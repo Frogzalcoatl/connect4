@@ -1,0 +1,5 @@
+{
+    "git.ignoredRepositories": [
+        "build/_deps/sdl3-src"
+    ]
+}

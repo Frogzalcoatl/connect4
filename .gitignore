@@ -1,0 +1,8 @@
+build
+out
+.cache
+.idea
+.vs
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
