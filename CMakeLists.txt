@@ -1,19 +1,22 @@
+# Vibe coded ah CMakeLists.txt file. I was struggling to figure it out myself ngl.
+
 cmake_minimum_required(VERSION 3.28)
 project(Connect4 LANGUAGES C)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# --- CRITICAL FIX: Force Global Static Build ---
+# This tells CMake that EVERY library (SDL3, SDL3_ttf, Freetype, Harfbuzz) 
+# must be built as a static library (.lib), not a DLL.
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_BUILD_PARALLEL_LEVEL 0 CACHE STRING "Number of parallel build jobs")
 
-find_program(CCACHE_PROGRAM ccache)
-if(CCACHE_PROGRAM)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
-endif()
-
 if(MSVC)
+    # Ensure we use the same Runtime Library as SDL (MultiThreadedDebug/MultiThreaded)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
+# --- SDL3 SETUP ---
 set(SDL_SHARED OFF CACHE BOOL "Build shared libraries" FORCE)
 set(SDL_STATIC ON CACHE BOOL "Build static libraries" FORCE)
 set(SDL_TEST_LIBRARY OFF CACHE BOOL "Build SDL test library" FORCE)
@@ -29,31 +32,50 @@ if(NOT SDL3_FOUND)
         GIT_TAG main
         GIT_SHALLOW ON
         EXCLUDE_FROM_ALL
-        SYSTEM)
+        SYSTEM
+        OVERRIDE_FIND_PACKAGE
+    )
     FetchContent_MakeAvailable(SDL3)
+endif()
+
+# --- SDL3_ttf SETUP ---
+# Explicitly disable shared builds for TTF
+set(SDLTTF_SHARED OFF CACHE BOOL "Build shared libraries" FORCE)
+set(SDLTTF_STATIC ON  CACHE BOOL "Build static libraries" FORCE)
+set(SDLTTF_SAMPLES OFF CACHE BOOL "Build SDL3_ttf samples" FORCE)
+set(SDLTTF_VENDORED ON CACHE BOOL "Use vendored FreeType/HarfBuzz" FORCE)
+set(SDLTTF_NSC_INTROSPECTION OFF CACHE BOOL "Enable NSC Introspection" FORCE)
+
+find_package(SDL3_ttf CONFIG QUIET)
+
+if(NOT SDL3_ttf_FOUND)
+    message(STATUS "SDL3_ttf not found, fetching from GitHub...")
+    include(FetchContent)
+    FetchContent_Declare(SDL3_ttf
+        GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+        GIT_TAG main
+        GIT_SHALLOW ON
+        EXCLUDE_FROM_ALL
+        SYSTEM
+        OVERRIDE_FIND_PACKAGE
+    )
+    FetchContent_MakeAvailable(SDL3_ttf)
 endif()
 
 set(SOURCES
     src/main.c
+    src/connect4.c
+    src/game/board.c
 )
 
 if(WIN32)
     add_executable(${PROJECT_NAME} WIN32 ${SOURCES} resources/icon.rc)
-elseif(APPLE)
-    add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCES})
-    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_ICON_FILE icon.icns)
-    target_sources(${PROJECT_NAME} PRIVATE resources/icon.icns)
-    set_source_files_properties(resources/icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 else()
     add_executable(${PROJECT_NAME} ${SOURCES})
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_compile_features(${PROJECT_NAME} PRIVATE c_std_17)
 
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD 
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
-)
-
-file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets)
