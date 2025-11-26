@@ -67,11 +67,18 @@ set(SOURCES
     src/connect4.c
     src/game/board.c
     src/game/random.c
+    src/ui/button.c
+    src/ui/cursorManager.c
+    src/ui/fontManager.c
+    src/ui/rectangle_element.c
     src/ui/text_element.c
     src/ui/screens/game.c
+    src/ui/screens/menu.c
+    src/ui/screens/settings.c
 )
 
 if(WIN32)
+# Add WIN32 before ${SOURCES} to remove the debug console
     add_executable(${PROJECT_NAME} WIN32 ${SOURCES} resources/icon.rc)
 else()
     add_executable(${PROJECT_NAME} ${SOURCES})

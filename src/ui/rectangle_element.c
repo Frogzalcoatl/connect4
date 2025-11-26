@@ -1,0 +1,39 @@
+#include "Connect4/ui/rectangle_element.h"
+#include "Connect4/constants.h"
+
+C4_RectangleUIElement* C4_RectangleUIElement_Create(const SDL_FRect rectangle, const SDL_Color color) {
+    C4_RectangleUIElement* element = calloc(1, sizeof(C4_RectangleUIElement));
+    if (!element) {
+        return NULL;
+    }
+    element->rectangle = rectangle;
+    element->color = color;
+    return element;
+}
+
+void C4_RectangleUIElement_Destroy(C4_RectangleUIElement* element) {
+    if (!element) {
+        return;
+    }
+    free(element);
+}
+
+void C4_RectangleUIElement_Draw(C4_RectangleUIElement* element, SDL_Renderer* renderer) {
+    if (!element) {
+        return;
+    }
+    SDL_SetRenderDrawColor(renderer, element->color.r, element->color.g, element->color.b, element->color.a);
+    SDL_RenderFillRect(renderer, &element->rectangle);
+}
+
+void C4_RectangleUIElement_CenterInWindow(C4_RectangleUIElement* element, C4_Axis axis) {
+    if (!element) {
+        return;
+    }
+    if (axis == C4_Axis_X || axis == C4_Axis_XY) {
+        element->rectangle.x = (C4_BASE_WINDOW_WIDTH / 2.f) - (element->rectangle.w / 2.f);
+    }
+    if (axis == C4_Axis_Y || axis == C4_Axis_XY) {
+        element->rectangle.y = (C4_BASE_WINDOW_HEIGHT / 2.f) - (element->rectangle.h / 2.f);
+    }
+}
