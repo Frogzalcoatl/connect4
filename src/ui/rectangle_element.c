@@ -1,5 +1,6 @@
 #include "Connect4/ui/rectangle_element.h"
 #include "Connect4/constants.h"
+#include <stdlib.h>
 
 C4_RectangleUIElement* C4_RectangleUIElement_Create(const SDL_FRect rectangle, const SDL_Color color) {
     C4_RectangleUIElement* element = calloc(1, sizeof(C4_RectangleUIElement));

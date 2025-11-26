@@ -1,5 +1,6 @@
 #include "Connect4/ui/button.h"
 #include "Connect4/ui/cursorManager.h"
+#include <stdlib.h>
 
 C4_Button* C4_Button_Create(
     SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, const SDL_FRect background, const C4_ButtonColorInfo defaultColors,

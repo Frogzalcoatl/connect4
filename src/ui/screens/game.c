@@ -1,6 +1,7 @@
 #include "Connect4/ui/screens/game.h"
 #include "Connect4/game/random.h"
 #include "Connect4/ui/fontManager.h"
+#include <stdlib.h>
 
 C4_GameScreen* C4_GameScreen_Create(C4_Board* board, SDL_Renderer* renderer) {
     if (!board || !renderer) {

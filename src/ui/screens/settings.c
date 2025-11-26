@@ -1,5 +1,6 @@
 #include "Connect4/ui/screens/settings.h"
 #include "Connect4/ui/fontManager.h"
+#include <stdlib.h>
 
 C4_SettingsScreen* C4_SettingsScreen_Create(SDL_Window* window, SDL_Renderer* renderer) {
     if (!window || !renderer) {
