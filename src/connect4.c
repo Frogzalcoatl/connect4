@@ -2,6 +2,9 @@
 #include "Connect4/ui/cursorManager.h"
 #include "Connect4/ui/fontManager.h"
 #include "Connect4/constants.h"
+#include "Connect4/ui/screens/menu.h"
+#include "Connect4/ui/screens/game.h"
+#include "Connect4/ui/screens/settings.h"
 #include <stdlib.h>
 #include <time.h>
 
@@ -26,49 +29,45 @@ void Connect4_Quit_Dependencies() {
     C4_CloseAllFonts();
 }
 
-static void C4_Game_DestroyAllScreens(C4_Game* game) {
-    C4_GameScreen_Destroy(game->gameScreen);
-    C4_SettingsScreen_Destroy(game->settingsScreen);
-    C4_MenuScreen_Destroy(game->menuScreen);
-    game->gameScreen = NULL;
-    game->settingsScreen = NULL;
-    game->menuScreen = NULL;
-}
-
 // Returns false if the screen change was unsuccessful (Likely out of memory)
 static bool C4_Game_HandleScreenChangeRequest(C4_Game* game, C4_ScreenChangeRequest type) {
+    if (type == C4_ScreenChangeRequest_None) {
+        return true;
+    }
+    if (type == C4_ScreenChangeRequest_CloseWindow) {
+        game->running = false;
+        return true;
+    }
+    if (game->currentScreen.Destroy) {
+        game->currentScreen.Destroy(game->currentScreen.data);
+    }
     switch (type) {
         case C4_ScreenChangeRequest_Menu: {
-            C4_Game_DestroyAllScreens(game);
-            game->menuScreen = C4_MenuScreen_Create(game->renderer);
-            if (!game->menuScreen) {
-                return false;
-            }
-            game->currentScreen = C4_ScreenType_Menu;
-            SDL_SetCursor(C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT));
+            game->currentScreen.data = C4_MenuScreen_Create(game->renderer);
+            game->currentScreen.Destroy = &C4_MenuScreen_Destroy;
+            game->currentScreen.Draw = &C4_MenuScreen_Draw;
+            game->currentScreen.HandleKeyboardInput = &C4_MenuScreen_HandleKeyboardInput;
+            game->currentScreen.HandleMouseEvents = &C4_MenuScreen_HandleMouseEvents;
         }; break;
         case C4_ScreenChangeRequest_Settings: {
-            C4_Game_DestroyAllScreens(game);
-            game->settingsScreen = C4_SettingsScreen_Create(game->window, game->renderer);
-            if (!game->settingsScreen) {
-                return false;
-            }
-            game->currentScreen = C4_ScreenType_Settings;
-            SDL_SetCursor(C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT));
+            game->currentScreen.data = C4_SettingsScreen_Create(game->renderer, game->window);
+            game->currentScreen.Destroy = &C4_SettingsScreen_Destroy;
+            game->currentScreen.Draw = &C4_SettingsScreen_Draw;
+            game->currentScreen.HandleKeyboardInput = &C4_SettingsScreen_HandleKeyboardInput;
+            game->currentScreen.HandleMouseEvents = &C4_SettingsScreen_HandleMouseEvents;
         }; break;
         case C4_ScreenChangeRequest_Game: {
-            C4_Game_DestroyAllScreens(game);
-            game->gameScreen = C4_GameScreen_Create(&game->board, game->renderer);
-            if (!game->gameScreen) {
-                return false;
-            }
-            game->currentScreen = C4_ScreenType_Game;
-            SDL_SetCursor(C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT));
-        }; break;
-        case C4_ScreenChangeRequest_CloseWindow: {
-            game->running = false;
+            game->currentScreen.data = C4_GameScreen_Create(game->renderer, game->board);
+            game->currentScreen.Destroy = &C4_GameScreen_Destroy;
+            game->currentScreen.Draw = &C4_GameScreen_Draw;
+            game->currentScreen.HandleKeyboardInput = &C4_GameScreen_HandleKeyboardInput;
+            game->currentScreen.HandleMouseEvents = &C4_GameScreen_HandleMouseEvents;
         }; break;
     }
+    if (!game->currentScreen.data) {
+        return false;
+    }
+    SDL_SetCursor(C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT));
     return true;
 }
 
@@ -104,8 +103,10 @@ void C4_Game_Destroy(C4_Game* game) {
     if (!game) {
         return;
     }
-    C4_Game_DestroyAllScreens(game);
-    C4_Board_Destroy(&game->board);
+    if (game->currentScreen.Destroy) {
+        game->currentScreen.Destroy(game->currentScreen.data);
+    }
+    C4_Board_Destroy(game->board);
     if (game->renderer) {
         SDL_DestroyRenderer(game->renderer);
     }
@@ -122,37 +123,25 @@ static void C4_Game_HandleKeyboardInput(C4_Game* game, int scancode) {
         return;
     }
     C4_ScreenChangeRequest request = C4_ScreenChangeRequest_None;
-    switch (game->currentScreen) {
-        case C4_ScreenType_Menu: {
-            request = C4_MenuScreen_HandleKeyboardInput(game->menuScreen, scancode);
-        }; break;
-        case C4_ScreenType_Game: {
-            request = C4_GameScreen_HandleKeyboardInput(game->gameScreen, scancode);
-        }; break;
-        case C4_ScreenType_Settings: {
-            request = C4_SettingsScreen_HandleKeyboardInput(game->settingsScreen, scancode);
-        }; break;
+    if (game->currentScreen.HandleKeyboardInput) {
+        request = game->currentScreen.HandleKeyboardInput(game->currentScreen.data, scancode);
     }
-    if (!C4_Game_HandleScreenChangeRequest(game, request)) {
-        game->running = false;
+    if (request != C4_ScreenChangeRequest_None) {
+        if (!C4_Game_HandleScreenChangeRequest(game, request)) {
+            game->running = false;
+        }
     }
 }
 
 static void C4_Game_HandleMouseEvents(C4_Game* game, SDL_Event* event) {
     C4_ScreenChangeRequest request = C4_ScreenChangeRequest_None;
-    switch (game->currentScreen) {
-        case C4_ScreenType_Menu: {
-            request = C4_MenuScreen_HandleMouseEvents(game->menuScreen, event);
-        }; break;
-        case C4_ScreenType_Game: {
-            request = C4_GameScreen_HandleMouseEvents(game->gameScreen, event);
-        }; break;
-        case C4_ScreenType_Settings: {
-            request = C4_SettingsScreen_HandleMouseEvents(game->settingsScreen, event);
-        }; break;
+    if (game->currentScreen.HandleMouseEvents) {
+        request = game->currentScreen.HandleMouseEvents(game->currentScreen.data, event);
     }
-    if (!C4_Game_HandleScreenChangeRequest(game, request)) {
-        game->running = false;
+    if (request != C4_ScreenChangeRequest_None) {
+        if (!C4_Game_HandleScreenChangeRequest(game, request)) {
+            game->running = false;
+        }
     }
 }
 
@@ -171,20 +160,6 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* event) {
     }
 }
 
-static void C4_Game_DrawCurrentScreen(C4_Game* game) {
-    switch (game->currentScreen) {
-        case C4_ScreenType_Menu: {
-            C4_MenuScreen_Draw(game->menuScreen);
-        }; break;
-        case C4_ScreenType_Game: {
-            C4_GameScreen_Draw(game->gameScreen);
-        }; break;
-        case C4_ScreenType_Settings: {
-            C4_SettingsScreen_Draw(game->settingsScreen);
-        }; break;
-    }
-}
-
 void C4_Game_Run(C4_Game* game) {
     game->running = true;
     SDL_Event event;
@@ -192,7 +167,9 @@ void C4_Game_Run(C4_Game* game) {
         C4_Game_HandleEvents(game, &event);
         SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
         SDL_RenderClear(game->renderer);
-        C4_Game_DrawCurrentScreen(game);
+        if (game->currentScreen.Draw) {
+            game->currentScreen.Draw(game->currentScreen.data);
+        }
         SDL_RenderPresent(game->renderer);
     }
 }

@@ -13,7 +13,7 @@ typedef struct {
 } C4_MenuScreen;
 
 C4_MenuScreen* C4_MenuScreen_Create(SDL_Renderer* renderer);
-void C4_MenuScreen_Destroy(C4_MenuScreen* screen);
-void C4_MenuScreen_Draw(C4_MenuScreen* screen);
-C4_ScreenChangeRequest C4_MenuScreen_HandleKeyboardInput(C4_MenuScreen* screen, SDL_Scancode scancode);
-C4_ScreenChangeRequest C4_MenuScreen_HandleMouseEvents(C4_MenuScreen* screen, SDL_Event* event);
+void C4_MenuScreen_Destroy(void* screenData);
+void C4_MenuScreen_Draw(void* screenData);
+C4_ScreenChangeRequest C4_MenuScreen_HandleKeyboardInput(void* screenData, SDL_Scancode scancode);
+C4_ScreenChangeRequest C4_MenuScreen_HandleMouseEvents(void* screenData, SDL_Event* event);

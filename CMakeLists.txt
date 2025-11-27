@@ -3,21 +3,17 @@
 cmake_minimum_required(VERSION 3.28)
 project(Connect4 LANGUAGES C)
 
-# --- CRITICAL FIX: Force Global Static Build ---
-# This tells CMake that EVERY library (SDL3, SDL3_ttf, Freetype, Harfbuzz) 
-# must be built as a static library (.lib), not a DLL.
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_BUILD_PARALLEL_LEVEL 0 CACHE STRING "Number of parallel build jobs")
 
-# --- SDL3 SETUP ---
 set(SDL_SHARED OFF CACHE BOOL "Build shared libraries" FORCE)
 set(SDL_STATIC ON CACHE BOOL "Build static libraries" FORCE)
 set(SDL_TEST_LIBRARY OFF CACHE BOOL "Build SDL test library" FORCE)
 set(SDL_DISABLE_INSTALL ON CACHE BOOL "Don't add install targets for SDL" FORCE)
 
-find_package(SDL3 CONFIG QUIET)
+find_package(SDL3 CONFIG QUIET) 
 
 if(NOT SDL3_FOUND)
     message(STATUS "SDL3 not found, fetching from GitHub...")
@@ -33,8 +29,6 @@ if(NOT SDL3_FOUND)
     FetchContent_MakeAvailable(SDL3)
 endif()
 
-# --- SDL3_ttf SETUP ---
-# Explicitly disable shared builds for TTF
 set(SDLTTF_SHARED OFF CACHE BOOL "Build shared libraries" FORCE)
 set(SDLTTF_STATIC ON  CACHE BOOL "Build static libraries" FORCE)
 set(SDLTTF_SAMPLES OFF CACHE BOOL "Build SDL3_ttf samples" FORCE)

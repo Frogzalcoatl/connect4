@@ -2,6 +2,7 @@
 #include <stddef.h>
 
 // cursorCache's memory is guaranteed to be filled with zeros before main even runs
+// This would happen regardless of whether " = {0}" is included since its static
 static SDL_Cursor* cursorCache[SDL_SYSTEM_CURSOR_COUNT] = {0};
 
 SDL_Cursor* C4_GetSystemCursor(SDL_SystemCursor type) {

@@ -14,9 +14,9 @@ typedef struct {
     C4_Button* menuButton;
 } C4_GameScreen;
 
-C4_GameScreen* C4_GameScreen_Create(C4_Board* board, SDL_Renderer* renderer);
-void C4_GameScreen_Destroy(C4_GameScreen* screen);
-void C4_GameScreen_Draw(C4_GameScreen* screen);
+C4_GameScreen* C4_GameScreen_Create(SDL_Renderer* renderer, C4_Board* board);
+void C4_GameScreen_Destroy(void* screenData);
+void C4_GameScreen_Draw(void* screenData);
 void C4_GameScreen_TestStrUpdate(C4_GameScreen* screen);
-C4_ScreenChangeRequest C4_GameScreen_HandleKeyboardInput(C4_GameScreen* screen, SDL_Scancode scancode);
-C4_ScreenChangeRequest C4_GameScreen_HandleMouseEvents(C4_GameScreen* screen, SDL_Event* event);
+C4_ScreenChangeRequest C4_GameScreen_HandleKeyboardInput(void* screenData, SDL_Scancode scancode);
+C4_ScreenChangeRequest C4_GameScreen_HandleMouseEvents(void* screenData, SDL_Event* event);

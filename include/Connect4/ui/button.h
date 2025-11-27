@@ -2,20 +2,13 @@
 #include "Connect4/ui/rectangle_element.h"
 #include "Connect4/ui/text_element.h"
 #include "Connect4/ui/fontManager.h"
+#include "Connect4/ui/screens/interface.h"
 #include <stdbool.h>
 
 typedef struct {
     SDL_Color background;
     SDL_Color text;
 } C4_ButtonColorInfo;
-
-typedef enum {
-    C4_ScreenChangeRequest_None,
-    C4_ScreenChangeRequest_Menu,
-    C4_ScreenChangeRequest_Settings,
-    C4_ScreenChangeRequest_Game,
-    C4_ScreenChangeRequest_CloseWindow
-} C4_ScreenChangeRequest;
 
 typedef struct {
     C4_RectangleUIElement* background;

@@ -2,7 +2,7 @@
 #include "Connect4/ui/fontManager.h"
 #include <stdlib.h>
 
-C4_SettingsScreen* C4_SettingsScreen_Create(SDL_Window* window, SDL_Renderer* renderer) {
+C4_SettingsScreen* C4_SettingsScreen_Create(SDL_Renderer* renderer, SDL_Window* window) {
     if (!window || !renderer) {
         return NULL;
     }
@@ -30,32 +30,36 @@ C4_SettingsScreen* C4_SettingsScreen_Create(SDL_Window* window, SDL_Renderer* re
     return screen;
 }
 
-void C4_SettingsScreen_Destroy(C4_SettingsScreen* screen) {
-    if (!screen) {
+void C4_SettingsScreen_Destroy(void* screenData) {
+    if (!screenData) {
         return;
     }
+    C4_SettingsScreen* screen = (C4_SettingsScreen*)screenData;
     C4_TextUIElement_Destroy(screen->title);
     free(screen);
 }
 
-void C4_SettingsScreen_Draw(C4_SettingsScreen* screen) {
-    if (!screen) {
+void C4_SettingsScreen_Draw(void* screenData) {
+    if (!screenData) {
         return;
     }
+    C4_SettingsScreen* screen = (C4_SettingsScreen*)screenData;
     C4_Button_Draw(screen->backButton, screen->renderer);
     C4_TextUIElement_Draw(screen->title, screen->renderer);
 }
 
-C4_ScreenChangeRequest C4_SettingsScreen_HandleKeyboardInput(C4_SettingsScreen* screen, SDL_Scancode scancode) {
-    if (!screen) {
+C4_ScreenChangeRequest C4_SettingsScreen_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
+    if (!screenData) {
         return C4_ScreenChangeRequest_None;
     }
+    C4_SettingsScreen* screen = (C4_SettingsScreen*)screenData;
     return C4_ScreenChangeRequest_None;
 }
 
-C4_ScreenChangeRequest C4_SettingsScreen_HandleMouseEvents(C4_SettingsScreen* screen, SDL_Event* event) {
-    if (!screen || !event) {
+C4_ScreenChangeRequest C4_SettingsScreen_HandleMouseEvents(void* screenData, SDL_Event* event) {
+    if (!screenData || !event) {
         return C4_ScreenChangeRequest_None;
     }
+    C4_SettingsScreen* screen = (C4_SettingsScreen*)screenData;
     return C4_Button_HandleMouseEvents(screen->backButton, event, screen->renderer);
 }

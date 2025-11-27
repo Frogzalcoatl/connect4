@@ -59,10 +59,11 @@ C4_MenuScreen* C4_MenuScreen_Create(SDL_Renderer* renderer) {
     return screen;
 }
 
-void C4_MenuScreen_Destroy(C4_MenuScreen* screen) {
-    if (!screen) {
+void C4_MenuScreen_Destroy(void* screenData) {
+    if (!screenData) {
         return;
     }
+    C4_MenuScreen* screen = (C4_MenuScreen*)screenData;
     C4_Button_Destroy(screen->quitButton);
     C4_Button_Destroy(screen->settingsButton);
     C4_Button_Destroy(screen->playButton);
@@ -70,29 +71,32 @@ void C4_MenuScreen_Destroy(C4_MenuScreen* screen) {
     free(screen);
 }
 
-void C4_MenuScreen_Draw(C4_MenuScreen* screen) {
-    if (!screen) {
+void C4_MenuScreen_Draw(void* screenData) {
+    if (!screenData) {
         return;
     }
+    C4_MenuScreen* screen = (C4_MenuScreen*)screenData;
     C4_Button_Draw(screen->playButton, screen->renderer);
     C4_Button_Draw(screen->settingsButton, screen->renderer);
     C4_Button_Draw(screen->quitButton, screen->renderer);
     C4_TextUIElement_Draw(screen->title, screen->renderer);
 }
 
-C4_ScreenChangeRequest C4_MenuScreen_HandleKeyboardInput(C4_MenuScreen* screen, SDL_Scancode scancode) {
-    if (!screen) {
+C4_ScreenChangeRequest C4_MenuScreen_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
+    if (!screenData) {
         return C4_ScreenChangeRequest_None;
     }
+    C4_MenuScreen* screen = (C4_MenuScreen*)screenData;
     // Will probably create some kind of struct for a popup that appears when pressing esc to close the game
     return C4_ScreenChangeRequest_None;
 }
 
-C4_ScreenChangeRequest C4_MenuScreen_HandleMouseEvents(C4_MenuScreen* screen, SDL_Event* event) {
+C4_ScreenChangeRequest C4_MenuScreen_HandleMouseEvents(void* screenData, SDL_Event* event) {
     // lmao ill improve this later just trying to make sure everything works. Will probably use an array of button pointers or smth and iterate through them
-    if (!screen || !event) {
+    if (!screenData || !event) {
         return C4_ScreenChangeRequest_None;
     }
+    C4_MenuScreen* screen = (C4_MenuScreen*)screenData;
     C4_ScreenChangeRequest request = C4_ScreenChangeRequest_None;
     C4_ScreenChangeRequest newRequest = C4_Button_HandleMouseEvents(screen->playButton, event, screen->renderer);
     if (newRequest != C4_ScreenChangeRequest_None) {

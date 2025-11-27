@@ -3,7 +3,7 @@
 #include "Connect4/ui/fontManager.h"
 #include <stdlib.h>
 
-C4_GameScreen* C4_GameScreen_Create(C4_Board* board, SDL_Renderer* renderer) {
+C4_GameScreen* C4_GameScreen_Create(SDL_Renderer* renderer, C4_Board* board) {
     if (!board || !renderer) {
         return NULL;
     }
@@ -35,19 +35,21 @@ C4_GameScreen* C4_GameScreen_Create(C4_Board* board, SDL_Renderer* renderer) {
     return screen;
 }
 
-void C4_GameScreen_Destroy(C4_GameScreen* screen) {
-    if (!screen) {
+void C4_GameScreen_Destroy(void* screenData) {
+    if (!screenData) {
         return;
     }
+    C4_GameScreen* screen = (C4_GameScreen*)screenData;
     C4_Button_Destroy(screen->menuButton);
     C4_TextUIElement_Destroy(screen->testBoardText);
     free(screen);
 }
 
-void C4_GameScreen_Draw(C4_GameScreen* screen) {
-    if (!screen) {
+void C4_GameScreen_Draw(void* screenData) {
+    if (!screenData) {
         return;
     }
+    C4_GameScreen* screen = (C4_GameScreen*)screenData;
     C4_TextUIElement_Draw(screen->testBoardText, screen->renderer);
     C4_Button_Draw(screen->menuButton, screen->renderer);
 }
@@ -63,10 +65,11 @@ void C4_GameScreen_TestStrUpdate(C4_GameScreen* screen) {
     C4_TextUIElement_CenterInWindow(screen->testBoardText, C4_Axis_X);
 }
 
-C4_ScreenChangeRequest C4_GameScreen_HandleKeyboardInput(C4_GameScreen* screen, SDL_Scancode scancode) {
-    if (!screen) {
+C4_ScreenChangeRequest C4_GameScreen_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
+    if (!screenData) {
         return C4_ScreenChangeRequest_None;
     }
+    C4_GameScreen* screen = (C4_GameScreen*)screenData;
     // Temporary just for testing
     if (scancode >= SDL_SCANCODE_1 && scancode <= SDL_SCANCODE_7) {
         int column = scancode - SDL_SCANCODE_1;
@@ -76,9 +79,10 @@ C4_ScreenChangeRequest C4_GameScreen_HandleKeyboardInput(C4_GameScreen* screen, 
     return C4_ScreenChangeRequest_None;
 }
 
-C4_ScreenChangeRequest C4_GameScreen_HandleMouseEvents(C4_GameScreen* screen, SDL_Event* event) {
-    if (!screen || !event) {
+C4_ScreenChangeRequest C4_GameScreen_HandleMouseEvents(void* screenData, SDL_Event* event) {
+    if (!screenData || !event) {
         return C4_ScreenChangeRequest_None;
     }
+    C4_GameScreen* screen = (C4_GameScreen*)screenData;
     return C4_Button_HandleMouseEvents(screen->menuButton, event, screen->renderer);
 }

@@ -19,7 +19,7 @@ C4_TextUIElement* C4_TextUIElement_Create(SDL_Renderer* renderer, const char* st
         return NULL;
     }
     element->ptSize = ptSize;
-    element->destination = (SDL_FRect){destinationX, destinationY, 800.f, 0.f};
+    element->destination = (SDL_FRect){destinationX, destinationY, 0.f, 0.f};
     element->color = color;
     C4_TextUIElement_ChangeStr(element, str);
     C4_TextUIElement_Refresh(element, renderer);

@@ -3,9 +3,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include "Connect4/game/board.h"
 #include "Connect4/ui/text_element.h"
-#include "Connect4/ui/screens/game.h"
-#include "Connect4/ui/screens/menu.h"
-#include "Connect4/ui/screens/settings.h"
+#include "Connect4/ui/screens/interface.h"
 
 bool Connect4_Init_Dependencies();
 void Connect4_Quit_Dependencies();
@@ -19,11 +17,8 @@ typedef enum {
 typedef struct {
     SDL_Window* window;
     SDL_Renderer* renderer;
-    C4_Board board;
-    C4_GameScreen* gameScreen;
-    C4_MenuScreen* menuScreen;
-    C4_SettingsScreen* settingsScreen;
-    ScreenType currentScreen;
+    C4_Board* board;
+    C4_ScreenInterface currentScreen;
     bool running;
     bool isFullscreen;
 } C4_Game;

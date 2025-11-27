@@ -3,27 +3,31 @@
 #include "Connect4/game/random.h"
 #include <stddef.h>
 
-C4_Board C4_Board_Create(uint8_t width, uint8_t height) {
-    C4_Board newBoard;
-    newBoard.width = width;
-    newBoard.height = height;
+C4_Board* C4_Board_Create(uint8_t width, uint8_t height) {
+    C4_Board* newBoard = calloc(1, sizeof(C4_Board));
+    newBoard->width = width;
+    newBoard->height = height;
     // Put cells on the heap to support any width/height
     // If cells were on the stack, I would have to set a max array size
     // Would be wasteful if i set the max to 100x100 for example but only used 6x7.
-    newBoard.cells = calloc(width * height, sizeof(C4_SlotState));
+    newBoard->cells = calloc(width * height, sizeof(C4_SlotState));
+    if (!newBoard->cells) {
+        C4_Board_Destroy(newBoard);
+    }
     // Randomly select either player 1 or 2
-    newBoard.currentPlayer = C4_GetRandomInt(1, 2);
+    newBoard->currentPlayer = C4_GetRandomInt(1, 2);
     return newBoard;
 }
 
 void C4_Board_Destroy(C4_Board* board) {
-    if (board->cells != NULL) {
+    if (!board) {
+        return;
+    }
+    if (board->cells) {
         // must free the cells directly since theyre on the heap
         free(board->cells);
-        board->cells = NULL;
-        // When main returns, instances of board and their stack
-        // allocated properties are destroyed automatically.
     }
+    free(board);
 }
 
 C4_SlotState C4_Board_GetSlot(C4_Board* board, uint8_t x, uint8_t y) {
@@ -67,7 +71,7 @@ bool C4_Board_DoMove(C4_Board* board, uint8_t inColumn) {
     return false;
 }
 
-C4_SlotState C4_Board_GetWinner(C4_Board* board) {
+C4_SlotState C4_Board_GetWinner(C4_Board* board, size_t mostRecentMoveIndex) {
     // Ill implement this later wanna try the test string thing
     // I only need to check the lines of the most recently placed piece rather than the whole board
     return C4_SlotState_Empty;
