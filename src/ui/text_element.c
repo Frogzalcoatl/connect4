@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
+#include <stdio.h>
 
 C4_TextUIElement* C4_TextUIElement_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, SDL_Color color, float destinationX, float destinationY) {
     if (!renderer || !str || ptSize <= 0) {

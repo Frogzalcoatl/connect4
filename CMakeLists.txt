@@ -11,11 +11,6 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_BUILD_PARALLEL_LEVEL 0 CACHE STRING "Number of parallel build jobs")
 
-if(MSVC)
-    # Ensure we use the same Runtime Library as SDL (MultiThreadedDebug/MultiThreaded)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif()
-
 # --- SDL3 SETUP ---
 set(SDL_SHARED OFF CACHE BOOL "Build shared libraries" FORCE)
 set(SDL_STATIC ON CACHE BOOL "Build static libraries" FORCE)
