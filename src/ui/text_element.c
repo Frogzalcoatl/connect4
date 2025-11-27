@@ -40,7 +40,7 @@ void C4_TextUIElement_Refresh(C4_TextUIElement* element, SDL_Renderer* renderer)
     }
     SDL_DestroyTexture(element->texture);
     TTF_SetFontSize(element->font, element->ptSize);
-    SDL_Surface* tempSurface = TTF_RenderText_Blended_Wrapped(element->font, element->str, 0, element->color, 0);
+    SDL_Surface* tempSurface = TTF_RenderText_Blended_Wrapped(element->font, element->str, 0, (SDL_Color){255, 255, 255, 255}, 0);
     if (tempSurface) {
         element->texture = SDL_CreateTextureFromSurface(renderer, tempSurface);
         element->destination.w = (float)tempSurface->w;
@@ -64,6 +64,8 @@ void C4_TextUIElement_Draw(C4_TextUIElement* element, SDL_Renderer* renderer) {
     if (!element || !element->texture || !renderer) {
         return;
     }
+    SDL_SetTextureColorMod(element->texture, element->color.r, element->color.g, element->color.b);
+    SDL_SetTextureAlphaMod(element->texture, element->color.a);
     SDL_RenderTexture(renderer, element->texture, NULL, &element->destination);
 }
 

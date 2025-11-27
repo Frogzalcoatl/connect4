@@ -1,8 +1,7 @@
 # TODO
 
-* Load font textures in white so they can be tinted
-    * Wont have to regenerate it every time the color changes
 * Win Check Logic
 * Board UI
 * Slider UIElement
 * Settings screen
+* Support for adjustable board size and "amount in row to win" (i cant think of a better way to word this rn)
