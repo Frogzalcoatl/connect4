@@ -57,7 +57,7 @@ bool C4_Board_DoMove(C4_Board* board, uint8_t inColumn) {
     if (board->cells[inColumn] != C4_SlotState_Empty) {
         return false;
     }
-    for (size_t row = board->height - 1; row != SIZE_MAX; row--) {
+    for (size_t row = board->height - 1; row < board->height; row--) {
         if (board->cells[row * board->width + inColumn] == C4_SlotState_Empty) {
             board->cells[row * board->width + inColumn] = board->currentPlayer;
             C4_Board_SwapCurrentPlayer(board);
