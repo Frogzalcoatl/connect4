@@ -73,8 +73,31 @@ else()
     add_executable(${PROJECT_NAME} ${SOURCES})
 endif()
 
+function(make_header_file TARGET_NAME SOURCE_FILE VAR_NAME)
+    set(HEADER_FILE "${CMAKE_CURRENT_BINARY_DIR}/generated/${VAR_NAME}.h")
+    
+    # Read the file as hex
+    file(READ "${SOURCE_FILE}" HEX_CONTENTS HEX)
+    # Add 0x prefix and commas
+    string(REGEX REPLACE "(..)" "0x\\1, " HEX_C_ARRAY "${HEX_CONTENTS}")
+    
+    # Write the .h file
+    file(WRITE "${HEADER_FILE}" 
+        "#ifndef ${VAR_NAME}_H\n"
+        "#define ${VAR_NAME}_H\n\n"
+        "#include <stddef.h>\n\n"
+        "const unsigned char ${VAR_NAME}[] = { ${HEX_C_ARRAY} };\n"
+        "const size_t ${VAR_NAME}_len = sizeof(${VAR_NAME});\n\n"
+        "#endif\n"
+    )
+    
+    # Make sure the target can find this header
+    target_include_directories(${TARGET_NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
+endfunction()
+
+make_header_file(${PROJECT_NAME} "assets/fonts/Monocraft.ttf" "FONT_Monocraft")
+make_header_file(${PROJECT_NAME} "assets/fonts/Monocraft-Bold.ttf" "FONT_Monocraft_Bold")
+
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_compile_features(${PROJECT_NAME} PRIVATE c_std_17)
-
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets)
