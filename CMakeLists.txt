@@ -83,12 +83,10 @@ function(make_header_file TARGET_NAME SOURCE_FILE VAR_NAME)
     
     # Write the .h file
     file(WRITE "${HEADER_FILE}" 
-        "#ifndef ${VAR_NAME}_H\n"
-        "#define ${VAR_NAME}_H\n\n"
+        "#pragma once\n"
         "#include <stddef.h>\n\n"
         "const unsigned char ${VAR_NAME}[] = { ${HEX_C_ARRAY} };\n"
-        "const size_t ${VAR_NAME}_len = sizeof(${VAR_NAME});\n\n"
-        "#endif\n"
+        "#define ${VAR_NAME}_len sizeof(${VAR_NAME})"
     )
     
     # Make sure the target can find this header
