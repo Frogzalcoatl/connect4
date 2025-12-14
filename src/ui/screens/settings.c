@@ -2,11 +2,11 @@
 #include "Connect4/assets/fonts.h"
 #include <stdlib.h>
 
-C4_SettingsScreen* C4_SettingsScreen_Create(SDL_Renderer* renderer, SDL_Window* window) {
+C4_Screen_Settings* C4_SettingsScreen_Create(SDL_Renderer* renderer, SDL_Window* window) {
     if (!window || !renderer) {
         return NULL;
     }
-    C4_SettingsScreen* screen = calloc(1, sizeof(C4_SettingsScreen));
+    C4_Screen_Settings* screen = calloc(1, sizeof(C4_Screen_Settings));
     if (!screen) {
         return NULL;
     }
@@ -21,9 +21,9 @@ C4_SettingsScreen* C4_SettingsScreen_Create(SDL_Renderer* renderer, SDL_Window* 
     screen->backButton = C4_Button_Create(
         screen->renderer, "Back", C4_FontType_Bold, 32.f,
         (SDL_FRect){0.f, 800.f, 400.f, 100.f },
-        (C4_ButtonColorInfo){(SDL_Color){150, 150, 150, 255}, (SDL_Color){255, 255, 255, 255}},
-        (C4_ButtonColorInfo){(SDL_Color){200, 200, 200, 255}, (SDL_Color){255, 255, 255, 255}},
-        (C4_ButtonColorInfo){(SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 255}},
+        (C4_UI_ButtonColorInfo){(SDL_Color){150, 150, 150, 255}, (SDL_Color){255, 255, 255, 255}},
+        (C4_UI_ButtonColorInfo){(SDL_Color){200, 200, 200, 255}, (SDL_Color){255, 255, 255, 255}},
+        (C4_UI_ButtonColorInfo){(SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 255}},
         C4_ScreenChangeRequest_Menu
     );
     C4_Button_CenterInWindow(screen->backButton, C4_Axis_X);
@@ -34,7 +34,7 @@ void C4_SettingsScreen_Destroy(void* screenData) {
     if (!screenData) {
         return;
     }
-    C4_SettingsScreen* screen = (C4_SettingsScreen*)screenData;
+    C4_Screen_Settings* screen = (C4_Screen_Settings*)screenData;
     C4_TextUIElement_Destroy(screen->title);
     free(screen);
 }
@@ -43,23 +43,23 @@ void C4_SettingsScreen_Draw(void* screenData) {
     if (!screenData) {
         return;
     }
-    C4_SettingsScreen* screen = (C4_SettingsScreen*)screenData;
+    C4_Screen_Settings* screen = (C4_Screen_Settings*)screenData;
     C4_Button_Draw(screen->backButton, screen->renderer);
     C4_TextUIElement_Draw(screen->title, screen->renderer);
 }
 
-C4_ScreenChangeRequest C4_SettingsScreen_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
+C4_Screen_RequestChange C4_SettingsScreen_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
     if (!screenData) {
         return C4_ScreenChangeRequest_None;
     }
-    C4_SettingsScreen* screen = (C4_SettingsScreen*)screenData;
+    C4_Screen_Settings* screen = (C4_Screen_Settings*)screenData;
     return C4_ScreenChangeRequest_None;
 }
 
-C4_ScreenChangeRequest C4_SettingsScreen_HandleMouseEvents(void* screenData, SDL_Event* event) {
+C4_Screen_RequestChange C4_SettingsScreen_HandleMouseEvents(void* screenData, SDL_Event* event) {
     if (!screenData || !event) {
         return C4_ScreenChangeRequest_None;
     }
-    C4_SettingsScreen* screen = (C4_SettingsScreen*)screenData;
+    C4_Screen_Settings* screen = (C4_Screen_Settings*)screenData;
     return C4_Button_HandleMouseEvents(screen->backButton, event, screen->renderer);
 }

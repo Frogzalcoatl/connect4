@@ -36,7 +36,7 @@ void Connect4_Quit_Dependencies() {
 }
 
 // Returns false if the screen change was unsuccessful (Likely out of memory)
-static bool C4_Game_HandleScreenChangeRequest(C4_Game* game, C4_ScreenChangeRequest type) {
+static bool C4_Game_HandleScreenChangeRequest(C4_Game* game, C4_Screen_RequestChange type) {
     if (type != C4_ScreenChangeRequest_None && game->currentScreen.Destroy) {
         game->currentScreen.Destroy(game->currentScreen.data);
     }
@@ -131,7 +131,7 @@ static void C4_Game_HandleKeyboardInput(C4_Game* game, int scancode) {
         SDL_SetWindowFullscreen(game->window, game->isFullscreen);
         return;
     }
-    C4_ScreenChangeRequest request = C4_ScreenChangeRequest_None;
+    C4_Screen_RequestChange request = C4_ScreenChangeRequest_None;
     if (game->currentScreen.HandleKeyboardInput) {
         request = game->currentScreen.HandleKeyboardInput(game->currentScreen.data, scancode);
     }
@@ -143,7 +143,7 @@ static void C4_Game_HandleKeyboardInput(C4_Game* game, int scancode) {
 }
 
 static void C4_Game_HandleMouseEvents(C4_Game* game, SDL_Event* event) {
-    C4_ScreenChangeRequest request = C4_ScreenChangeRequest_None;
+    C4_Screen_RequestChange request = C4_ScreenChangeRequest_None;
     if (game->currentScreen.HandleMouseEvents) {
         request = game->currentScreen.HandleMouseEvents(game->currentScreen.data, event);
     }

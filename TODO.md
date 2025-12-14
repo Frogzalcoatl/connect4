@@ -1,10 +1,10 @@
 # TODO
 
-* Board UI
+* Add SDL_Logs for errors
 * Popup struct that functions similarly to minecraft scripting's MessageForm
 * Slider UIElement
 * Settings screen
 * Support for adjustable board size and "amount in row to win" (i cant think of a better way to word this rn)
-
+* Board UI
 * Improve win check efficiency
 * Improve sound design

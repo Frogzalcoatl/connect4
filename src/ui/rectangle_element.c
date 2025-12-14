@@ -2,8 +2,8 @@
 #include "Connect4/constants.h"
 #include <stdlib.h>
 
-C4_RectangleUIElement* C4_RectangleUIElement_Create(const SDL_FRect rectangle, const SDL_Color color) {
-    C4_RectangleUIElement* element = calloc(1, sizeof(C4_RectangleUIElement));
+C4_UI_Rectangle* C4_RectangleUIElement_Create(const SDL_FRect rectangle, const SDL_Color color) {
+    C4_UI_Rectangle* element = calloc(1, sizeof(C4_UI_Rectangle));
     if (!element) {
         return NULL;
     }
@@ -12,14 +12,14 @@ C4_RectangleUIElement* C4_RectangleUIElement_Create(const SDL_FRect rectangle, c
     return element;
 }
 
-void C4_RectangleUIElement_Destroy(C4_RectangleUIElement* element) {
+void C4_RectangleUIElement_Destroy(C4_UI_Rectangle* element) {
     if (!element) {
         return;
     }
     free(element);
 }
 
-void C4_RectangleUIElement_Draw(C4_RectangleUIElement* element, SDL_Renderer* renderer) {
+void C4_RectangleUIElement_Draw(C4_UI_Rectangle* element, SDL_Renderer* renderer) {
     if (!element) {
         return;
     }
@@ -27,7 +27,7 @@ void C4_RectangleUIElement_Draw(C4_RectangleUIElement* element, SDL_Renderer* re
     SDL_RenderFillRect(renderer, &element->rectangle);
 }
 
-void C4_RectangleUIElement_CenterInWindow(C4_RectangleUIElement* element, C4_Axis axis) {
+void C4_RectangleUIElement_CenterInWindow(C4_UI_Rectangle* element, C4_Axis axis) {
     if (!element) {
         return;
     }

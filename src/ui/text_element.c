@@ -5,11 +5,11 @@
 #include <stddef.h>
 #include <stdio.h>
 
-C4_TextUIElement* C4_TextUIElement_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, SDL_Color color, float destinationX, float destinationY) {
+C4_UI_Text* C4_TextUIElement_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, SDL_Color color, float destinationX, float destinationY) {
     if (!renderer || !str || ptSize <= 0) {
         return NULL;
     }
-    C4_TextUIElement* element = calloc(1, sizeof(C4_TextUIElement));
+    C4_UI_Text* element = calloc(1, sizeof(C4_UI_Text));
     if (!element) {
         return NULL;
     }
@@ -26,7 +26,7 @@ C4_TextUIElement* C4_TextUIElement_Create(SDL_Renderer* renderer, const char* st
     return element;
 }
 
-void C4_TextUIElement_Destroy(C4_TextUIElement* element) {
+void C4_TextUIElement_Destroy(C4_UI_Text* element) {
     if (!element) {
         return;
     }
@@ -34,7 +34,7 @@ void C4_TextUIElement_Destroy(C4_TextUIElement* element) {
     free(element);
 }
 
-void C4_TextUIElement_Refresh(C4_TextUIElement* element, SDL_Renderer* renderer) {
+void C4_TextUIElement_Refresh(C4_UI_Text* element, SDL_Renderer* renderer) {
     if (!element) {
         return;
     }
@@ -52,7 +52,7 @@ void C4_TextUIElement_Refresh(C4_TextUIElement* element, SDL_Renderer* renderer)
     }
 }
 
-void C4_TextUIElement_ChangeStr(C4_TextUIElement* element, const char* newStr) {
+void C4_TextUIElement_ChangeStr(C4_UI_Text* element, const char* newStr) {
     if (!element) {
         return;
     }
@@ -60,7 +60,7 @@ void C4_TextUIElement_ChangeStr(C4_TextUIElement* element, const char* newStr) {
     snprintf(element->str, totalSize, "%s", newStr);
 }
 
-void C4_TextUIElement_Draw(C4_TextUIElement* element, SDL_Renderer* renderer) {
+void C4_TextUIElement_Draw(C4_UI_Text* element, SDL_Renderer* renderer) {
     if (!element || !element->texture || !renderer) {
         return;
     }
@@ -69,7 +69,7 @@ void C4_TextUIElement_Draw(C4_TextUIElement* element, SDL_Renderer* renderer) {
     SDL_RenderTexture(renderer, element->texture, NULL, &element->destination);
 }
 
-void C4_TextUIElement_CenterInWindow(C4_TextUIElement* element, C4_Axis axis) {
+void C4_TextUIElement_CenterInWindow(C4_UI_Text* element, C4_Axis axis) {
     if (!element) {
         return;
     }

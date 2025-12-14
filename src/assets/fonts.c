@@ -8,7 +8,7 @@
 
 static TTF_Font* fontCache[C4_FONT_COUNT] = {0};
 
-static const HeaderAsset FONT_ASSETS[C4_FONT_COUNT] = {
+static const C4_HeaderAsset FONT_ASSETS[C4_FONT_COUNT] = {
     {assets_fonts_Monocraft_ttf_data, assets_fonts_Monocraft_ttf_size},
     {assets_fonts_Monocraft_Bold_ttf_data, assets_fonts_Monocraft_Bold_ttf_size}
 };

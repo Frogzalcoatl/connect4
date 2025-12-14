@@ -6,7 +6,7 @@
 #include "assets_sounds_Player1Place_wav.h"
 #include "assets_sounds_Player2Place_wav.h"
 
-static const HeaderAsset SOUND_ASSETS[C4_SoundEffect_ListSize] = {
+static const C4_HeaderAsset SOUND_ASSETS[C4_SoundEffect_ListSize] = {
     {assets_sounds_ButtonClick_wav_data, assets_sounds_ButtonClick_wav_size},
     {assets_sounds_ButtonHover_wav_data, assets_sounds_ButtonHover_wav_size},
     {assets_sounds_Player1Place_wav_data, assets_sounds_Player1Place_wav_size},

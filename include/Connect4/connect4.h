@@ -18,7 +18,7 @@ typedef struct {
     SDL_Window* window;
     SDL_Renderer* renderer;
     C4_Board* board;
-    C4_ScreenInterface currentScreen;
+    C4_Screen_Interface currentScreen;
     bool running;
     bool isFullscreen;
 } C4_Game;

@@ -4,11 +4,11 @@
 #include "Connect4/assets/sounds.h"
 #include <stdlib.h>
 
-C4_GameScreen* C4_GameScreen_Create(SDL_Renderer* renderer, C4_Board* board) {
+C4_Screen_Game* C4_GameScreen_Create(SDL_Renderer* renderer, C4_Board* board) {
     if (!board || !renderer) {
         return NULL;
     }
-    C4_GameScreen* screen = calloc(1, sizeof(C4_GameScreen));
+    C4_Screen_Game* screen = calloc(1, sizeof(C4_Screen_Game));
     if (!screen) {
         return NULL;
     }
@@ -23,9 +23,9 @@ C4_GameScreen* C4_GameScreen_Create(SDL_Renderer* renderer, C4_Board* board) {
     screen->menuButton = C4_Button_Create(
         screen->renderer, "Back", C4_FontType_Bold, 32.f,
         (SDL_FRect){0.f, 950.f, 400.f, 100.f},
-        (C4_ButtonColorInfo){(SDL_Color){150, 150, 150, 255}, (SDL_Color){255, 255, 255, 255}},
-        (C4_ButtonColorInfo){(SDL_Color){200, 200, 200, 255}, (SDL_Color){255, 255, 255, 255}},
-        (C4_ButtonColorInfo){(SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 255}},
+        (C4_UI_ButtonColorInfo){(SDL_Color){150, 150, 150, 255}, (SDL_Color){255, 255, 255, 255}},
+        (C4_UI_ButtonColorInfo){(SDL_Color){200, 200, 200, 255}, (SDL_Color){255, 255, 255, 255}},
+        (C4_UI_ButtonColorInfo){(SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 255}},
         C4_ScreenChangeRequest_Menu
     );
     if (!screen->menuButton) {
@@ -40,7 +40,7 @@ void C4_GameScreen_Destroy(void* screenData) {
     if (!screenData) {
         return;
     }
-    C4_GameScreen* screen = (C4_GameScreen*)screenData;
+    C4_Screen_Game* screen = (C4_Screen_Game*)screenData;
     C4_Button_Destroy(screen->menuButton);
     C4_TextUIElement_Destroy(screen->testBoardText);
     free(screen);
@@ -50,12 +50,12 @@ void C4_GameScreen_Draw(void* screenData) {
     if (!screenData) {
         return;
     }
-    C4_GameScreen* screen = (C4_GameScreen*)screenData;
+    C4_Screen_Game* screen = (C4_Screen_Game*)screenData;
     C4_TextUIElement_Draw(screen->testBoardText, screen->renderer);
     C4_Button_Draw(screen->menuButton, screen->renderer);
 }
 
-void C4_GameScreen_TestStrUpdate(C4_GameScreen* screen) {
+void C4_GameScreen_TestStrUpdate(C4_Screen_Game* screen) {
     if (!screen) {
         return;
     }
@@ -66,11 +66,11 @@ void C4_GameScreen_TestStrUpdate(C4_GameScreen* screen) {
     C4_TextUIElement_CenterInWindow(screen->testBoardText, C4_Axis_X);
 }
 
-C4_ScreenChangeRequest C4_GameScreen_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
+C4_Screen_RequestChange C4_GameScreen_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
     if (!screenData) {
         return C4_ScreenChangeRequest_None;
     }
-    C4_GameScreen* screen = (C4_GameScreen*)screenData;
+    C4_Screen_Game* screen = (C4_Screen_Game*)screenData;
     // Temporary just for testing
     if (scancode >= SDL_SCANCODE_1 && scancode <= SDL_SCANCODE_7) {
         int column = scancode - SDL_SCANCODE_1;
@@ -91,10 +91,10 @@ C4_ScreenChangeRequest C4_GameScreen_HandleKeyboardInput(void* screenData, SDL_S
     return C4_ScreenChangeRequest_None;
 }
 
-C4_ScreenChangeRequest C4_GameScreen_HandleMouseEvents(void* screenData, SDL_Event* event) {
+C4_Screen_RequestChange C4_GameScreen_HandleMouseEvents(void* screenData, SDL_Event* event) {
     if (!screenData || !event) {
         return C4_ScreenChangeRequest_None;
     }
-    C4_GameScreen* screen = (C4_GameScreen*)screenData;
+    C4_Screen_Game* screen = (C4_Screen_Game*)screenData;
     return C4_Button_HandleMouseEvents(screen->menuButton, event, screen->renderer);
 }

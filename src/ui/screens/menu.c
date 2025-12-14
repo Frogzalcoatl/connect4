@@ -2,11 +2,11 @@
 #include "Connect4/assets/fonts.h"
 #include <stdlib.h>
 
-C4_MenuScreen* C4_MenuScreen_Create(SDL_Renderer* renderer) {
+C4_Screen_Menu* C4_MenuScreen_Create(SDL_Renderer* renderer) {
     if (!renderer) {
         return NULL;
     }
-    C4_MenuScreen* screen = calloc(1, sizeof(C4_MenuScreen));
+    C4_Screen_Menu* screen = calloc(1, sizeof(C4_Screen_Menu));
     if (!screen) {
         return NULL;
     }
@@ -20,9 +20,9 @@ C4_MenuScreen* C4_MenuScreen_Create(SDL_Renderer* renderer) {
     screen->playButton = C4_Button_Create(
         screen->renderer, "Play", C4_FontType_Bold, 32.f,
         (SDL_FRect){0.f, 380.f, 400.f, 100.f },
-        (C4_ButtonColorInfo){(SDL_Color){150, 150, 150, 255}, (SDL_Color){255, 255, 255, 255}},
-        (C4_ButtonColorInfo){(SDL_Color){200, 200, 200, 255}, (SDL_Color){255, 255, 255, 255}},
-        (C4_ButtonColorInfo){(SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 255}},
+        (C4_UI_ButtonColorInfo){(SDL_Color){150, 150, 150, 255}, (SDL_Color){255, 255, 255, 255}},
+        (C4_UI_ButtonColorInfo){(SDL_Color){200, 200, 200, 255}, (SDL_Color){255, 255, 255, 255}},
+        (C4_UI_ButtonColorInfo){(SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 255}},
         C4_ScreenChangeRequest_Game
     );
     if (!screen->playButton) {
@@ -33,9 +33,9 @@ C4_MenuScreen* C4_MenuScreen_Create(SDL_Renderer* renderer) {
     screen->settingsButton = C4_Button_Create(
         screen->renderer, "Settings", C4_FontType_Bold, 32.f,
         (SDL_FRect){0.f, 0.f, 400.f, 100.f },
-        (C4_ButtonColorInfo){(SDL_Color){150, 150, 150, 255}, (SDL_Color){255, 255, 255, 255}},
-        (C4_ButtonColorInfo){(SDL_Color){200, 200, 200, 255}, (SDL_Color){255, 255, 255, 255}},
-        (C4_ButtonColorInfo){(SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 255}},
+        (C4_UI_ButtonColorInfo){(SDL_Color){150, 150, 150, 255}, (SDL_Color){255, 255, 255, 255}},
+        (C4_UI_ButtonColorInfo){(SDL_Color){200, 200, 200, 255}, (SDL_Color){255, 255, 255, 255}},
+        (C4_UI_ButtonColorInfo){(SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 255}},
         C4_ScreenChangeRequest_Settings
     );
     if (!screen->settingsButton) {
@@ -46,9 +46,9 @@ C4_MenuScreen* C4_MenuScreen_Create(SDL_Renderer* renderer) {
     screen->quitButton = C4_Button_Create(
         screen->renderer, "Quit", C4_FontType_Bold, 32.f,
         (SDL_FRect){0.f, 600.f, 400.f, 100.f },
-        (C4_ButtonColorInfo){(SDL_Color){150, 150, 150, 255}, (SDL_Color){255, 255, 255, 255}},
-        (C4_ButtonColorInfo){(SDL_Color){200, 200, 200, 255}, (SDL_Color){255, 255, 255, 255}},
-        (C4_ButtonColorInfo){(SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 255}},
+        (C4_UI_ButtonColorInfo){(SDL_Color){150, 150, 150, 255}, (SDL_Color){255, 255, 255, 255}},
+        (C4_UI_ButtonColorInfo){(SDL_Color){200, 200, 200, 255}, (SDL_Color){255, 255, 255, 255}},
+        (C4_UI_ButtonColorInfo){(SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 255}},
         C4_ScreenChangeRequest_CloseWindow
     );
     if (!screen->quitButton) {
@@ -63,7 +63,7 @@ void C4_MenuScreen_Destroy(void* screenData) {
     if (!screenData) {
         return;
     }
-    C4_MenuScreen* screen = (C4_MenuScreen*)screenData;
+    C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
     C4_Button_Destroy(screen->quitButton);
     C4_Button_Destroy(screen->settingsButton);
     C4_Button_Destroy(screen->playButton);
@@ -75,30 +75,30 @@ void C4_MenuScreen_Draw(void* screenData) {
     if (!screenData) {
         return;
     }
-    C4_MenuScreen* screen = (C4_MenuScreen*)screenData;
+    C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
     C4_Button_Draw(screen->playButton, screen->renderer);
     C4_Button_Draw(screen->settingsButton, screen->renderer);
     C4_Button_Draw(screen->quitButton, screen->renderer);
     C4_TextUIElement_Draw(screen->title, screen->renderer);
 }
 
-C4_ScreenChangeRequest C4_MenuScreen_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
+C4_Screen_RequestChange C4_MenuScreen_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
     if (!screenData) {
         return C4_ScreenChangeRequest_None;
     }
-    C4_MenuScreen* screen = (C4_MenuScreen*)screenData;
+    C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
     // Will probably create some kind of struct for a popup that appears when pressing esc to close the game
     return C4_ScreenChangeRequest_None;
 }
 
-C4_ScreenChangeRequest C4_MenuScreen_HandleMouseEvents(void* screenData, SDL_Event* event) {
+C4_Screen_RequestChange C4_MenuScreen_HandleMouseEvents(void* screenData, SDL_Event* event) {
     // lmao ill improve this later just trying to make sure everything works. Will probably use an array of button pointers or smth and iterate through them
     if (!screenData || !event) {
         return C4_ScreenChangeRequest_None;
     }
-    C4_MenuScreen* screen = (C4_MenuScreen*)screenData;
-    C4_ScreenChangeRequest request = C4_ScreenChangeRequest_None;
-    C4_ScreenChangeRequest newRequest = C4_Button_HandleMouseEvents(screen->playButton, event, screen->renderer);
+    C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
+    C4_Screen_RequestChange request = C4_ScreenChangeRequest_None;
+    C4_Screen_RequestChange newRequest = C4_Button_HandleMouseEvents(screen->playButton, event, screen->renderer);
     if (newRequest != C4_ScreenChangeRequest_None) {
         request = newRequest;
     }
