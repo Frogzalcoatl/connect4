@@ -5,37 +5,46 @@
 #include <stddef.h>
 #include <stdio.h>
 
-C4_UI_Text* C4_TextUIElement_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, SDL_Color color, float destinationX, float destinationY) {
-    if (!renderer || !str || ptSize <= 0) {
+C4_UI_Text* C4_UI_Text_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, SDL_Color color, float destinationX, float destinationY) {
+    if (!renderer || !str) {
+        SDL_Log("Unable to create text element. renderer and/or str is NULL.");
+        return NULL;
+    }
+    if (ptSize <= 0) {
+        SDL_Log("Unable to create text element. ptSize must be greater than 0.");
         return NULL;
     }
     C4_UI_Text* element = calloc(1, sizeof(C4_UI_Text));
     if (!element) {
+        SDL_Log("Unable to allocate memory for text element");
         return NULL;
     }
     element->font = C4_GetFont(font);
     if (!element->font) {
-        C4_TextUIElement_Destroy(element);
+        SDL_Log("Unable to get text element font");
+        C4_UI_Text_Destroy(element);
         return NULL;
     }
     element->ptSize = ptSize;
     element->destination = (SDL_FRect){destinationX, destinationY, 0.f, 0.f};
     element->color = color;
-    C4_TextUIElement_ChangeStr(element, str);
-    C4_TextUIElement_Refresh(element, renderer);
+    C4_UI_Text_ChangeStr(element, str);
+    C4_UI_Text_Refresh(element, renderer);
     return element;
 }
 
-void C4_TextUIElement_Destroy(C4_UI_Text* element) {
+void C4_UI_Text_Destroy(C4_UI_Text* element) {
     if (!element) {
+        SDL_Log("Tried to destroy NULL text element");
         return;
     }
     SDL_DestroyTexture(element->texture);
     free(element);
 }
 
-void C4_TextUIElement_Refresh(C4_UI_Text* element, SDL_Renderer* renderer) {
+void C4_UI_Text_Refresh(C4_UI_Text* element, SDL_Renderer* renderer) {
     if (!element) {
+        SDL_Log("Text element is NULL");
         return;
     }
     SDL_DestroyTexture(element->texture);
@@ -52,16 +61,18 @@ void C4_TextUIElement_Refresh(C4_UI_Text* element, SDL_Renderer* renderer) {
     }
 }
 
-void C4_TextUIElement_ChangeStr(C4_UI_Text* element, const char* newStr) {
+void C4_UI_Text_ChangeStr(C4_UI_Text* element, const char* newStr) {
     if (!element) {
+        SDL_Log("Text element is NULL");
         return;
     }
     size_t totalSize = sizeof(element->str) / sizeof(element->str[0]);
     snprintf(element->str, totalSize, "%s", newStr);
 }
 
-void C4_TextUIElement_Draw(C4_UI_Text* element, SDL_Renderer* renderer) {
+void C4_UI_Text_Draw(C4_UI_Text* element, SDL_Renderer* renderer) {
     if (!element || !element->texture || !renderer) {
+        SDL_Log("Text element, text element texture, and/or renderer is NULL");
         return;
     }
     SDL_SetTextureColorMod(element->texture, element->color.r, element->color.g, element->color.b);
@@ -69,8 +80,9 @@ void C4_TextUIElement_Draw(C4_UI_Text* element, SDL_Renderer* renderer) {
     SDL_RenderTexture(renderer, element->texture, NULL, &element->destination);
 }
 
-void C4_TextUIElement_CenterInWindow(C4_UI_Text* element, C4_Axis axis) {
+void C4_UI_Text_CenterInWindow(C4_UI_Text* element, C4_Axis axis) {
     if (!element) {
+        SDL_Log("Text element is NULL");
         return;
     }
     if (axis == C4_Axis_X || axis == C4_Axis_XY) {

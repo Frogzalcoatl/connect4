@@ -42,25 +42,25 @@ static bool C4_Game_HandleScreenChangeRequest(C4_Game* game, C4_Screen_RequestCh
     }
     switch (type) {
         case C4_ScreenChangeRequest_Menu: {
-            game->currentScreen.data = C4_MenuScreen_Create(game->renderer);
-            game->currentScreen.Destroy = &C4_MenuScreen_Destroy;
-            game->currentScreen.Draw = &C4_MenuScreen_Draw;
-            game->currentScreen.HandleKeyboardInput = &C4_MenuScreen_HandleKeyboardInput;
-            game->currentScreen.HandleMouseEvents = &C4_MenuScreen_HandleMouseEvents;
+            game->currentScreen.data = C4_Screen_Menu_Create(game->renderer);
+            game->currentScreen.Destroy = &C4_Screen_Menu_Destroy;
+            game->currentScreen.Draw = &C4_Screen_Menu_Draw;
+            game->currentScreen.HandleKeyboardInput = &C4_Screen_Menu_HandleKeyboardInput;
+            game->currentScreen.HandleMouseEvents = &C4_Screen_Menu_HandleMouseEvents;
         }; break;
         case C4_ScreenChangeRequest_Settings: {
-            game->currentScreen.data = C4_SettingsScreen_Create(game->renderer, game->window);
-            game->currentScreen.Destroy = &C4_SettingsScreen_Destroy;
-            game->currentScreen.Draw = &C4_SettingsScreen_Draw;
-            game->currentScreen.HandleKeyboardInput = &C4_SettingsScreen_HandleKeyboardInput;
-            game->currentScreen.HandleMouseEvents = &C4_SettingsScreen_HandleMouseEvents;
+            game->currentScreen.data = C4_Screen_Settings_Create(game->renderer, game->window);
+            game->currentScreen.Destroy = &C4_Screen_Settings_Destroy;
+            game->currentScreen.Draw = &C4_Screen_Settings_Draw;
+            game->currentScreen.HandleKeyboardInput = &C4_Screen_Settings_HandleKeyboardInput;
+            game->currentScreen.HandleMouseEvents = &C4_Screen_Settings_HandleMouseEvents;
         }; break;
         case C4_ScreenChangeRequest_Game: {
-            game->currentScreen.data = C4_GameScreen_Create(game->renderer, game->board);
-            game->currentScreen.Destroy = &C4_GameScreen_Destroy;
-            game->currentScreen.Draw = &C4_GameScreen_Draw;
-            game->currentScreen.HandleKeyboardInput = &C4_GameScreen_HandleKeyboardInput;
-            game->currentScreen.HandleMouseEvents = &C4_GameScreen_HandleMouseEvents;
+            game->currentScreen.data = C4_Screen_Game_Create(game->renderer, game->board);
+            game->currentScreen.Destroy = &C4_Screen_Game_Destroy;
+            game->currentScreen.Draw = &C4_Screen_Game_Draw;
+            game->currentScreen.HandleKeyboardInput = &C4_Screen_Game_HandleKeyboardInput;
+            game->currentScreen.HandleMouseEvents = &C4_Screen_Game_HandleMouseEvents;
         }; break;
         case C4_ScreenChangeRequest_CloseWindow: {
             game->running = false;
@@ -78,21 +78,20 @@ static bool C4_Game_HandleScreenChangeRequest(C4_Game* game, C4_Screen_RequestCh
 }
 
 C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountToWin) {
-    if (amountToWin <= 1) {
-        return NULL;
-    }
     C4_Game* game = calloc(1, sizeof(C4_Game));
     if (!game) {
-        // Out of memory
+        SDL_Log("Unable allocate memory for C4 Game");
         return NULL;
     }
     game->window = SDL_CreateWindow("Connect4", 1280, 720, SDL_WINDOW_RESIZABLE);
     if (!game->window) {
+        SDL_Log("Unable to create SDL Window: %s", SDL_GetError());
         C4_Game_Destroy(game);
         return NULL;
     }
     game->renderer = SDL_CreateRenderer(game->window, NULL);
     if (!game->renderer) {
+        SDL_Log("Unable to create SDL renderer: %s", SDL_GetError());
         C4_Game_Destroy(game);
         return NULL;
     }
@@ -100,6 +99,7 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
     SDL_SetRenderVSync(game->renderer, 1);
     game->board = C4_Board_Create(boardWidth, boardHeight, amountToWin);
     if (!C4_Game_HandleScreenChangeRequest(game, C4_ScreenChangeRequest_Menu)) {
+        SDL_Log("Unable to create initial menu screen");
         C4_Game_Destroy(game);
         return NULL;
     }
@@ -110,6 +110,7 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
 
 void C4_Game_Destroy(C4_Game* game) {
     if (!game) {
+        SDL_Log("Tried to destroy NULL C4 Game");
         return;
     }
     if (game->currentScreen.Destroy) {

@@ -2,9 +2,10 @@
 #include "Connect4/constants.h"
 #include <stdlib.h>
 
-C4_UI_Rectangle* C4_RectangleUIElement_Create(const SDL_FRect rectangle, const SDL_Color color) {
+C4_UI_Rectangle* C4_UI_Rectangle_Create(const SDL_FRect rectangle, const SDL_Color color) {
     C4_UI_Rectangle* element = calloc(1, sizeof(C4_UI_Rectangle));
     if (!element) {
+        SDL_Log("Unable to allocate memory for rectangle element");
         return NULL;
     }
     element->rectangle = rectangle;
@@ -12,23 +13,26 @@ C4_UI_Rectangle* C4_RectangleUIElement_Create(const SDL_FRect rectangle, const S
     return element;
 }
 
-void C4_RectangleUIElement_Destroy(C4_UI_Rectangle* element) {
+void C4_UI_Rectangle_Destroy(C4_UI_Rectangle* element) {
     if (!element) {
+        SDL_Log("Tried to destroy NULL rectangle element");
         return;
     }
     free(element);
 }
 
-void C4_RectangleUIElement_Draw(C4_UI_Rectangle* element, SDL_Renderer* renderer) {
+void C4_UI_Rectangle_Draw(C4_UI_Rectangle* element, SDL_Renderer* renderer) {
     if (!element) {
+        SDL_Log("Rectangle element is NULL");
         return;
     }
     SDL_SetRenderDrawColor(renderer, element->color.r, element->color.g, element->color.b, element->color.a);
     SDL_RenderFillRect(renderer, &element->rectangle);
 }
 
-void C4_RectangleUIElement_CenterInWindow(C4_UI_Rectangle* element, C4_Axis axis) {
+void C4_UI_Rectangle_CenterInWindow(C4_UI_Rectangle* element, C4_Axis axis) {
     if (!element) {
+        SDL_Log("Rectangle element is NULL");
         return;
     }
     if (axis == C4_Axis_X || axis == C4_Axis_XY) {

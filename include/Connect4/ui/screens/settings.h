@@ -11,8 +11,8 @@ typedef struct {
     C4_UI_Button* backButton;
 } C4_Screen_Settings;
 
-C4_Screen_Settings* C4_SettingsScreen_Create(SDL_Renderer* renderer, SDL_Window* window);
-void C4_SettingsScreen_Destroy(void* screenData);
-void C4_SettingsScreen_Draw(void* screenData);
-C4_Screen_RequestChange C4_SettingsScreen_HandleKeyboardInput(void* screenData, SDL_Scancode scancode);
-C4_Screen_RequestChange C4_SettingsScreen_HandleMouseEvents(void* screenData, SDL_Event* event);
+C4_Screen_Settings* C4_Screen_Settings_Create(SDL_Renderer* renderer, SDL_Window* window);
+void C4_Screen_Settings_Destroy(void* screenData);
+void C4_Screen_Settings_Draw(void* screenData);
+C4_Screen_RequestChange C4_Screen_Settings_HandleKeyboardInput(void* screenData, SDL_Scancode scancode);
+C4_Screen_RequestChange C4_Screen_Settings_HandleMouseEvents(void* screenData, SDL_Event* event);

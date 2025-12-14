@@ -7,6 +7,7 @@ static SDL_Cursor* cursorCache[SDL_SYSTEM_CURSOR_COUNT] = {0};
 
 SDL_Cursor* C4_GetSystemCursor(SDL_SystemCursor type) {
     if (type < 0 || type >= SDL_SYSTEM_CURSOR_COUNT) {
+        SDL_Log("Tried to access invalid cursor id. Got default cursor instead.");
         return C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
     }
     if (cursorCache[type] != NULL) {
@@ -20,6 +21,7 @@ SDL_Cursor* C4_GetSystemCursor(SDL_SystemCursor type) {
     if (type != SDL_SYSTEM_CURSOR_DEFAULT) {
         return C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
     }
+    SDL_Log("Unable to create system cursor");
     return NULL;
 }
 

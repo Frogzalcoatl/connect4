@@ -15,6 +15,7 @@ static const C4_HeaderAsset FONT_ASSETS[C4_FONT_COUNT] = {
 
 TTF_Font* C4_GetFont(C4_FontType type) {
     if (type < 0 || type >= C4_FONT_COUNT) {
+        SDL_Log("Tried to access invalid C4_FontType");
         return NULL;
     }
     if (fontCache[type] != NULL) {
@@ -22,6 +23,7 @@ TTF_Font* C4_GetFont(C4_FontType type) {
     }
     SDL_IOStream* io = SDL_IOFromConstMem(FONT_ASSETS[type].data, FONT_ASSETS[type].size);
     if (!io) {
+        SDL_Log("Unable to open font IOStream. Type index: %i", type);
         return NULL;
     }
     TTF_Font* newFont = TTF_OpenFontIO(io, true, 32);
@@ -32,6 +34,7 @@ TTF_Font* C4_GetFont(C4_FontType type) {
     if (type != C4_FontType_Regular) {
         return C4_GetFont(C4_FontType_Regular);
     }
+    SDL_Log("Unable to get font. Type index: %i", type);
     return NULL;
 }
 

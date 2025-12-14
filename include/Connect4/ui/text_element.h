@@ -16,9 +16,9 @@ typedef struct {
     char str[512];
 } C4_UI_Text;
 
-C4_UI_Text* C4_TextUIElement_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, SDL_Color color, float destinationX, float destinationY);
-void C4_TextUIElement_Destroy(C4_UI_Text* element);
-void C4_TextUIElement_ChangeStr(C4_UI_Text* element, const char* newStr);
-void C4_TextUIElement_Draw(C4_UI_Text* element, SDL_Renderer* renderer);
-void C4_TextUIElement_Refresh(C4_UI_Text* element, SDL_Renderer* renderer);
-void C4_TextUIElement_CenterInWindow(C4_UI_Text* element, C4_Axis axis);
+C4_UI_Text* C4_UI_Text_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, SDL_Color color, float destinationX, float destinationY);
+void C4_UI_Text_Destroy(C4_UI_Text* element);
+void C4_UI_Text_ChangeStr(C4_UI_Text* element, const char* newStr);
+void C4_UI_Text_Draw(C4_UI_Text* element, SDL_Renderer* renderer);
+void C4_UI_Text_Refresh(C4_UI_Text* element, SDL_Renderer* renderer);
+void C4_UI_Text_CenterInWindow(C4_UI_Text* element, C4_Axis axis);

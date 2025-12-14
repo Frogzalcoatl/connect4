@@ -73,7 +73,12 @@ void C4_QuitAudio() {
 }
 
 void C4_PlaySound(C4_SoundEffect soundID) {
-    if (soundID < 0 || soundID >= C4_SoundEffect_ListSize || deviceID == 0) {
+    if (soundID < 0 || soundID >= C4_SoundEffect_ListSize) {
+        SDL_Log("Tried to play invalid sound ID");
+        return;
+    }
+    if (deviceID == 0) {
+        SDL_Log("Invalid sound device id");
         return;
     }
     SDL_AudioStream* stream = streams[currentStreamIndex];

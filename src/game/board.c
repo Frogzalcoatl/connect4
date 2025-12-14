@@ -7,6 +7,7 @@
 
 C4_Board* C4_Board_Create(uint8_t width, uint8_t height, uint8_t amountToWin) {
     if (amountToWin <= 1) {
+        SDL_Log("amount to win cannot be less than 1");
         return NULL;
     }
     C4_Board* newBoard = calloc(1, sizeof(C4_Board));
@@ -16,6 +17,7 @@ C4_Board* C4_Board_Create(uint8_t width, uint8_t height, uint8_t amountToWin) {
     newBoard->cells = calloc(width * height, sizeof(C4_SlotState));
     if (!newBoard->cells) {
         C4_Board_Destroy(newBoard);
+        SDL_Log("Unable to allocate memory for board cells");
         return NULL;
     }
     newBoard->cellCheckBufferSize = C4_Max(width, height);
@@ -31,6 +33,7 @@ C4_Board* C4_Board_Create(uint8_t width, uint8_t height, uint8_t amountToWin) {
 
 void C4_Board_Destroy(C4_Board* board) {
     if (!board) {
+        SDL_Log("Tried to destroy NULL board");
         return;
     }
     if (board->cells) {
@@ -45,9 +48,11 @@ void C4_Board_Destroy(C4_Board* board) {
 
 C4_SlotState C4_Board_GetSlot(C4_Board* board, uint8_t x, uint8_t y) {
     if (!board) {
+        SDL_Log("Board is NULL");
         return C4_SlotState_Empty;
     }
     if (x >= board->width || y >= board->height) {
+        SDL_Log("Tried to access slot outside of bounds");
         return C4_SlotState_Empty;
     }
     return board->cells[board->width * y + x];
@@ -55,9 +60,11 @@ C4_SlotState C4_Board_GetSlot(C4_Board* board, uint8_t x, uint8_t y) {
 
 bool C4_Board_SetSlot(C4_Board* board, uint8_t x, uint8_t y, C4_SlotState state) {
     if (!board) {
+        SDL_Log("Board is NULL");
         return false;
     }
     if (x >= board->width || y >= board->height) {
+        SDL_Log("Tried to access slot outside of bounds");
         return false;
     }
     board->cells[board->width * y + x] = state;
@@ -66,6 +73,7 @@ bool C4_Board_SetSlot(C4_Board* board, uint8_t x, uint8_t y, C4_SlotState state)
 
 static void C4_Board_SwapCurrentPlayer(C4_Board* board) {
     if (!board) {
+        SDL_Log("Board is NULL");
         return;
     }
     if (board->currentPlayer == C4_SlotState_Player1) {
@@ -78,9 +86,11 @@ static void C4_Board_SwapCurrentPlayer(C4_Board* board) {
 // Returns index of move. -1 if move is invalid.
 int64_t C4_Board_DoMove(C4_Board* board, uint8_t inColumn) {
     if (!board) {
+        SDL_Log("Board is NULL");
         return -1;
     }
     if (board->currentPlayer == C4_SlotState_Empty || inColumn >= board->width) {
+        SDL_Log("Unable to do board move");
         return -1;
     }
     // If column is full returns -1
@@ -108,11 +118,13 @@ static char C4_Board_GetCharForState(C4_SlotState state) {
 
 static void C4_Board_PrintCellCheckBuffer(C4_Board* board) {
     if (!board) {
+        SDL_Log("Board is NULL");
         return;
     }
     const size_t strSize = board->cellCheckCount * 2 + 1;
     char* str = malloc(strSize);
     if (!str) {
+        SDL_Log("Unable to allocate memory for cellCheckBuffer string");
         return;
     }
     for (size_t i = 0; i < board->cellCheckCount; i++) {
@@ -127,6 +139,7 @@ static void C4_Board_PrintCellCheckBuffer(C4_Board* board) {
 
 static void C4_Board_UpdateCellCheckBuffer(C4_Board* board, C4_Board_RowAxis axis, size_t atIndex) {
     if (!board) {
+        SDL_Log("Board is NULL");
         return;
     }
     // Sets all values of cellCheckBuffer to zero.
@@ -201,6 +214,7 @@ static void C4_Board_UpdateCellCheckBuffer(C4_Board* board, C4_Board_RowAxis axi
 
 static C4_SlotState C4_Board_TestCellCheckBuffer(C4_Board* board) {
     if (!board) {
+        SDL_Log("Board is NULL");
         return C4_SlotState_Empty;
     }
     C4_SlotState previousState = C4_SlotState_Empty;
@@ -221,6 +235,7 @@ static C4_SlotState C4_Board_TestCellCheckBuffer(C4_Board* board) {
 
 C4_SlotState C4_Board_GetWinner(C4_Board* board, size_t mostRecentMoveIndex) {
     if (!board) {
+        SDL_Log("Board is NULL");
         return C4_SlotState_Empty;
     }
     C4_SlotState bufferTestResult = C4_SlotState_Empty;
@@ -252,10 +267,12 @@ C4_SlotState C4_Board_GetWinner(C4_Board* board, size_t mostRecentMoveIndex) {
 
 void C4_Board_UpdateTestStr(C4_Board* board, char* buffer, size_t bufferSize) {
     if (!board) {
+        SDL_Log("Board is NULL");
         return;
     }
     size_t amountNeeded = board->width * board->height + board->height + 1;
     if (amountNeeded > bufferSize) {
+        SDL_Log("Amount needed for testStr exceeds its size");
         return;
     }
     size_t i = 0;
