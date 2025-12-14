@@ -5,7 +5,7 @@ int main(int argc, char *argv[]) {
     if (!Connect4_Init_Dependencies()) {
         return 1;
     }
-    C4_Game* connect4 = C4_Game_Create(7, 6);
+    C4_Game* connect4 = C4_Game_Create(7, 6, 4);
     if (connect4) {
         C4_Game_Run(connect4);
         C4_Game_Destroy(connect4);

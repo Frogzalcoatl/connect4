@@ -1,5 +1,5 @@
 #include "Connect4/ui/screens/game.h"
-#include "Connect4/game/random.h"
+#include "Connect4/game/utils.h"
 #include "Connect4/ui/fontManager.h"
 #include <stdlib.h>
 
@@ -73,7 +73,12 @@ C4_ScreenChangeRequest C4_GameScreen_HandleKeyboardInput(void* screenData, SDL_S
     // Temporary just for testing
     if (scancode >= SDL_SCANCODE_1 && scancode <= SDL_SCANCODE_7) {
         int column = scancode - SDL_SCANCODE_1;
-        C4_Board_DoMove(screen->board, column);
+        int64_t atIndex = C4_Board_DoMove(screen->board, column);
+        if (atIndex == -1) {
+            return C4_ScreenChangeRequest_None;
+        }
+        C4_SlotState winnerCheckResult = C4_Board_GetWinner(screen->board, atIndex);
+        SDL_Log("winnerCheckResult: %i", winnerCheckResult);
         C4_GameScreen_TestStrUpdate(screen);
     }
     return C4_ScreenChangeRequest_None;

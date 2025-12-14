@@ -55,7 +55,7 @@ set(SOURCES
     src/main.c
     src/connect4.c
     src/game/board.c
-    src/game/random.c
+    src/game/utils.c
     src/ui/button.c
     src/ui/cursorManager.c
     src/ui/fontManager.c

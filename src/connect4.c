@@ -31,14 +31,7 @@ void Connect4_Quit_Dependencies() {
 
 // Returns false if the screen change was unsuccessful (Likely out of memory)
 static bool C4_Game_HandleScreenChangeRequest(C4_Game* game, C4_ScreenChangeRequest type) {
-    if (type == C4_ScreenChangeRequest_None) {
-        return true;
-    }
-    if (type == C4_ScreenChangeRequest_CloseWindow) {
-        game->running = false;
-        return true;
-    }
-    if (game->currentScreen.Destroy) {
+    if (type != C4_ScreenChangeRequest_None && game->currentScreen.Destroy) {
         game->currentScreen.Destroy(game->currentScreen.data);
     }
     switch (type) {
@@ -63,6 +56,13 @@ static bool C4_Game_HandleScreenChangeRequest(C4_Game* game, C4_ScreenChangeRequ
             game->currentScreen.HandleKeyboardInput = &C4_GameScreen_HandleKeyboardInput;
             game->currentScreen.HandleMouseEvents = &C4_GameScreen_HandleMouseEvents;
         }; break;
+        case C4_ScreenChangeRequest_CloseWindow: {
+            game->running = false;
+            return true;
+        }; break;
+        case C4_ScreenChangeRequest_None: {
+            return true;
+        }
     }
     if (!game->currentScreen.data) {
         return false;
@@ -71,7 +71,10 @@ static bool C4_Game_HandleScreenChangeRequest(C4_Game* game, C4_ScreenChangeRequ
     return true;
 }
 
-C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight) {
+C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountToWin) {
+    if (amountToWin <= 1) {
+        return NULL;
+    }
     C4_Game* game = calloc(1, sizeof(C4_Game));
     if (!game) {
         // Out of memory
@@ -89,7 +92,7 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight) {
     }
     SDL_SetRenderLogicalPresentation(game->renderer, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);
     SDL_SetRenderVSync(game->renderer, 1);
-    game->board = C4_Board_Create(boardWidth, boardHeight);
+    game->board = C4_Board_Create(boardWidth, boardHeight, amountToWin);
     if (!C4_Game_HandleScreenChangeRequest(game, C4_ScreenChangeRequest_Menu)) {
         C4_Game_Destroy(game);
         return NULL;
