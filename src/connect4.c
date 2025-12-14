@@ -28,11 +28,11 @@ bool Connect4_Init_Dependencies() {
 }
 
 void Connect4_Quit_Dependencies() {
+    C4_CloseAllFonts();
+    C4_DestroyAllCursors();
+    C4_QuitAudio();
     TTF_Quit();
     SDL_Quit();
-    C4_QuitAudio();
-    C4_DestroyAllCursors();
-    C4_CloseAllFonts();
 }
 
 // Returns false if the screen change was unsuccessful (Likely out of memory)
