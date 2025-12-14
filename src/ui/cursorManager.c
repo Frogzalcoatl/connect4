@@ -26,6 +26,8 @@ SDL_Cursor* C4_GetSystemCursor(SDL_SystemCursor type) {
 }
 
 void C4_DestroyAllCursors() {
+    // Theoretically this fixes issues on linux
+    SDL_SetCursor(NULL);
     for (size_t i = 0; i < SDL_SYSTEM_CURSOR_COUNT; i++) {
         if (cursorCache[i]) {
             SDL_DestroyCursor(cursorCache[i]);
