@@ -16,6 +16,7 @@ C4_Board* C4_Board_Create(uint8_t width, uint8_t height, uint8_t amountToWin) {
     newBoard->cells = calloc(width * height, sizeof(C4_SlotState));
     if (!newBoard->cells) {
         C4_Board_Destroy(newBoard);
+        return NULL;
     }
     newBoard->cellCheckBufferSize = C4_Max(width, height);
     newBoard->cellCheckBuffer = calloc(newBoard->cellCheckBufferSize, sizeof(C4_SlotState));
