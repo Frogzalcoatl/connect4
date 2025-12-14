@@ -1,20 +1,16 @@
-#include "Connect4/ui/fontManager.h"
+#include "Connect4/assets/index.h"
+#include "Connect4/assets/fonts.h"
+#include "assets_fonts_Monocraft_ttf.h"
+#include "assets_fonts_Monocraft_Bold_ttf.h"
 #include <stdio.h>
-#include "FONT_Monocraft.h"
-#include "FONT_Monocraft_Bold.h"
 
 #define C4_FONT_COUNT 2
 
 static TTF_Font* fontCache[C4_FONT_COUNT] = {0};
 
-typedef struct {
-    const unsigned char* data;
-    const size_t len;
-} FontAsset;
-
-static const FontAsset FONT_ASSETS[C4_FONT_COUNT] = {
-    {FONT_Monocraft, FONT_Monocraft_len},
-    {FONT_Monocraft_Bold, FONT_Monocraft_Bold_len}
+static const HeaderAsset FONT_ASSETS[C4_FONT_COUNT] = {
+    {assets_fonts_Monocraft_ttf_data, assets_fonts_Monocraft_ttf_size},
+    {assets_fonts_Monocraft_Bold_ttf_data, assets_fonts_Monocraft_Bold_ttf_size}
 };
 
 TTF_Font* C4_GetFont(C4_FontType type) {
@@ -24,7 +20,7 @@ TTF_Font* C4_GetFont(C4_FontType type) {
     if (fontCache[type] != NULL) {
         return fontCache[type];
     }
-    SDL_IOStream* io = SDL_IOFromConstMem(FONT_ASSETS[type].data, FONT_ASSETS[type].len);
+    SDL_IOStream* io = SDL_IOFromConstMem(FONT_ASSETS[type].data, FONT_ASSETS[type].size);
     if (!io) {
         return NULL;
     }

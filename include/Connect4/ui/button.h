@@ -1,7 +1,7 @@
 #pragma once
 #include "Connect4/ui/rectangle_element.h"
 #include "Connect4/ui/text_element.h"
-#include "Connect4/ui/fontManager.h"
+#include "Connect4/assets/fonts.h"
 #include "Connect4/ui/screens/interface.h"
 #include <stdbool.h>
 

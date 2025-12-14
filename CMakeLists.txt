@@ -8,6 +8,7 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_BUILD_PARALLEL_LEVEL 0 CACHE STRING "Number of parallel build jobs")
 
+# --- SDL3 SETUP ---
 set(SDL_SHARED OFF CACHE BOOL "Build shared libraries" FORCE)
 set(SDL_STATIC ON CACHE BOOL "Build static libraries" FORCE)
 set(SDL_TEST_LIBRARY OFF CACHE BOOL "Build SDL test library" FORCE)
@@ -29,6 +30,7 @@ if(NOT SDL3_FOUND)
     FetchContent_MakeAvailable(SDL3)
 endif()
 
+# --- SDL3_ttf SETUP ---
 set(SDLTTF_SHARED OFF CACHE BOOL "Build shared libraries" FORCE)
 set(SDLTTF_STATIC ON  CACHE BOOL "Build static libraries" FORCE)
 set(SDLTTF_SAMPLES OFF CACHE BOOL "Build SDL3_ttf samples" FORCE)
@@ -51,14 +53,68 @@ if(NOT SDL3_ttf_FOUND)
     FetchContent_MakeAvailable(SDL3_ttf)
 endif()
 
+# Function to read a file and turn it into a C header
+function(embed_resource input_file output_file c_name)
+    file(READ ${input_file} hex_content HEX)
+    
+    # Check if file is empty to prevent empty initializer errors
+    string(LENGTH "${hex_content}" hex_len)
+    if(hex_len EQUAL 0)
+        # Create a dummy entry if file is empty
+        set(array_values "0x00")
+        set(size_def "0")
+    else()
+        # 1. Add 0x prefix and comma to every byte
+        string(REGEX REPLACE "(..)" "0x\\1, " array_values "${hex_content}")
+        # 2. REMOVE the trailing comma and space to ensure valid C syntax
+        string(REGEX REPLACE ", $" "" array_values "${array_values}")
+        set(size_def "sizeof(${c_name}_data)")
+    endif()
+
+    # Create the header file content
+    set(file_content "
+#pragma once
+#include <stddef.h>
+
+/* Auto-generated from ${input_file} */
+static const unsigned char ${c_name}_data[] = { ${array_values} };
+#define ${c_name}_size ${size_def}
+")
+
+    file(WRITE ${output_file} "${file_content}")
+endfunction()
+
+# Find all files in assets/ recursively
+file(GLOB_RECURSE ASSET_FILES "${CMAKE_SOURCE_DIR}/assets/*")
+
+message(STATUS "Bundling assets...")
+
+foreach(file_path ${ASSET_FILES})
+    file(RELATIVE_PATH rel_path "${CMAKE_SOURCE_DIR}/assets" "${file_path}")
+    
+    # Sanitize filename
+    string(REPLACE "/" "_" safe_name "${rel_path}")
+    string(REPLACE "\\" "_" safe_name "${safe_name}")
+    string(REPLACE "." "_" safe_name "${safe_name}")
+    string(REPLACE "-" "_" safe_name "${safe_name}") # Handle dashes too
+    set(safe_name "assets_${safe_name}")
+
+    set(out_header "${CMAKE_BINARY_DIR}/generated/${safe_name}.h")
+    
+    embed_resource("${file_path}" "${out_header}" "${safe_name}")
+    message(STATUS "  Embedded: ${rel_path} -> ${safe_name}.h")
+endforeach()
+message(STATUS "Assets embedded successfully.")
+
 set(SOURCES
     src/main.c
     src/connect4.c
+    src/assets/fonts.c
+    src/assets/sounds.c
     src/game/board.c
     src/game/utils.c
     src/ui/button.c
     src/ui/cursorManager.c
-    src/ui/fontManager.c
     src/ui/rectangle_element.c
     src/ui/text_element.c
     src/ui/screens/game.c
@@ -73,29 +129,11 @@ else()
     add_executable(${PROJECT_NAME} ${SOURCES})
 endif()
 
-function(make_header_file TARGET_NAME SOURCE_FILE VAR_NAME)
-    set(HEADER_FILE "${CMAKE_CURRENT_BINARY_DIR}/generated/${VAR_NAME}.h")
-    
-    # Read the file as hex
-    file(READ "${SOURCE_FILE}" HEX_CONTENTS HEX)
-    # Add 0x prefix and commas
-    string(REGEX REPLACE "(..)" "0x\\1, " HEX_C_ARRAY "${HEX_CONTENTS}")
-    
-    # Write the .h file
-    file(WRITE "${HEADER_FILE}" 
-        "#pragma once\n"
-        "#include <stddef.h>\n\n"
-        "const unsigned char ${VAR_NAME}[] = { ${HEX_C_ARRAY} };\n"
-        "#define ${VAR_NAME}_len sizeof(${VAR_NAME})"
-    )
-    
-    # Make sure the target can find this header
-    target_include_directories(${TARGET_NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
-endfunction()
-
-make_header_file(${PROJECT_NAME} "assets/fonts/Monocraft.ttf" "FONT_Monocraft")
-make_header_file(${PROJECT_NAME} "assets/fonts/Monocraft-Bold.ttf" "FONT_Monocraft_Bold")
-
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
+
+target_include_directories(${PROJECT_NAME} PUBLIC 
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_BINARY_DIR}/generated
+)
+
 target_compile_features(${PROJECT_NAME} PRIVATE c_std_17)

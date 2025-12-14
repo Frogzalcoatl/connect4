@@ -2,7 +2,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include "Connect4/ui/rectangle_element.h"
-#include "Connect4/ui/fontManager.h"
+#include "Connect4/assets/fonts.h"
 
 typedef struct {
     // [Ref] Shared resources owned by C4_Game

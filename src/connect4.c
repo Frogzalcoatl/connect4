@@ -1,10 +1,11 @@
 #include "Connect4/connect4.h"
 #include "Connect4/ui/cursorManager.h"
-#include "Connect4/ui/fontManager.h"
+#include "Connect4/assets/fonts.h"
 #include "Connect4/constants.h"
 #include "Connect4/ui/screens/menu.h"
 #include "Connect4/ui/screens/game.h"
 #include "Connect4/ui/screens/settings.h"
+#include "Connect4/assets/sounds.h"
 #include <stdlib.h>
 #include <time.h>
 
@@ -19,12 +20,17 @@ bool Connect4_Init_Dependencies() {
         SDL_Log("TTF_Init failed: %s", SDL_GetError());
         return false;
     }
+    if (!C4_InitAudio()) {
+        SDL_Log("C4_InitAudio failed");
+        return false;
+    }
     return true;
 }
 
 void Connect4_Quit_Dependencies() {
     TTF_Quit();
     SDL_Quit();
+    C4_QuitAudio();
     C4_DestroyAllCursors();
     C4_CloseAllFonts();
 }

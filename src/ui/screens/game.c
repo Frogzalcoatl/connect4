@@ -1,6 +1,7 @@
 #include "Connect4/ui/screens/game.h"
 #include "Connect4/game/utils.h"
-#include "Connect4/ui/fontManager.h"
+#include "Connect4/assets/fonts.h"
+#include "Connect4/assets/sounds.h"
 #include <stdlib.h>
 
 C4_GameScreen* C4_GameScreen_Create(SDL_Renderer* renderer, C4_Board* board) {
@@ -76,6 +77,12 @@ C4_ScreenChangeRequest C4_GameScreen_HandleKeyboardInput(void* screenData, SDL_S
         int64_t atIndex = C4_Board_DoMove(screen->board, column);
         if (atIndex == -1) {
             return C4_ScreenChangeRequest_None;
+        }
+        // Reversed since currentPlayer would have been swapped already by doMove
+        if (screen->board->currentPlayer == C4_SlotState_Player2) {
+            C4_PlaySound(C4_SoundEffect_Player1Place);
+        } else {
+            C4_PlaySound(C4_SoundEffect_Player2Place);
         }
         C4_SlotState winnerCheckResult = C4_Board_GetWinner(screen->board, atIndex);
         SDL_Log("winnerCheckResult: %i", winnerCheckResult);

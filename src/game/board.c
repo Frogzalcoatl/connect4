@@ -114,7 +114,7 @@ static void C4_Board_PrintCellCheckBuffer(C4_Board* board) {
     if (!str) {
         return;
     }
-    for (size_t i = 0; i < board->cellCheckBufferSize; i++) {
+    for (size_t i = 0; i < board->cellCheckCount; i++) {
         str[i * 2] = C4_Board_GetCharForState(board->cellCheckBuffer[i]);
         str[i * 2 + 1] = ' ';
         

@@ -1,5 +1,5 @@
 #include "Connect4/ui/screens/menu.h"
-#include "Connect4/ui/fontManager.h"
+#include "Connect4/assets/fonts.h"
 #include <stdlib.h>
 
 C4_MenuScreen* C4_MenuScreen_Create(SDL_Renderer* renderer) {
