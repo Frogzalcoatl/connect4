@@ -1,5 +1,6 @@
 #include "Connect4/ui/elements/popup.h"
 #include "Connect4/constants.h"
+#include <stdlib.h>
 
 #define C4_UI_POPUP_PADDING 10
 
