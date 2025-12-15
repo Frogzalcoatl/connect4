@@ -1,5 +1,6 @@
 #include "Connect4/ui/elements/borders.h"
 #include "Connect4/constants.h"
+#include <stdlib.h>
 
 C4_UI_Borders* C4_UI_Borders_Create(const SDL_FRect rectangle, const SDL_Color color, const unsigned int borderWidth) {
     C4_UI_Borders* element = calloc(1, sizeof(C4_UI_Borders));
