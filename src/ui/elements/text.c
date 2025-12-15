@@ -1,11 +1,11 @@
-#include "Connect4/ui/text_element.h"
+#include "Connect4/ui/elements/text.h"
 #include "Connect4/constants.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
 #include <stdio.h>
 
-C4_UI_Text* C4_UI_Text_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, SDL_Color color, float destinationX, float destinationY) {
+C4_UI_Text* C4_UI_Text_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, float destinationX, float destinationY, int wrapWidth) {
     if (!renderer || !str) {
         SDL_Log("Unable to create text element. renderer and/or str is NULL.");
         return NULL;
@@ -27,7 +27,8 @@ C4_UI_Text* C4_UI_Text_Create(SDL_Renderer* renderer, const char* str, C4_FontTy
     }
     element->ptSize = ptSize;
     element->destination = (SDL_FRect){destinationX, destinationY, 0.f, 0.f};
-    element->color = color;
+    element->color = C4_BUTTON_DEFAULTCOLOR_TEXT;
+    element->wrapWidth = wrapWidth;
     C4_UI_Text_ChangeStr(element, str);
     C4_UI_Text_Refresh(element, renderer);
     return element;
@@ -49,7 +50,7 @@ void C4_UI_Text_Refresh(C4_UI_Text* element, SDL_Renderer* renderer) {
     }
     SDL_DestroyTexture(element->texture);
     TTF_SetFontSize(element->font, element->ptSize);
-    SDL_Surface* tempSurface = TTF_RenderText_Blended_Wrapped(element->font, element->str, 0, (SDL_Color){255, 255, 255, 255}, 0);
+    SDL_Surface* tempSurface = TTF_RenderText_Blended_Wrapped(element->font, element->str, 0, (SDL_Color){255, 255, 255, 255}, element->wrapWidth);
     if (tempSurface) {
         element->texture = SDL_CreateTextureFromSurface(renderer, tempSurface);
         element->destination.w = (float)tempSurface->w;

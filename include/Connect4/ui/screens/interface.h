@@ -2,11 +2,11 @@
 #include <SDL3/SDL.h>
 
 typedef enum {
-    C4_ScreenChangeRequest_None,
-    C4_ScreenChangeRequest_Menu,
-    C4_ScreenChangeRequest_Settings,
-    C4_ScreenChangeRequest_Game,
-    C4_ScreenChangeRequest_CloseWindow
+    C4_Screen_RequestChange_None,
+    C4_Screen_RequestChange_Menu,
+    C4_Screen_RequestChange_Settings,
+    C4_Screen_RequestChange_Game,
+    C4_Screen_RequestChange_CloseWindow
 } C4_Screen_RequestChange;
 
 typedef struct {

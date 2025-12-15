@@ -1,5 +1,5 @@
 #pragma once
-#include "Connect4/ui/button.h"
+#include "Connect4/ui/elements/button.h"
 
 typedef struct {
     // [Ref] Shared resources owned by C4_Game

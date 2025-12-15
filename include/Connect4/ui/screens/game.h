@@ -1,8 +1,8 @@
 #pragma once
 #include "Connect4/game/board.h"
-#include "Connect4/ui/text_element.h"
-#include "Connect4/ui/rectangle_element.h"
-#include "Connect4/ui/button.h"
+#include "Connect4/ui/elements/text.h"
+#include "Connect4/ui/elements/rectangle.h"
+#include "Connect4/ui/elements/button.h"
 
 typedef struct {
     // [Ref] Shared resources owned by C4_Game

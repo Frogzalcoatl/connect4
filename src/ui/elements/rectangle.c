@@ -1,4 +1,4 @@
-#include "Connect4/ui/rectangle_element.h"
+#include "Connect4/ui/elements/rectangle.h"
 #include "Connect4/constants.h"
 #include <stdlib.h>
 

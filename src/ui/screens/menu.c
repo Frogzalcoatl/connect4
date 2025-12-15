@@ -13,7 +13,7 @@ C4_Screen_Menu* C4_Screen_Menu_Create(SDL_Renderer* renderer) {
         return NULL;
     }
     screen->renderer = renderer;
-    screen->title = C4_UI_Text_Create(screen->renderer, "Connect4", C4_FontType_Bold, 100.f, (SDL_Color){255, 255, 255, 255}, 0.f, 0.f);
+    screen->title = C4_UI_Text_Create(screen->renderer, "Connect4", C4_FontType_Bold, 100.f, 0.f, 0.f, 0);
     if (!screen->title) {
         SDL_Log("Unable to create title text element");
         C4_Screen_Menu_Destroy(screen);
@@ -22,11 +22,7 @@ C4_Screen_Menu* C4_Screen_Menu_Create(SDL_Renderer* renderer) {
     C4_UI_Text_CenterInWindow(screen->title, C4_Axis_X);
     screen->playButton = C4_UI_Button_Create(
         screen->renderer, "Play", C4_FontType_Bold, 32.f,
-        (SDL_FRect){0.f, 380.f, 400.f, 100.f },
-        (C4_UI_ButtonColorInfo){(SDL_Color){150, 150, 150, 255}, (SDL_Color){255, 255, 255, 255}},
-        (C4_UI_ButtonColorInfo){(SDL_Color){200, 200, 200, 255}, (SDL_Color){255, 255, 255, 255}},
-        (C4_UI_ButtonColorInfo){(SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 255}},
-        C4_ScreenChangeRequest_Game
+        (SDL_FRect){0.f, 380.f, 400.f, 100.f }
     );
     if (!screen->playButton) {
         SDL_Log("Unable to create play button");
@@ -36,11 +32,7 @@ C4_Screen_Menu* C4_Screen_Menu_Create(SDL_Renderer* renderer) {
     C4_UI_Button_CenterInWindow(screen->playButton, C4_Axis_X);
     screen->settingsButton = C4_UI_Button_Create(
         screen->renderer, "Settings", C4_FontType_Bold, 32.f,
-        (SDL_FRect){0.f, 0.f, 400.f, 100.f },
-        (C4_UI_ButtonColorInfo){(SDL_Color){150, 150, 150, 255}, (SDL_Color){255, 255, 255, 255}},
-        (C4_UI_ButtonColorInfo){(SDL_Color){200, 200, 200, 255}, (SDL_Color){255, 255, 255, 255}},
-        (C4_UI_ButtonColorInfo){(SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 255}},
-        C4_ScreenChangeRequest_Settings
+        (SDL_FRect){0.f, 0.f, 400.f, 100.f }
     );
     if (!screen->settingsButton) {
         SDL_Log("Unable to create settings button");
@@ -50,11 +42,7 @@ C4_Screen_Menu* C4_Screen_Menu_Create(SDL_Renderer* renderer) {
     C4_UI_Button_CenterInWindow(screen->settingsButton, C4_Axis_XY);
     screen->quitButton = C4_UI_Button_Create(
         screen->renderer, "Quit", C4_FontType_Bold, 32.f,
-        (SDL_FRect){0.f, 600.f, 400.f, 100.f },
-        (C4_UI_ButtonColorInfo){(SDL_Color){150, 150, 150, 255}, (SDL_Color){255, 255, 255, 255}},
-        (C4_UI_ButtonColorInfo){(SDL_Color){200, 200, 200, 255}, (SDL_Color){255, 255, 255, 255}},
-        (C4_UI_ButtonColorInfo){(SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 255}},
-        C4_ScreenChangeRequest_CloseWindow
+        (SDL_FRect){0.f, 600.f, 400.f, 100.f }
     );
     if (!screen->quitButton) {
         SDL_Log("Unable to create quit button");
@@ -93,32 +81,28 @@ void C4_Screen_Menu_Draw(void* screenData) {
 C4_Screen_RequestChange C4_Screen_Menu_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
     if (!screenData) {
         SDL_Log("Menu screen is NULL");
-        return C4_ScreenChangeRequest_None;
+        return C4_Screen_RequestChange_None;
     }
     C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
     // Will probably create some kind of struct for a popup that appears when pressing esc to close the game
-    return C4_ScreenChangeRequest_None;
+    return C4_Screen_RequestChange_None;
 }
 
 C4_Screen_RequestChange C4_Screen_Menu_HandleMouseEvents(void* screenData, SDL_Event* event) {
     // lmao ill improve this later just trying to make sure everything works. Will probably use an array of button pointers or smth and iterate through them
     if (!screenData || !event) {
         SDL_Log("Menu screen and/or event is NULL");
-        return C4_ScreenChangeRequest_None;
+        return C4_Screen_RequestChange_None;
     }
     C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
-    C4_Screen_RequestChange request = C4_ScreenChangeRequest_None;
-    C4_Screen_RequestChange newRequest = C4_UI_Button_HandleMouseEvents(screen->playButton, event, screen->renderer);
-    if (newRequest != C4_ScreenChangeRequest_None) {
-        request = newRequest;
+    if (C4_UI_Button_HandleMouseEvents(screen->playButton, event, screen->renderer)) {
+        return C4_Screen_RequestChange_Game;
     }
-    newRequest = C4_UI_Button_HandleMouseEvents(screen->settingsButton, event, screen->renderer);
-    if (newRequest != C4_ScreenChangeRequest_None) {
-        request = newRequest;
+    if (C4_UI_Button_HandleMouseEvents(screen->settingsButton, event, screen->renderer)) {
+        return C4_Screen_RequestChange_Settings;
     }
-    newRequest = C4_UI_Button_HandleMouseEvents(screen->quitButton, event, screen->renderer);
-    if (newRequest != C4_ScreenChangeRequest_None) {
-        request = newRequest;
+    if (C4_UI_Button_HandleMouseEvents(screen->quitButton, event, screen->renderer)) {
+        return C4_Screen_RequestChange_CloseWindow;
     }
-    return request;
+    return C4_Screen_RequestChange_None;
 }

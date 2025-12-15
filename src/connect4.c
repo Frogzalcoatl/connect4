@@ -35,43 +35,44 @@ void Connect4_Quit_Dependencies() {
     SDL_Quit();
 }
 
-// Returns false if the screen change was unsuccessful (Likely out of memory)
+// Returns true if a screen change occured
 static bool C4_Game_HandleScreenChangeRequest(C4_Game* game, C4_Screen_RequestChange type) {
-    if (type != C4_ScreenChangeRequest_None && game->currentScreen.Destroy) {
+    if (type != C4_Screen_RequestChange_None && game->currentScreen.Destroy) {
         game->currentScreen.Destroy(game->currentScreen.data);
     }
     switch (type) {
-        case C4_ScreenChangeRequest_Menu: {
+        case C4_Screen_RequestChange_Menu: {
             game->currentScreen.data = C4_Screen_Menu_Create(game->renderer);
             game->currentScreen.Destroy = &C4_Screen_Menu_Destroy;
             game->currentScreen.Draw = &C4_Screen_Menu_Draw;
             game->currentScreen.HandleKeyboardInput = &C4_Screen_Menu_HandleKeyboardInput;
             game->currentScreen.HandleMouseEvents = &C4_Screen_Menu_HandleMouseEvents;
         }; break;
-        case C4_ScreenChangeRequest_Settings: {
+        case C4_Screen_RequestChange_Settings: {
             game->currentScreen.data = C4_Screen_Settings_Create(game->renderer, game->window);
             game->currentScreen.Destroy = &C4_Screen_Settings_Destroy;
             game->currentScreen.Draw = &C4_Screen_Settings_Draw;
             game->currentScreen.HandleKeyboardInput = &C4_Screen_Settings_HandleKeyboardInput;
             game->currentScreen.HandleMouseEvents = &C4_Screen_Settings_HandleMouseEvents;
         }; break;
-        case C4_ScreenChangeRequest_Game: {
+        case C4_Screen_RequestChange_Game: {
             game->currentScreen.data = C4_Screen_Game_Create(game->renderer, game->board);
             game->currentScreen.Destroy = &C4_Screen_Game_Destroy;
             game->currentScreen.Draw = &C4_Screen_Game_Draw;
             game->currentScreen.HandleKeyboardInput = &C4_Screen_Game_HandleKeyboardInput;
             game->currentScreen.HandleMouseEvents = &C4_Screen_Game_HandleMouseEvents;
         }; break;
-        case C4_ScreenChangeRequest_CloseWindow: {
+        case C4_Screen_RequestChange_CloseWindow: {
             game->running = false;
-            return true;
+            return false;
         }; break;
-        case C4_ScreenChangeRequest_None: {
-            return true;
+        case C4_Screen_RequestChange_None: {
+            return false;
         }
     }
     if (!game->currentScreen.data) {
-        return false;
+        game->running = false;
+        return true;
     }
     SDL_SetCursor(C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT));
     return true;
@@ -98,7 +99,7 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
     SDL_SetRenderLogicalPresentation(game->renderer, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);
     SDL_SetRenderVSync(game->renderer, 1);
     game->board = C4_Board_Create(boardWidth, boardHeight, amountToWin);
-    if (!C4_Game_HandleScreenChangeRequest(game, C4_ScreenChangeRequest_Menu)) {
+    if (!C4_Game_HandleScreenChangeRequest(game, C4_Screen_RequestChange_Menu)) {
         SDL_Log("Unable to create initial menu screen");
         C4_Game_Destroy(game);
         return NULL;
@@ -126,33 +127,26 @@ void C4_Game_Destroy(C4_Game* game) {
     free(game);
 }
 
-static void C4_Game_HandleKeyboardInput(C4_Game* game, int scancode) {
+// Returns true if a screenchange occured
+static bool C4_Game_HandleKeyboardInput(C4_Game* game, int scancode) {
     if (scancode == SDL_SCANCODE_F11) {
         game->isFullscreen = !game->isFullscreen;
         SDL_SetWindowFullscreen(game->window, game->isFullscreen);
-        return;
+        return false;
     }
-    C4_Screen_RequestChange request = C4_ScreenChangeRequest_None;
+    C4_Screen_RequestChange request = C4_Screen_RequestChange_None;
     if (game->currentScreen.HandleKeyboardInput) {
         request = game->currentScreen.HandleKeyboardInput(game->currentScreen.data, scancode);
     }
-    if (request != C4_ScreenChangeRequest_None) {
-        if (!C4_Game_HandleScreenChangeRequest(game, request)) {
-            game->running = false;
-        }
-    }
+    return C4_Game_HandleScreenChangeRequest(game, request);
 }
 
-static void C4_Game_HandleMouseEvents(C4_Game* game, SDL_Event* event) {
-    C4_Screen_RequestChange request = C4_ScreenChangeRequest_None;
+static bool C4_Game_HandleMouseEvents(C4_Game* game, SDL_Event* event) {
+    C4_Screen_RequestChange request = C4_Screen_RequestChange_None;
     if (game->currentScreen.HandleMouseEvents) {
         request = game->currentScreen.HandleMouseEvents(game->currentScreen.data, event);
     }
-    if (request != C4_ScreenChangeRequest_None) {
-        if (!C4_Game_HandleScreenChangeRequest(game, request)) {
-            game->running = false;
-        }
-    }
+    return C4_Game_HandleScreenChangeRequest(game, request);
 }
 
 static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* event) {
@@ -164,9 +158,13 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* event) {
             if (event->key.repeat) {
                 continue;
             }
-            C4_Game_HandleKeyboardInput(game, event->key.scancode);
+            if (C4_Game_HandleKeyboardInput(game, event->key.scancode)) {
+                break;
+            }
         }
-        C4_Game_HandleMouseEvents(game, event);
+        if (C4_Game_HandleMouseEvents(game, event)) {
+            break;
+        }
     }
 }
 

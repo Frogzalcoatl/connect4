@@ -2,7 +2,6 @@
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include "Connect4/game/board.h"
-#include "Connect4/ui/text_element.h"
 #include "Connect4/ui/screens/interface.h"
 
 bool Connect4_Init_Dependencies();

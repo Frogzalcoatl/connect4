@@ -257,7 +257,6 @@ C4_SlotState C4_Board_GetWinner(C4_Board* board, size_t mostRecentMoveIndex) {
         return bufferTestResult;
     }
     C4_Board_UpdateCellCheckBuffer(board, C4_Board_RowAxis_NorthWestSouthEast, mostRecentMoveIndex);
-    C4_Board_PrintCellCheckBuffer(board);
     bufferTestResult = C4_Board_TestCellCheckBuffer(board);
     if (bufferTestResult != C4_SlotState_Empty) {
         return bufferTestResult;
