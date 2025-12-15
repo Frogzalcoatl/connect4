@@ -1,4 +1,5 @@
 #include "Connect4/ui/elements/buttonStack.h"
+#include <stdlib.h>
 
 static SDL_FRect C4_UI_ButtonStack_GetUpdatedButtonRect(C4_UI_ButtonStack* stack, size_t index) {
     SDL_FRect rect = {0.f, 0.f, 0.f, 0.f};
