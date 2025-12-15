@@ -3,9 +3,23 @@
 #include <stdlib.h>
 
 #define C4_SCREEN_SETTINGS_BUTTONCOUNT 2
+typedef enum {
+    C4_ButtonGroupIndexes_Apply,
+    C4_ButtonGroupIndexes_Cancel
+} C4_ButtonGroupIndexes;
 static const char buttonText[C4_SCREEN_SETTINGS_BUTTONCOUNT][16] = {
     "Apply",
     "Cancel",
+};
+
+#define C4_SCREEN_SETTINGS_POPUPBUTTONCOUNT 2
+typedef enum {
+    C4_PopupButtonIndexes_Yes,
+    C4_PopupButtonIndexes_Back
+} C4_PopupButtonIndexes;
+static const char popupButtonText[C4_SCREEN_SETTINGS_POPUPBUTTONCOUNT][8] = {
+    "Yes",
+    "Back"
 };
 
 C4_Screen_Settings* C4_Screen_Settings_Create(SDL_Renderer* renderer, SDL_Window* window) {
@@ -26,27 +40,28 @@ C4_Screen_Settings* C4_Screen_Settings_Create(SDL_Renderer* renderer, SDL_Window
     }
     C4_UI_CenterInWindow(&screen->title.destination, C4_Axis_X);
     if (
-        !C4_UI_ButtonStack_InitProperties(
-            &screen->buttonStack, renderer, (SDL_FRect){0.f, 900.f, 900.f, 100.f},
-            C4_SCREEN_SETTINGS_BUTTONCOUNT, C4_UI_ButtonStack_Direction_Horizontal, 15, 32.f
+        !C4_UI_ButtonGroup_InitProperties(
+            &screen->buttonGroup, renderer, (SDL_FRect){0.f, 900.f, 900.f, 100.f},
+            C4_SCREEN_SETTINGS_BUTTONCOUNT, C4_UI_ButtonGroup_Direction_Horizontal, 15, 32.f
         )
     ) {
         C4_Screen_Settings_Destroy(screen);
         return NULL;
     }
     for (size_t i = 0; i < C4_SCREEN_SETTINGS_BUTTONCOUNT; i++) {
-        C4_UI_ButtonStack_SetButtonIndex(&screen->buttonStack, i, screen->renderer, buttonText[i], C4_FontType_Bold, 32.f);
+        C4_UI_ButtonGroup_SetButtonIndex(&screen->buttonGroup, i, screen->renderer, buttonText[i], C4_FontType_Bold, 32.f);
     }
-    C4_UI_ButtonStack_CenterInWindow(&screen->buttonStack, C4_Axis_X);
+    C4_UI_ButtonGroup_CenterInWindow(&screen->buttonGroup, C4_Axis_X);
     if (!C4_UI_Popup_InitProperties(
-        &screen->confirmationPopup, screen->renderer, (SDL_FRect){0, 0, 800, 400}, 3, C4_UI_ButtonStack_Direction_Horizontal,
+        &screen->confirmationPopup, screen->renderer, (SDL_FRect){0, 0, 800, 400}, 3, C4_UI_ButtonGroup_Direction_Horizontal,
         2, 100.f, "Are you sure you want to apply these settings?", 32.f, 32.f
     )) {
         C4_Screen_Settings_Destroy(screen);
         return NULL;
     }
-    C4_UI_ButtonStack_SetButtonIndex(&screen->confirmationPopup.buttonStack, 0, screen->renderer, "Yes", C4_FontType_Bold, 32.f);
-    C4_UI_ButtonStack_SetButtonIndex(&screen->confirmationPopup.buttonStack, 1, screen->renderer, "Cancel", C4_FontType_Bold, 32.f);
+    for (size_t i = 0; i < C4_SCREEN_SETTINGS_POPUPBUTTONCOUNT; i++) {
+        C4_UI_ButtonGroup_SetButtonIndex(&screen->confirmationPopup.buttonGroup, i, screen->renderer, popupButtonText[i], C4_FontType_Bold, 32.f);
+    }
     C4_UI_Popup_CenterInWindow(&screen->confirmationPopup);
     return screen;
 }
@@ -57,7 +72,7 @@ void C4_Screen_Settings_Destroy(void* screenData) {
         return;
     }
     C4_Screen_Settings* screen = (C4_Screen_Settings*)screenData;
-    C4_UI_ButtonStack_FreeResources(&screen->buttonStack);
+    C4_UI_ButtonGroup_FreeResources(&screen->buttonGroup);
     C4_UI_Popup_FreeResources(&screen->confirmationPopup);
     C4_UI_Text_FreeResources(&screen->title);
     free(screen);
@@ -69,7 +84,7 @@ void C4_Screen_Settings_Draw(void* screenData) {
         return;
     }
     C4_Screen_Settings* screen = (C4_Screen_Settings*)screenData;
-    C4_UI_ButtonStack_Draw(&screen->buttonStack, screen->renderer);
+    C4_UI_ButtonGroup_Draw(&screen->buttonGroup, screen->renderer);
     C4_UI_Text_Draw(&screen->title, screen->renderer);
     C4_UI_Popup_Draw(&screen->confirmationPopup);
 }
@@ -90,12 +105,10 @@ C4_Screen_RequestChange C4_Screen_Settings_HandleMouseEvents(void* screenData, S
     }
     C4_Screen_Settings* screen = (C4_Screen_Settings*)screenData;
     switch (C4_UI_Popup_HandleMouseEvents(&screen->confirmationPopup, event)) {
-        // Yes Button
-        case 0: {  
+        case C4_PopupButtonIndexes_Yes: {  
             screen->confirmationPopup.isShowing = false;
         }; return C4_Screen_RequestChange_Menu;
-        // Cancel Button
-        case 1: {
+        case C4_PopupButtonIndexes_Back: {
             screen->confirmationPopup.isShowing = false;
         }; return C4_Screen_RequestChange_None;
         default: break;
@@ -103,15 +116,13 @@ C4_Screen_RequestChange C4_Screen_Settings_HandleMouseEvents(void* screenData, S
     if (screen->confirmationPopup.isShowing) {
         return C4_Screen_RequestChange_None;
     }
-    switch (C4_UI_ButtonStack_HandleMouseEvents(&screen->buttonStack, event, screen->renderer)) {
-        // Apply Button
-        case 0: {
+    switch (C4_UI_ButtonGroup_HandleMouseEvents(&screen->buttonGroup, event, screen->renderer)) {
+        case C4_ButtonGroupIndexes_Apply: {
             screen->confirmationPopup.isShowing = true;
-            screen->buttonStack.buttons[0].background.color = screen->buttonStack.buttons[0].defaultColors.background;
+            screen->buttonGroup.buttons[0].background.color = screen->buttonGroup.buttons[0].defaultColors.background;
             return C4_Screen_RequestChange_None;
         }
-        // Back Button
-        case 1: {
+        case C4_ButtonGroupIndexes_Cancel: {
             return C4_Screen_RequestChange_Menu;
         }
         default: return C4_Screen_RequestChange_None;

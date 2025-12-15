@@ -15,17 +15,17 @@ static void C4_UI_Popup_PositionElementsInBackground(C4_UI_Popup* popup) {
     popup->message.wrapWidth = rect->w - popup->borderWidth * 2 - C4_UI_POPUP_MARGIN;
     C4_UI_Text_Refresh(&popup->message, popup->renderer);
     popup->borders.rectangle = popup->background.rectangle;
-    SDL_FRect buttonStackRect;
-    buttonStackRect.x = rect->x + popup->borderWidth + C4_UI_POPUP_MARGIN;
-    buttonStackRect.w = rect->w - popup->borderWidth - (C4_UI_POPUP_MARGIN * popup->buttonStack.count + 1);
-    buttonStackRect.h = popup->buttonStack.bounds.h;
-    buttonStackRect.y = rect->y + rect->h - buttonStackRect.h - popup->borderWidth - C4_UI_POPUP_MARGIN;
-    C4_UI_ButtonStack_TransformResize(&popup->buttonStack, buttonStackRect);
+    SDL_FRect buttonGroupRect;
+    buttonGroupRect.x = rect->x + popup->borderWidth + C4_UI_POPUP_MARGIN;
+    buttonGroupRect.w = rect->w - popup->borderWidth - (C4_UI_POPUP_MARGIN * popup->buttonGroup.count + 1);
+    buttonGroupRect.h = popup->buttonGroup.bounds.h;
+    buttonGroupRect.y = rect->y + rect->h - buttonGroupRect.h - popup->borderWidth - C4_UI_POPUP_MARGIN;
+    C4_UI_ButtonGroup_TransformResize(&popup->buttonGroup, buttonGroupRect);
 }
 
 bool C4_UI_Popup_InitProperties(
-    C4_UI_Popup* popup, SDL_Renderer* renderer, SDL_FRect rectangle, unsigned int borderWidth, C4_UI_ButtonStack_Direction buttonDirection,
-    size_t buttonCount, float buttonStackHeight, const char* messageText, float buttonPtSize, float messagePtSize
+    C4_UI_Popup* popup, SDL_Renderer* renderer, SDL_FRect rectangle, unsigned int borderWidth, C4_UI_ButtonGroup_Direction buttonDirection,
+    size_t buttonCount, float buttonGroupHeight, const char* messageText, float buttonPtSize, float messagePtSize
 ) {
     if (!renderer) {
         SDL_Log("Unable to init popup element properties. Renderer is NULL");
@@ -40,7 +40,7 @@ bool C4_UI_Popup_InitProperties(
         return false;
     }
     popup->renderer = renderer;
-    if (!C4_UI_ButtonStack_InitProperties(&popup->buttonStack, renderer, (SDL_FRect){0.f, 0.f, 0.f, buttonStackHeight}, buttonCount, buttonDirection, C4_UI_POPUP_MARGIN, buttonPtSize)) {
+    if (!C4_UI_ButtonGroup_InitProperties(&popup->buttonGroup, renderer, (SDL_FRect){0.f, 0.f, 0.f, buttonGroupHeight}, buttonCount, buttonDirection, C4_UI_POPUP_MARGIN, buttonPtSize)) {
         return false;
     }
     if (!C4_UI_Borders_InitProperties(&popup->borders, rectangle, (SDL_Color){255, 255, 255, 255}, borderWidth)) {
@@ -59,15 +59,15 @@ bool C4_UI_Popup_InitProperties(
 }
 
 C4_UI_Popup* C4_UI_Popup_Create(
-    SDL_Renderer* renderer, SDL_FRect rectangle, unsigned int borderWidth, C4_UI_ButtonStack_Direction buttonDirection,
-    size_t buttonCount, float buttonStackHeight, const char* messageText, float buttonPtSize, float messagePtSize
+    SDL_Renderer* renderer, SDL_FRect rectangle, unsigned int borderWidth, C4_UI_ButtonGroup_Direction buttonDirection,
+    size_t buttonCount, float buttonGroupHeight, const char* messageText, float buttonPtSize, float messagePtSize
 ) {
     C4_UI_Popup* popup = calloc(1, sizeof(C4_UI_Popup));
     if (!popup) {
         SDL_Log("Unable to allocate memory for popup");
         return NULL;
     }
-    if (!C4_UI_Popup_InitProperties(popup, renderer, rectangle, borderWidth, buttonDirection, buttonCount, buttonStackHeight, messageText, buttonPtSize, messagePtSize)) {
+    if (!C4_UI_Popup_InitProperties(popup, renderer, rectangle, borderWidth, buttonDirection, buttonCount, buttonGroupHeight, messageText, buttonPtSize, messagePtSize)) {
         C4_UI_Popup_Destroy(popup);
         return NULL;
     }
@@ -78,7 +78,7 @@ void C4_UI_Popup_FreeResources(C4_UI_Popup* popup) {
     if (!popup) {
         return;
     }
-    C4_UI_ButtonStack_FreeResources(&popup->buttonStack);
+    C4_UI_ButtonGroup_FreeResources(&popup->buttonGroup);
     C4_UI_Text_FreeResources(&popup->message);
 }
 
@@ -110,7 +110,7 @@ void C4_UI_Popup_Draw(C4_UI_Popup* popup) {
     C4_UI_Rectangle_Draw(&popup->background, popup->renderer);
     C4_UI_Borders_Draw(&popup->borders, popup->renderer);
     C4_UI_Text_Draw(&popup->message, popup->renderer);
-    C4_UI_ButtonStack_Draw(&popup->buttonStack, popup->renderer);
+    C4_UI_ButtonGroup_Draw(&popup->buttonGroup, popup->renderer);
 }
 
 void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup) {
@@ -130,12 +130,12 @@ long long C4_UI_Popup_HandleMouseEvents(C4_UI_Popup* popup, SDL_Event* event) {
     if (!popup->isShowing) {
         return -1;
     }
-    return C4_UI_ButtonStack_HandleMouseEvents(&popup->buttonStack, event, popup->renderer);
+    return C4_UI_ButtonGroup_HandleMouseEvents(&popup->buttonGroup, event, popup->renderer);
 }
 
 void C4_UI_Popup_SetButtonText(C4_UI_Popup* popup, SDL_Renderer* renderer, size_t buttonIndex, const char* text) {
-    if (!popup || buttonIndex >= popup->buttonStack.count) {
+    if (!popup || buttonIndex >= popup->buttonGroup.count) {
         return;
     }
-    C4_UI_Button_ChangeStr(&popup->buttonStack.buttons[buttonIndex], text, renderer);
+    C4_UI_Button_ChangeStr(&popup->buttonGroup.buttons[buttonIndex], text, renderer);
 }

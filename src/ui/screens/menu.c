@@ -4,6 +4,13 @@
 
 #define C4_SCREEN_MENU_BUTTONCOUNT 4
 
+typedef enum {
+    C4_Screen_Menu_ButtonTextIndexes_1Player,
+    C4_Screen_Menu_ButtonTextIndexes_2Players,
+    C4_Screen_Menu_ButtonTextIndexes_Settings,
+    C4_Screen_Menu_ButtonTextIndexes_Quit
+} C4_Screen_Menu_ButtonTextIndexes;
+
 static const char buttonText[C4_SCREEN_MENU_BUTTONCOUNT][16] = {
     "1 Player",
     "2 Players",
@@ -27,14 +34,14 @@ C4_Screen_Menu* C4_Screen_Menu_Create(SDL_Renderer* renderer) {
         return NULL;
     }
     C4_UI_CenterInWindow(&screen->title.destination, C4_Axis_X);
-    if (!C4_UI_ButtonStack_InitProperties(&screen->buttonStack, screen->renderer, (SDL_FRect){0.f, 0.f, 700.f, 500.f}, C4_SCREEN_MENU_BUTTONCOUNT, C4_UI_ButtonStack_Direction_Vertical, 15, 32.f)) {
+    if (!C4_UI_ButtonGroup_InitProperties(&screen->buttonGroup, screen->renderer, (SDL_FRect){0.f, 0.f, 700.f, 500.f}, C4_SCREEN_MENU_BUTTONCOUNT, C4_UI_ButtonGroup_Direction_Vertical, 15, 32.f)) {
         C4_Screen_Menu_Destroy(screen);
         return NULL;
     }
     for (size_t i = 0; i < C4_SCREEN_MENU_BUTTONCOUNT; i++) {
-        C4_UI_ButtonStack_SetButtonIndex(&screen->buttonStack, i, screen->renderer, buttonText[i], C4_FontType_Bold, 32.f);
+        C4_UI_ButtonGroup_SetButtonIndex(&screen->buttonGroup, i, screen->renderer, buttonText[i], C4_FontType_Bold, 32.f);
     }
-    C4_UI_ButtonStack_CenterInWindow(&screen->buttonStack, C4_Axis_XY);
+    C4_UI_ButtonGroup_CenterInWindow(&screen->buttonGroup, C4_Axis_XY);
     return screen;
 }
 
@@ -44,7 +51,7 @@ void C4_Screen_Menu_Destroy(void* screenData) {
         return;
     }
     C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
-    C4_UI_ButtonStack_FreeResources(&screen->buttonStack);
+    C4_UI_ButtonGroup_FreeResources(&screen->buttonGroup);
     C4_UI_Text_FreeResources(&screen->title);
     free(screen);
 }
@@ -55,7 +62,7 @@ void C4_Screen_Menu_Draw(void* screenData) {
         return;
     }
     C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
-    C4_UI_ButtonStack_Draw(&screen->buttonStack, screen->renderer);
+    C4_UI_ButtonGroup_Draw(&screen->buttonGroup, screen->renderer);
     C4_UI_Text_Draw(&screen->title, screen->renderer);
 }
 
@@ -75,15 +82,11 @@ C4_Screen_RequestChange C4_Screen_Menu_HandleMouseEvents(void* screenData, SDL_E
         return C4_Screen_RequestChange_None;
     }
     C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
-    switch (C4_UI_ButtonStack_HandleMouseEvents(&screen->buttonStack, event, screen->renderer)) {
-        // 1 Player Button
-        case 0: return C4_Screen_RequestChange_Game;
-        //2 Players button
-        case 1: return C4_Screen_RequestChange_Game;
-        // Settings button
-        case 2: return C4_Screen_RequestChange_Settings;
-        // Quit button
-        case 3: return C4_Screen_RequestChange_CloseWindow;
+    switch (C4_UI_ButtonGroup_HandleMouseEvents(&screen->buttonGroup, event, screen->renderer)) {
+        case C4_Screen_Menu_ButtonTextIndexes_1Player: return C4_Screen_RequestChange_Game;
+        case C4_Screen_Menu_ButtonTextIndexes_2Players: return C4_Screen_RequestChange_Game;
+        case C4_Screen_Menu_ButtonTextIndexes_Settings: return C4_Screen_RequestChange_Settings;
+        case C4_Screen_Menu_ButtonTextIndexes_Quit: return C4_Screen_RequestChange_CloseWindow;
         default: return C4_Screen_RequestChange_None;
     }
 }

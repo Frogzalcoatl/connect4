@@ -1,5 +1,5 @@
 #pragma once
-#include "Connect4/ui/elements/buttonStack.h"
+#include "Connect4/ui/elements/buttonGroup.h"
 
 typedef struct {
     // [Ref] Shared resources owned by C4_Game
@@ -7,7 +7,7 @@ typedef struct {
 
     // [Owns] properties specific to this screen
     C4_UI_Text title;
-    C4_UI_ButtonStack buttonStack;
+    C4_UI_ButtonGroup buttonGroup;
 } C4_Screen_Menu;
 
 C4_Screen_Menu* C4_Screen_Menu_Create(SDL_Renderer* renderer);

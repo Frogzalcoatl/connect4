@@ -116,7 +116,7 @@ set(SOURCES
     src/game/utils.c
     src/ui/cursorManager.c
     src/ui/elements/button.c
-    src/ui/elements/buttonStack.c
+    src/ui/elements/buttonGroup.c
     src/ui/elements/borders.c
     src/ui/elements/index.c
     src/ui/elements/popup.c
