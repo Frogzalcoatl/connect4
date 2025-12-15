@@ -2,6 +2,15 @@
 #include "Connect4/assets/fonts.h"
 #include <stdlib.h>
 
+#define C4_SCREEN_MENU_BUTTONCOUNT 4
+
+static const char buttonText[C4_SCREEN_MENU_BUTTONCOUNT][16] = {
+    "1 Player",
+    "2 Players",
+    "Settings",
+    "Quit"
+};
+
 C4_Screen_Menu* C4_Screen_Menu_Create(SDL_Renderer* renderer) {
     if (!renderer) {
         SDL_Log("Unable to create menu screen. renderer is NULL");
@@ -17,37 +26,15 @@ C4_Screen_Menu* C4_Screen_Menu_Create(SDL_Renderer* renderer) {
         C4_Screen_Menu_Destroy(screen);
         return NULL;
     }
-    C4_UI_Text_CenterInWindow(&screen->title, C4_Axis_X);
-    if (
-        !C4_UI_Button_InitProperties(
-            &screen->playButton, screen->renderer, "Play", C4_FontType_Bold, 
-            32.f, (SDL_FRect){0.f, 380.f, 400.f, 100.f}
-        )
-    ) {
+    C4_UI_CenterInWindow(&screen->title.destination, C4_Axis_X);
+    if (!C4_UI_ButtonStack_InitProperties(&screen->buttonStack, screen->renderer, (SDL_FRect){0.f, 0.f, 700.f, 500.f}, C4_SCREEN_MENU_BUTTONCOUNT, C4_UI_ButtonStack_Direction_Vertical, 15, 32.f)) {
         C4_Screen_Menu_Destroy(screen);
         return NULL;
     }
-    C4_UI_Button_CenterInWindow(&screen->playButton, C4_Axis_X);
-    if (
-        !C4_UI_Button_InitProperties(
-            &screen->settingsButton, screen->renderer, "Settings", C4_FontType_Bold,
-            32.f, (SDL_FRect){0.f, 0.f, 400.f, 100.f}
-        )
-    ) {
-        C4_Screen_Menu_Destroy(screen);
-        return NULL;
+    for (size_t i = 0; i < C4_SCREEN_MENU_BUTTONCOUNT; i++) {
+        C4_UI_ButtonStack_SetButtonIndex(&screen->buttonStack, i, screen->renderer, buttonText[i], C4_FontType_Bold, 32.f);
     }
-    C4_UI_Button_CenterInWindow(&screen->settingsButton, C4_Axis_XY);
-    if (
-        !C4_UI_Button_InitProperties(
-            &screen->quitButton, screen->renderer, "Quit", C4_FontType_Bold,
-            32.f, (SDL_FRect){0.f, 600.f, 400.f, 100.f}
-        )
-    ) {
-        C4_Screen_Menu_Destroy(screen);
-        return NULL;
-    }
-    C4_UI_Button_CenterInWindow(&screen->quitButton, C4_Axis_X);
+    C4_UI_ButtonStack_CenterInWindow(&screen->buttonStack, C4_Axis_XY);
     return screen;
 }
 
@@ -57,9 +44,7 @@ void C4_Screen_Menu_Destroy(void* screenData) {
         return;
     }
     C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
-    C4_UI_Button_FreeResources(&screen->quitButton);
-    C4_UI_Button_FreeResources(&screen->settingsButton);
-    C4_UI_Button_FreeResources(&screen->playButton);
+    C4_UI_ButtonStack_FreeResources(&screen->buttonStack);
     C4_UI_Text_FreeResources(&screen->title);
     free(screen);
 }
@@ -70,9 +55,7 @@ void C4_Screen_Menu_Draw(void* screenData) {
         return;
     }
     C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
-    C4_UI_Button_Draw(&screen->playButton, screen->renderer);
-    C4_UI_Button_Draw(&screen->settingsButton, screen->renderer);
-    C4_UI_Button_Draw(&screen->quitButton, screen->renderer);
+    C4_UI_ButtonStack_Draw(&screen->buttonStack, screen->renderer);
     C4_UI_Text_Draw(&screen->title, screen->renderer);
 }
 
@@ -82,25 +65,25 @@ C4_Screen_RequestChange C4_Screen_Menu_HandleKeyboardInput(void* screenData, SDL
         return C4_Screen_RequestChange_None;
     }
     C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
-    // Will probably create some kind of struct for a popup that appears when pressing esc to close the game
+    // popup for esc to exit the game
     return C4_Screen_RequestChange_None;
 }
 
 C4_Screen_RequestChange C4_Screen_Menu_HandleMouseEvents(void* screenData, SDL_Event* event) {
-    // lmao ill improve this later just trying to make sure everything works. Will probably use an array of button pointers or smth and iterate through them
     if (!screenData || !event) {
         SDL_Log("Menu screen and/or event is NULL");
         return C4_Screen_RequestChange_None;
     }
     C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
-    if (C4_UI_Button_HandleMouseEvents(&screen->playButton, event, screen->renderer)) {
-        return C4_Screen_RequestChange_Game;
+    switch (C4_UI_ButtonStack_HandleMouseEvents(&screen->buttonStack, event, screen->renderer)) {
+        // 1 Player Button
+        case 0: return C4_Screen_RequestChange_Game;
+        //2 Players button
+        case 1: return C4_Screen_RequestChange_Game;
+        // Settings button
+        case 2: return C4_Screen_RequestChange_Settings;
+        // Quit button
+        case 3: return C4_Screen_RequestChange_CloseWindow;
+        default: return C4_Screen_RequestChange_None;
     }
-    if (C4_UI_Button_HandleMouseEvents(&screen->settingsButton, event, screen->renderer)) {
-        return C4_Screen_RequestChange_Settings;
-    }
-    if (C4_UI_Button_HandleMouseEvents(&screen->quitButton, event, screen->renderer)) {
-        return C4_Screen_RequestChange_CloseWindow;
-    }
-    return C4_Screen_RequestChange_None;
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "Connect4/ui/elements/button.h"
+#include "Connect4/ui/elements/buttonStack.h"
 #include "Connect4/ui/elements/popup.h"
 
 typedef struct {
@@ -9,8 +9,7 @@ typedef struct {
 
     // [Owns] properties specific to this screen
     C4_UI_Text title;
-    C4_UI_Button backButton;
-    C4_UI_Button applyButton;
+    C4_UI_ButtonStack buttonStack;
     C4_UI_Popup confirmationPopup;
 } C4_Screen_Settings;
 

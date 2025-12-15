@@ -68,7 +68,7 @@ void C4_UI_Text_Refresh(C4_UI_Text* element, SDL_Renderer* renderer) {
     }
     SDL_DestroyTexture(element->texture);
     TTF_SetFontSize(element->font, element->ptSize);
-    SDL_Surface* tempSurface = TTF_RenderText_Blended_Wrapped(element->font, element->str, 0, (SDL_Color){255, 255, 255, 255}, element->wrapWidth);
+    SDL_Surface* tempSurface = TTF_RenderText_Blended_Wrapped(element->font, element->str, strlen(element->str), (SDL_Color){255, 255, 255, 255}, element->wrapWidth);
     if (tempSurface) {
         element->texture = SDL_CreateTextureFromSurface(renderer, tempSurface);
         element->destination.w = (float)tempSurface->w;
@@ -91,23 +91,18 @@ void C4_UI_Text_ChangeStr(C4_UI_Text* element, const char* newStr) {
 
 void C4_UI_Text_Draw(C4_UI_Text* element, SDL_Renderer* renderer) {
     if (!element || !element->texture || !renderer) {
-        SDL_Log("Text element, text element texture, and/or renderer is NULL");
+        SDL_Log("Text element is NULL");
+        return;
+    }
+    if (!element->texture) {
+        SDL_Log("Text element texture is NULL");
+        return;
+    }
+    if (!renderer) {
+        SDL_Log("Text element renderer is NULL");
         return;
     }
     SDL_SetTextureColorMod(element->texture, element->color.r, element->color.g, element->color.b);
     SDL_SetTextureAlphaMod(element->texture, element->color.a);
     SDL_RenderTexture(renderer, element->texture, NULL, &element->destination);
-}
-
-void C4_UI_Text_CenterInWindow(C4_UI_Text* element, C4_Axis axis) {
-    if (!element) {
-        SDL_Log("Text element is NULL");
-        return;
-    }
-    if (axis == C4_Axis_X || axis == C4_Axis_XY) {
-        element->destination.x = (C4_BASE_WINDOW_WIDTH / 2.f) - (element->destination.w / 2.f);
-    }
-    if (axis == C4_Axis_Y || axis == C4_Axis_XY) {
-        element->destination.y = (C4_BASE_WINDOW_HEIGHT / 2.f) - (element->destination.h / 2.f);
-    }
 }

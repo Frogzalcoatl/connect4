@@ -90,6 +90,7 @@ bool C4_UI_Button_HandleMouseEvents(C4_UI_Button* button, SDL_Event* event, SDL_
             button->background.color = button->clickColors.background;
             button->text.color = button->clickColors.text;
             C4_PlaySound(C4_SoundEffect_ButtonClick);
+            SDL_SetCursor(C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT));
         }
     } else if (event->type == SDL_EVENT_MOUSE_BUTTON_UP) {
         if (event->button.button == SDL_BUTTON_LEFT) {
@@ -124,7 +125,7 @@ void C4_UI_Button_CenterInWindow(C4_UI_Button* button, C4_Axis axis) {
         SDL_Log("Button is NULL");
         return;
     }
-    C4_UI_Rectangle_CenterInWindow(&button->background, axis);
+    C4_UI_CenterInWindow(&button->background.rectangle, axis);
     C4_UI_Button_CenterTextInBackground(button, axis);
 }
 
@@ -134,5 +135,14 @@ void C4_UI_Button_TransformResize(C4_UI_Button* button, float x, float y, float 
         return;
     }
     button->background.rectangle = (SDL_FRect){x, y, w, h};
+    C4_UI_Button_CenterTextInBackground(button, C4_Axis_XY);
+}
+
+void C4_UI_Button_ChangeStr(C4_UI_Button* button, const char* str, SDL_Renderer* renderer) {
+    if (!button || !str) {
+        return;
+    }
+    C4_UI_Text_ChangeStr(&button->text, str);
+    C4_UI_Text_Refresh(&button->text, renderer);
     C4_UI_Button_CenterTextInBackground(button, C4_Axis_XY);
 }

@@ -112,10 +112,13 @@ set(SOURCES
     src/assets/fonts.c
     src/assets/sounds.c
     src/game/board.c
+    src/game/events.c
     src/game/utils.c
     src/ui/cursorManager.c
     src/ui/elements/button.c
+    src/ui/elements/buttonStack.c
     src/ui/elements/borders.c
+    src/ui/elements/index.c
     src/ui/elements/popup.c
     src/ui/elements/rectangle.c
     src/ui/elements/text.c

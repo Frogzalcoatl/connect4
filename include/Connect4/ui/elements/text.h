@@ -24,4 +24,3 @@ void C4_UI_Text_Destroy(C4_UI_Text* element);
 void C4_UI_Text_ChangeStr(C4_UI_Text* element, const char* newStr);
 void C4_UI_Text_Draw(C4_UI_Text* element, SDL_Renderer* renderer);
 void C4_UI_Text_Refresh(C4_UI_Text* element, SDL_Renderer* renderer);
-void C4_UI_Text_CenterInWindow(C4_UI_Text* element, C4_Axis axis);

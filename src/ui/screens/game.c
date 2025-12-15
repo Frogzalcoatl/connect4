@@ -65,7 +65,7 @@ void C4_Screen_Game_TestStrUpdate(C4_Screen_Game* screen) {
     C4_Board_UpdateTestStr(screen->board, tempBuffer, 100);
     C4_UI_Text_ChangeStr(&screen->testBoardText, tempBuffer);
     C4_UI_Text_Refresh(&screen->testBoardText, screen->renderer);
-    C4_UI_Text_CenterInWindow(&screen->testBoardText, C4_Axis_X);
+    C4_UI_CenterInWindow(&screen->testBoardText.destination, C4_Axis_X);
 }
 
 C4_Screen_RequestChange C4_Screen_Game_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {

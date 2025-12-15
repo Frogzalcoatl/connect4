@@ -29,3 +29,4 @@ bool C4_UI_Button_HandleMouseEvents(C4_UI_Button* button, SDL_Event* event, SDL_
 void C4_UI_Button_CenterTextInBackground(C4_UI_Button* button, C4_Axis axis);
 void C4_UI_Button_CenterInWindow(C4_UI_Button* button, C4_Axis axis);
 void C4_UI_Button_TransformResize(C4_UI_Button* button, float x, float y, float w, float h);
+void C4_UI_Button_ChangeStr(C4_UI_Button* button, const char* str, SDL_Renderer* renderer);

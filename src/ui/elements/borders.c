@@ -49,16 +49,3 @@ void C4_UI_Borders_Draw(C4_UI_Borders* element, SDL_Renderer* renderer) {
     SDL_RenderFillRect(renderer, &leftBorder);
     SDL_RenderFillRect(renderer, &rightBorder);
 }
-
-void C4_UI_Borders_CenterInWindow(C4_UI_Borders* element, C4_Axis axis) {
-    if (!element) {
-        SDL_Log("Borders element is NULL");
-        return;
-    }
-    if (axis == C4_Axis_X || axis == C4_Axis_XY) {
-        element->rectangle.x = (C4_BASE_WINDOW_WIDTH / 2.f) - (element->rectangle.w / 2.f);
-    }
-    if (axis == C4_Axis_Y || axis == C4_Axis_XY) {
-        element->rectangle.y = (C4_BASE_WINDOW_HEIGHT / 2.f) - (element->rectangle.h / 2.f);
-    }
-}
