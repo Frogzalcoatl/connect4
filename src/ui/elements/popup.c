@@ -9,62 +9,69 @@ static void C4_UI_Popup_PositionElementsInBackground(C4_UI_Popup* popup) {
         SDL_Log("Tried to position NULL popup elements");
         return;
     }
-    SDL_FRect* rect = &popup->background->rectangle;
-    C4_UI_Button_TransformResize(popup->button1, rect->x + popup->borderWidth + C4_UI_POPUP_PADDING, rect->y + rect->h - popup->buttonHeight - popup->borderWidth - C4_UI_POPUP_PADDING, rect->w / 2 - C4_UI_POPUP_PADDING * 1.5 - popup->borderWidth, popup->buttonHeight);
-    C4_UI_Button_TransformResize(popup->button2, rect->x + C4_UI_POPUP_PADDING / 2 + (rect->w / 2), rect->y + rect->h - popup->buttonHeight - popup->borderWidth - C4_UI_POPUP_PADDING, rect->w / 2 - C4_UI_POPUP_PADDING * 1.5 - popup->borderWidth, popup->buttonHeight);
-    popup->message->destination.x = rect->x + popup->borderWidth + C4_UI_POPUP_PADDING;
-    popup->message->destination.y = rect->y + popup->borderWidth + C4_UI_POPUP_PADDING;
-    popup->message->wrapWidth = rect->w - (popup->borderWidth * 2);
-    C4_UI_Text_Refresh(popup->message, popup->renderer);
-    popup->borders->rectangle = popup->background->rectangle;
+    SDL_FRect* rect = &popup->background.rectangle;
+    C4_UI_Button_TransformResize(&popup->button1, rect->x + popup->borderWidth + C4_UI_POPUP_PADDING, rect->y + rect->h - popup->buttonHeight - popup->borderWidth - C4_UI_POPUP_PADDING, rect->w / 2 - C4_UI_POPUP_PADDING * 1.5 - popup->borderWidth, popup->buttonHeight);
+    C4_UI_Button_TransformResize(&popup->button2, rect->x + C4_UI_POPUP_PADDING / 2 + (rect->w / 2), rect->y + rect->h - popup->buttonHeight - popup->borderWidth - C4_UI_POPUP_PADDING, rect->w / 2 - C4_UI_POPUP_PADDING * 1.5 - popup->borderWidth, popup->buttonHeight);
+    popup->message.destination.x = rect->x + popup->borderWidth + C4_UI_POPUP_PADDING;
+    popup->message.destination.y = rect->y + popup->borderWidth + C4_UI_POPUP_PADDING;
+    popup->message.wrapWidth = rect->w - (popup->borderWidth * 2);
+    C4_UI_Text_Refresh(&popup->message, popup->renderer);
+    popup->borders.rectangle = popup->background.rectangle;
 }
 
-C4_UI_Popup* C4_UI_Popup_Create(SDL_Renderer* renderer, SDL_FRect rectangle, unsigned int borderWidth, unsigned int buttonHeight, const char* button1Text, const char* button2Text, const char* messageText, float buttonPtSize, float messagePtSize) {
+bool C4_UI_Popup_InitProperties(C4_UI_Popup* popup, SDL_Renderer* renderer, SDL_FRect rectangle, unsigned int borderWidth, unsigned int buttonHeight, const char* button1Text, const char* button2Text, const char* messageText, float buttonPtSize, float messagePtSize) {
     if (!renderer) {
-        SDL_Log("Unable to create popup element. Renderer is NULL");
-        return NULL;
+        SDL_Log("Unable to init popup element properties. Renderer is NULL");
+        return false;
     }
-    C4_UI_Popup* popup = calloc(1, sizeof(C4_UI_Popup));
+    if (!button1Text || !button2Text || !messageText) {
+        SDL_Log("Unable to init popup element properties. Text is NULL");
+        return false;
+    }
     if (!popup) {
-        SDL_Log("Unable to allocate memory for popup");
-        return NULL;
+        SDL_Log("Unable to init popup elements. Popup pointer is NULL");
+        return false;
     }
     popup->renderer = renderer;
-    popup->button1 = C4_UI_Button_Create(renderer, button1Text, C4_FontType_Bold, buttonPtSize, (SDL_FRect){1, 1, 1, 1});
-    if (!popup->button1) {
-        SDL_Log("Unable to create popup button1");
-        C4_UI_Popup_Destroy(popup);
-        return NULL;
+    if (!C4_UI_Button_InitProperties(&popup->button1, renderer, button1Text, C4_FontType_Bold, buttonPtSize, (SDL_FRect){1, 1, 1, 1})) {
+        return false;
     }
-    popup->button2 = C4_UI_Button_Create(renderer, button2Text, C4_FontType_Bold, buttonPtSize, (SDL_FRect){1, 1, 1, 1});
-    if (!popup->button2) {
-        SDL_Log("Unable to create popup button2");
-        C4_UI_Popup_Destroy(popup);
-        return NULL;
+    if (!C4_UI_Button_InitProperties(&popup->button2, renderer, button2Text, C4_FontType_Bold, buttonPtSize, (SDL_FRect){1, 1, 1, 1})) {
+        return false;
     }
-    popup->borders = C4_UI_Borders_Create(rectangle, (SDL_Color){255, 255, 255, 255}, borderWidth);
-    if (!popup->borders) {
-        SDL_Log("Unable to create popup borders");
-        C4_UI_Popup_Destroy(popup);
-        return NULL;
+    if (!C4_UI_Borders_InitProperties(&popup->borders, rectangle, (SDL_Color){255, 255, 255, 255}, borderWidth)) {
+        return false;
     }
-    popup->background = C4_UI_Rectangle_Create(rectangle, (SDL_Color){0, 0, 0, 255});
-    if (!popup->background) {
-        SDL_Log("Unable to create popup background");
-        C4_UI_Popup_Destroy(popup);
-        return NULL;
+    if (!C4_UI_Rectangle_InitProperties(&popup->background, rectangle, (SDL_Color){0, 0, 0, 255})) {
+        return false;
     }
-    popup->message = C4_UI_Text_Create(popup->renderer, messageText, C4_FontType_Regular, messagePtSize, 0, 0, 0);
-    if (!popup->message) {
-        SDL_Log("Unable to create popup message");
-        C4_UI_Popup_Destroy(popup);   
-        return NULL;
+    if (!C4_UI_Text_InitProperties(&popup->message, popup->renderer, messageText, C4_FontType_Regular, messagePtSize, 0, 0, 0)) {
+        return false;
     }
     popup->borderWidth = borderWidth;
     popup->buttonHeight = buttonHeight;
     C4_UI_Popup_PositionElementsInBackground(popup);
     popup->isShowing = false;
+    return true;
+}
+
+C4_UI_Popup* C4_UI_Popup_Create(SDL_Renderer* renderer, SDL_FRect rectangle, unsigned int borderWidth, unsigned int buttonHeight, const char* button1Text, const char* button2Text, const char* messageText, float buttonPtSize, float messagePtSize) {
+    C4_UI_Popup* popup = calloc(1, sizeof(C4_UI_Popup));
+    if (!popup) {
+        SDL_Log("Unable to allocate memory for popup");
+        return NULL;
+    }
+    if (!C4_UI_Popup_InitProperties(popup, renderer, rectangle, borderWidth, buttonHeight, button1Text, button2Text, messageText, buttonPtSize, messagePtSize)) {
+        C4_UI_Popup_Destroy(popup);
+        return NULL;
+    }
     return popup;
+}
+
+void C4_UI_Popup_FreeResources(C4_UI_Popup* popup) {
+    C4_UI_Button_FreeResources(&popup->button1);
+    C4_UI_Button_FreeResources(&popup->button2);
+    C4_UI_Text_FreeResources(&popup->message);
 }
 
 void C4_UI_Popup_Destroy(C4_UI_Popup* popup) {
@@ -72,21 +79,7 @@ void C4_UI_Popup_Destroy(C4_UI_Popup* popup) {
         SDL_Log("Tried to destroy NULL popup element");
         return;
     }
-    if (popup->message) {
-        C4_UI_Text_Destroy(popup->message);
-    }
-    if (popup->background) {
-        C4_UI_Rectangle_Destroy(popup->background);
-    }
-    if (popup->borders) {
-        C4_UI_Borders_Destroy(popup->borders);
-    }
-    if (popup->button2) {
-        C4_UI_Button_Destroy(popup->button2);
-    }
-    if (popup->button1) {
-        C4_UI_Button_Destroy(popup->button1);
-    }
+    C4_UI_Popup_FreeResources(popup);
     free(popup);
 }
 
@@ -106,11 +99,11 @@ void C4_UI_Popup_Draw(C4_UI_Popup* popup) {
         return;
     }
     C4_UI_Popup_DrawScreenBackground(popup->renderer);
-    C4_UI_Rectangle_Draw(popup->background, popup->renderer);
-    C4_UI_Borders_Draw(popup->borders, popup->renderer);
-    C4_UI_Text_Draw(popup->message, popup->renderer);
-    C4_UI_Button_Draw(popup->button1, popup->renderer);
-    C4_UI_Button_Draw(popup->button2, popup->renderer);
+    C4_UI_Rectangle_Draw(&popup->background, popup->renderer);
+    C4_UI_Borders_Draw(&popup->borders, popup->renderer);
+    C4_UI_Text_Draw(&popup->message, popup->renderer);
+    C4_UI_Button_Draw(&popup->button1, popup->renderer);
+    C4_UI_Button_Draw(&popup->button2, popup->renderer);
 }
 
 void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup) {
@@ -118,7 +111,7 @@ void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup) {
         SDL_Log("Popup element is NULL");
         return;
     }
-    C4_UI_Rectangle_CenterInWindow(popup->background, C4_Axis_XY);
+    C4_UI_Rectangle_CenterInWindow(&popup->background, C4_Axis_XY);
     C4_UI_Popup_PositionElementsInBackground(popup);
 }
 
@@ -130,10 +123,10 @@ unsigned short C4_UI_Popup_HandleMouseEvents(C4_UI_Popup* popup, SDL_Event* even
     if (!popup->isShowing) {
         return 0;
     }
-    if (C4_UI_Button_HandleMouseEvents(popup->button1, event, popup->renderer)) {
+    if (C4_UI_Button_HandleMouseEvents(&popup->button1, event, popup->renderer)) {
         return 1;
     }
-    if (C4_UI_Button_HandleMouseEvents(popup->button2, event, popup->renderer)) {
+    if (C4_UI_Button_HandleMouseEvents(&popup->button2, event, popup->renderer)) {
         return 2;
     }
     return 0;

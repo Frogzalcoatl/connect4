@@ -5,24 +5,22 @@
 #include <stddef.h>
 #include <stdio.h>
 
-C4_UI_Text* C4_UI_Text_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, float destinationX, float destinationY, int wrapWidth) {
-    if (!renderer || !str) {
-        SDL_Log("Unable to create text element. renderer and/or str is NULL.");
-        return NULL;
-    }
-    if (ptSize <= 0) {
-        SDL_Log("Unable to create text element. ptSize must be greater than 0.");
-        return NULL;
-    }
-    C4_UI_Text* element = calloc(1, sizeof(C4_UI_Text));
+bool C4_UI_Text_InitProperties(C4_UI_Text* element, SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, float destinationX, float destinationY, int wrapWidth) {
     if (!element) {
-        SDL_Log("Unable to allocate memory for text element");
+        SDL_Log("Unable to init text element properties. Pointer is NULL");
+        return false;
+    }
+    if (!renderer || !str) {
+        SDL_Log("Unable to init text element properties. renderer and/or str is NULL.");
         return NULL;
     }
     element->font = C4_GetFont(font);
     if (!element->font) {
         SDL_Log("Unable to get text element font");
-        C4_UI_Text_Destroy(element);
+        return false;
+    }
+    if (ptSize <= 0) {
+        SDL_Log("Unable to create text element. ptSize must be greater than 0.");
         return NULL;
     }
     element->ptSize = ptSize;
@@ -31,7 +29,27 @@ C4_UI_Text* C4_UI_Text_Create(SDL_Renderer* renderer, const char* str, C4_FontTy
     element->wrapWidth = wrapWidth;
     C4_UI_Text_ChangeStr(element, str);
     C4_UI_Text_Refresh(element, renderer);
+    return true;
+}
+
+C4_UI_Text* C4_UI_Text_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, float destinationX, float destinationY, int wrapWidth) {
+    C4_UI_Text* element = calloc(1, sizeof(C4_UI_Text));
+    if (!element) {
+        SDL_Log("Unable to allocate memory for text element");
+        return NULL;
+    }
+    if (!C4_UI_Text_InitProperties(element, renderer, str, font, ptSize, destinationX, destinationY, wrapWidth)) {
+        C4_UI_Text_Destroy(element);
+        return NULL;
+    }
     return element;
+}
+
+void C4_UI_Text_FreeResources(C4_UI_Text* element) {
+    if (element->texture) {
+        SDL_DestroyTexture(element->texture);
+        element->texture = NULL;
+    }
 }
 
 void C4_UI_Text_Destroy(C4_UI_Text* element) {
@@ -39,7 +57,7 @@ void C4_UI_Text_Destroy(C4_UI_Text* element) {
         SDL_Log("Tried to destroy NULL text element");
         return;
     }
-    SDL_DestroyTexture(element->texture);
+    C4_UI_Text_FreeResources(element);
     free(element);
 }
 

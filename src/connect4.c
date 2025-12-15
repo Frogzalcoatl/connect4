@@ -39,6 +39,7 @@ void Connect4_Quit_Dependencies() {
 static bool C4_Game_HandleScreenChangeRequest(C4_Game* game, C4_Screen_RequestChange type) {
     if (type != C4_Screen_RequestChange_None && game->currentScreen.Destroy) {
         game->currentScreen.Destroy(game->currentScreen.data);
+        memset(&game->currentScreen, 0, sizeof(C4_Screen_Interface));
     }
     switch (type) {
         case C4_Screen_RequestChange_Menu: {

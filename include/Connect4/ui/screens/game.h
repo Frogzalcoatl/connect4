@@ -10,8 +10,8 @@ typedef struct {
     SDL_Renderer* renderer;
     
     // [Owns] properties specific to this screen
-    C4_UI_Text* testBoardText;
-    C4_UI_Button* menuButton;
+    C4_UI_Text testBoardText;
+    C4_UI_Button menuButton;
 } C4_Screen_Game;
 
 C4_Screen_Game* C4_Screen_Game_Create(SDL_Renderer* renderer, C4_Board* board);

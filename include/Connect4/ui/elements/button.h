@@ -11,8 +11,8 @@ typedef struct {
 } C4_UI_ButtonColorInfo;
 
 typedef struct {
-    C4_UI_Rectangle* background;
-    C4_UI_Text* text;
+    C4_UI_Rectangle background;
+    C4_UI_Text text;
     C4_UI_ButtonColorInfo defaultColors;
     C4_UI_ButtonColorInfo hoverColors;
     C4_UI_ButtonColorInfo clickColors;
@@ -20,7 +20,9 @@ typedef struct {
     bool isPressed;
 } C4_UI_Button;
 
+bool C4_UI_Button_InitProperties(C4_UI_Button* button, SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, const SDL_FRect background);
 C4_UI_Button* C4_UI_Button_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, const SDL_FRect background);
+void C4_UI_Button_FreeResources(C4_UI_Button* button);
 void C4_UI_Button_Destroy(C4_UI_Button* button);
 void C4_UI_Button_Draw(C4_UI_Button* button, SDL_Renderer* renderer);
 bool C4_UI_Button_HandleMouseEvents(C4_UI_Button* button, SDL_Event* event, SDL_Renderer* renderer);

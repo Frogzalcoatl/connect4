@@ -2,15 +2,27 @@
 #include "Connect4/constants.h"
 #include <stdlib.h>
 
+bool C4_UI_Borders_InitProperties(C4_UI_Borders* element, const SDL_FRect rectangle, const SDL_Color color, const unsigned int borderWidth) {
+    if (!element) {
+        SDL_Log("Unable to init properties for border element. Pointer is NULL");
+        return false;
+    }
+    element->rectangle = rectangle;
+    element->color = color;
+    element->borderWidth = borderWidth;
+    return true;
+}
+
 C4_UI_Borders* C4_UI_Borders_Create(const SDL_FRect rectangle, const SDL_Color color, const unsigned int borderWidth) {
     C4_UI_Borders* element = calloc(1, sizeof(C4_UI_Borders));
     if (!element) {
         SDL_Log("Unable to allocate memory for borders element");
         return NULL;
     }
-    element->rectangle = rectangle;
-    element->color = color;
-    element->borderWidth = borderWidth;
+    if (!C4_UI_Borders_InitProperties(element, rectangle, color, borderWidth)) {
+        C4_UI_Borders_Destroy(element);
+        return NULL;
+    }
     return element;
 }
 

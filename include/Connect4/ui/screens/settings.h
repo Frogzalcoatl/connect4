@@ -8,10 +8,10 @@ typedef struct {
     SDL_Window* window;
 
     // [Owns] properties specific to this screen
-    C4_UI_Text* title;
-    C4_UI_Button* backButton;
-    C4_UI_Button* applyButton;
-    C4_UI_Popup* confirmationPopup;
+    C4_UI_Text title;
+    C4_UI_Button backButton;
+    C4_UI_Button applyButton;
+    C4_UI_Popup confirmationPopup;
 } C4_Screen_Settings;
 
 C4_Screen_Settings* C4_Screen_Settings_Create(SDL_Renderer* renderer, SDL_Window* window);
