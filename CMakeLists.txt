@@ -21,7 +21,7 @@ if(NOT SDL3_FOUND)
     include(FetchContent)
     FetchContent_Declare(SDL3
         GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-        GIT_TAG main
+        GIT_TAG d94cd1efad89953a360bcd8835a066104da00003
         GIT_SHALLOW ON
         EXCLUDE_FROM_ALL
         SYSTEM
@@ -44,7 +44,7 @@ if(NOT SDL3_ttf_FOUND)
     include(FetchContent)
     FetchContent_Declare(SDL3_ttf
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
-        GIT_TAG main
+        GIT_TAG 747c5fd1e3668a427c081422574e589dd9111dc0
         GIT_SHALLOW ON
         EXCLUDE_FROM_ALL
         SYSTEM

@@ -1,6 +1,5 @@
 # TODO
 
-* Events instead of screen change requests
 * Bug: Cursor style not set to hover when quickly hovering from button to button.
 * Slider UIElement
 * Number input UIElement
