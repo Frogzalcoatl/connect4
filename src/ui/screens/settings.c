@@ -1,5 +1,6 @@
 #include "Connect4/ui/screens/settings.h"
 #include "Connect4/assets/fonts.h"
+#include "Connect4/game/events.h"
 #include <stdlib.h>
 
 #define C4_SCREEN_SETTINGS_BUTTONCOUNT 2
@@ -89,42 +90,41 @@ void C4_Screen_Settings_Draw(void* screenData) {
     C4_UI_Popup_Draw(&screen->confirmationPopup);
 }
 
-C4_Screen_RequestChange C4_Screen_Settings_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
+void C4_Screen_Settings_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
     if (!screenData) {
         SDL_Log("Settings screen is NULL");
-        return C4_Screen_RequestChange_None;
+        return;
     }
     C4_Screen_Settings* screen = (C4_Screen_Settings*)screenData;
-    return C4_Screen_RequestChange_None;
 }
 
-C4_Screen_RequestChange C4_Screen_Settings_HandleMouseEvents(void* screenData, SDL_Event* event) {
+void C4_Screen_Settings_HandleMouseEvents(void* screenData, SDL_Event* event) {
     if (!screenData || !event) {
         SDL_Log("Settings screen and/or event is NULL");
-        return C4_Screen_RequestChange_None;
+        return;
     }
     C4_Screen_Settings* screen = (C4_Screen_Settings*)screenData;
     switch (C4_UI_Popup_HandleMouseEvents(&screen->confirmationPopup, event)) {
         case C4_PopupButtonIndexes_Yes: {  
             screen->confirmationPopup.isShowing = false;
-        }; return C4_Screen_RequestChange_Menu;
+            C4_PushEvent_ScreenChange(C4_ScreenType_Menu);
+        }; return;
         case C4_PopupButtonIndexes_Back: {
             screen->confirmationPopup.isShowing = false;
-        }; return C4_Screen_RequestChange_None;
+        }; return;
         default: break;
     }
     if (screen->confirmationPopup.isShowing) {
-        return C4_Screen_RequestChange_None;
+        return;
     }
     switch (C4_UI_ButtonGroup_HandleMouseEvents(&screen->buttonGroup, event, screen->renderer)) {
         case C4_ButtonGroupIndexes_Apply: {
             screen->confirmationPopup.isShowing = true;
             screen->buttonGroup.buttons[0].background.color = screen->buttonGroup.buttons[0].defaultColors.background;
-            return C4_Screen_RequestChange_None;
-        }
+        }; break;
         case C4_ButtonGroupIndexes_Cancel: {
-            return C4_Screen_RequestChange_Menu;
-        }
-        default: return C4_Screen_RequestChange_None;
+            C4_PushEvent_ScreenChange(C4_ScreenType_Menu);
+        }; break;
+        default: break;
     }
 }

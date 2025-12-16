@@ -1,5 +1,6 @@
 #include "Connect4/ui/screens/menu.h"
 #include "Connect4/assets/fonts.h"
+#include "Connect4/game/events.h"
 #include <stdlib.h>
 
 #define C4_SCREEN_MENU_BUTTONCOUNT 4
@@ -66,27 +67,35 @@ void C4_Screen_Menu_Draw(void* screenData) {
     C4_UI_Text_Draw(&screen->title, screen->renderer);
 }
 
-C4_Screen_RequestChange C4_Screen_Menu_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
+void C4_Screen_Menu_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
     if (!screenData) {
         SDL_Log("Menu screen is NULL");
-        return C4_Screen_RequestChange_None;
+        return;
     }
     C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
     // popup for esc to exit the game
-    return C4_Screen_RequestChange_None;
+    return;
 }
 
-C4_Screen_RequestChange C4_Screen_Menu_HandleMouseEvents(void* screenData, SDL_Event* event) {
+void C4_Screen_Menu_HandleMouseEvents(void* screenData, SDL_Event* event) {
     if (!screenData || !event) {
         SDL_Log("Menu screen and/or event is NULL");
-        return C4_Screen_RequestChange_None;
+        return;
     }
     C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
     switch (C4_UI_ButtonGroup_HandleMouseEvents(&screen->buttonGroup, event, screen->renderer)) {
-        case C4_Screen_Menu_ButtonTextIndexes_1Player: return C4_Screen_RequestChange_Game;
-        case C4_Screen_Menu_ButtonTextIndexes_2Players: return C4_Screen_RequestChange_Game;
-        case C4_Screen_Menu_ButtonTextIndexes_Settings: return C4_Screen_RequestChange_Settings;
-        case C4_Screen_Menu_ButtonTextIndexes_Quit: return C4_Screen_RequestChange_CloseWindow;
-        default: return C4_Screen_RequestChange_None;
+        case C4_Screen_Menu_ButtonTextIndexes_1Player: {
+            C4_PushEvent_ScreenChange(C4_ScreenType_Game);
+        }; break;
+        case C4_Screen_Menu_ButtonTextIndexes_2Players: {
+            C4_PushEvent_ScreenChange(C4_ScreenType_Game);
+        }; break;
+        case C4_Screen_Menu_ButtonTextIndexes_Settings: {
+            C4_PushEvent_ScreenChange(C4_ScreenType_Settings);
+        }; break;
+        case C4_Screen_Menu_ButtonTextIndexes_Quit: {
+            C4_PushEvent_CloseWindow();
+        }; break;
+        default: break;
     }
 }

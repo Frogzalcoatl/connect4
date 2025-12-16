@@ -1,20 +1,12 @@
 #pragma once
 #include <SDL3/SDL.h>
 
-typedef enum {
-    C4_Screen_RequestChange_None,
-    C4_Screen_RequestChange_Menu,
-    C4_Screen_RequestChange_Settings,
-    C4_Screen_RequestChange_Game,
-    C4_Screen_RequestChange_CloseWindow
-} C4_Screen_RequestChange;
-
 typedef struct {
     // A generic pointer that can hold a C4_Screen_Menu, C4_Gamescreen, or anything else
     void* data;
     void (*Draw)(void* screenData);
-    C4_Screen_RequestChange (*HandleMouseEvents)(void* screenData, SDL_Event* event);
-    C4_Screen_RequestChange (*HandleKeyboardInput)(void* screenData, SDL_Scancode scancode);
+    void (*HandleMouseEvents)(void* screenData, SDL_Event* event);
+    void (*HandleKeyboardInput)(void* screenData, SDL_Scancode scancode);
     void (*Destroy)(void* screenData);
 } C4_Screen_Interface;
 

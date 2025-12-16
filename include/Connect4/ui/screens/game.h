@@ -18,5 +18,5 @@ C4_Screen_Game* C4_Screen_Game_Create(SDL_Renderer* renderer, C4_Board* board);
 void C4_Screen_Game_Destroy(void* screenData);
 void C4_Screen_Game_Draw(void* screenData);
 void C4_Screen_Game_TestStrUpdate(C4_Screen_Game* screen);
-C4_Screen_RequestChange C4_Screen_Game_HandleKeyboardInput(void* screenData, SDL_Scancode scancode);
-C4_Screen_RequestChange C4_Screen_Game_HandleMouseEvents(void* screenData, SDL_Event* event);
+void C4_Screen_Game_HandleKeyboardInput(void* screenData, SDL_Scancode scancode);
+void C4_Screen_Game_HandleMouseEvents(void* screenData, SDL_Event* event);

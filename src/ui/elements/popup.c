@@ -122,7 +122,7 @@ void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup) {
     C4_UI_Popup_PositionElementsInBackground(popup);
 }
 
-long long C4_UI_Popup_HandleMouseEvents(C4_UI_Popup* popup, SDL_Event* event) {
+int C4_UI_Popup_HandleMouseEvents(C4_UI_Popup* popup, SDL_Event* event) {
     if (!popup || !event) {
         SDL_Log("Popup element and/or event is NULL");
         return -1;

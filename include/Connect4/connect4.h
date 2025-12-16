@@ -7,12 +7,6 @@
 bool Connect4_Init_Dependencies();
 void Connect4_Quit_Dependencies();
 
-typedef enum {
-    C4_ScreenType_Menu,
-    C4_ScreenType_Game,
-    C4_ScreenType_Settings
-} ScreenType;
-
 typedef struct {
     SDL_Window* window;
     SDL_Renderer* renderer;

@@ -1,7 +1,7 @@
 #include "Connect4/ui/screens/game.h"
 #include "Connect4/game/utils.h"
 #include "Connect4/assets/fonts.h"
-#include "Connect4/assets/sounds.h"
+#include "Connect4/game/events.h"
 #include "Connect4/constants.h"
 #include <stdlib.h>
 
@@ -68,10 +68,10 @@ void C4_Screen_Game_TestStrUpdate(C4_Screen_Game* screen) {
     C4_UI_CenterInWindow(&screen->testBoardText.destination, C4_Axis_X);
 }
 
-C4_Screen_RequestChange C4_Screen_Game_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
+void C4_Screen_Game_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
     if (!screenData) {
         SDL_Log("Game screen is NULL");
-        return C4_Screen_RequestChange_None;
+        return;
     }
     C4_Screen_Game* screen = (C4_Screen_Game*)screenData;
     // Temporary just for testing
@@ -79,29 +79,29 @@ C4_Screen_RequestChange C4_Screen_Game_HandleKeyboardInput(void* screenData, SDL
         int column = scancode - SDL_SCANCODE_1;
         int64_t atIndex = C4_Board_DoMove(screen->board, column);
         if (atIndex == -1) {
-            return C4_Screen_RequestChange_None;
+            return;
         }
         // Reversed since currentPlayer would have been swapped already by doMove
         if (screen->board->currentPlayer == C4_SlotState_Player2) {
-            C4_PlaySound(C4_SoundEffect_Player1Place);
+            C4_PushEvent_SoundRequest(C4_SoundEffect_Player1Place);
         } else {
-            C4_PlaySound(C4_SoundEffect_Player2Place);
+            C4_PushEvent_SoundRequest(C4_SoundEffect_Player2Place);
         }
         C4_SlotState winnerCheckResult = C4_Board_GetWinner(screen->board, atIndex);
-        SDL_Log("winnerCheckResult: %i", winnerCheckResult);
+        if (winnerCheckResult == C4_SlotState_Player1 || winnerCheckResult == C4_SlotState_Player2) {
+            C4_PushEvent_GameOver(winnerCheckResult);
+        }
         C4_Screen_Game_TestStrUpdate(screen);
     }
-    return C4_Screen_RequestChange_None;
 }
 
-C4_Screen_RequestChange C4_Screen_Game_HandleMouseEvents(void* screenData, SDL_Event* event) {
+void C4_Screen_Game_HandleMouseEvents(void* screenData, SDL_Event* event) {
     if (!screenData || !event) {
         SDL_Log("Game screen and/or event is NULL");
-        return C4_Screen_RequestChange_None;
+        return;
     }
     C4_Screen_Game* screen = (C4_Screen_Game*)screenData;
     if (C4_UI_Button_HandleMouseEvents(&screen->menuButton, event, screen->renderer)) {
-        return C4_Screen_RequestChange_Menu;
+        C4_PushEvent_ScreenChange(C4_ScreenType_Menu);
     }
-    return C4_Screen_RequestChange_None;
 }

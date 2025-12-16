@@ -1,6 +1,7 @@
 #include "Connect4/ui/elements/button.h"
 #include "Connect4/ui/cursorManager.h"
 #include "Connect4/assets/sounds.h"
+#include "Connect4/game/events.h"
 #include "Connect4/constants.h"
 #include <stdlib.h>
 
@@ -77,7 +78,7 @@ bool C4_UI_Button_HandleMouseEvents(C4_UI_Button* button, SDL_Event* event, SDL_
                 button->background.color = button->hoverColors.background;
                 button->text.color = button->hoverColors.text;
                 SDL_SetCursor(C4_GetSystemCursor(SDL_SYSTEM_CURSOR_POINTER));
-                C4_PlaySound(C4_SoundEffect_ButtonHover);
+                C4_PushEvent_SoundRequest(C4_SoundEffect_ButtonHover);
             } else {
                 button->background.color = button->defaultColors.background;
                 button->text.color = button->defaultColors.text;
@@ -89,7 +90,7 @@ bool C4_UI_Button_HandleMouseEvents(C4_UI_Button* button, SDL_Event* event, SDL_
             button->isPressed = true;
             button->background.color = button->clickColors.background;
             button->text.color = button->clickColors.text;
-            C4_PlaySound(C4_SoundEffect_ButtonClick);
+            C4_PushEvent_SoundRequest(C4_SoundEffect_ButtonClick);
             SDL_SetCursor(C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT));
         }
     } else if (event->type == SDL_EVENT_MOUSE_BUTTON_UP) {

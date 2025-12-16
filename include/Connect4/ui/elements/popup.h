@@ -25,4 +25,4 @@ void C4_UI_Popup_FreeResources(C4_UI_Popup* popup);
 void C4_UI_Popup_Destroy(C4_UI_Popup* popup);
 void C4_UI_Popup_Draw(C4_UI_Popup* popup);
 void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup);
-long long C4_UI_Popup_HandleMouseEvents(C4_UI_Popup* popup, SDL_Event* event);
+int C4_UI_Popup_HandleMouseEvents(C4_UI_Popup* popup, SDL_Event* event);

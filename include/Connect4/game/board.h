@@ -30,6 +30,7 @@ typedef enum {
 
 C4_Board* C4_Board_Create(uint8_t width, uint8_t height, uint8_t amountToWin);
 void C4_Board_Destroy(C4_Board* board);
+void C4_Board_Reset(C4_Board* board);
 C4_SlotState C4_Board_GetSlot(C4_Board* board, uint8_t x, uint8_t y);
 bool C4_Board_SetSlot(C4_Board* board, uint8_t x, uint8_t y, C4_SlotState state);
 int64_t C4_Board_DoMove(C4_Board* board, uint8_t inColumn);

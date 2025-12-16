@@ -46,6 +46,15 @@ void C4_Board_Destroy(C4_Board* board) {
     free(board);
 }
 
+void C4_Board_Reset(C4_Board* board) {
+    if (!board) {
+        return;
+    }
+    for (size_t i = 0; i < board->width * board->height; i++) {
+        board->cells[i] = C4_SlotState_Empty;
+    }
+}
+
 C4_SlotState C4_Board_GetSlot(C4_Board* board, uint8_t x, uint8_t y) {
     if (!board) {
         SDL_Log("Board is NULL");
