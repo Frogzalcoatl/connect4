@@ -10,3 +10,4 @@
 * Background music
 * Improve win check efficiency
 * Improve sound design
+* Use the TTF text engine thingy thingy instead of current text implementation

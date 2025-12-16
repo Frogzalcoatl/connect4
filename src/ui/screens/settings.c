@@ -1,6 +1,7 @@
 #include "Connect4/ui/screens/settings.h"
 #include "Connect4/assets/fonts.h"
 #include "Connect4/game/events.h"
+#include "Connect4/constants.h"
 #include <stdlib.h>
 
 #define C4_SCREEN_SETTINGS_BUTTONCOUNT 2
@@ -35,33 +36,36 @@ C4_Screen_Settings* C4_Screen_Settings_Create(SDL_Renderer* renderer, SDL_Window
     }
     screen->window = window;
     screen->renderer = renderer;
-    if (!C4_UI_Text_InitProperties(&screen->title, screen->renderer, "Settings", C4_FontType_Bold, 100.f, 0.f, 0.f, 0)) {
+    if (!C4_UI_Text_InitProperties(&screen->title, screen->renderer, "Settings", C4_FontType_Bold, C4_SCREEN_SETTINGS_TITLE_PT_SIZE, 0.f, 0.f, 0)) {
         C4_Screen_Settings_Destroy(screen);
         return NULL;
     }
     C4_UI_CenterInWindow(&screen->title.destination, C4_Axis_X);
     if (
         !C4_UI_ButtonGroup_InitProperties(
-            &screen->buttonGroup, renderer, (SDL_FRect){0.f, 900.f, 900.f, 100.f},
-            C4_SCREEN_SETTINGS_BUTTONCOUNT, C4_UI_ButtonGroup_Direction_Horizontal, 15, 32.f
+            &screen->buttonGroup, renderer,
+            (SDL_FRect){0.f, C4_SCREEN_SETTINGS_BUTTON_GROUP_YPOS, C4_SCREEN_SETTINGS_BUTTON_GROUP_WIDTH, C4_SCREEN_SETTINGS_BUTTON_GROUP_HEIGHT},
+            C4_SCREEN_SETTINGS_BUTTONCOUNT, C4_UI_ButtonGroup_Direction_Horizontal, 15, C4_FONT_DEFAULT_PT_SIZE
         )
     ) {
         C4_Screen_Settings_Destroy(screen);
         return NULL;
     }
     for (size_t i = 0; i < C4_SCREEN_SETTINGS_BUTTONCOUNT; i++) {
-        C4_UI_ButtonGroup_SetButtonIndex(&screen->buttonGroup, i, screen->renderer, buttonText[i], C4_FontType_Bold, 32.f);
+        C4_UI_ButtonGroup_SetButtonIndex(&screen->buttonGroup, i, screen->renderer, buttonText[i], C4_DEFAULT_BUTTON_FONT, C4_FONT_DEFAULT_PT_SIZE);
     }
     C4_UI_ButtonGroup_CenterInWindow(&screen->buttonGroup, C4_Axis_X);
     if (!C4_UI_Popup_InitProperties(
-        &screen->confirmationPopup, screen->renderer, (SDL_FRect){0, 0, 800, 400}, 3, C4_UI_ButtonGroup_Direction_Horizontal,
-        2, 100.f, "Are you sure you want to apply these settings?", 32.f, 32.f
+        &screen->confirmationPopup, screen->renderer,
+        (SDL_FRect){0.f, 0.f, C4_SCREEN_SETTINGS_POPUP_WIDTH, C4_SCREEN_SETTINGS_POPUP_HEIGHT},
+        3, C4_UI_ButtonGroup_Direction_Horizontal, 2, 100.f,
+        "Are you sure you want to apply these settings?", C4_FONT_DEFAULT_PT_SIZE, C4_FONT_DEFAULT_PT_SIZE
     )) {
         C4_Screen_Settings_Destroy(screen);
         return NULL;
     }
     for (size_t i = 0; i < C4_SCREEN_SETTINGS_POPUPBUTTONCOUNT; i++) {
-        C4_UI_ButtonGroup_SetButtonIndex(&screen->confirmationPopup.buttonGroup, i, screen->renderer, popupButtonText[i], C4_FontType_Bold, 32.f);
+        C4_UI_ButtonGroup_SetButtonIndex(&screen->confirmationPopup.buttonGroup, i, screen->renderer, popupButtonText[i], C4_DEFAULT_BUTTON_FONT, C4_FONT_DEFAULT_PT_SIZE);
     }
     C4_UI_Popup_CenterInWindow(&screen->confirmationPopup);
     return screen;

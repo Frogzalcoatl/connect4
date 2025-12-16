@@ -1,6 +1,7 @@
 #include "Connect4/ui/screens/menu.h"
 #include "Connect4/assets/fonts.h"
 #include "Connect4/game/events.h"
+#include "Connect4/constants.h"
 #include <stdlib.h>
 
 #define C4_SCREEN_MENU_BUTTONCOUNT 4
@@ -30,17 +31,22 @@ C4_Screen_Menu* C4_Screen_Menu_Create(SDL_Renderer* renderer) {
         return NULL;
     }
     screen->renderer = renderer;
-    if (!C4_UI_Text_InitProperties(&screen->title, screen->renderer, "Connect4", C4_FontType_Bold, 100.f, 0.f, 0.f, 0)) {
+    if (!C4_UI_Text_InitProperties(&screen->title, screen->renderer, "Connect4", C4_FontType_Bold, C4_SCREEN_MENU_TITLE_PT_SIZE, 0.f, 0.f, 0)) {
         C4_Screen_Menu_Destroy(screen);
         return NULL;
     }
     C4_UI_CenterInWindow(&screen->title.destination, C4_Axis_X);
-    if (!C4_UI_ButtonGroup_InitProperties(&screen->buttonGroup, screen->renderer, (SDL_FRect){0.f, 0.f, 700.f, 500.f}, C4_SCREEN_MENU_BUTTONCOUNT, C4_UI_ButtonGroup_Direction_Vertical, 15, 32.f)) {
+    if (
+        !C4_UI_ButtonGroup_InitProperties(
+            &screen->buttonGroup, screen->renderer, (SDL_FRect){0.f, 0.f, C4_SCREEN_MENU_BUTTON_GROUP_WIDTH, C4_SCREEN_MENU_BUTTON_GROUP_HEIGHT}, C4_SCREEN_MENU_BUTTONCOUNT,
+            C4_UI_ButtonGroup_Direction_Vertical, C4_SCREEN_MENU_BUTTON_GROUP_MARGIN, C4_FONT_DEFAULT_PT_SIZE
+        )
+    ) {
         C4_Screen_Menu_Destroy(screen);
         return NULL;
     }
     for (size_t i = 0; i < C4_SCREEN_MENU_BUTTONCOUNT; i++) {
-        C4_UI_ButtonGroup_SetButtonIndex(&screen->buttonGroup, i, screen->renderer, buttonText[i], C4_FontType_Bold, 32.f);
+        C4_UI_ButtonGroup_SetButtonIndex(&screen->buttonGroup, i, screen->renderer, buttonText[i], C4_DEFAULT_BUTTON_FONT, C4_FONT_DEFAULT_PT_SIZE);
     }
     C4_UI_ButtonGroup_CenterInWindow(&screen->buttonGroup, C4_Axis_XY);
     return screen;

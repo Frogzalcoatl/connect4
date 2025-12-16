@@ -8,9 +8,9 @@ void C4_UI_CenterInWindow(SDL_FRect* rect, C4_Axis axis) {
         return;
     }
     if (axis == C4_Axis_X || axis == C4_Axis_XY) {
-        rect->x = (C4_BASE_WINDOW_WIDTH / 2.f) - (rect->w / 2.f);
+        rect->x = C4_WINDOW_CENTER_X - (rect->w / 2.f);
     }
     if (axis == C4_Axis_Y || axis == C4_Axis_XY) {
-        rect->y = (C4_BASE_WINDOW_HEIGHT / 2.f) - (rect->h / 2.f);
+        rect->y = C4_WINDOW_CENTER_Y - (rect->h / 2.f);
     }
 }

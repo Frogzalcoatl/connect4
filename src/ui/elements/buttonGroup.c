@@ -1,4 +1,5 @@
 #include "Connect4/ui/elements/buttonGroup.h"
+#include "Connect4/constants.h"
 #include <stdlib.h>
 
 static SDL_FRect C4_UI_ButtonGroup_GetUpdatedButtonRect(C4_UI_ButtonGroup* group, size_t index) {
@@ -47,7 +48,7 @@ bool C4_UI_ButtonGroup_InitProperties(C4_UI_ButtonGroup* group, SDL_Renderer* re
         return false;
     }
     for (size_t i = 0; i < group->count; i++) {
-        if (!C4_UI_Button_InitProperties(&group->buttons[i], renderer, "", C4_FontType_Bold, buttonPtSize, C4_UI_ButtonGroup_GetUpdatedButtonRect(group, i))) {
+        if (!C4_UI_Button_InitProperties(&group->buttons[i], renderer, "", C4_DEFAULT_BUTTON_FONT, buttonPtSize, C4_UI_ButtonGroup_GetUpdatedButtonRect(group, i))) {
             return false;
         }
     }

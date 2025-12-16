@@ -2,6 +2,7 @@
 #include "Connect4/assets/fonts.h"
 #include "assets_fonts_Monocraft_ttf.h"
 #include "assets_fonts_Monocraft_Bold_ttf.h"
+#include "Connect4/constants.h"
 #include <stdio.h>
 
 #define C4_FONT_COUNT 2
@@ -26,7 +27,7 @@ TTF_Font* C4_GetFont(C4_FontType type) {
         SDL_Log("Unable to open font IOStream. Type index: %i", type);
         return NULL;
     }
-    TTF_Font* newFont = TTF_OpenFontIO(io, true, 32);
+    TTF_Font* newFont = TTF_OpenFontIO(io, true, C4_FONT_DEFAULT_PT_SIZE);
     if (newFont) {
         fontCache[type] = newFont;
         return newFont;

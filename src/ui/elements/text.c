@@ -25,7 +25,7 @@ bool C4_UI_Text_InitProperties(C4_UI_Text* element, SDL_Renderer* renderer, cons
     }
     element->ptSize = ptSize;
     element->destination = (SDL_FRect){destinationX, destinationY, 0.f, 0.f};
-    element->color = C4_BUTTON_DEFAULTCOLOR_TEXT;
+    element->color = C4_BUTTON_DEFAULT_COLOR_TEXT;
     element->wrapWidth = wrapWidth;
     C4_UI_Text_ChangeStr(element, str);
     C4_UI_Text_Refresh(element, renderer);

@@ -10,9 +10,9 @@ bool C4_UI_Button_InitProperties(C4_UI_Button* button, SDL_Renderer* renderer, c
         SDL_Log("Unable to init button properties. str and/or renderer is NULL");
         return false;
     }
-    button->defaultColors = (C4_UI_ButtonColorInfo){C4_BUTTON_DEFAULTCOLOR_BACKGROUND, C4_BUTTON_DEFAULTCOLOR_TEXT};
-    button->hoverColors = (C4_UI_ButtonColorInfo){C4_BUTTON_HOVERCOLOR_BACKGROUND, C4_BUTTON_HOVERCOLOR_TEXT};
-    button->clickColors = (C4_UI_ButtonColorInfo){C4_BUTTON_CLICKCOLOR_BACKGROUND, C4_BUTTON_CLICKCOLOR_TEXT};
+    button->defaultColors = (C4_UI_ButtonColorInfo){C4_BUTTON_DEFAULT_COLOR_BACKGROUND, C4_BUTTON_DEFAULT_COLOR_TEXT};
+    button->hoverColors = (C4_UI_ButtonColorInfo){C4_BUTTON_HOVER_COLOR_BACKGROUND, C4_BUTTON_HOVER_COLOR_TEXT};
+    button->clickColors = (C4_UI_ButtonColorInfo){C4_BUTTON_CLICK_COLOR_BACKGROUND, C4_BUTTON_CLICK_COLOR_TEXT};
     if (!C4_UI_Rectangle_InitProperties(&button->background, background, button->defaultColors.background)) {
         return false;
     }

@@ -17,15 +17,15 @@ C4_Screen_Game* C4_Screen_Game_Create(SDL_Renderer* renderer, C4_Board* board) {
     }
     screen->board = board;
     screen->renderer = renderer;
-    if (!C4_UI_Text_InitProperties(&screen->testBoardText, screen->renderer, "", C4_FontType_Regular, 140.f, 0.f, 0.f, 0)) {
+    if (!C4_UI_Text_InitProperties(&screen->testBoardText, screen->renderer, "", C4_FontType_Regular, C4_SCREEN_GAME_TEST_TEXT_PT_SIZE, 0.f, 0.f, 0)) {
         C4_Screen_Game_Destroy(screen);
         return NULL;
     }
     C4_Screen_Game_TestStrUpdate(screen);
     if (
         !C4_UI_Button_InitProperties(
-            &screen->menuButton, screen->renderer, "Back", C4_FontType_Bold, 
-            32.f, (SDL_FRect){0.f, 950.f, 400.f, 100.f}
+            &screen->menuButton, screen->renderer, "Back", C4_DEFAULT_BUTTON_FONT, 
+            C4_FONT_DEFAULT_PT_SIZE, C4_SCREEN_GAME_BACK_BUTTON_RECT
         )
     ) {
         C4_Screen_Game_Destroy(screen);
