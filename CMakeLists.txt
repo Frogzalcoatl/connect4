@@ -124,26 +124,7 @@ foreach(file_path ${ASSET_FILES})
     list(APPEND GENERATED_SOURCES "${out_c}")
 endforeach()
 
-set(SOURCES
-    src/main.c
-    src/connect4.c
-    src/assets/fonts.c
-    src/assets/sounds.c
-    src/game/board.c
-    src/game/events.c
-    src/game/utils.c
-    src/ui/cursorManager.c
-    src/ui/elements/button.c
-    src/ui/elements/buttonGroup.c
-    src/ui/elements/borders.c
-    src/ui/elements/index.c
-    src/ui/elements/popup.c
-    src/ui/elements/rectangle.c
-    src/ui/elements/text.c
-    src/ui/screens/game.c
-    src/ui/screens/menu.c
-    src/ui/screens/settings.c
-)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.c")
 
 if(WIN32)
 # Add WIN32 before ${SOURCES} to remove the debug console
