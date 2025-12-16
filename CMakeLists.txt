@@ -53,35 +53,47 @@ if(NOT SDL3_ttf_FOUND)
     FetchContent_MakeAvailable(SDL3_ttf)
 endif()
 
-# Function to read a file and turn it into a C header
-function(embed_resource input_file output_file c_name)
+# Function to read a file and turn it into a C file / header
+# Function to read a file and turn it into a C file / header
+function(embed_resource input_file output_c output_h c_name)
     file(READ ${input_file} hex_content HEX)
     
-    # Check if file is empty to prevent empty initializer errors
+    # Calculate the size (2 hex characters = 1 byte)
     string(LENGTH "${hex_content}" hex_len)
+    math(EXPR file_size "${hex_len} / 2")
+
+    # Handle empty files
     if(hex_len EQUAL 0)
-        # Create a dummy entry if file is empty
         set(array_values "0x00")
-        set(size_def "0")
+        # Size is technically 0, even though we pad the array with 1 byte to keep C happy
+        set(file_size 0) 
     else()
-        # 1. Add 0x prefix and comma to every byte
+        # Regex magic to format hex dump
         string(REGEX REPLACE "(..)" "0x\\1, " array_values "${hex_content}")
-        # 2. REMOVE the trailing comma and space to ensure valid C syntax
+        # Remove trailing comma
         string(REGEX REPLACE ", $" "" array_values "${array_values}")
-        set(size_def "sizeof(${c_name}_data)")
     endif()
 
-    # Create the header file content
-    set(file_content "
+    # --- 1. Write the Header (.h) ---
+    # CHANGE: We define the size as a MACRO so it is a compile-time constant.
+    set(header_content "
 #pragma once
 #include <stddef.h>
 
-/* Auto-generated from ${input_file} */
-static const unsigned char ${c_name}_data[] = { ${array_values} };
-#define ${c_name}_size ${size_def}
+extern const unsigned char ${c_name}_data[];
+#define ${c_name}_size ${file_size}
 ")
+    file(WRITE ${output_h} "${header_content}")
 
-    file(WRITE ${output_file} "${file_content}")
+    # --- 2. Write the Source (.c) ---
+    # The array definition stays the same
+    set(source_content "
+#include \"${c_name}.h\"
+
+const unsigned char ${c_name}_data[] = { ${array_values} };
+")
+    file(WRITE ${output_c} "${source_content}")
+
 endfunction()
 
 # Find all files in assets/ recursively
@@ -89,22 +101,28 @@ file(GLOB_RECURSE ASSET_FILES "${CMAKE_SOURCE_DIR}/assets/*")
 
 message(STATUS "Bundling assets...")
 
+set(GENERATED_SOURCES "")
+
 foreach(file_path ${ASSET_FILES})
     file(RELATIVE_PATH rel_path "${CMAKE_SOURCE_DIR}/assets" "${file_path}")
     
-    # Sanitize filename
+    # Sanitize filename to create a valid C variable name
     string(REPLACE "/" "_" safe_name "${rel_path}")
     string(REPLACE "\\" "_" safe_name "${safe_name}")
     string(REPLACE "." "_" safe_name "${safe_name}")
-    string(REPLACE "-" "_" safe_name "${safe_name}") # Handle dashes too
+    string(REPLACE "-" "_" safe_name "${safe_name}")
     set(safe_name "assets_${safe_name}")
-
-    set(out_header "${CMAKE_BINARY_DIR}/generated/${safe_name}.h")
     
-    embed_resource("${file_path}" "${out_header}" "${safe_name}")
-    message(STATUS "  Embedded: ${rel_path} -> ${safe_name}.h")
+    # Define paths for both .c and .h
+    set(out_c "${CMAKE_BINARY_DIR}/generated/${safe_name}.c")
+    set(out_h "${CMAKE_BINARY_DIR}/generated/${safe_name}.h")
+    
+    # Call the updated function
+    embed_resource("${file_path}" "${out_c}" "${out_h}" "${safe_name}")
+    
+    # Add the .c file to our list
+    list(APPEND GENERATED_SOURCES "${out_c}")
 endforeach()
-message(STATUS "Assets embedded successfully.")
 
 set(SOURCES
     src/main.c
@@ -129,9 +147,9 @@ set(SOURCES
 
 if(WIN32)
 # Add WIN32 before ${SOURCES} to remove the debug console
-    add_executable(${PROJECT_NAME} WIN32 ${SOURCES} resources/icon.rc)
+    add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${GENERATED_SOURCES} resources/icon.rc)
 else()
-    add_executable(${PROJECT_NAME} ${SOURCES})
+    add_executable(${PROJECT_NAME} ${SOURCES} ${GENERATED_SOURCES})
 endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)

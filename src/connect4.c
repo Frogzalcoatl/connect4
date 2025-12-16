@@ -46,7 +46,9 @@ static bool C4_Game_ChangeScreen(C4_Game* game, C4_ScreenType type) {
         game->currentScreen.Destroy(game->currentScreen.data);
         memset(&game->currentScreen, 0, sizeof(C4_Screen_Interface));
     } else {
-        SDL_Log("Warning: was unable to destroy previous screen");
+        if (game->running) {
+            SDL_Log("Warning: was unable to destroy previous screen");
+        }
     }
     switch (type) {
         case C4_ScreenType_Menu: {
