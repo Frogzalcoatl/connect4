@@ -9,7 +9,6 @@ typedef struct {
     C4_UI_Borders borders;
     C4_UI_Rectangle background;
     C4_UI_Text message;
-    unsigned int borderWidth;
     bool isShowing;
 } C4_UI_Popup;
 

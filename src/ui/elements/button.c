@@ -5,33 +5,90 @@
 #include "Connect4/constants.h"
 #include <stdlib.h>
 
-bool C4_UI_Button_InitProperties(C4_UI_Button* button, SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, const SDL_FRect background) {
-    if (!str || !renderer) {
-        SDL_Log("Unable to init button properties. str and/or renderer is NULL");
+void C4_UI_Button_CenterElementsInBackground(C4_UI_Button* button, C4_Axis axis) {
+    if (!button) {
+        SDL_Log("Button is NULL");
+        return;
+    }
+    button->borders.destination.w = button->background.destination.w;
+    button->borders.destination.h = button->background.destination.h;
+    if (axis == C4_Axis_X || axis == C4_Axis_XY) {
+        float backgroundCenterX = button->background.destination.x + (button->background.destination.w / 2.f);
+        button->text.destination.x = backgroundCenterX - (button->text.destination.w / 2.f);
+        button->borders.destination.x = button->background.destination.x;
+        button->symbol.destination.x = backgroundCenterX - (button->symbol.destination.w / 2.f);
+    }
+    if (axis == C4_Axis_Y || axis == C4_Axis_XY) {
+        float backgroundCenterY = button->background.destination.y + (button->background.destination.h / 2.f);
+        button->text.destination.y = backgroundCenterY - (button->text.destination.h / 2.f);
+        button->borders.destination.y = button->background.destination.y;
+        button->symbol.destination.y = backgroundCenterY - (button->symbol.destination.h / 2.f);
+    }
+}
+
+bool C4_UI_Button_InitProperties(
+    C4_UI_Button* button, SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, const SDL_FRect background,
+    unsigned int borderWidth, C4_UI_SymbolType symbol, float symbolWidth, float symbolHeight, int symbolRotationDegrees
+) {
+    if (!renderer) {
+        SDL_Log("Unable to init button properties. Renderer is NULL");
         return false;
     }
-    button->defaultColors = (C4_UI_ButtonColorInfo){C4_BUTTON_DEFAULT_COLOR_BACKGROUND, C4_BUTTON_DEFAULT_COLOR_TEXT};
-    button->hoverColors = (C4_UI_ButtonColorInfo){C4_BUTTON_HOVER_COLOR_BACKGROUND, C4_BUTTON_HOVER_COLOR_TEXT};
-    button->clickColors = (C4_UI_ButtonColorInfo){C4_BUTTON_CLICK_COLOR_BACKGROUND, C4_BUTTON_CLICK_COLOR_TEXT};
+    button->defaultColors = (C4_UI_ButtonColorInfo){
+        C4_BUTTON_DEFAULT_COLOR_BACKGROUND, C4_BUTTON_DEFAULT_COLOR_TEXT, C4_BUTTON_DEFAULT_COLOR_BORDERS, C4_BUTTON_DEFAULT_COLOR_SYMBOL
+    };
+    button->hoverColors = (C4_UI_ButtonColorInfo){
+        C4_BUTTON_HOVER_COLOR_BACKGROUND, C4_BUTTON_HOVER_COLOR_TEXT, C4_BUTTON_HOVER_COLOR_BORDERS, C4_BUTTON_HOVER_COLOR_SYMBOL
+    };
+    button->clickColors = (C4_UI_ButtonColorInfo){
+        C4_BUTTON_CLICK_COLOR_BACKGROUND, C4_BUTTON_CLICK_COLOR_TEXT, C4_BUTTON_CLICK_COLOR_BORDERS, C4_BUTTON_CLICK_COLOR_SYMBOL
+    };
     if (!C4_UI_Rectangle_InitProperties(&button->background, background, button->defaultColors.background)) {
         return false;
     }
-    if (!C4_UI_Text_InitProperties(&button->text, renderer, str, font, ptSize, background.x, background.y, 0)) {
-        return false;
+    if (str) {
+        if (!C4_UI_Text_InitProperties(&button->text, renderer, str, font, ptSize, background.x, background.y, 0)) {
+            return false;
+        }
+    } else {
+        button->text.str[0] = '\0';
+    }
+    if (borderWidth > 0) {
+        if (!C4_UI_Borders_InitProperties(&button->borders, background, button->defaultColors.borders, borderWidth)) {
+            return false;
+        }
+    } else {
+        button->borders.width = 0;
+        button->borders.destination.w = background.w;
+        button->borders.destination.h = background.h;
+    }
+    if (symbol != C4_UI_SymbolType_None) {
+        if (
+            !C4_UI_Symbol_InitProperties(
+                &button->symbol, symbol,
+                (SDL_FRect){background.x, background.y, symbolWidth, symbolHeight},
+                symbolRotationDegrees
+            )
+        ) {
+            return false;
+        }
     }
     button->isHovered = false;
     button->isPressed = false;
-    C4_UI_Button_CenterTextInBackground(button, C4_Axis_XY);
+    C4_UI_Button_CenterElementsInBackground(button, C4_Axis_XY);
     return true;
 }
 
-C4_UI_Button* C4_UI_Button_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, const SDL_FRect background) {
+C4_UI_Button* C4_UI_Button_Create(
+    SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, const SDL_FRect background, unsigned int borderWidth,
+    C4_UI_SymbolType symbol, float symbolWidth, float symbolHeight, int symbolRotationDegrees
+) {
     C4_UI_Button* button = calloc(1, sizeof(C4_UI_Button));
     if (!button) {
         SDL_Log("Unable to allocate memory for button");
         return NULL;
     }
-    if (!C4_UI_Button_InitProperties(button, renderer, str, font, ptSize, background)) {
+    if (!C4_UI_Button_InitProperties(button, renderer, str, font, ptSize, background, borderWidth, symbol, symbolWidth, symbolHeight, symbolRotationDegrees)) {
         C4_UI_Button_Destroy(button);
         return NULL;
     }
@@ -56,8 +113,25 @@ void C4_UI_Button_Draw(C4_UI_Button* button, SDL_Renderer* renderer) {
         SDL_Log("Button is NULL");
         return;
     }
+    C4_UI_ButtonColorInfo* currentColors = &button->defaultColors;
+    if (button->isPressed) {
+        currentColors = &button->clickColors;
+    } else if (button->isHovered) {
+        currentColors = &button->hoverColors;
+    }
+    button->background.color = currentColors->background;
     C4_UI_Rectangle_Draw(&button->background, renderer);
-    C4_UI_Text_Draw(&button->text, renderer);
+    if (button->borders.width > 0) {
+        button->borders.color = currentColors->borders;
+        C4_UI_Borders_Draw(&button->borders, renderer);
+    }
+    if (button->symbol.type != C4_UI_SymbolType_None) {
+        C4_UI_Symbol_Draw(&button->symbol, currentColors->symbol, renderer);
+    }
+    if (button->text.str[0] != '\0') {
+        button->text.color = currentColors->text;
+        C4_UI_Text_Draw(&button->text, renderer);
+    }
 }
 
 bool C4_UI_Button_HandleMouseEvents(C4_UI_Button* button, SDL_Event* event, SDL_Renderer* renderer) {
@@ -67,58 +141,35 @@ bool C4_UI_Button_HandleMouseEvents(C4_UI_Button* button, SDL_Event* event, SDL_
     }
     if (event->type == SDL_EVENT_MOUSE_MOTION) {
         bool currentlyHovered = (
-            event->motion.x >= button->background.rectangle.x &&
-            event->motion.x <= button->background.rectangle.x + button->background.rectangle.w &&
-            event->motion.y >= button->background.rectangle.y &&
-            event->motion.y <= button->background.rectangle.y + button->background.rectangle.h
+            event->motion.x >= button->background.destination.x &&
+            event->motion.x <= button->background.destination.x + button->background.destination.w &&
+            event->motion.y >= button->background.destination.y &&
+            event->motion.y <= button->background.destination.y + button->background.destination.h
         );
         if (currentlyHovered != button->isHovered) {
             button->isHovered = currentlyHovered;
             if (button->isHovered) {
-                button->background.color = button->hoverColors.background;
-                button->text.color = button->hoverColors.text;
                 SDL_SetCursor(C4_GetSystemCursor(SDL_SYSTEM_CURSOR_POINTER));
                 C4_PushEvent_SoundRequest(C4_SoundEffect_ButtonHover);
             } else {
-                button->background.color = button->defaultColors.background;
-                button->text.color = button->defaultColors.text;
                 SDL_SetCursor(C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT));
             }
         }
     } else if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
         if (event->button.button == SDL_BUTTON_LEFT && button->isHovered) {
             button->isPressed = true;
-            button->background.color = button->clickColors.background;
-            button->text.color = button->clickColors.text;
             C4_PushEvent_SoundRequest(C4_SoundEffect_ButtonClick);
-            SDL_SetCursor(C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT));
         }
     } else if (event->type == SDL_EVENT_MOUSE_BUTTON_UP) {
         if (event->button.button == SDL_BUTTON_LEFT) {
-            if (button->isPressed && button->isHovered)  {
-                button->background.color = button->hoverColors.background;
-                button->text.color = button->hoverColors.text;
+            bool wasClicked = button->isPressed && button->isHovered;
+            button->isPressed = false;
+            if (wasClicked)  {
                 return true;
             }
-            button->isPressed = false;
         }
     }
     return false;
-}
-
-void C4_UI_Button_CenterTextInBackground(C4_UI_Button* button, C4_Axis axis) {
-    if (!button) {
-        SDL_Log("Button is NULL");
-        return;
-    }
-    if (axis == C4_Axis_X || axis == C4_Axis_XY) {
-        float backgroundCenterX = button->background.rectangle.x + (button->background.rectangle.w / 2.f);
-        button->text.destination.x = backgroundCenterX - (button->text.destination.w / 2.0f);
-    }
-    if (axis == C4_Axis_Y || axis == C4_Axis_XY) {
-        float bcakgroundCenterY = button->background.rectangle.y + (button->background.rectangle.h / 2.f);
-        button->text.destination.y = bcakgroundCenterY - (button->text.destination.h / 2.f);
-    }
 }
 
 void C4_UI_Button_CenterInWindow(C4_UI_Button* button, C4_Axis axis) {
@@ -126,8 +177,8 @@ void C4_UI_Button_CenterInWindow(C4_UI_Button* button, C4_Axis axis) {
         SDL_Log("Button is NULL");
         return;
     }
-    C4_UI_CenterInWindow(&button->background.rectangle, axis);
-    C4_UI_Button_CenterTextInBackground(button, axis);
+    C4_UI_CenterInWindow(&button->background.destination, axis);
+    C4_UI_Button_CenterElementsInBackground(button, axis);
 }
 
 void C4_UI_Button_TransformResize(C4_UI_Button* button, float x, float y, float w, float h) {
@@ -135,8 +186,8 @@ void C4_UI_Button_TransformResize(C4_UI_Button* button, float x, float y, float 
         SDL_Log("Tried to resize NULL button");
         return;
     }
-    button->background.rectangle = (SDL_FRect){x, y, w, h};
-    C4_UI_Button_CenterTextInBackground(button, C4_Axis_XY);
+    button->background.destination = (SDL_FRect){x, y, w, h};
+    C4_UI_Button_CenterElementsInBackground(button, C4_Axis_XY);
 }
 
 void C4_UI_Button_ChangeStr(C4_UI_Button* button, const char* str, SDL_Renderer* renderer) {
@@ -145,5 +196,8 @@ void C4_UI_Button_ChangeStr(C4_UI_Button* button, const char* str, SDL_Renderer*
     }
     C4_UI_Text_ChangeStr(&button->text, str);
     C4_UI_Text_Refresh(&button->text, renderer);
-    C4_UI_Button_CenterTextInBackground(button, C4_Axis_XY);
+    float backgroundCenterX = button->background.destination.x + (button->background.destination.w / 2.f);
+    button->text.destination.x = backgroundCenterX - (button->text.destination.w / 2.f);
+    float backgroundCenterY = button->background.destination.y + (button->background.destination.h / 2.f);
+    button->text.destination.y = backgroundCenterY - (button->text.destination.h / 2.f);
 }

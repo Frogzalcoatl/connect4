@@ -16,12 +16,15 @@ typedef struct {
     unsigned int margin;
 } C4_UI_ButtonGroup;
 
-bool C4_UI_ButtonGroup_InitProperties(C4_UI_ButtonGroup* stack, SDL_Renderer* renderer, const SDL_FRect bounds, size_t count, C4_UI_ButtonGroup_Direction direction, unsigned int margin, float buttonPtSize);
+bool C4_UI_ButtonGroup_InitProperties(C4_UI_ButtonGroup* group, SDL_Renderer* renderer, const SDL_FRect bounds, size_t count, C4_UI_ButtonGroup_Direction direction, unsigned int margin, float buttonPtSize);
 C4_UI_ButtonGroup* C4_UI_ButtonGroup_Create(SDL_Renderer* renderer, const SDL_FRect bounds, size_t count, C4_UI_ButtonGroup_Direction direction, unsigned int margin, float buttonPtSize);
-void C4_UI_ButtonGroup_FreeResources(C4_UI_ButtonGroup* stack);
-void C4_UI_ButtonGroup_Destroy(C4_UI_ButtonGroup* stack);
-void C4_UI_ButtonGroup_SetButtonIndex(C4_UI_ButtonGroup* stack, size_t buttonIndex, SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize);
-void C4_UI_ButtonGroup_Draw(C4_UI_ButtonGroup* stack, SDL_Renderer* renderer);
-int C4_UI_ButtonGroup_HandleMouseEvents(C4_UI_ButtonGroup* stack, SDL_Event* event, SDL_Renderer* renderer);
-void C4_UI_ButtonGroup_TransformResize(C4_UI_ButtonGroup* stack, const SDL_FRect rect);
-void C4_UI_ButtonGroup_CenterInWindow(C4_UI_ButtonGroup* stack, C4_Axis axis);
+void C4_UI_ButtonGroup_FreeResources(C4_UI_ButtonGroup* group);
+void C4_UI_ButtonGroup_Destroy(C4_UI_ButtonGroup* group);
+void C4_UI_ButtonGroup_SetButtonIndex(
+    C4_UI_ButtonGroup* group, size_t buttonIndex, SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize,
+    unsigned int borderWidth, C4_UI_SymbolType symbol, float symbolWidth, float symbolHeight, int symbolRotationDegrees
+);
+void C4_UI_ButtonGroup_Draw(C4_UI_ButtonGroup* group, SDL_Renderer* renderer);
+int C4_UI_ButtonGroup_HandleMouseEvents(C4_UI_ButtonGroup* group, SDL_Event* event, SDL_Renderer* renderer);
+void C4_UI_ButtonGroup_TransformResize(C4_UI_ButtonGroup* group, const SDL_FRect rect);
+void C4_UI_ButtonGroup_CenterInWindow(C4_UI_ButtonGroup* group, C4_Axis axis);

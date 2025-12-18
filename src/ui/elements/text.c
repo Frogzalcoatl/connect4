@@ -102,6 +102,9 @@ void C4_UI_Text_Draw(C4_UI_Text* element, SDL_Renderer* renderer) {
         SDL_Log("Text element renderer is NULL");
         return;
     }
+    if (element->str[0] == '\0') {
+        return;
+    }
     SDL_SetTextureColorMod(element->texture, element->color.r, element->color.g, element->color.b);
     SDL_SetTextureAlphaMod(element->texture, element->color.a);
     SDL_RenderTexture(renderer, element->texture, NULL, &element->destination);

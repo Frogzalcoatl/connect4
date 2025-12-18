@@ -48,7 +48,7 @@ bool C4_UI_ButtonGroup_InitProperties(C4_UI_ButtonGroup* group, SDL_Renderer* re
         return false;
     }
     for (size_t i = 0; i < group->count; i++) {
-        if (!C4_UI_Button_InitProperties(&group->buttons[i], renderer, "", C4_DEFAULT_BUTTON_FONT, buttonPtSize, C4_UI_ButtonGroup_GetUpdatedButtonRect(group, i))) {
+        if (!C4_UI_Button_InitProperties(&group->buttons[i], renderer, "", C4_DEFAULT_BUTTON_FONT, buttonPtSize, C4_UI_ButtonGroup_GetUpdatedButtonRect(group, i), 0, C4_UI_SymbolType_None, 1.f, 1.f, 0)) {
             return false;
         }
     }
@@ -87,7 +87,10 @@ void C4_UI_ButtonGroup_Destroy(C4_UI_ButtonGroup* group) {
     free(group);
 }
 
-void C4_UI_ButtonGroup_SetButtonIndex(C4_UI_ButtonGroup* group, size_t buttonIndex, SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize) {
+void C4_UI_ButtonGroup_SetButtonIndex(
+    C4_UI_ButtonGroup* group, size_t buttonIndex, SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize,
+    unsigned int borderWidth, C4_UI_SymbolType symbol, float symbolWidth, float symbolHeight, int symbolRotationDegrees
+) {
     if (buttonIndex >= group->count) {
         SDL_Log("Unable to set button index %zu. Out of bounds.", buttonIndex);
         return;
@@ -95,6 +98,12 @@ void C4_UI_ButtonGroup_SetButtonIndex(C4_UI_ButtonGroup* group, size_t buttonInd
     group->buttons[buttonIndex].text.ptSize = ptSize;
     group->buttons[buttonIndex].text.font = C4_GetFont(font);
     C4_UI_Button_ChangeStr(&group->buttons[buttonIndex], str, renderer);
+    group->buttons[buttonIndex].borders.width = borderWidth;
+    group->buttons[buttonIndex].symbol.type = symbol;
+    group->buttons[buttonIndex].symbol.destination.w = symbolWidth;
+    group->buttons[buttonIndex].symbol.destination.h = symbolHeight;
+    group->buttons[buttonIndex].symbol.rotationDegrees = symbolRotationDegrees;
+    C4_UI_Button_CenterElementsInBackground(&group->buttons[buttonIndex], C4_Axis_XY);
 }
 
 void C4_UI_ButtonGroup_Draw(C4_UI_ButtonGroup* group, SDL_Renderer* renderer) {

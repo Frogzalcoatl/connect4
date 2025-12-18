@@ -140,4 +140,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_BINARY_DIR}/generated
 )
 
+# So math.h always includes math defines (ex: M_PI)
+target_compile_definitions(${PROJECT_NAME} PRIVATE _USE_MATH_DEFINES)
+
 target_compile_features(${PROJECT_NAME} PRIVATE c_std_17)

@@ -2,24 +2,24 @@
 #include "Connect4/constants.h"
 #include <stdlib.h>
 
-bool C4_UI_Borders_InitProperties(C4_UI_Borders* element, const SDL_FRect rectangle, const SDL_Color color, const unsigned int borderWidth) {
+bool C4_UI_Borders_InitProperties(C4_UI_Borders* element, const SDL_FRect destination, const SDL_Color color, const unsigned int width) {
     if (!element) {
         SDL_Log("Unable to init properties for border element. Pointer is NULL");
         return false;
     }
-    element->rectangle = rectangle;
+    element->destination = destination;
     element->color = color;
-    element->borderWidth = borderWidth;
+    element->width = width;
     return true;
 }
 
-C4_UI_Borders* C4_UI_Borders_Create(const SDL_FRect rectangle, const SDL_Color color, const unsigned int borderWidth) {
+C4_UI_Borders* C4_UI_Borders_Create(const SDL_FRect destination, const SDL_Color color, const unsigned int width) {
     C4_UI_Borders* element = calloc(1, sizeof(C4_UI_Borders));
     if (!element) {
         SDL_Log("Unable to allocate memory for borders element");
         return NULL;
     }
-    if (!C4_UI_Borders_InitProperties(element, rectangle, color, borderWidth)) {
+    if (!C4_UI_Borders_InitProperties(element, destination, color, width)) {
         C4_UI_Borders_Destroy(element);
         return NULL;
     }
@@ -40,10 +40,10 @@ void C4_UI_Borders_Draw(C4_UI_Borders* element, SDL_Renderer* renderer) {
         return;
     }
     SDL_SetRenderDrawColor(renderer, element->color.r, element->color.g, element->color.b, element->color.a);
-    SDL_FRect topBorder = {element->rectangle.x, element->rectangle.y, element->rectangle.w, element->borderWidth};
-    SDL_FRect bottomBorder = {element->rectangle.x, element->rectangle.y + element->rectangle.h - element->borderWidth, element->rectangle.w, element->borderWidth};
-    SDL_FRect leftBorder = {element->rectangle.x, element->rectangle.y, element->borderWidth, element->rectangle.h};
-    SDL_FRect rightBorder = {element->rectangle.x + element->rectangle.w - element->borderWidth, element->rectangle.y, element->borderWidth, element->rectangle.h};
+    SDL_FRect topBorder = {element->destination.x, element->destination.y, element->destination.w, element->width};
+    SDL_FRect bottomBorder = {element->destination.x, element->destination.y + element->destination.h - element->width, element->destination.w, element->width};
+    SDL_FRect leftBorder = {element->destination.x, element->destination.y, element->width, element->destination.h};
+    SDL_FRect rightBorder = {element->destination.x + element->destination.w - element->width, element->destination.y, element->width, element->destination.h};
     SDL_RenderFillRect(renderer, &topBorder);
     SDL_RenderFillRect(renderer, &bottomBorder);
     SDL_RenderFillRect(renderer, &leftBorder);

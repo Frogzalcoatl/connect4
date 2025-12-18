@@ -2,24 +2,24 @@
 #include "Connect4/constants.h"
 #include <stdlib.h>
 
-#define C4_UI_POPUP_MARGIN 10
+#define C4_UI_POPUP_MARGIN 20
 
 static void C4_UI_Popup_PositionElementsInBackground(C4_UI_Popup* popup) {
     if (!popup) {
         SDL_Log("Tried to position NULL popup elements");
         return;
     }
-    SDL_FRect* rect = &popup->background.rectangle;
-    popup->message.destination.x = rect->x + popup->borderWidth + C4_UI_POPUP_MARGIN;
-    popup->message.destination.y = rect->y + popup->borderWidth + C4_UI_POPUP_MARGIN;
-    popup->message.wrapWidth = rect->w - popup->borderWidth * 2 - C4_UI_POPUP_MARGIN;
+    SDL_FRect* rect = &popup->background.destination;
+    popup->message.destination.x = rect->x + popup->borders.width + C4_UI_POPUP_MARGIN;
+    popup->message.destination.y = rect->y + popup->borders.width + C4_UI_POPUP_MARGIN;
+    popup->message.wrapWidth = rect->w - popup->borders.width * 2 - C4_UI_POPUP_MARGIN;
     C4_UI_Text_Refresh(&popup->message, popup->renderer);
-    popup->borders.rectangle = popup->background.rectangle;
+    popup->borders.destination = popup->background.destination;
     SDL_FRect buttonGroupRect;
-    buttonGroupRect.x = rect->x + popup->borderWidth + C4_UI_POPUP_MARGIN;
-    buttonGroupRect.w = rect->w - popup->borderWidth - (C4_UI_POPUP_MARGIN * popup->buttonGroup.count + 1);
+    buttonGroupRect.x = rect->x + popup->borders.width + C4_UI_POPUP_MARGIN;
+    buttonGroupRect.w = rect->w - popup->borders.width - (C4_UI_POPUP_MARGIN * popup->buttonGroup.count + 1);
     buttonGroupRect.h = popup->buttonGroup.bounds.h;
-    buttonGroupRect.y = rect->y + rect->h - buttonGroupRect.h - popup->borderWidth - C4_UI_POPUP_MARGIN;
+    buttonGroupRect.y = rect->y + rect->h - buttonGroupRect.h - popup->borders.width - C4_UI_POPUP_MARGIN;
     C4_UI_ButtonGroup_TransformResize(&popup->buttonGroup, buttonGroupRect);
 }
 
@@ -43,7 +43,7 @@ bool C4_UI_Popup_InitProperties(
     if (!C4_UI_ButtonGroup_InitProperties(&popup->buttonGroup, renderer, (SDL_FRect){0.f, 0.f, 0.f, buttonGroupHeight}, buttonCount, buttonDirection, C4_UI_POPUP_MARGIN, buttonPtSize)) {
         return false;
     }
-    if (!C4_UI_Borders_InitProperties(&popup->borders, rectangle, (SDL_Color){255, 255, 255, 255}, borderWidth)) {
+    if (!C4_UI_Borders_InitProperties(&popup->borders, rectangle, (SDL_Color){80, 80, 80, 255}, borderWidth)) {
         return false;
     }
     if (!C4_UI_Rectangle_InitProperties(&popup->background, rectangle, (SDL_Color){0, 0, 0, 255})) {
@@ -52,7 +52,8 @@ bool C4_UI_Popup_InitProperties(
     if (!C4_UI_Text_InitProperties(&popup->message, popup->renderer, messageText, C4_FontType_Regular, messagePtSize, 0, 0, 0)) {
         return false;
     }
-    popup->borderWidth = borderWidth;
+    popup->message.color = (SDL_Color){230, 230, 230, 255};
+    popup->borders.width = borderWidth;
     C4_UI_Popup_PositionElementsInBackground(popup);
     popup->isShowing = false;
     return true;
@@ -118,7 +119,7 @@ void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup) {
         SDL_Log("Popup element is NULL");
         return;
     }
-    C4_UI_CenterInWindow(&popup->background.rectangle, C4_Axis_XY);
+    C4_UI_CenterInWindow(&popup->background.destination, C4_Axis_XY);
     C4_UI_Popup_PositionElementsInBackground(popup);
 }
 

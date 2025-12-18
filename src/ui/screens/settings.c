@@ -14,12 +14,12 @@ static const char buttonText[C4_SCREEN_SETTINGS_BUTTONCOUNT][16] = {
     "Cancel",
 };
 
-#define C4_SCREEN_SETTINGS_POPUPBUTTONCOUNT 2
+#define C4_SCREEN_MENU_POPUPBUTTONCOUNT 2
 typedef enum {
     C4_PopupButtonIndexes_Yes,
     C4_PopupButtonIndexes_Back
 } C4_PopupButtonIndexes;
-static const char popupButtonText[C4_SCREEN_SETTINGS_POPUPBUTTONCOUNT][8] = {
+static const char popupButtonText[C4_SCREEN_MENU_POPUPBUTTONCOUNT][8] = {
     "Yes",
     "Back"
 };
@@ -52,7 +52,7 @@ C4_Screen_Settings* C4_Screen_Settings_Create(SDL_Renderer* renderer, SDL_Window
         return NULL;
     }
     for (size_t i = 0; i < C4_SCREEN_SETTINGS_BUTTONCOUNT; i++) {
-        C4_UI_ButtonGroup_SetButtonIndex(&screen->buttonGroup, i, screen->renderer, buttonText[i], C4_DEFAULT_BUTTON_FONT, C4_FONT_DEFAULT_PT_SIZE);
+        C4_UI_ButtonGroup_SetButtonIndex(&screen->buttonGroup, i, screen->renderer, buttonText[i], C4_DEFAULT_BUTTON_FONT, C4_FONT_DEFAULT_PT_SIZE, 3, C4_UI_SymbolType_None, 0.f, 0.f, 0);
     }
     C4_UI_ButtonGroup_CenterInWindow(&screen->buttonGroup, C4_Axis_X);
     if (!C4_UI_Popup_InitProperties(
@@ -64,8 +64,8 @@ C4_Screen_Settings* C4_Screen_Settings_Create(SDL_Renderer* renderer, SDL_Window
         C4_Screen_Settings_Destroy(screen);
         return NULL;
     }
-    for (size_t i = 0; i < C4_SCREEN_SETTINGS_POPUPBUTTONCOUNT; i++) {
-        C4_UI_ButtonGroup_SetButtonIndex(&screen->confirmationPopup.buttonGroup, i, screen->renderer, popupButtonText[i], C4_DEFAULT_BUTTON_FONT, C4_FONT_DEFAULT_PT_SIZE);
+    for (size_t i = 0; i < C4_SCREEN_MENU_POPUPBUTTONCOUNT; i++) {
+        C4_UI_ButtonGroup_SetButtonIndex(&screen->confirmationPopup.buttonGroup, i, screen->renderer, popupButtonText[i], C4_DEFAULT_BUTTON_FONT, C4_FONT_DEFAULT_PT_SIZE, 3, C4_UI_SymbolType_None, 0.f, 0.f, 0);
     }
     C4_UI_Popup_CenterInWindow(&screen->confirmationPopup);
     return screen;
@@ -100,6 +100,13 @@ void C4_Screen_Settings_HandleKeyboardInput(void* screenData, SDL_Scancode scanc
         return;
     }
     C4_Screen_Settings* screen = (C4_Screen_Settings*)screenData;
+    if (scancode == SDL_SCANCODE_ESCAPE) {
+        if (screen->confirmationPopup.isShowing) {
+            screen->confirmationPopup.isShowing = false;
+        } else {
+            C4_PushEvent_ScreenChange(C4_ScreenType_Menu);
+        }
+    }
 }
 
 void C4_Screen_Settings_HandleMouseEvents(void* screenData, SDL_Event* event) {
