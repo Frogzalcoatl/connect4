@@ -1,6 +1,6 @@
 # TODO
 
-* Investigate why the WindowsVS github actions has additional warnings/errors that prevent it from building
+* Ensure all UI code isnt dependent on connect4 specific files (ex: screens/.c, connect4.c) so it can be reused for future projects
 * Number input UIElement
 * Slider UIElement
 * Settings screen
