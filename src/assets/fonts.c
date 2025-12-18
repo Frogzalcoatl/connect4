@@ -27,7 +27,7 @@ TTF_Font* C4_GetFont(C4_FontType type) {
         SDL_Log("Unable to open font IOStream. Type index: %i", type);
         return NULL;
     }
-    TTF_Font* newFont = TTF_OpenFontIO(io, true, C4_FONT_DEFAULT_PT_SIZE);
+    TTF_Font* newFont = TTF_OpenFontIO(io, true, 32.f);
     if (newFont) {
         fontCache[type] = newFont;
         return newFont;

@@ -16,13 +16,13 @@ typedef struct {
     unsigned int margin;
 } C4_UI_ButtonGroup;
 
-bool C4_UI_ButtonGroup_InitProperties(C4_UI_ButtonGroup* group, SDL_Renderer* renderer, const SDL_FRect bounds, size_t count, C4_UI_ButtonGroup_Direction direction, unsigned int margin, float buttonPtSize);
-C4_UI_ButtonGroup* C4_UI_ButtonGroup_Create(SDL_Renderer* renderer, const SDL_FRect bounds, size_t count, C4_UI_ButtonGroup_Direction direction, unsigned int margin, float buttonPtSize);
+bool C4_UI_ButtonGroup_InitProperties(C4_UI_ButtonGroup* group, SDL_Renderer* renderer, const SDL_FRect bounds, size_t count, C4_UI_ButtonGroup_Direction direction, unsigned int margin, const C4_UI_Theme* theme);
+C4_UI_ButtonGroup* C4_UI_ButtonGroup_Create(SDL_Renderer* renderer, const SDL_FRect bounds, size_t count, C4_UI_ButtonGroup_Direction direction, unsigned int margin, const C4_UI_Theme* theme);
 void C4_UI_ButtonGroup_FreeResources(C4_UI_ButtonGroup* group);
 void C4_UI_ButtonGroup_Destroy(C4_UI_ButtonGroup* group);
 void C4_UI_ButtonGroup_SetButtonIndex(
-    C4_UI_ButtonGroup* group, size_t buttonIndex, SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize,
-    unsigned int borderWidth, C4_UI_SymbolType symbol, float symbolWidth, float symbolHeight, int symbolRotationDegrees
+    C4_UI_ButtonGroup* group, size_t buttonIndex, SDL_Renderer* renderer, const char* str, C4_UI_SymbolType symbol,
+    float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme
 );
 void C4_UI_ButtonGroup_Draw(C4_UI_ButtonGroup* group, SDL_Renderer* renderer);
 int C4_UI_ButtonGroup_HandleMouseEvents(C4_UI_ButtonGroup* group, SDL_Event* event, SDL_Renderer* renderer);

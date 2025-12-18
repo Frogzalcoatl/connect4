@@ -24,8 +24,8 @@ static void C4_UI_Popup_PositionElementsInBackground(C4_UI_Popup* popup) {
 }
 
 bool C4_UI_Popup_InitProperties(
-    C4_UI_Popup* popup, SDL_Renderer* renderer, SDL_FRect rectangle, unsigned int borderWidth, C4_UI_ButtonGroup_Direction buttonDirection,
-    size_t buttonCount, float buttonGroupHeight, const char* messageText, float buttonPtSize, float messagePtSize
+    C4_UI_Popup* popup, SDL_Renderer* renderer, SDL_FRect destination, C4_UI_ButtonGroup_Direction buttonDirection, size_t buttonCount,
+    float buttonGroupHeight, const char* messageText, const C4_UI_Theme* theme
 ) {
     if (!renderer) {
         SDL_Log("Unable to init popup element properties. Renderer is NULL");
@@ -39,36 +39,40 @@ bool C4_UI_Popup_InitProperties(
         SDL_Log("Unable to init popup elements. Popup pointer is NULL");
         return false;
     }
+    if (!theme) {
+        SDL_Log("Unable to init popup element properties. Theme is NULL");
+        return false;
+    }
     popup->renderer = renderer;
-    if (!C4_UI_ButtonGroup_InitProperties(&popup->buttonGroup, renderer, (SDL_FRect){0.f, 0.f, 0.f, buttonGroupHeight}, buttonCount, buttonDirection, C4_UI_POPUP_MARGIN, buttonPtSize)) {
+    if (!C4_UI_ButtonGroup_InitProperties(&popup->buttonGroup, renderer, (SDL_FRect){0.f, 0.f, 0.f, buttonGroupHeight}, buttonCount, buttonDirection, C4_UI_POPUP_MARGIN, theme)) {
         return false;
     }
-    if (!C4_UI_Borders_InitProperties(&popup->borders, rectangle, (SDL_Color){80, 80, 80, 255}, borderWidth)) {
+    if (!C4_UI_Borders_InitProperties(&popup->borders, destination, (SDL_Color){80, 80, 80, 255}, theme->borderWidth)) {
         return false;
     }
-    if (!C4_UI_Rectangle_InitProperties(&popup->background, rectangle, (SDL_Color){0, 0, 0, 255})) {
+    if (!C4_UI_Rectangle_InitProperties(&popup->background, destination, (SDL_Color){0, 0, 0, 255})) {
         return false;
     }
-    if (!C4_UI_Text_InitProperties(&popup->message, popup->renderer, messageText, C4_FontType_Regular, messagePtSize, 0, 0, 0)) {
+    if (!C4_UI_Text_InitProperties(&popup->message, popup->renderer, messageText, C4_FontType_Regular, theme->defaultPtSize, 0, 0, 0, theme->textColor)) {
         return false;
     }
     popup->message.color = (SDL_Color){230, 230, 230, 255};
-    popup->borders.width = borderWidth;
+    popup->borders.width = theme->borderWidth;
     C4_UI_Popup_PositionElementsInBackground(popup);
     popup->isShowing = false;
     return true;
 }
 
 C4_UI_Popup* C4_UI_Popup_Create(
-    SDL_Renderer* renderer, SDL_FRect rectangle, unsigned int borderWidth, C4_UI_ButtonGroup_Direction buttonDirection,
-    size_t buttonCount, float buttonGroupHeight, const char* messageText, float buttonPtSize, float messagePtSize
+    SDL_Renderer* renderer, SDL_FRect destination, C4_UI_ButtonGroup_Direction buttonDirection, size_t buttonCount,
+    float buttonGroupHeight, const char* messageText, const C4_UI_Theme* theme
 ) {
     C4_UI_Popup* popup = calloc(1, sizeof(C4_UI_Popup));
     if (!popup) {
         SDL_Log("Unable to allocate memory for popup");
         return NULL;
     }
-    if (!C4_UI_Popup_InitProperties(popup, renderer, rectangle, borderWidth, buttonDirection, buttonCount, buttonGroupHeight, messageText, buttonPtSize, messagePtSize)) {
+    if (!C4_UI_Popup_InitProperties(popup, renderer, destination, buttonDirection, buttonCount, buttonGroupHeight, messageText, theme)) {
         C4_UI_Popup_Destroy(popup);
         return NULL;
     }

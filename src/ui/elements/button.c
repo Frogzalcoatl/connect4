@@ -27,46 +27,49 @@ void C4_UI_Button_CenterElementsInBackground(C4_UI_Button* button, C4_Axis axis)
 }
 
 bool C4_UI_Button_InitProperties(
-    C4_UI_Button* button, SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, const SDL_FRect background,
-    unsigned int borderWidth, C4_UI_SymbolType symbol, float symbolWidth, float symbolHeight, int symbolRotationDegrees
+    C4_UI_Button* button, SDL_Renderer* renderer, const char* str, const SDL_FRect destination,
+    C4_UI_SymbolType symbol, float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme
 ) {
     if (!renderer) {
         SDL_Log("Unable to init button properties. Renderer is NULL");
         return false;
     }
+    if (!theme) {
+        SDL_Log("Unable to init button properties. Theme is NULL");
+    }
     button->defaultColors = (C4_UI_ButtonColorInfo){
-        C4_BUTTON_DEFAULT_COLOR_BACKGROUND, C4_BUTTON_DEFAULT_COLOR_TEXT, C4_BUTTON_DEFAULT_COLOR_BORDERS, C4_BUTTON_DEFAULT_COLOR_SYMBOL
+        theme->buttonDefault.background, theme->buttonDefault.text, theme->buttonDefault.borders, theme->buttonDefault.symbol
     };
     button->hoverColors = (C4_UI_ButtonColorInfo){
-        C4_BUTTON_HOVER_COLOR_BACKGROUND, C4_BUTTON_HOVER_COLOR_TEXT, C4_BUTTON_HOVER_COLOR_BORDERS, C4_BUTTON_HOVER_COLOR_SYMBOL
+        theme->buttonHovered.background, theme->buttonHovered.text, theme->buttonHovered.borders, theme->buttonHovered.symbol
     };
     button->clickColors = (C4_UI_ButtonColorInfo){
-        C4_BUTTON_CLICK_COLOR_BACKGROUND, C4_BUTTON_CLICK_COLOR_TEXT, C4_BUTTON_CLICK_COLOR_BORDERS, C4_BUTTON_CLICK_COLOR_SYMBOL
+        theme->buttonPressed.background, theme->buttonPressed.text, theme->buttonPressed.borders, theme->buttonPressed.symbol
     };
-    if (!C4_UI_Rectangle_InitProperties(&button->background, background, button->defaultColors.background)) {
+    if (!C4_UI_Rectangle_InitProperties(&button->background, destination, button->defaultColors.background)) {
         return false;
     }
     if (str) {
-        if (!C4_UI_Text_InitProperties(&button->text, renderer, str, font, ptSize, background.x, background.y, 0)) {
+        if (!C4_UI_Text_InitProperties(&button->text, renderer, str, theme->buttonFont, theme->defaultPtSize, destination.x, destination.y, 0, theme->textColor)) {
             return false;
         }
     } else {
         button->text.str[0] = '\0';
     }
-    if (borderWidth > 0) {
-        if (!C4_UI_Borders_InitProperties(&button->borders, background, button->defaultColors.borders, borderWidth)) {
+    if (theme->borderWidth > 0) {
+        if (!C4_UI_Borders_InitProperties(&button->borders, destination, button->defaultColors.borders, theme->borderWidth)) {
             return false;
         }
     } else {
         button->borders.width = 0;
-        button->borders.destination.w = background.w;
-        button->borders.destination.h = background.h;
+        button->borders.destination.w = destination.w;
+        button->borders.destination.h = destination.h;
     }
     if (symbol != C4_UI_SymbolType_None) {
         if (
             !C4_UI_Symbol_InitProperties(
                 &button->symbol, symbol,
-                (SDL_FRect){background.x, background.y, symbolWidth, symbolHeight},
+                (SDL_FRect){destination.x, destination.y, symbolWidth, symbolHeight},
                 symbolRotationDegrees
             )
         ) {
@@ -80,15 +83,15 @@ bool C4_UI_Button_InitProperties(
 }
 
 C4_UI_Button* C4_UI_Button_Create(
-    SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, const SDL_FRect background, unsigned int borderWidth,
-    C4_UI_SymbolType symbol, float symbolWidth, float symbolHeight, int symbolRotationDegrees
+    SDL_Renderer* renderer, const char* str, const SDL_FRect destination, C4_UI_SymbolType symbol, float symbolWidth,
+    float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme
 ) {
     C4_UI_Button* button = calloc(1, sizeof(C4_UI_Button));
     if (!button) {
         SDL_Log("Unable to allocate memory for button");
         return NULL;
     }
-    if (!C4_UI_Button_InitProperties(button, renderer, str, font, ptSize, background, borderWidth, symbol, symbolWidth, symbolHeight, symbolRotationDegrees)) {
+    if (!C4_UI_Button_InitProperties(button, renderer, str, destination, symbol, symbolWidth, symbolHeight, symbolRotationDegrees, theme)) {
         C4_UI_Button_Destroy(button);
         return NULL;
     }

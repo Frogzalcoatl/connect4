@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL3/SDL.h>
+#include "Connect4/assets/fonts.h"
 
 typedef enum {
     C4_Axis_X,

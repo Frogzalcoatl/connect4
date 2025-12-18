@@ -24,7 +24,7 @@ if(NOT SDL3_FOUND)
         GIT_TAG main
         GIT_SHALLOW ON
         EXCLUDE_FROM_ALL
-        SYSTEM
+        SYSTEM PRIVATE
         OVERRIDE_FIND_PACKAGE
     )
     FetchContent_MakeAvailable(SDL3)
@@ -47,7 +47,7 @@ if(NOT SDL3_ttf_FOUND)
         GIT_TAG main
         GIT_SHALLOW ON
         EXCLUDE_FROM_ALL
-        SYSTEM
+        SYSTEM PRIVATE
         OVERRIDE_FIND_PACKAGE
     )
     FetchContent_MakeAvailable(SDL3_ttf)

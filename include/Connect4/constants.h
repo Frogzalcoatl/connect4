@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL3/SDL.h>
-#include "Connect4/assets/fonts.h"
+#include "Connect4/ui/themes.h"
 
 // Window
 #define C4_BASE_WINDOW_WIDTH 1920
@@ -8,28 +8,31 @@
 #define C4_WINDOW_CENTER_X (C4_BASE_WINDOW_WIDTH / 2.f)
 #define C4_WINDOW_CENTER_Y (C4_BASE_WINDOW_HEIGHT / 2.f)
 
-// Button Colors
-#define C4_BUTTON_DEFAULT_COLOR_BACKGROUND (SDL_Color){45, 45, 48, 255}
-#define C4_BUTTON_HOVER_COLOR_BACKGROUND   (SDL_Color){70, 70, 75, 255}
-#define C4_BUTTON_CLICK_COLOR_BACKGROUND   (SDL_Color){240, 240, 240, 255}
-
-#define C4_BUTTON_DEFAULT_COLOR_TEXT (SDL_Color){230, 230, 230, 255}
-#define C4_BUTTON_HOVER_COLOR_TEXT   (SDL_Color){255, 255, 255, 255}
-#define C4_BUTTON_CLICK_COLOR_TEXT   (SDL_Color){20, 20, 20, 255}
-
-#define C4_BUTTON_DEFAULT_COLOR_BORDERS (SDL_Color){80, 80, 80, 255}
-#define C4_BUTTON_HOVER_COLOR_BORDERS   (SDL_Color){120, 120, 120, 255}
-#define C4_BUTTON_CLICK_COLOR_BORDERS   (SDL_Color){0, 0, 0, 255}
-
-#define C4_BUTTON_DEFAULT_COLOR_SYMBOL (SDL_Color){230, 230, 230, 255}
-#define C4_BUTTON_HOVER_COLOR_SYMBOL   (SDL_Color){255, 255, 255, 255}
-#define C4_BUTTON_CLICK_COLOR_SYMBOL   (SDL_Color){20, 20, 20, 255}
-
-// Default Button Font
-#define C4_DEFAULT_BUTTON_FONT C4_FontType_Bold
-
-// Default Font Size
-#define C4_FONT_DEFAULT_PT_SIZE 32.f
+//Theme
+#define C4_UI_THEME_DEFAULT (C4_UI_Theme){\
+    .buttonDefault = (C4_UI_ButtonColorInfo){\
+        .background = (SDL_Color){45, 45, 48, 255},\
+        .text = (SDL_Color){230, 230, 230, 255},\
+        .borders = (SDL_Color){80, 80, 80, 255},\
+        .symbol = (SDL_Color){230, 230, 230, 255}\
+    },\
+    .buttonHovered = (C4_UI_ButtonColorInfo){\
+        .background = (SDL_Color){70, 70, 75, 255},\
+        .text = (SDL_Color){255, 255, 255, 255},\
+        .borders = (SDL_Color){120, 120, 120, 255},\
+        .symbol = (SDL_Color){255, 255, 255, 255}\
+    },\
+    .buttonPressed = (C4_UI_ButtonColorInfo){\
+        .background = (SDL_Color){240, 240, 240, 255},\
+        .text = (SDL_Color){20, 20, 20, 255},\
+        .borders = (SDL_Color){0, 0, 0, 255},\
+        .symbol = (SDL_Color){20, 20, 20, 255}\
+    },\
+    .buttonFont = C4_FontType_Bold,\
+    .defaultPtSize = 32.f,\
+    .borderWidth = 3,\
+    .textColor = (SDL_Color){255, 255, 255, 255}\
+}
 
 // Game Screen
 #define C4_SCREEN_GAME_BACK_BUTTON_RECT (SDL_FRect){0.f, 950.f, 400.f, 100.f}

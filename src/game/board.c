@@ -93,7 +93,7 @@ static void C4_Board_SwapCurrentPlayer(C4_Board* board) {
 }
 
 // Returns index of move. -1 if move is invalid.
-int64_t C4_Board_DoMove(C4_Board* board, uint8_t inColumn) {
+int C4_Board_DoMove(C4_Board* board, uint8_t inColumn) {
     if (!board) {
         SDL_Log("Board is NULL");
         return -1;
@@ -110,7 +110,7 @@ int64_t C4_Board_DoMove(C4_Board* board, uint8_t inColumn) {
         if (board->cells[row * board->width + inColumn] == C4_SlotState_Empty) {
             board->cells[row * board->width + inColumn] = board->currentPlayer;
             C4_Board_SwapCurrentPlayer(board);
-            return (long long)row * board->width + (long long)inColumn;
+            return (int)row * (int)board->width + (int)inColumn;
         }
     }
     return -1;

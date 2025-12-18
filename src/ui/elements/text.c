@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
-bool C4_UI_Text_InitProperties(C4_UI_Text* element, SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, float destinationX, float destinationY, int wrapWidth) {
+bool C4_UI_Text_InitProperties(C4_UI_Text* element, SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, float destinationX, float destinationY, int wrapWidth, const SDL_Color color) {
     if (!element) {
         SDL_Log("Unable to init text element properties. Pointer is NULL");
         return false;
@@ -25,20 +25,20 @@ bool C4_UI_Text_InitProperties(C4_UI_Text* element, SDL_Renderer* renderer, cons
     }
     element->ptSize = ptSize;
     element->destination = (SDL_FRect){destinationX, destinationY, 0.f, 0.f};
-    element->color = C4_BUTTON_DEFAULT_COLOR_TEXT;
+    element->color = color;
     element->wrapWidth = wrapWidth;
     C4_UI_Text_ChangeStr(element, str);
     C4_UI_Text_Refresh(element, renderer);
     return true;
 }
 
-C4_UI_Text* C4_UI_Text_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, float destinationX, float destinationY, int wrapWidth) {
+C4_UI_Text* C4_UI_Text_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, float destinationX, float destinationY, int wrapWidth, const SDL_Color color) {
     C4_UI_Text* element = calloc(1, sizeof(C4_UI_Text));
     if (!element) {
         SDL_Log("Unable to allocate memory for text element");
         return NULL;
     }
-    if (!C4_UI_Text_InitProperties(element, renderer, str, font, ptSize, destinationX, destinationY, wrapWidth)) {
+    if (!C4_UI_Text_InitProperties(element, renderer, str, font, ptSize, destinationX, destinationY, wrapWidth, color)) {
         C4_UI_Text_Destroy(element);
         return NULL;
     }

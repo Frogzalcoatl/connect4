@@ -25,9 +25,13 @@ static SDL_FRect C4_UI_ButtonGroup_GetUpdatedButtonRect(C4_UI_ButtonGroup* group
     return rect;
 }
 
-bool C4_UI_ButtonGroup_InitProperties(C4_UI_ButtonGroup* group, SDL_Renderer* renderer, const SDL_FRect bounds, size_t count, C4_UI_ButtonGroup_Direction direction, unsigned int margin, float buttonPtSize) {
+bool C4_UI_ButtonGroup_InitProperties(C4_UI_ButtonGroup* group, SDL_Renderer* renderer, const SDL_FRect bounds, size_t count, C4_UI_ButtonGroup_Direction direction, unsigned int margin, const C4_UI_Theme* theme) {
     if (!group) {
         SDL_Log("Unable to init button group properties. Pointer is NULL");
+        return false;
+    }
+    if (!theme) {
+        SDL_Log("Unable to init button group properties. Theme is NULL");
         return false;
     }
     if (count == 0) {
@@ -48,20 +52,20 @@ bool C4_UI_ButtonGroup_InitProperties(C4_UI_ButtonGroup* group, SDL_Renderer* re
         return false;
     }
     for (size_t i = 0; i < group->count; i++) {
-        if (!C4_UI_Button_InitProperties(&group->buttons[i], renderer, "", C4_DEFAULT_BUTTON_FONT, buttonPtSize, C4_UI_ButtonGroup_GetUpdatedButtonRect(group, i), 0, C4_UI_SymbolType_None, 1.f, 1.f, 0)) {
+        if (!C4_UI_Button_InitProperties(&group->buttons[i], renderer, "", C4_UI_ButtonGroup_GetUpdatedButtonRect(group, i), C4_UI_SymbolType_None, 1.f, 1.f, 0, theme)) {
             return false;
         }
     }
     return true;
 }
 
-C4_UI_ButtonGroup* C4_UI_ButtonGroup_Create(SDL_Renderer* renderer, const SDL_FRect bounds, size_t count, C4_UI_ButtonGroup_Direction direction, unsigned int margin, float buttonPtSize) {
+C4_UI_ButtonGroup* C4_UI_ButtonGroup_Create(SDL_Renderer* renderer, const SDL_FRect bounds, size_t count, C4_UI_ButtonGroup_Direction direction, unsigned int margin, const C4_UI_Theme* theme) {
     C4_UI_ButtonGroup* group = calloc(1, sizeof(C4_UI_ButtonGroup));
     if (!group) {
         SDL_Log("Unable to allocate memory for button group");
         return NULL;
     }
-    if (!C4_UI_ButtonGroup_InitProperties(group, renderer, bounds, count, direction, margin, buttonPtSize)) {
+    if (!C4_UI_ButtonGroup_InitProperties(group, renderer, bounds, count, direction, margin, theme)) {
         C4_UI_ButtonGroup_Destroy(group);
         return NULL;
     }
@@ -88,22 +92,26 @@ void C4_UI_ButtonGroup_Destroy(C4_UI_ButtonGroup* group) {
 }
 
 void C4_UI_ButtonGroup_SetButtonIndex(
-    C4_UI_ButtonGroup* group, size_t buttonIndex, SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize,
-    unsigned int borderWidth, C4_UI_SymbolType symbol, float symbolWidth, float symbolHeight, int symbolRotationDegrees
+    C4_UI_ButtonGroup* group, size_t buttonIndex, SDL_Renderer* renderer, const char* str,C4_UI_SymbolType symbol,
+    float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme
 ) {
     if (buttonIndex >= group->count) {
         SDL_Log("Unable to set button index %zu. Out of bounds.", buttonIndex);
         return;
     }
-    group->buttons[buttonIndex].text.ptSize = ptSize;
-    group->buttons[buttonIndex].text.font = C4_GetFont(font);
-    C4_UI_Button_ChangeStr(&group->buttons[buttonIndex], str, renderer);
-    group->buttons[buttonIndex].borders.width = borderWidth;
-    group->buttons[buttonIndex].symbol.type = symbol;
-    group->buttons[buttonIndex].symbol.destination.w = symbolWidth;
-    group->buttons[buttonIndex].symbol.destination.h = symbolHeight;
-    group->buttons[buttonIndex].symbol.rotationDegrees = symbolRotationDegrees;
-    C4_UI_Button_CenterElementsInBackground(&group->buttons[buttonIndex], C4_Axis_XY);
+    C4_UI_Button* btn = &group->buttons[buttonIndex];
+    btn->text.ptSize = theme->defaultPtSize;
+    btn->text.font = C4_GetFont(theme->buttonFont);
+    C4_UI_Button_ChangeStr(btn, str, renderer);
+    btn->borders.width = theme->borderWidth;
+    btn->defaultColors = theme->buttonDefault;
+    btn->hoverColors = theme->buttonHovered;
+    btn->clickColors = theme->buttonPressed;
+    btn->symbol.type = symbol;
+    btn->symbol.destination.w = symbolWidth;
+    btn->symbol.destination.h = symbolHeight;
+    btn->symbol.rotationDegrees = symbolRotationDegrees;
+    C4_UI_Button_CenterElementsInBackground(btn, C4_Axis_XY);
 }
 
 void C4_UI_ButtonGroup_Draw(C4_UI_ButtonGroup* group, SDL_Renderer* renderer) {
