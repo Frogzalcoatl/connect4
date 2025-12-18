@@ -12,7 +12,7 @@
 #include <time.h>
 
 bool Connect4_Init_Dependencies(void) {
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
         // The error is inserted at %s
         SDL_Log("SDL_Init failed: %s", SDL_GetError());

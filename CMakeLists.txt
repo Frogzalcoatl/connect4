@@ -1,6 +1,6 @@
 # Vibe coded ah CMakeLists.txt file. I was struggling to figure it out myself ngl.
 
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.25)
 project(Connect4 LANGUAGES C)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
@@ -127,30 +127,31 @@ endforeach()
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.c")
 
 if(WIN32)
-# Add WIN32 before ${SOURCES} to remove the debug console
-    add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${GENERATED_SOURCES} resources/icon.rc)
-else()
-    add_executable(${PROJECT_NAME} ${SOURCES} ${GENERATED_SOURCES})
+    set(WIN_FLAGS WIN32)
+    set(ICON_RC resources/icon.rc)
 endif()
 
-# --- COMPILER WARNING SETUP ---
+add_executable(${PROJECT_NAME} ${WIN_FLAGS} ${SOURCES} ${GENERATED_SOURCES} ${ICON_RC})
+
+# Compiler Warnings
 if(MSVC)
-    # Flags for Visual Studio Compiler (or clang-cl)
-    # /W4 = Enable high warning level
-    # /WX = Treat warnings as errors
-    target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+    target_compile_options(${PROJECT_NAME} PRIVATE /W4)
 else()
-    # Flags for Standard Clang / GCC
     target_compile_options(${PROJECT_NAME} PRIVATE 
-        -Wall 
+        # Standard set of warnings
+        -Wall
+        # Extra useful warnings (unused parameters, etc.)
         -Wextra
+        # Warns about non-standard C code
         -Wpedantic
-        # This is the specific flag that catches missing headers:
+        # This is the specific flag that catches missing headers
         -Werror=implicit-function-declaration
-        # Optional: Catch pointer type issues often caused by missing headers
+        # Error if you assign a random integer to a pointer (prevents segfaults)
         -Werror=int-conversion
         # To disable the "no newline at end of file warning"
         -Wno-newline-eof
+        # Warn if data is lost (e.g. double -> float, int64 -> int8)
+        -Wconversion
     )
 endif()
 

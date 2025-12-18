@@ -8,19 +8,19 @@ static SDL_FRect C4_UI_ButtonGroup_GetUpdatedButtonRect(C4_UI_ButtonGroup* group
         SDL_Log("Unable to update button rect index %zu. Out of bounds.", index);
         return rect;
     }
-    float totalMarginSpace = group->margin * (group->count - 1);
+    float totalMarginSpace = (float)group->margin * ((float)group->count - 1.f);
     if (group->direction == C4_UI_ButtonGroup_Direction_Vertical) {
-        float buttonHeight = (group->bounds.h - totalMarginSpace) / group->count;
+        float buttonHeight = (group->bounds.h - totalMarginSpace) / (float)group->count;
         rect.x = group->bounds.x;
-        rect.y = group->bounds.y + (buttonHeight * index) + (group->margin * index);
+        rect.y = group->bounds.y + (buttonHeight * (float)index) + ((float)group->margin * (float)index);
         rect.w = group->bounds.w;
         rect.h = buttonHeight;
     } else {
-        float buttonWidth = (group->bounds.w - totalMarginSpace) / group->count;
+        float buttonWidth = (group->bounds.w - totalMarginSpace) / (float)group->count;
         rect.y = group->bounds.y;
         rect.h = group->bounds.h;
         rect.w = buttonWidth;
-        rect.x = group->bounds.x + (buttonWidth * index) + (group->margin * index);
+        rect.x = group->bounds.x + (buttonWidth * (float)index) + ((float)group->margin * (float)index);
     }
     return rect;
 }
@@ -123,7 +123,7 @@ int C4_UI_ButtonGroup_HandleMouseEvents(C4_UI_ButtonGroup* group, SDL_Event* eve
     }
     for (size_t i = 0; i < group->count; i++) {
         if (C4_UI_Button_HandleMouseEvents(&group->buttons[i], event)) {
-            return i;
+            return (int)i;
         }
     }
     return -1;

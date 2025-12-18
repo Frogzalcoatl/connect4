@@ -41,7 +41,7 @@ static SDL_FPoint C4_UI_RotatePoint(SDL_FPoint point, SDL_FPoint center, float d
     if (degrees == 0) {
         return point;
     }
-    float radians = degrees * (M_PI / 180.f);
+    float radians = degrees * ((float)M_PI / 180.f);
     float sineVal = sinf(radians);
     float cosineVal = cosf(radians);
     float localX = point.x - center.x;

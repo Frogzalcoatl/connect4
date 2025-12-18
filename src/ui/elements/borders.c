@@ -40,10 +40,10 @@ void C4_UI_Borders_Draw(C4_UI_Borders* element, SDL_Renderer* renderer) {
         return;
     }
     SDL_SetRenderDrawColor(renderer, element->color.r, element->color.g, element->color.b, element->color.a);
-    SDL_FRect topBorder = {element->destination.x, element->destination.y, element->destination.w, element->width};
-    SDL_FRect bottomBorder = {element->destination.x, element->destination.y + element->destination.h - element->width, element->destination.w, element->width};
-    SDL_FRect leftBorder = {element->destination.x, element->destination.y, element->width, element->destination.h};
-    SDL_FRect rightBorder = {element->destination.x + element->destination.w - element->width, element->destination.y, element->width, element->destination.h};
+    SDL_FRect topBorder = {element->destination.x, element->destination.y, element->destination.w, (float)element->width};
+    SDL_FRect bottomBorder = {element->destination.x, element->destination.y + element->destination.h - (float)element->width, element->destination.w, (float)element->width};
+    SDL_FRect leftBorder = {element->destination.x, element->destination.y, (float)element->width, element->destination.h};
+    SDL_FRect rightBorder = {element->destination.x + element->destination.w - (float)element->width, element->destination.y, (float)element->width, element->destination.h};
     SDL_RenderFillRect(renderer, &topBorder);
     SDL_RenderFillRect(renderer, &bottomBorder);
     SDL_RenderFillRect(renderer, &leftBorder);

@@ -10,16 +10,16 @@ static void C4_UI_Popup_PositionElementsInBackground(C4_UI_Popup* popup) {
         return;
     }
     SDL_FRect* rect = &popup->background.destination;
-    popup->message.destination.x = rect->x + popup->borders.width + C4_UI_POPUP_MARGIN;
-    popup->message.destination.y = rect->y + popup->borders.width + C4_UI_POPUP_MARGIN;
-    popup->message.wrapWidth = rect->w - popup->borders.width * 2 - C4_UI_POPUP_MARGIN;
+    popup->message.destination.x = rect->x + (float)popup->borders.width + C4_UI_POPUP_MARGIN;
+    popup->message.destination.y = rect->y + (float)popup->borders.width + C4_UI_POPUP_MARGIN;
+    popup->message.wrapWidth = (int)rect->w - (int)popup->borders.width * 2 - C4_UI_POPUP_MARGIN;
     C4_UI_Text_Refresh(&popup->message, popup->renderer);
     popup->borders.destination = popup->background.destination;
     SDL_FRect buttonGroupRect;
-    buttonGroupRect.x = rect->x + popup->borders.width + C4_UI_POPUP_MARGIN;
-    buttonGroupRect.w = rect->w - popup->borders.width - (C4_UI_POPUP_MARGIN * popup->buttonGroup.count + 1);
+    buttonGroupRect.x = rect->x + (float)popup->borders.width + C4_UI_POPUP_MARGIN;
+    buttonGroupRect.w = rect->w - (float)popup->borders.width - (C4_UI_POPUP_MARGIN * (float)popup->buttonGroup.count + 1.f);
     buttonGroupRect.h = popup->buttonGroup.bounds.h;
-    buttonGroupRect.y = rect->y + rect->h - buttonGroupRect.h - popup->borders.width - C4_UI_POPUP_MARGIN;
+    buttonGroupRect.y = rect->y + rect->h - buttonGroupRect.h - (float)popup->borders.width - C4_UI_POPUP_MARGIN;
     C4_UI_ButtonGroup_TransformResize(&popup->buttonGroup, buttonGroupRect);
 }
 

@@ -86,7 +86,7 @@ void C4_Screen_Game_HandleKeyboardInput(void* screenData, SDL_Scancode scancode)
     // Temporary just for testing
     if (scancode >= SDL_SCANCODE_1 && scancode <= SDL_SCANCODE_7) {
         int column = scancode - SDL_SCANCODE_1;
-        int64_t atIndex = C4_Board_DoMove(screen->board, column);
+        int64_t atIndex = C4_Board_DoMove(screen->board, (uint8_t)column);
         if (atIndex == -1) {
             return;
         }
@@ -96,7 +96,7 @@ void C4_Screen_Game_HandleKeyboardInput(void* screenData, SDL_Scancode scancode)
         } else {
             C4_PushEvent_SoundRequest(C4_SoundEffect_Player2Place);
         }
-        C4_SlotState winnerCheckResult = C4_Board_GetWinner(screen->board, atIndex);
+        C4_SlotState winnerCheckResult = C4_Board_GetWinner(screen->board, (size_t)atIndex);
         if (winnerCheckResult == C4_SlotState_Player1 || winnerCheckResult == C4_SlotState_Player2) {
             C4_PushEvent_GameOver(winnerCheckResult);
         }

@@ -1,5 +1,6 @@
 # TODO
 
+* Investigate why the WindowsVS github actions has additional warnings/errors that prevent it from building
 * Number input UIElement
 * Slider UIElement
 * Settings screen

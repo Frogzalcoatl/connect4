@@ -12,7 +12,7 @@ bool C4_UI_Text_InitProperties(C4_UI_Text* element, SDL_Renderer* renderer, cons
     }
     if (!renderer || !str) {
         SDL_Log("Unable to init text element properties. renderer and/or str is NULL.");
-        return NULL;
+        return false;
     }
     element->font = C4_GetFont(font);
     if (!element->font) {
@@ -21,7 +21,7 @@ bool C4_UI_Text_InitProperties(C4_UI_Text* element, SDL_Renderer* renderer, cons
     }
     if (ptSize <= 0) {
         SDL_Log("Unable to create text element. ptSize must be greater than 0.");
-        return NULL;
+        return false;
     }
     element->ptSize = ptSize;
     element->destination = (SDL_FRect){destinationX, destinationY, 0.f, 0.f};

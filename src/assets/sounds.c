@@ -84,5 +84,5 @@ void C4_PlaySound(C4_SoundEffect soundID) {
     SDL_AudioStream* stream = streams[currentStreamIndex];
     currentStreamIndex = (currentStreamIndex + 1) % MAX_STREAMS;
     SDL_SetAudioStreamFormat(stream, &specs[soundID], NULL);
-    SDL_PutAudioStreamData(stream, buffers[soundID], lengths[soundID]);
+    SDL_PutAudioStreamData(stream, buffers[soundID], (int)lengths[soundID]);
 }

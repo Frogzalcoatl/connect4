@@ -2,6 +2,9 @@
 #include <SDL3/SDL_main.h>
 
 int main(int argc, char *argv[]) {
+    // To shutup compiler warnings
+    (void)argc;
+    (void)argv;
     if (!Connect4_Init_Dependencies()) {
         SDL_Log("Unable to initialize dependencies");
         return 1;

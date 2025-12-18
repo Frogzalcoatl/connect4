@@ -20,7 +20,7 @@ C4_Board* C4_Board_Create(uint8_t width, uint8_t height, uint8_t amountToWin) {
         SDL_Log("Unable to allocate memory for board cells");
         return NULL;
     }
-    newBoard->cellCheckBufferSize = C4_Max(width, height);
+    newBoard->cellCheckBufferSize = (size_t)C4_Max((int)width, (int)height);
     newBoard->cellCheckBuffer = calloc(newBoard->cellCheckBufferSize, sizeof(C4_SlotState));
     newBoard->cellCheckCount = 0;
     newBoard->width = width;
@@ -110,7 +110,7 @@ int64_t C4_Board_DoMove(C4_Board* board, uint8_t inColumn) {
         if (board->cells[row * board->width + inColumn] == C4_SlotState_Empty) {
             board->cells[row * board->width + inColumn] = board->currentPlayer;
             C4_Board_SwapCurrentPlayer(board);
-            return row * board->width + inColumn;
+            return (long long)row * board->width + (long long)inColumn;
         }
     }
     return -1;
@@ -152,7 +152,7 @@ static void C4_Board_UpdateCellCheckBuffer(C4_Board* board, C4_Board_RowAxis axi
         return;
     }
     // Sets all values of cellCheckBuffer to zero.
-    memset(board->cellCheckBuffer, 0, C4_Max(board->width, board->height) * sizeof(C4_SlotState));
+    memset(board->cellCheckBuffer, 0, (size_t)C4_Max((int)board->width, (int)board->height) * sizeof(C4_SlotState));
     size_t bufferIndex = 0;
     switch (axis) {
         case C4_Board_RowAxis_NorthSouth: {
@@ -286,7 +286,7 @@ void C4_Board_UpdateTestStr(C4_Board* board, char* buffer, size_t bufferSize) {
     size_t i = 0;
     for (size_t y = 0; y < board->height; y++) {
         for (size_t x = 0; x < board->width; x++) {
-            C4_SlotState state = C4_Board_GetSlot(board, x, y);
+            C4_SlotState state = C4_Board_GetSlot(board, (uint8_t)x, (uint8_t)y);
             buffer[i] = C4_Board_GetCharForState(state);
             i++;
         }
