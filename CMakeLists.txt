@@ -54,7 +54,6 @@ if(NOT SDL3_ttf_FOUND)
 endif()
 
 # Function to read a file and turn it into a C file / header
-# Function to read a file and turn it into a C file / header
 function(embed_resource input_file output_c output_h c_name)
     file(READ ${input_file} hex_content HEX)
     
@@ -165,4 +164,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 # So math.h always includes math defines (ex: M_PI)
 target_compile_definitions(${PROJECT_NAME} PRIVATE _USE_MATH_DEFINES)
 
-target_compile_features(${PROJECT_NAME} PRIVATE c_std_23)
+if(MSVC)
+    # MSVC added /std:c11 and /std:c17, but for C23 features, 
+    # they currently use /std:clatest (which includes all C23 features).
+    # Some very recent versions also support /std:c23, 
+    # but /std:clatest is the most compatible way to unlock those features right now.
+    target_compile_options(${PROJECT_NAME} PRIVATE /std:clatest)
+else()
+    # GCC and Clang handle the high-level feature correctly
+    target_compile_features(${PROJECT_NAME} PRIVATE c_std_23)
+endif()
