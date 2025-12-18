@@ -36,3 +36,4 @@ bool C4_Board_SetSlot(C4_Board* board, uint8_t x, uint8_t y, C4_SlotState state)
 int C4_Board_DoMove(C4_Board* board, uint8_t inColumn);
 void C4_Board_UpdateTestStr(C4_Board* board, char* buffer, size_t bufferSize);
 C4_SlotState C4_Board_GetWinner(C4_Board* board, size_t mostRecentMoveIndex);
+char C4_Board_GetCharForState(C4_SlotState state);

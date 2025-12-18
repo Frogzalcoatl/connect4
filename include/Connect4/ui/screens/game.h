@@ -3,6 +3,7 @@
 #include "Connect4/ui/elements/text.h"
 #include "Connect4/ui/elements/rectangle.h"
 #include "Connect4/ui/elements/button.h"
+#include "Connect4/ui/elements/popup.h"
 
 typedef struct {
     // [Ref] Shared resources owned by C4_Game
@@ -12,6 +13,7 @@ typedef struct {
     // [Owns] properties specific to this screen
     C4_UI_Text testBoardText;
     C4_UI_Button menuButton;
+    C4_UI_Popup winnerPopup;
 } C4_Screen_Game;
 
 C4_Screen_Game* C4_Screen_Game_Create(SDL_Renderer* renderer, C4_Board* board);

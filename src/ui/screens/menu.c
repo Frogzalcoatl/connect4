@@ -4,27 +4,26 @@
 #include "Connect4/constants.h"
 #include <stdlib.h>
 
-#define C4_SCREEN_MENU_BUTTONCOUNT 4
-
+#define MENU_BUTTON_GROUP_COUNT 4
 typedef enum {
-    C4_Screen_Menu_ButtonTextIndexes_1Player,
-    C4_Screen_Menu_ButtonTextIndexes_2Players,
-    C4_Screen_Menu_ButtonTextIndexes_Settings,
-    C4_Screen_Menu_ButtonTextIndexes_Quit
-} C4_Screen_Menu_ButtonTextIndexes;
-static const char buttonText[C4_SCREEN_MENU_BUTTONCOUNT][16] = {
+    Menu_ButtonGroup_1Player,
+    Menu_ButtonGroup_2Players,
+    Menu_ButtonGroup_Settings,
+    Menu_ButtonGroup_Quit
+} Menu_ButtonGroup;
+static const char MENU_BUTTON_GROUP_TEXT[MENU_BUTTON_GROUP_COUNT][16] = {
     "1 Player",
     "2 Players",
     "Settings",
     "Quit"
 };
 
-#define C4_SCREEN_MENU_POPUPBUTTONCOUNT 2
+#define MENU_POPUP_BUTTONS_COUNT 2
 typedef enum {
-    C4_PopupButtonIndexes_Ok,
-    C4_PopupButtonIndexes_Cancel
-} C4_PopupButtonIndexes;
-static const char popupButtonText[C4_SCREEN_MENU_POPUPBUTTONCOUNT][8] = {
+    Menu_ExitPopupButtons_Ok,
+    Menu_ExitPopupButtons_Cancel
+} Menu_ExitPopupButtons;
+static const char MENU_POPUP_BUTTONS_TEXT[MENU_POPUP_BUTTONS_COUNT][8] = {
     "Ok",
     "Cancel"
 };
@@ -47,15 +46,15 @@ C4_Screen_Menu* C4_Screen_Menu_Create(SDL_Renderer* renderer) {
     C4_UI_CenterInWindow(&screen->title.destination, C4_Axis_X);
     if (
         !C4_UI_ButtonGroup_InitProperties(
-            &screen->buttonGroup, screen->renderer, (SDL_FRect){0.f, 375.f, C4_SCREEN_MENU_BUTTON_GROUP_WIDTH, C4_SCREEN_MENU_BUTTON_GROUP_HEIGHT}, C4_SCREEN_MENU_BUTTONCOUNT,
+            &screen->buttonGroup, screen->renderer, (SDL_FRect){0.f, 375.f, C4_SCREEN_MENU_BUTTON_GROUP_WIDTH, C4_SCREEN_MENU_BUTTON_GROUP_HEIGHT}, MENU_BUTTON_GROUP_COUNT,
             C4_UI_ButtonGroup_Direction_Vertical, C4_SCREEN_MENU_BUTTON_GROUP_MARGIN, &C4_UI_THEME_DEFAULT
         )
     ) {
         C4_Screen_Menu_Destroy(screen);
         return NULL;
     }
-    for (size_t i = 0; i < C4_SCREEN_MENU_BUTTONCOUNT; i++) {
-        C4_UI_ButtonGroup_SetButtonIndex(&screen->buttonGroup, i, screen->renderer, buttonText[i], C4_UI_SymbolType_None, 0.f, 0.f, 0, &C4_UI_THEME_DEFAULT);
+    for (size_t i = 0; i < MENU_BUTTON_GROUP_COUNT; i++) {
+        C4_UI_ButtonGroup_SetButtonIndex(&screen->buttonGroup, i, screen->renderer, MENU_BUTTON_GROUP_TEXT[i], C4_UI_SymbolType_None, 0.f, 0.f, 0, &C4_UI_THEME_DEFAULT);
     }
     C4_UI_ButtonGroup_CenterInWindow(&screen->buttonGroup, C4_Axis_X);
     if (
@@ -67,13 +66,26 @@ C4_Screen_Menu* C4_Screen_Menu_Create(SDL_Renderer* renderer) {
         C4_Screen_Menu_Destroy(screen);
         return NULL;
     }
-    for (size_t i = 0; i < C4_SCREEN_MENU_POPUPBUTTONCOUNT; i++) {
+    for (size_t i = 0; i < MENU_POPUP_BUTTONS_COUNT; i++) {
         C4_UI_ButtonGroup_SetButtonIndex(
-            &screen->exitGamePopup.buttonGroup, i, screen->renderer, popupButtonText[i], 
+            &screen->exitGamePopup.buttonGroup, i, screen->renderer, MENU_POPUP_BUTTONS_TEXT[i], 
             C4_UI_SymbolType_None, 0.f, 0.f, 0, &C4_UI_THEME_DEFAULT
         );
     }
     C4_UI_Popup_CenterInWindow(&screen->exitGamePopup);
+    if (
+        !C4_UI_Popup_InitProperties(
+            &screen->inDevelopmentPopup, screen->renderer, (SDL_FRect){0.f, 0.f, C4_SCREEN_SETTINGS_POPUP_WIDTH, C4_SCREEN_SETTINGS_POPUP_HEIGHT},
+            C4_UI_ButtonGroup_Direction_Horizontal, 1, 100.f, "This is still in development!", &C4_UI_THEME_DEFAULT
+        )
+    ) {
+        C4_Screen_Menu_Destroy(screen);
+        return NULL;
+    }
+    C4_UI_ButtonGroup_SetButtonIndex(
+        &screen->inDevelopmentPopup.buttonGroup, 0, screen->renderer, "Ok", C4_UI_SymbolType_None, 0.f, 0.f, 0, &C4_UI_THEME_DEFAULT
+    );
+    C4_UI_Popup_CenterInWindow(&screen->inDevelopmentPopup);
     return screen;
 }
 
@@ -83,6 +95,7 @@ void C4_Screen_Menu_Destroy(void* screenData) {
         return;
     }
     C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
+    C4_UI_Popup_FreeResources(&screen->inDevelopmentPopup);
     C4_UI_Popup_FreeResources(&screen->exitGamePopup);
     C4_UI_ButtonGroup_FreeResources(&screen->buttonGroup);
     C4_UI_Text_FreeResources(&screen->title);
@@ -98,6 +111,7 @@ void C4_Screen_Menu_Draw(void* screenData) {
     C4_UI_ButtonGroup_Draw(&screen->buttonGroup, screen->renderer);
     C4_UI_Text_Draw(&screen->title, screen->renderer);
     C4_UI_Popup_Draw(&screen->exitGamePopup);
+    C4_UI_Popup_Draw(&screen->inDevelopmentPopup);
 }
 
 void C4_Screen_Menu_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
@@ -107,9 +121,12 @@ void C4_Screen_Menu_HandleKeyboardInput(void* screenData, SDL_Scancode scancode)
     }
     C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
     if (scancode == SDL_SCANCODE_ESCAPE) {
+        if (screen->inDevelopmentPopup.isShowing) {
+            screen->inDevelopmentPopup.isShowing = false;
+            return;
+        }
         screen->exitGamePopup.isShowing = !screen->exitGamePopup.isShowing;
     }
-    return;
 }
 
 void C4_Screen_Menu_HandleMouseEvents(void* screenData, SDL_Event* event) {
@@ -120,26 +137,33 @@ void C4_Screen_Menu_HandleMouseEvents(void* screenData, SDL_Event* event) {
     C4_Screen_Menu* screen = (C4_Screen_Menu*)screenData;
     if (screen->exitGamePopup.isShowing) {
         switch (C4_UI_Popup_HandleMouseEvents(&screen->exitGamePopup, event)) {
-            case C4_PopupButtonIndexes_Ok: {
+            case Menu_ExitPopupButtons_Ok: {
                 C4_PushEvent_CloseWindow();
             }; break;
-            case C4_PopupButtonIndexes_Cancel: {
+            case Menu_ExitPopupButtons_Cancel: {
                 screen->exitGamePopup.isShowing = false;
             }; break;
         }
         return;
     }
+    if (screen->inDevelopmentPopup.isShowing) {
+        // Only one button on this popup
+        if (C4_UI_Popup_HandleMouseEvents(&screen->inDevelopmentPopup, event) == 0) {
+            screen->inDevelopmentPopup.isShowing = false;
+        }
+        return;
+    }
     switch (C4_UI_ButtonGroup_HandleMouseEvents(&screen->buttonGroup, event, screen->renderer)) {
-        case C4_Screen_Menu_ButtonTextIndexes_1Player: {
+        case Menu_ButtonGroup_1Player: {
+            screen->inDevelopmentPopup.isShowing = true;
+        }; break;
+        case Menu_ButtonGroup_2Players: {
             C4_PushEvent_ScreenChange(C4_ScreenType_Game);
         }; break;
-        case C4_Screen_Menu_ButtonTextIndexes_2Players: {
-            C4_PushEvent_ScreenChange(C4_ScreenType_Game);
-        }; break;
-        case C4_Screen_Menu_ButtonTextIndexes_Settings: {
+        case Menu_ButtonGroup_Settings: {
             C4_PushEvent_ScreenChange(C4_ScreenType_Settings);
         }; break;
-        case C4_Screen_Menu_ButtonTextIndexes_Quit: {
+        case Menu_ButtonGroup_Quit: {
             screen->exitGamePopup.isShowing = true;
         }; break;
         default: break;

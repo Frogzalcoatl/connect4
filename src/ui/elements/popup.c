@@ -17,7 +17,7 @@ static void C4_UI_Popup_PositionElementsInBackground(C4_UI_Popup* popup) {
     popup->borders.destination = popup->background.destination;
     SDL_FRect buttonGroupRect;
     buttonGroupRect.x = rect->x + (float)popup->borders.width + C4_UI_POPUP_MARGIN;
-    buttonGroupRect.w = rect->w - (float)popup->borders.width - (C4_UI_POPUP_MARGIN * (float)popup->buttonGroup.count + 1.f);
+    buttonGroupRect.w = rect->w - (float)popup->borders.width - (((float)popup->borders.width + C4_UI_POPUP_MARGIN) * 2.f);
     buttonGroupRect.h = popup->buttonGroup.bounds.h;
     buttonGroupRect.y = rect->y + rect->h - buttonGroupRect.h - (float)popup->borders.width - C4_UI_POPUP_MARGIN;
     C4_UI_ButtonGroup_TransformResize(&popup->buttonGroup, buttonGroupRect);

@@ -10,6 +10,7 @@ typedef struct {
     C4_UI_Text title;
     C4_UI_ButtonGroup buttonGroup;
     C4_UI_Popup exitGamePopup;
+    C4_UI_Popup inDevelopmentPopup;
 } C4_Screen_Menu;
 
 C4_Screen_Menu* C4_Screen_Menu_Create(SDL_Renderer* renderer);

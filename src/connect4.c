@@ -168,7 +168,7 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
                 }
             }; break;
             case C4_EVENT_GAME_OVER: {
-                SDL_Log("The winner is Player %i", eventC4->gameOver.winnerId);
+                
             }; break;
             case C4_EVENT_SOUND_REQUEST: {
                 C4_PlaySound(eventC4->sound.id);

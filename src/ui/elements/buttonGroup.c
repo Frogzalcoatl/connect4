@@ -8,7 +8,7 @@ static SDL_FRect C4_UI_ButtonGroup_GetUpdatedButtonRect(C4_UI_ButtonGroup* group
         SDL_Log("Unable to update button rect index %zu. Out of bounds.", index);
         return rect;
     }
-    float totalMarginSpace = (float)group->margin * ((float)group->count - 1.f);
+    float totalMarginSpace = (float)group->margin * (group->count > 1 ? ((float)group->count - 1.f) : 0.f);
     if (group->direction == C4_UI_ButtonGroup_Direction_Vertical) {
         float buttonHeight = (group->bounds.h - totalMarginSpace) / (float)group->count;
         rect.x = group->bounds.x;

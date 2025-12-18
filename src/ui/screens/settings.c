@@ -4,22 +4,22 @@
 #include "Connect4/constants.h"
 #include <stdlib.h>
 
-#define C4_SCREEN_SETTINGS_BUTTONCOUNT 2
+#define SETTINGS_BUTTON_COUNT 2
 typedef enum {
-    C4_ButtonGroupIndexes_Apply,
-    C4_ButtonGroupIndexes_Cancel
-} C4_ButtonGroupIndexes;
-static const char buttonText[C4_SCREEN_SETTINGS_BUTTONCOUNT][16] = {
+    Settings_ButtonGroup_Apply,
+    Settings_ButtonGroup_Cancel
+} Settings_ButtonGroup;
+static const char SETTINGS_BUTTONS_TEXT[SETTINGS_BUTTON_COUNT][16] = {
     "Apply",
     "Cancel",
 };
 
-#define C4_SCREEN_MENU_POPUPBUTTONCOUNT 2
+#define SETTINGS_POPUP_BUTTONS_COUNT 2
 typedef enum {
-    C4_PopupButtonIndexes_Yes,
-    C4_PopupButtonIndexes_Back
-} C4_PopupButtonIndexes;
-static const char popupButtonText[C4_SCREEN_MENU_POPUPBUTTONCOUNT][8] = {
+    Settings_PopupButtons_Yes,
+    Settings_PopupButtons_Back
+} Settings_PopupButtons;
+static const char SETTINGS_POPUP_BUTTONS_TEXT[SETTINGS_POPUP_BUTTONS_COUNT][8] = {
     "Yes",
     "Back"
 };
@@ -45,14 +45,14 @@ C4_Screen_Settings* C4_Screen_Settings_Create(SDL_Renderer* renderer, SDL_Window
         !C4_UI_ButtonGroup_InitProperties(
             &screen->buttonGroup, renderer,
             (SDL_FRect){0.f, C4_SCREEN_SETTINGS_BUTTON_GROUP_YPOS, C4_SCREEN_SETTINGS_BUTTON_GROUP_WIDTH, C4_SCREEN_SETTINGS_BUTTON_GROUP_HEIGHT},
-            C4_SCREEN_SETTINGS_BUTTONCOUNT, C4_UI_ButtonGroup_Direction_Horizontal, 15, &C4_UI_THEME_DEFAULT
+            SETTINGS_BUTTON_COUNT, C4_UI_ButtonGroup_Direction_Horizontal, 15, &C4_UI_THEME_DEFAULT
         )
     ) {
         C4_Screen_Settings_Destroy(screen);
         return NULL;
     }
-    for (size_t i = 0; i < C4_SCREEN_SETTINGS_BUTTONCOUNT; i++) {
-        C4_UI_ButtonGroup_SetButtonIndex(&screen->buttonGroup, i, screen->renderer, buttonText[i], C4_UI_SymbolType_None, 0.f, 0.f, 0, &C4_UI_THEME_DEFAULT);
+    for (size_t i = 0; i < SETTINGS_BUTTON_COUNT; i++) {
+        C4_UI_ButtonGroup_SetButtonIndex(&screen->buttonGroup, i, screen->renderer, SETTINGS_BUTTONS_TEXT[i], C4_UI_SymbolType_None, 0.f, 0.f, 0, &C4_UI_THEME_DEFAULT);
     }
     C4_UI_ButtonGroup_CenterInWindow(&screen->buttonGroup, C4_Axis_X);
     if (!C4_UI_Popup_InitProperties(
@@ -64,8 +64,8 @@ C4_Screen_Settings* C4_Screen_Settings_Create(SDL_Renderer* renderer, SDL_Window
         C4_Screen_Settings_Destroy(screen);
         return NULL;
     }
-    for (size_t i = 0; i < C4_SCREEN_MENU_POPUPBUTTONCOUNT; i++) {
-        C4_UI_ButtonGroup_SetButtonIndex(&screen->confirmationPopup.buttonGroup, i, screen->renderer, popupButtonText[i], C4_UI_SymbolType_None, 0.f, 0.f, 0, &C4_UI_THEME_DEFAULT);
+    for (size_t i = 0; i < SETTINGS_POPUP_BUTTONS_COUNT; i++) {
+        C4_UI_ButtonGroup_SetButtonIndex(&screen->confirmationPopup.buttonGroup, i, screen->renderer, SETTINGS_POPUP_BUTTONS_TEXT[i], C4_UI_SymbolType_None, 0.f, 0.f, 0, &C4_UI_THEME_DEFAULT);
     }
     C4_UI_Popup_CenterInWindow(&screen->confirmationPopup);
     return screen;
@@ -116,11 +116,11 @@ void C4_Screen_Settings_HandleMouseEvents(void* screenData, SDL_Event* event) {
     }
     C4_Screen_Settings* screen = (C4_Screen_Settings*)screenData;
     switch (C4_UI_Popup_HandleMouseEvents(&screen->confirmationPopup, event)) {
-        case C4_PopupButtonIndexes_Yes: {  
+        case Settings_PopupButtons_Yes: {  
             screen->confirmationPopup.isShowing = false;
             C4_PushEvent_ScreenChange(C4_ScreenType_Menu);
         }; return;
-        case C4_PopupButtonIndexes_Back: {
+        case Settings_PopupButtons_Back: {
             screen->confirmationPopup.isShowing = false;
         }; return;
         default: break;
@@ -129,11 +129,11 @@ void C4_Screen_Settings_HandleMouseEvents(void* screenData, SDL_Event* event) {
         return;
     }
     switch (C4_UI_ButtonGroup_HandleMouseEvents(&screen->buttonGroup, event, screen->renderer)) {
-        case C4_ButtonGroupIndexes_Apply: {
+        case Settings_ButtonGroup_Apply: {
             screen->confirmationPopup.isShowing = true;
             screen->buttonGroup.buttons[0].background.color = screen->buttonGroup.buttons[0].defaultColors.background;
         }; break;
-        case C4_ButtonGroupIndexes_Cancel: {
+        case Settings_ButtonGroup_Cancel: {
             C4_PushEvent_ScreenChange(C4_ScreenType_Menu);
         }; break;
         default: break;

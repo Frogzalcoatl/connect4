@@ -27,7 +27,7 @@ C4_Board* C4_Board_Create(uint8_t width, uint8_t height, uint8_t amountToWin) {
     newBoard->height = height;
     newBoard->amountToWin = amountToWin;
     // Randomly select either player 1 or 2
-    newBoard->currentPlayer = C4_GetRandomInt(1, 2);
+    newBoard->currentPlayer = C4_SlotState_Player1;
     return newBoard;
 }
 
@@ -53,6 +53,7 @@ void C4_Board_Reset(C4_Board* board) {
     for (size_t i = 0; i < board->width * board->height; i++) {
         board->cells[i] = C4_SlotState_Empty;
     }
+    board->currentPlayer = C4_SlotState_Player1;
 }
 
 C4_SlotState C4_Board_GetSlot(C4_Board* board, uint8_t x, uint8_t y) {
@@ -116,7 +117,7 @@ int C4_Board_DoMove(C4_Board* board, uint8_t inColumn) {
     return -1;
 }
 
-static char C4_Board_GetCharForState(C4_SlotState state) {
+char C4_Board_GetCharForState(C4_SlotState state) {
     switch (state) {
         case C4_SlotState_Player1: return 'X';
         case C4_SlotState_Player2: return 'O';
