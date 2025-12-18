@@ -7,4 +7,4 @@ typedef enum {
 } C4_FontType;
 
 TTF_Font* C4_GetFont(C4_FontType type);
-void C4_CloseAllFonts();
+void C4_CloseAllFonts(void);

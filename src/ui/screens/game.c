@@ -110,7 +110,7 @@ void C4_Screen_Game_HandleMouseEvents(void* screenData, SDL_Event* event) {
         return;
     }
     C4_Screen_Game* screen = (C4_Screen_Game*)screenData;
-    if (C4_UI_Button_HandleMouseEvents(&screen->menuButton, event, screen->renderer)) {
+    if (C4_UI_Button_HandleMouseEvents(&screen->menuButton, event)) {
         C4_PushEvent_ScreenChange(C4_ScreenType_Menu);
     }
 }

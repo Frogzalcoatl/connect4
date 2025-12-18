@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-bool Connect4_Init_Dependencies() {
+bool Connect4_Init_Dependencies(void) {
     srand(time(NULL));
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
         // The error is inserted at %s
@@ -29,7 +29,7 @@ bool Connect4_Init_Dependencies() {
     return true;
 }
 
-void Connect4_Quit_Dependencies() {
+void Connect4_Quit_Dependencies(void) {
     C4_CloseAllFonts();
     C4_DestroyAllCursors();
     C4_QuitAudio();

@@ -134,7 +134,7 @@ void C4_UI_Button_Draw(C4_UI_Button* button, SDL_Renderer* renderer) {
     }
 }
 
-bool C4_UI_Button_HandleMouseEvents(C4_UI_Button* button, SDL_Event* event, SDL_Renderer* renderer) {
+bool C4_UI_Button_HandleMouseEvents(C4_UI_Button* button, SDL_Event* event) {
     if (!button || !event) {
         SDL_Log("Button and/or event is NULL");
         return false;

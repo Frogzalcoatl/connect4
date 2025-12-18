@@ -4,8 +4,8 @@
 #include "Connect4/game/board.h"
 #include "Connect4/ui/screens/interface.h"
 
-bool Connect4_Init_Dependencies();
-void Connect4_Quit_Dependencies();
+bool Connect4_Init_Dependencies(void);
+void Connect4_Quit_Dependencies(void);
 
 typedef struct {
     SDL_Window* window;

@@ -22,7 +22,7 @@ static Uint32 lengths[C4_SoundEffect_ListSize];
 static SDL_AudioStream* streams[MAX_STREAMS];
 static int currentStreamIndex = 0;
 
-bool C4_InitAudio() {
+bool C4_InitAudio(void) {
     deviceID = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, NULL);
     if (deviceID == 0) {
         SDL_Log("Failed to get audio deviceID");
@@ -54,7 +54,7 @@ bool C4_InitAudio() {
     return true;
 }
 
-void C4_QuitAudio() {
+void C4_QuitAudio(void) {
     for (size_t i = 0; i < C4_SoundEffect_ListSize; i++) {
         if (buffers[i]) {
             SDL_free(buffers[i]);

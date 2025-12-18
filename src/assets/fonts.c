@@ -39,7 +39,7 @@ TTF_Font* C4_GetFont(C4_FontType type) {
     return NULL;
 }
 
-void C4_CloseAllFonts() {
+void C4_CloseAllFonts(void) {
     for (size_t i = 0; i < C4_FONT_COUNT; i++) {
         if (fontCache[i]) {
             TTF_CloseFont(fontCache[i]);

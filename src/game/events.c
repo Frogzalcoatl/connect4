@@ -7,7 +7,7 @@ static C4_Event eventQueue[C4_EVENT_QUEUE_SIZE];
 static int head = 0;
 static int tail = 0;
 
-void C4_InitEvents() {
+void C4_InitEvents(void) {
     head = 0;
     tail = 0;
 }
@@ -31,7 +31,7 @@ bool C4_PollEvent(C4_Event* event) {
     return true;
 }
 
-void C4_PushEvent_CloseWindow() {
+void C4_PushEvent_CloseWindow(void) {
     C4_Event event;
     event.type = C4_EVENT_CLOSE_WINDOW;
     C4_PushEvent(event);

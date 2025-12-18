@@ -36,7 +36,7 @@ C4_UI_Button* C4_UI_Button_Create(
 void C4_UI_Button_FreeResources(C4_UI_Button* button);
 void C4_UI_Button_Destroy(C4_UI_Button* button);
 void C4_UI_Button_Draw(C4_UI_Button* button, SDL_Renderer* renderer);
-bool C4_UI_Button_HandleMouseEvents(C4_UI_Button* button, SDL_Event* event, SDL_Renderer* renderer);
+bool C4_UI_Button_HandleMouseEvents(C4_UI_Button* button, SDL_Event* event);
 void C4_UI_Button_CenterElementsInBackground(C4_UI_Button* button, C4_Axis axis);
 void C4_UI_Button_CenterInWindow(C4_UI_Button* button, C4_Axis axis);
 void C4_UI_Button_TransformResize(C4_UI_Button* button, float x, float y, float w, float h);

@@ -122,7 +122,7 @@ int C4_UI_ButtonGroup_HandleMouseEvents(C4_UI_ButtonGroup* group, SDL_Event* eve
         return -1;
     }
     for (size_t i = 0; i < group->count; i++) {
-        if (C4_UI_Button_HandleMouseEvents(&group->buttons[i], event, renderer)) {
+        if (C4_UI_Button_HandleMouseEvents(&group->buttons[i], event)) {
             return i;
         }
     }

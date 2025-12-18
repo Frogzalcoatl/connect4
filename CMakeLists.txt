@@ -133,6 +133,27 @@ else()
     add_executable(${PROJECT_NAME} ${SOURCES} ${GENERATED_SOURCES})
 endif()
 
+# --- COMPILER WARNING SETUP ---
+if(MSVC)
+    # Flags for Visual Studio Compiler (or clang-cl)
+    # /W4 = Enable high warning level
+    # /WX = Treat warnings as errors
+    target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+else()
+    # Flags for Standard Clang / GCC
+    target_compile_options(${PROJECT_NAME} PRIVATE 
+        -Wall 
+        -Wextra
+        -Wpedantic
+        # This is the specific flag that catches missing headers:
+        -Werror=implicit-function-declaration
+        # Optional: Catch pointer type issues often caused by missing headers
+        -Werror=int-conversion
+        # To disable the "no newline at end of file warning"
+        -Wno-newline-eof
+    )
+endif()
+
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
 
 target_include_directories(${PROJECT_NAME} PUBLIC 

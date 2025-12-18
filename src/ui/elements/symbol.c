@@ -1,5 +1,6 @@
 #include "Connect4/ui/elements/symbol.h"
 #include <math.h>
+#include <stdlib.h>
 
 bool C4_UI_Symbol_InitProperties(C4_UI_Symbol* symbol, C4_UI_SymbolType type, SDL_FRect destination, int rotationDegrees) {
     if (!symbol) {
@@ -98,5 +99,6 @@ void C4_UI_Symbol_Draw(C4_UI_Symbol* symbol, const SDL_Color color, SDL_Renderer
         case C4_UI_SymbolType_Triangle: {
             C4_UI_Symbol_DrawTriangle(symbol, color, renderer);
         }; break;
+        default: break;
     }
 }

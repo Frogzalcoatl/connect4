@@ -9,6 +9,6 @@ typedef enum {
     C4_SoundEffect_ListSize
 } C4_SoundEffect;
 
-bool C4_InitAudio();
-void C4_QuitAudio();
+bool C4_InitAudio(void);
+void C4_QuitAudio(void);
 void C4_PlaySound(C4_SoundEffect soundID);

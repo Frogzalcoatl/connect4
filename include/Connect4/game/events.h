@@ -21,10 +21,10 @@ typedef struct {
     };
 } C4_Event;
 
-void C4_InitEvents();
+void C4_InitEvents(void);
 void C4_PushEvent(C4_Event event);
 bool C4_PollEvent(C4_Event* event);
-void C4_PushEvent_CloseWindow();
+void C4_PushEvent_CloseWindow(void);
 void C4_PushEvent_ScreenChange(C4_ScreenType screenType);
 void C4_PushEvent_GameOver(C4_SlotState winnerId);
 void C4_PushEvent_SoundRequest(C4_SoundEffect soundId);
