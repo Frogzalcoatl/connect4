@@ -1,6 +1,6 @@
 # Vibe coded ah CMakeLists.txt file. I was struggling to figure it out myself ngl.
 
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.28)
 project(Connect4 LANGUAGES C)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
