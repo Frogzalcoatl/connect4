@@ -13,7 +13,7 @@ static void C4_UI_Popup_PositionElementsInBackground(C4_UI_Popup* popup) {
     popup->message.destination.x = rect->x + (float)popup->borders.width + C4_UI_POPUP_MARGIN;
     popup->message.destination.y = rect->y + (float)popup->borders.width + C4_UI_POPUP_MARGIN;
     popup->message.wrapWidth = (int)rect->w - (int)popup->borders.width * 2 - C4_UI_POPUP_MARGIN;
-    C4_UI_Text_Refresh(&popup->message, popup->renderer);
+    C4_UI_Text_ReloadTexture(&popup->message, popup->renderer);
     popup->borders.destination = popup->background.destination;
     SDL_FRect buttonGroupRect;
     buttonGroupRect.x = rect->x + (float)popup->borders.width + C4_UI_POPUP_MARGIN;
@@ -142,5 +142,5 @@ void C4_UI_Popup_SetButtonText(C4_UI_Popup* popup, SDL_Renderer* renderer, size_
     if (!popup || buttonIndex >= popup->buttonGroup.count) {
         return;
     }
-    C4_UI_Button_ChangeStr(&popup->buttonGroup.buttons[buttonIndex], text, renderer);
+    C4_UI_Button_UpdateStr(&popup->buttonGroup.buttons[buttonIndex], text, renderer);
 }

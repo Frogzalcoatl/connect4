@@ -95,23 +95,19 @@ void C4_UI_ButtonGroup_SetButtonIndex(
     C4_UI_ButtonGroup* group, size_t buttonIndex, SDL_Renderer* renderer, const char* str,C4_UI_SymbolType symbol,
     float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme
 ) {
+    if (!group) {
+        SDL_Log("Unable to set button index %zu. Button group is NULL", buttonIndex);
+        return;
+    }
     if (buttonIndex >= group->count) {
         SDL_Log("Unable to set button index %zu. Out of bounds.", buttonIndex);
         return;
     }
     C4_UI_Button* btn = &group->buttons[buttonIndex];
-    btn->text.ptSize = theme->defaultPtSize;
-    btn->text.font = C4_GetFont(theme->buttonFont);
-    C4_UI_Button_ChangeStr(btn, str, renderer);
-    btn->borders.width = theme->borderWidth;
-    btn->defaultColors = theme->buttonDefault;
-    btn->hoverColors = theme->buttonHovered;
-    btn->clickColors = theme->buttonPressed;
-    btn->symbol.type = symbol;
-    btn->symbol.destination.w = symbolWidth;
-    btn->symbol.destination.h = symbolHeight;
-    btn->symbol.rotationDegrees = symbolRotationDegrees;
-    C4_UI_Button_CenterElementsInBackground(btn, C4_Axis_XY);
+    C4_UI_Button_InitProperties(
+        btn, renderer, str, btn->background.destination, symbol,
+        symbolWidth, symbolHeight, symbolRotationDegrees, theme
+    );
 }
 
 void C4_UI_ButtonGroup_Draw(C4_UI_ButtonGroup* group, SDL_Renderer* renderer) {

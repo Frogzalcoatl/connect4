@@ -11,6 +11,8 @@ int main(int argc, char *argv[]) {
     }
     C4_Game* connect4 = C4_Game_Create(7, 6, 4);
     if (connect4) {
+        // I like logs starting under the file path of the exe in my ide.
+        SDL_Log("");
         C4_Game_Run(connect4);
         C4_Game_Destroy(connect4);
     }

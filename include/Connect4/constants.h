@@ -31,7 +31,7 @@
     .buttonFont = C4_FontType_Bold,\
     .defaultPtSize = 32.f,\
     .borderWidth = 3,\
-    .textColor = (SDL_Color){255, 255, 255, 255}\
+    .textColor = (SDL_Color){230, 230, 230, 255}\
 }
 
 // Game Screen

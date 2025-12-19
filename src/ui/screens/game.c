@@ -95,10 +95,8 @@ void C4_Screen_Game_TestStrUpdate(C4_Screen_Game* screen) {
         SDL_Log("Game screen is NULL");
         return;
     }
-    char tempBuffer[512];
-    C4_Board_UpdateTestStr(screen->board, tempBuffer, 100);
-    C4_UI_Text_ChangeStr(&screen->testBoardText, tempBuffer);
-    C4_UI_Text_Refresh(&screen->testBoardText, screen->renderer);
+    C4_Board_UpdateTestStr(screen->board, screen->testBoardText.str, sizeof(screen->testBoardText.str));
+    C4_UI_Text_ReloadTexture(&screen->testBoardText, screen->renderer);
     C4_UI_CenterInWindow(&screen->testBoardText.destination, C4_Axis_X);
 }
 
@@ -113,11 +111,7 @@ static void C4_Screen_Game_UpdateWinnerPopupText(C4_Screen_Game* screen, C4_Slot
         "Game Over!\nWinner: Player %c",
         C4_Board_GetCharForState(winner)
     );
-    C4_UI_Text_ChangeStr(
-        &screen->winnerPopup.message,
-        newStr
-    );
-    C4_UI_Text_Refresh(&screen->winnerPopup.message, screen->renderer);
+    C4_UI_Text_UpdateStr(&screen->winnerPopup.message, newStr, screen->renderer);
 }
 
 void C4_Screen_Game_HandleKeyboardInput(void* screenData, SDL_Scancode scancode) {
@@ -133,7 +127,7 @@ void C4_Screen_Game_HandleKeyboardInput(void* screenData, SDL_Scancode scancode)
     // Temporary just for testing
     if (
         scancode >= SDL_SCANCODE_1 &&
-        scancode <= SDL_SCANCODE_7 &&
+        scancode <= SDL_SCANCODE_0 &&
         !screen->winnerPopup.isShowing
     ) {
         int column = scancode - SDL_SCANCODE_1;

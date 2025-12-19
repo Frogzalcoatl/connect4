@@ -5,6 +5,41 @@
 #include <stdlib.h>
 #include <string.h>
 
+bool C4_Board_ChangeSize(C4_Board* board, uint8_t width, uint8_t height) {
+    if (!board) {
+        return false;
+    }
+    if (width == 0) {
+        SDL_Log("Board width must be greater than 0");
+        return false;
+    }
+    if (height == 0) {
+        SDL_Log("Board height must be greater than 0");
+        return false;
+    }
+    C4_SlotState* newCells = calloc(width * height, sizeof(C4_SlotState));
+    if (!newCells) {
+        SDL_Log("Unable to allocate memory for board cells");
+        return false;
+    }
+    size_t newBufferSize = (size_t)C4_Max((int)width, (int)height);
+    C4_SlotState* newCellCheckBuffer = calloc(newBufferSize, sizeof(C4_SlotState));
+    if (!newCellCheckBuffer) {
+        SDL_Log("Unable to allocate memory for board cell check buffer");
+        free(newCells);
+        return false;
+    }
+    free(board->cells);
+    free(board->cellCheckBuffer);
+    board->cells = newCells;
+    board->cellCheckBufferSize = newBufferSize;
+    board->cellCheckBuffer = newCellCheckBuffer;
+    board->width = width;
+    board->height = height;
+    board->currentPlayer = C4_SlotState_Player1;
+    return true;
+}
+
 C4_Board* C4_Board_Create(uint8_t width, uint8_t height, uint8_t amountToWin) {
     if (amountToWin <= 1) {
         SDL_Log("amount to win cannot be less than 1");
@@ -14,14 +49,10 @@ C4_Board* C4_Board_Create(uint8_t width, uint8_t height, uint8_t amountToWin) {
     // Put cells on the heap to support any width/height
     // If cells were on the stack, I would have to set a max array size
     // Would be wasteful if i set the max to 100x100 for example but only used 6x7.
-    newBoard->cells = calloc(width * height, sizeof(C4_SlotState));
-    if (!newBoard->cells) {
+    if (!C4_Board_ChangeSize(newBoard, width, height)) {
         C4_Board_Destroy(newBoard);
-        SDL_Log("Unable to allocate memory for board cells");
         return NULL;
     }
-    newBoard->cellCheckBufferSize = (size_t)C4_Max((int)width, (int)height);
-    newBoard->cellCheckBuffer = calloc(newBoard->cellCheckBufferSize, sizeof(C4_SlotState));
     newBoard->cellCheckCount = 0;
     newBoard->width = width;
     newBoard->height = height;
@@ -274,13 +305,13 @@ C4_SlotState C4_Board_GetWinner(C4_Board* board, size_t mostRecentMoveIndex) {
     return C4_SlotState_Empty;
 }
 
-void C4_Board_UpdateTestStr(C4_Board* board, char* buffer, size_t bufferSize) {
+void C4_Board_UpdateTestStr(C4_Board* board, char* strToUpdate, size_t strSize) {
     if (!board) {
         SDL_Log("Board is NULL");
         return;
     }
     size_t amountNeeded = board->width * board->height + board->height + 1;
-    if (amountNeeded > bufferSize) {
+    if (amountNeeded > strSize) {
         SDL_Log("Amount needed for testStr exceeds its size");
         return;
     }
@@ -288,12 +319,28 @@ void C4_Board_UpdateTestStr(C4_Board* board, char* buffer, size_t bufferSize) {
     for (size_t y = 0; y < board->height; y++) {
         for (size_t x = 0; x < board->width; x++) {
             C4_SlotState state = C4_Board_GetSlot(board, (uint8_t)x, (uint8_t)y);
-            buffer[i] = C4_Board_GetCharForState(state);
+            strToUpdate[i] = C4_Board_GetCharForState(state);
             i++;
         }
-        buffer[i] = '\n';
+        strToUpdate[i] = '\n';
         i++;
     }
     // \0 marks where the string stops.
-    buffer[i] = '\0';
+    strToUpdate[i] = '\0';
+}
+
+bool C4_Board_IsEmpty(C4_Board* board) {
+    if (!board) {
+        return false;
+    }
+    for (size_t i = 0; i < (int)board->width * (int)board->height; i++) {
+        if (board->cells[i] != C4_SlotState_Empty) {
+            return false;
+        }
+    }
+    return true;
+}
+
+uint8_t C4_Board_GetMaxAmountToWin(uint8_t width, uint8_t height) {
+    return C4_Min(width, height);
 }

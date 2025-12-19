@@ -59,7 +59,7 @@ static bool C4_Game_ChangeScreen(C4_Game* game, C4_ScreenType type) {
             game->currentScreen.HandleMouseEvents = &C4_Screen_Menu_HandleMouseEvents;
         }; break;
         case C4_ScreenType_Settings: {
-            game->currentScreen.data = C4_Screen_Settings_Create(game->renderer, game->window);
+            game->currentScreen.data = C4_Screen_Settings_Create(game->renderer, game->window, game->board);
             game->currentScreen.Destroy = &C4_Screen_Settings_Destroy;
             game->currentScreen.Draw = &C4_Screen_Settings_Draw;
             game->currentScreen.HandleKeyboardInput = &C4_Screen_Settings_HandleKeyboardInput;

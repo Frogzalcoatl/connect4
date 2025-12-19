@@ -10,8 +10,12 @@ bool C4_UI_Text_InitProperties(C4_UI_Text* element, SDL_Renderer* renderer, cons
         SDL_Log("Unable to init text element properties. Pointer is NULL");
         return false;
     }
-    if (!renderer || !str) {
-        SDL_Log("Unable to init text element properties. renderer and/or str is NULL.");
+    if (!renderer) {
+        SDL_Log("Unable to init text element properties. renderer is NULL.");
+        return false;
+    }
+    if (!str) {
+        SDL_Log("Unable to init text element properties. str is NULL");
         return false;
     }
     element->font = C4_GetFont(font);
@@ -27,8 +31,7 @@ bool C4_UI_Text_InitProperties(C4_UI_Text* element, SDL_Renderer* renderer, cons
     element->destination = (SDL_FRect){destinationX, destinationY, 0.f, 0.f};
     element->color = color;
     element->wrapWidth = wrapWidth;
-    C4_UI_Text_ChangeStr(element, str);
-    C4_UI_Text_Refresh(element, renderer);
+    C4_UI_Text_UpdateStr(element, str, renderer);
     return true;
 }
 
@@ -61,12 +64,18 @@ void C4_UI_Text_Destroy(C4_UI_Text* element) {
     free(element);
 }
 
-void C4_UI_Text_Refresh(C4_UI_Text* element, SDL_Renderer* renderer) {
+void C4_UI_Text_ReloadTexture(C4_UI_Text* element, SDL_Renderer* renderer) {
     if (!element) {
         SDL_Log("Text element is NULL");
         return;
     }
     SDL_DestroyTexture(element->texture);
+    size_t strLength = strlen(element->str);
+    if (strLength == 0) {
+        return;
+    } else if (strLength >= C4_UI_TEXT_STR_SIZE) {
+        return;
+    }
     TTF_SetFontSize(element->font, element->ptSize);
     SDL_Surface* tempSurface = TTF_RenderText_Blended_Wrapped(element->font, element->str, strlen(element->str), (SDL_Color){255, 255, 255, 255}, element->wrapWidth);
     if (tempSurface) {
@@ -80,22 +89,26 @@ void C4_UI_Text_Refresh(C4_UI_Text* element, SDL_Renderer* renderer) {
     }
 }
 
-void C4_UI_Text_ChangeStr(C4_UI_Text* element, const char* newStr) {
+void C4_UI_Text_UpdateStr(C4_UI_Text* element, const char* newStr, SDL_Renderer* renderer) {
     if (!element) {
         SDL_Log("Text element is NULL");
         return;
     }
-    size_t totalSize = sizeof(element->str) / sizeof(element->str[0]);
-    snprintf(element->str, totalSize, "%s", newStr);
+    if (strlen(newStr) >= C4_UI_TEXT_STR_SIZE) {
+        SDL_Log("Unable to update text element str. Length exceeds max size");
+        return;
+    }
+    snprintf(element->str, sizeof(element->str), "%s", newStr);
+    C4_UI_Text_ReloadTexture(element, renderer);
 }
 
 void C4_UI_Text_Draw(C4_UI_Text* element, SDL_Renderer* renderer) {
-    if (!element || !element->texture || !renderer) {
+    if (!element) {
         SDL_Log("Text element is NULL");
         return;
     }
     if (!element->texture) {
-        SDL_Log("Text element texture is NULL");
+        // Doesnt need a log since this would be true if the text element is currently an empty string
         return;
     }
     if (!renderer) {

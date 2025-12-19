@@ -8,3 +8,7 @@ int C4_GetRandomInt(int min, int max) {
 int C4_Max(int a, int b) {
     return a > b ? a : b;
 }
+
+int C4_Min(int a, int b) {
+    return a < b ? a : b;
+}

@@ -4,6 +4,8 @@
 #include "Connect4/ui/elements/index.h"
 #include "Connect4/assets/fonts.h"
 
+#define C4_UI_TEXT_STR_SIZE 1024
+
 typedef struct {
     // [Ref] Shared resources owned by C4_Game
     TTF_Font* font;
@@ -14,13 +16,13 @@ typedef struct {
     SDL_Texture* texture;
     SDL_FRect destination;
     int wrapWidth;
-    char str[512];
+    char str[C4_UI_TEXT_STR_SIZE];
 } C4_UI_Text;
 
 bool C4_UI_Text_InitProperties(C4_UI_Text* element, SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, float destinationX, float destinationY, int wrapWidth, const SDL_Color color);
 C4_UI_Text* C4_UI_Text_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, float destinationX, float destinationY, int wrapWidth, const SDL_Color color);
 void C4_UI_Text_FreeResources(C4_UI_Text* element);
 void C4_UI_Text_Destroy(C4_UI_Text* element);
-void C4_UI_Text_ChangeStr(C4_UI_Text* element, const char* newStr);
+void C4_UI_Text_UpdateStr(C4_UI_Text* element, const char* newStr, SDL_Renderer* renderer);
 void C4_UI_Text_Draw(C4_UI_Text* element, SDL_Renderer* renderer);
-void C4_UI_Text_Refresh(C4_UI_Text* element, SDL_Renderer* renderer);
+void C4_UI_Text_ReloadTexture(C4_UI_Text* element, SDL_Renderer* renderer);

@@ -1,7 +1,7 @@
 # TODO
 
 * Ensure all UI functionality isnt dependent on connect4 specific files (ex: screens/.c, connect4.c) so it can be reused for future projects
-* Number input UIElement
+* You gyatta add a better way to manage the ui elements
 * Slider UIElement
 * Settings screen
 * Support for adjustable board size and "amount in row to win" (i cant think of a better way to word this rn)

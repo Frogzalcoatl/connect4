@@ -4,6 +4,7 @@
 #include "Connect4/game/events.h"
 #include "Connect4/constants.h"
 #include <stdlib.h>
+#include <string.h>
 
 void C4_UI_Button_CenterElementsInBackground(C4_UI_Button* button, C4_Axis axis) {
     if (!button) {
@@ -193,12 +194,14 @@ void C4_UI_Button_TransformResize(C4_UI_Button* button, float x, float y, float 
     C4_UI_Button_CenterElementsInBackground(button, C4_Axis_XY);
 }
 
-void C4_UI_Button_ChangeStr(C4_UI_Button* button, const char* str, SDL_Renderer* renderer) {
+void C4_UI_Button_UpdateStr(C4_UI_Button* button, const char* str, SDL_Renderer* renderer) {
     if (!button || !str) {
         return;
     }
-    C4_UI_Text_ChangeStr(&button->text, str);
-    C4_UI_Text_Refresh(&button->text, renderer);
+    if (strcmp(button->text.str, str) == 0) {
+        return;
+    }
+    C4_UI_Text_UpdateStr(&button->text, str, renderer);
     float backgroundCenterX = button->background.destination.x + (button->background.destination.w / 2.f);
     button->text.destination.x = backgroundCenterX - (button->text.destination.w / 2.f);
     float backgroundCenterY = button->background.destination.y + (button->background.destination.h / 2.f);
