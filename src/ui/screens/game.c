@@ -100,15 +100,16 @@ void C4_Screen_Game_TestStrUpdate(C4_Screen_Game* screen) {
     C4_UI_CenterInWindow(&screen->testBoardText.destination, C4_Axis_X);
 }
 
+static const char winnerText[] = "Game Over!\nWinner: Player %c";
+static const char noWinnerText[] = "Game Over!\nThere is no Winner!";
+
 static void C4_Screen_Game_UpdateWinnerPopupText(C4_Screen_Game* screen, C4_SlotState winner) {
-    if (winner != C4_SlotState_Player1 && winner != C4_SlotState_Player2) {
-        return;
-    }
     char newStr[64];
+    bool isValidWinner = winner == C4_SlotState_Player1 || winner == C4_SlotState_Player2;
     snprintf(
         newStr,
         sizeof(newStr),
-        "Game Over!\nWinner: Player %c",
+        (isValidWinner ? winnerText : noWinnerText),
         C4_Board_GetCharForState(winner)
     );
     C4_UI_Text_UpdateStr(&screen->winnerPopup.message, newStr, screen->renderer);
@@ -135,6 +136,7 @@ void C4_Screen_Game_HandleKeyboardInput(void* screenData, SDL_Scancode scancode)
         if (atIndex == -1) {
             return;
         }
+        C4_Screen_Game_TestStrUpdate(screen);
         // Reversed since currentPlayer would have been swapped already by doMove
         if (screen->board->currentPlayer == C4_SlotState_Player2) {
             C4_PushEvent_SoundRequest(C4_SoundEffect_Player1Place);
@@ -146,8 +148,15 @@ void C4_Screen_Game_HandleKeyboardInput(void* screenData, SDL_Scancode scancode)
             C4_Screen_Game_UpdateWinnerPopupText(screen, winnerCheckResult);
             C4_PushEvent_GameOver(winnerCheckResult);
             screen->winnerPopup.isShowing = true;
+            return;
         }
-        C4_Screen_Game_TestStrUpdate(screen);
+        bool isBoardFull = C4_Board_IsFull(screen->board);
+        if (isBoardFull) {
+            // rip no winner. end game
+            C4_Screen_Game_UpdateWinnerPopupText(screen, C4_SlotState_Empty);
+            C4_PushEvent_GameOver(C4_SlotState_Empty);
+            screen->winnerPopup.isShowing = true;
+        }
     }
 }
 
@@ -168,7 +177,7 @@ void C4_Screen_Game_HandleMouseEvents(void* screenData, SDL_Event* event) {
                 C4_Board_Reset(screen->board);
                 C4_Screen_Game_TestStrUpdate(screen);
                 C4_PushEvent_ScreenChange(C4_ScreenType_Menu);
-            }
+            }; break;
         }
         return;
     }

@@ -130,12 +130,12 @@ int C4_Board_DoMove(C4_Board* board, uint8_t inColumn) {
         SDL_Log("Board is NULL");
         return -1;
     }
-    if (board->currentPlayer == C4_SlotState_Empty || inColumn >= board->width) {
-        SDL_Log("Unable to do board move");
-        return -1;
-    }
-    // If column is full returns -1
-    if (board->cells[inColumn] != C4_SlotState_Empty) {
+    // If column is full returns -1. Also more conditions where a move shouldnt be competed
+    if (
+        board->cells[inColumn] != C4_SlotState_Empty ||
+        board->currentPlayer == C4_SlotState_Empty ||
+        inColumn >= board->width
+    ) {
         return -1;
     }
     for (size_t row = board->height - 1; row < board->height; row--) {
@@ -225,7 +225,10 @@ static void C4_Board_UpdateCellCheckBuffer(C4_Board* board, C4_Board_RowAxis axi
                 // Since this loop increments by width - 1, if boardIndex is the bottom left index of the board,
                 // nextIndex would be the bottom right corner of the board, which should not be included in the diagonal row.
                 size_t nextIndex = boardIndex + (board->width - 1);
-                if (nextIndex == (board->width * board->height) - 1) {
+                if (
+                    nextIndex >= (board->width * board->height) || 
+                    nextIndex % board->width > boardIndex % board->width
+                ) {
                     break;
                 }
             }
@@ -248,6 +251,13 @@ static void C4_Board_UpdateCellCheckBuffer(C4_Board* board, C4_Board_RowAxis axi
                 board->cellCheckBuffer[bufferIndex] = board->cells[boardIndex];
                 bufferIndex++;
                 board->cellCheckCount++;
+                size_t nextIndex = boardIndex + (board->width + 1);
+                if (
+                    nextIndex >= (board->width * board->height) || 
+                    nextIndex % board->width < boardIndex % board->width
+                ) {
+                    break;
+                }
             }
         }; break;
     }
@@ -341,6 +351,18 @@ bool C4_Board_IsEmpty(C4_Board* board) {
     return true;
 }
 
+bool C4_Board_IsFull(C4_Board* board) {
+    if (!board) {
+        return false;
+    }
+    for (size_t i = 0; i < (int)board->width * (int)board->height; i++) {
+        if (board->cells[i] == C4_SlotState_Empty) {
+            return false;
+        }
+    }
+    return true;
+}
+
 uint8_t C4_Board_GetMaxAmountToWin(uint8_t width, uint8_t height) {
-    return C4_Min(width, height);
+    return (uint8_t)C4_Max(width, height);
 }

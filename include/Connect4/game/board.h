@@ -38,5 +38,6 @@ void C4_Board_UpdateTestStr(C4_Board* board, char* strToUpdate, size_t strSize);
 C4_SlotState C4_Board_GetWinner(C4_Board* board, size_t mostRecentMoveIndex);
 char C4_Board_GetCharForState(C4_SlotState state);
 bool C4_Board_IsEmpty(C4_Board* board);
+bool C4_Board_IsFull(C4_Board* board);
 bool C4_Board_ChangeSize(C4_Board* board, uint8_t width, uint8_t height);
 uint8_t C4_Board_GetMaxAmountToWin(uint8_t width, uint8_t height);
