@@ -1,5 +1,6 @@
 // USE_DISCORD is from the CMakeLists file
 #ifdef USE_DISCORD
+    #define _CRT_SECURE_NO_WARNINGS
     #include "Connect4/discord/index.h"
     #include "Discord/discord_rpc.h"
     #include "SDL3/SDL.h"
@@ -39,11 +40,12 @@
         DiscordRichPresence discordPresence;
         memset(&discordPresence, 0, sizeof(discordPresence));
         if (state) {
-            // _TRUNCATE will automatically truncate string that are longer than 128 bytes with a /0 to prevent overflow
-            strncpy_s(cachedState, sizeof(cachedState), state, _TRUNCATE);
+            strncpy(cachedState, state, sizeof(cachedState) - 1);
+            cachedState[sizeof(cachedState) - 1] = '\0';
         }
         if (details) {
-            strncpy_s(cachedDetails, sizeof(cachedDetails), details, _TRUNCATE);
+            strncpy(cachedDetails, details, sizeof(cachedDetails) - 1);
+            cachedDetails[sizeof(cachedDetails) - 1] = '\0';
         }
         if (!isConnected) {
             return;
