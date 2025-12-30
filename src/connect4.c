@@ -8,6 +8,7 @@
 #include "Connect4/ui/screens/settings.h"
 #include "Connect4/assets/sounds.h"
 #include "Connect4/game/events.h"
+#include "Connect4/discord/index.h"
 #include <stdlib.h>
 #include <time.h>
 
@@ -18,6 +19,8 @@ bool Connect4_Init_Dependencies(void) {
         SDL_Log("SDL_Init failed: %s", SDL_GetError());
         return false;
     }
+    // I like logs starting under the file path of the exe in my ide.
+    SDL_Log("");
     if (!TTF_Init()) {
         SDL_Log("TTF_Init failed: %s", SDL_GetError());
         return false;
@@ -26,10 +29,12 @@ bool Connect4_Init_Dependencies(void) {
         SDL_Log("C4_InitAudio failed");
         return false;
     }
+    C4_Discord_Init();
     return true;
 }
 
 void Connect4_Quit_Dependencies(void) {
+    C4_Discord_Shutdown();
     C4_CloseAllFonts();
     C4_DestroyAllCursors();
     C4_QuitAudio();
@@ -46,6 +51,7 @@ static bool C4_Game_ChangeScreen(C4_Game* game, C4_ScreenType type) {
         game->currentScreen.Destroy(game->currentScreen.data);
         memset(&game->currentScreen, 0, sizeof(C4_Screen_Interface));
     } else {
+        // To not log a warning on the inital screen change
         if (game->running) {
             SDL_Log("Warning: was unable to destroy previous screen");
         }
@@ -57,6 +63,7 @@ static bool C4_Game_ChangeScreen(C4_Game* game, C4_ScreenType type) {
             game->currentScreen.Draw = &C4_Screen_Menu_Draw;
             game->currentScreen.HandleKeyboardInput = &C4_Screen_Menu_HandleKeyboardInput;
             game->currentScreen.HandleMouseEvents = &C4_Screen_Menu_HandleMouseEvents;
+            C4_Discord_UpdateStatus("In the Menus", NULL);
         }; break;
         case C4_ScreenType_Settings: {
             game->currentScreen.data = C4_Screen_Settings_Create(game->renderer, game->window, game->board);
@@ -71,6 +78,7 @@ static bool C4_Game_ChangeScreen(C4_Game* game, C4_ScreenType type) {
             game->currentScreen.Draw = &C4_Screen_Game_Draw;
             game->currentScreen.HandleKeyboardInput = &C4_Screen_Game_HandleKeyboardInput;
             game->currentScreen.HandleMouseEvents = &C4_Screen_Game_HandleMouseEvents;
+            C4_Discord_UpdateStatus("In 2 Player Mode", NULL);
         }; break;
         default: break;
     }
@@ -190,5 +198,6 @@ void C4_Game_Run(C4_Game* game) {
             game->currentScreen.Draw(game->currentScreen.data);
         }
         SDL_RenderPresent(game->renderer);
+        C4_Discord_Loop();
     }
 }

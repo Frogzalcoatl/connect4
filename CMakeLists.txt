@@ -56,11 +56,9 @@ endif()
 # Function to read a file and turn it into a C file / header
 function(embed_resource input_file output_c output_h c_name)
     file(READ ${input_file} hex_content HEX)
-    
     # Calculate the size (2 hex characters = 1 byte)
     string(LENGTH "${hex_content}" hex_len)
     math(EXPR file_size "${hex_len} / 2")
-
     # Handle empty files
     if(hex_len EQUAL 0)
         set(array_values "0x00")
@@ -72,53 +70,39 @@ function(embed_resource input_file output_c output_h c_name)
         # Remove trailing comma
         string(REGEX REPLACE ", $" "" array_values "${array_values}")
     endif()
-
-    # --- 1. Write the Header (.h) ---
-    # CHANGE: We define the size as a MACRO so it is a compile-time constant.
-    set(header_content "
-#pragma once
+    # Write the Header (.h)
+    set(header_content "#pragma once
 #include <stddef.h>
 
 extern const unsigned char ${c_name}_data[];
-#define ${c_name}_size ${file_size}
-")
+#define ${c_name}_size ${file_size}")
     file(WRITE ${output_h} "${header_content}")
+    # Write the Source (.c)
+    set(source_content "#include \"${c_name}.h\"
 
-    # --- 2. Write the Source (.c) ---
-    # The array definition stays the same
-    set(source_content "
-#include \"${c_name}.h\"
-
-const unsigned char ${c_name}_data[] = { ${array_values} };
-")
+const unsigned char ${c_name}_data[] = { ${array_values} };")
     file(WRITE ${output_c} "${source_content}")
-
 endfunction()
 
 # Find all files in assets/ recursively
 file(GLOB_RECURSE ASSET_FILES "${CMAKE_SOURCE_DIR}/assets/*")
-
 message(STATUS "Bundling assets...")
 
 set(GENERATED_SOURCES "")
 
 foreach(file_path ${ASSET_FILES})
     file(RELATIVE_PATH rel_path "${CMAKE_SOURCE_DIR}/assets" "${file_path}")
-    
     # Sanitize filename to create a valid C variable name
     string(REPLACE "/" "_" safe_name "${rel_path}")
     string(REPLACE "\\" "_" safe_name "${safe_name}")
     string(REPLACE "." "_" safe_name "${safe_name}")
     string(REPLACE "-" "_" safe_name "${safe_name}")
     set(safe_name "assets_${safe_name}")
-    
     # Define paths for both .c and .h
     set(out_c "${CMAKE_BINARY_DIR}/generated/${safe_name}.c")
     set(out_h "${CMAKE_BINARY_DIR}/generated/${safe_name}.h")
-    
     # Call the updated function
     embed_resource("${file_path}" "${out_c}" "${out_h}" "${safe_name}")
-    
     # Add the .c file to our list
     list(APPEND GENERATED_SOURCES "${out_c}")
 endforeach()
@@ -154,12 +138,46 @@ else()
     )
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    SDL3::SDL3
+    SDL3_ttf::SDL3_ttf
+)
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_BINARY_DIR}/generated
 )
+
+# --- DISCORD SDK SETUP ---
+set(USE_DISCORD OFF)
+
+# Only enable Discord for Desktop platforms
+if(WIN32 OR (UNIX AND NOT ANDROID AND NOT APPLE) OR (APPLE AND NOT IOS))
+    set(USE_DISCORD ON)
+    add_definitions(-DUSE_DISCORD)
+    message(STATUS "discord-rpc enabled for this platform")
+endif()
+
+if(USE_DISCORD)
+    target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/deps/Discord/include")
+    if(WIN32)
+        # optimized means Release/MinSizeRel/RelWithDebInfo
+        target_link_libraries(${PROJECT_NAME} PRIVATE
+            debug     "${CMAKE_SOURCE_DIR}/deps/Discord/win/dynamic/discord-rpc.lib"
+            optimized "${CMAKE_SOURCE_DIR}/deps/Discord/win/static/discord-rpc.lib"
+        )
+        # I cant figure out how to not copy the dll for the release version. Just remeber to remove it when sending the release to others.
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/deps/Discord/win/dynamic/discord-rpc.dll"
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        ) 
+    elseif(APPLE)
+        target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/deps/Discord/include/Discord/osx/libdiscord-rpc.a")
+    elseif(LINUX)
+        target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/deps/Discord/include/Discord/linux/libdiscord-rpc.a")
+    endif()
+endif()
 
 # So math.h always includes math defines (ex: M_PI)
 target_compile_definitions(${PROJECT_NAME} PRIVATE _USE_MATH_DEFINES)

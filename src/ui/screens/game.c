@@ -100,18 +100,23 @@ void C4_Screen_Game_TestStrUpdate(C4_Screen_Game* screen) {
     C4_UI_CenterInWindow(&screen->testBoardText.destination, C4_Axis_X);
 }
 
-static const char winnerText[] = "Game Over!\nWinner: Player %c";
-static const char noWinnerText[] = "Game Over!\nThere is no Winner!";
-
 static void C4_Screen_Game_UpdateWinnerPopupText(C4_Screen_Game* screen, C4_SlotState winner) {
     char newStr[64];
     bool isValidWinner = winner == C4_SlotState_Player1 || winner == C4_SlotState_Player2;
-    snprintf(
-        newStr,
-        sizeof(newStr),
-        (isValidWinner ? winnerText : noWinnerText),
-        C4_Board_GetCharForState(winner)
-    );
+    if (isValidWinner) {
+        snprintf(
+            newStr,
+            sizeof(newStr),
+            "Game Over!\nWinner: Player %c",
+            C4_Board_GetCharForState(winner)
+        );
+    } else {
+        snprintf(
+            newStr,
+            sizeof(newStr),
+            "Game Over!\nThere is no Winner!"
+        );
+    }
     C4_UI_Text_UpdateStr(&screen->winnerPopup.message, newStr, screen->renderer);
 }
 
@@ -150,8 +155,7 @@ void C4_Screen_Game_HandleKeyboardInput(void* screenData, SDL_Scancode scancode)
             screen->winnerPopup.isShowing = true;
             return;
         }
-        bool isBoardFull = C4_Board_IsFull(screen->board);
-        if (isBoardFull) {
+        if (C4_Board_IsFull(screen->board)) {
             // rip no winner. end game
             C4_Screen_Game_UpdateWinnerPopupText(screen, C4_SlotState_Empty);
             C4_PushEvent_GameOver(C4_SlotState_Empty);
