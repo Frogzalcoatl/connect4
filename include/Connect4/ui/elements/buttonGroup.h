@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL3/SDL.h>
+#include "SDL3/SDL.h"
 #include "Connect4/ui/elements/button.h"
 #include <stdint.h>
 
@@ -25,6 +25,6 @@ void C4_UI_ButtonGroup_SetButtonIndex(
     float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme
 );
 void C4_UI_ButtonGroup_Draw(C4_UI_ButtonGroup* group, SDL_Renderer* renderer);
-int C4_UI_ButtonGroup_HandleMouseEvents(C4_UI_ButtonGroup* group, SDL_Event* event, SDL_Renderer* renderer);
+int C4_UI_ButtonGroup_HandleMouseEvents(C4_UI_ButtonGroup* group, SDL_Event* event);
 void C4_UI_ButtonGroup_TransformResize(C4_UI_ButtonGroup* group, const SDL_FRect rect);
 void C4_UI_ButtonGroup_CenterInWindow(C4_UI_ButtonGroup* group, C4_Axis axis);

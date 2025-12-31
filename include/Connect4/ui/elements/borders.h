@@ -1,6 +1,6 @@
 #pragma once
 #include "Connect4/ui/elements/index.h"
-#include <SDL3/SDL.h>
+#include "SDL3/SDL.h"
 
 typedef struct {
     SDL_FRect destination;

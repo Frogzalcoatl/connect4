@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL3/SDL.h>
+#include "SDL3/SDL.h"
 #include "Connect4/assets/fonts.h"
 
 typedef struct {

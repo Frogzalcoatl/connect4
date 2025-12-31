@@ -2,7 +2,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-bool C4_UI_Symbol_InitProperties(C4_UI_Symbol* symbol, C4_UI_SymbolType type, SDL_FRect destination, int rotationDegrees) {
+bool C4_UI_Symbol_InitProperties(C4_UI_Symbol* symbol, C4_UI_SymbolType type, const SDL_FRect destination, int rotationDegrees, const SDL_Color color) {
     if (!symbol) {
         SDL_Log("Unable to init symbol properties. Pointer is NULL");
         return false;
@@ -14,16 +14,17 @@ bool C4_UI_Symbol_InitProperties(C4_UI_Symbol* symbol, C4_UI_SymbolType type, SD
     symbol->type = type;
     symbol->destination = destination;
     symbol->rotationDegrees = rotationDegrees;
+    symbol->color = color;
     return true;
 }
 
-C4_UI_Symbol* C4_UI_Symbol_Create(C4_UI_SymbolType type, SDL_FRect destination, int rotationDegrees) {
+C4_UI_Symbol* C4_UI_Symbol_Create(C4_UI_SymbolType type, const SDL_FRect destination, int rotationDegrees, const SDL_Color color) {
     C4_UI_Symbol* symbol = calloc(1, sizeof(C4_UI_Symbol));
     if (!symbol) {
         SDL_Log("Unable to allocate memory for symbol element");
         return NULL;
     }
-    if (!C4_UI_Symbol_InitProperties(symbol, type, destination, rotationDegrees)) {
+    if (!C4_UI_Symbol_InitProperties(symbol, type, destination, rotationDegrees, color)) {
         C4_UI_Symbol_Destroy(symbol);
         return NULL;
     }
@@ -51,17 +52,17 @@ static SDL_FPoint C4_UI_RotatePoint(SDL_FPoint point, SDL_FPoint center, float d
     return (SDL_FPoint){rotatedX + center.x, rotatedY + center.y}; 
 }
 
-static void C4_UI_Symbol_DrawTriangle(C4_UI_Symbol* symbol, const SDL_Color color, SDL_Renderer* renderer) {
+static void C4_UI_Symbol_DrawTriangle(C4_UI_Symbol* symbol, SDL_Renderer* renderer) {
     if (!symbol) {
         return;
     }
     SDL_Vertex vertices[3];
     // FColor uses a 0.0 - 1.0 range rather than 0 - 255
     SDL_FColor fColor = {
-        color.r / 255.f,
-        color.g / 255.f,
-        color.b / 255.f,
-        color.a / 255.f
+        symbol->color.r / 255.f,
+        symbol->color.g / 255.f,
+        symbol->color.b / 255.f,
+        symbol->color.a / 255.f
     };
     for (int i = 0; i < 3; i++) {
         vertices[i].color = fColor;
@@ -86,7 +87,7 @@ static void C4_UI_Symbol_DrawTriangle(C4_UI_Symbol* symbol, const SDL_Color colo
     SDL_RenderGeometry(renderer, NULL, vertices, 3, NULL, 0);
 }
 
-void C4_UI_Symbol_Draw(C4_UI_Symbol* symbol, const SDL_Color color, SDL_Renderer* renderer) {
+void C4_UI_Symbol_Draw(C4_UI_Symbol* symbol, SDL_Renderer* renderer) {
     if (!symbol) {
         SDL_Log("Tried to draw NULL symbol element. Ignoring");
         return;
@@ -97,7 +98,7 @@ void C4_UI_Symbol_Draw(C4_UI_Symbol* symbol, const SDL_Color color, SDL_Renderer
     }
     switch (symbol->type) {
         case C4_UI_SymbolType_Triangle: {
-            C4_UI_Symbol_DrawTriangle(symbol, color, renderer);
+            C4_UI_Symbol_DrawTriangle(symbol, renderer);
         }; break;
         default: break;
     }

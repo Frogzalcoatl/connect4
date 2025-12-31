@@ -1,4 +1,4 @@
-#include <SDL3/SDL.h>
+#include "SDL3/SDL.h"
 #include "Connect4/game/board.h"
 #include "Connect4/game/utils.h"
 #include <stddef.h>

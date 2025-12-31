@@ -137,18 +137,17 @@ void C4_UI_NumberInput_CenterInWindow(C4_UI_NumberInput* numInput, C4_Axis axis)
     C4_UI_NumberInput_PositionElementsInBackground(numInput);
 }
 
-bool C4_UI_NumberInput_HandleMouseEvents(C4_UI_NumberInput* numInput, SDL_Event* event, SDL_Renderer* renderer) {
+void C4_UI_NumberInput_HandleMouseEvents(C4_UI_NumberInput* numInput, SDL_Event* event, SDL_Renderer* renderer) {
     if (!numInput) {
-        return false;
+        return;
     }
-    switch(C4_UI_ButtonGroup_HandleMouseEvents(&numInput->arrows, event, renderer)) {
+    switch(C4_UI_ButtonGroup_HandleMouseEvents(&numInput->arrows, event)) {
         // Up Button
         case 0: {
             if (numInput->currentValue + 1 <= numInput->max) {
                 numInput->currentValue++;
                 snprintf(numInput->numberText.str, sizeof(numInput->numberText.str), "%d", numInput->currentValue);
                 C4_UI_Text_ReloadTexture(&numInput->numberText, renderer);
-                return true;
             }
         }; break;
         // Down Button
@@ -157,11 +156,9 @@ bool C4_UI_NumberInput_HandleMouseEvents(C4_UI_NumberInput* numInput, SDL_Event*
                 numInput->currentValue--;
                 snprintf(numInput->numberText.str, sizeof(numInput->numberText.str), "%d", numInput->currentValue);
                 C4_UI_Text_ReloadTexture(&numInput->numberText, renderer);
-                return true;
             }
         }; break;
     }
-    return false;
 }
 
 void C4_UI_NumberInput_HandleKeyboardInput(C4_UI_NumberInput* numInput, SDL_Event* event, SDL_Renderer* renderer) {

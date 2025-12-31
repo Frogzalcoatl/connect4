@@ -120,8 +120,8 @@ void C4_UI_ButtonGroup_Draw(C4_UI_ButtonGroup* group, SDL_Renderer* renderer) {
     }
 }
 
-int C4_UI_ButtonGroup_HandleMouseEvents(C4_UI_ButtonGroup* group, SDL_Event* event, SDL_Renderer* renderer) {
-    if (!group || !event || !renderer) {
+int C4_UI_ButtonGroup_HandleMouseEvents(C4_UI_ButtonGroup* group, SDL_Event* event) {
+    if (!group || !event) {
         SDL_Log("Button group, event, and/or renderer is NULL");
         return -1;
     }

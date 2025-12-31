@@ -1,6 +1,6 @@
 #include "Connect4/ui/elements/index.h"
 #include "Connect4/constants.h"
-#include <SDL3/SDL.h>
+#include "SDL3/SDL.h"
 
 void C4_UI_CenterInWindow(SDL_FRect* rect, C4_Axis axis) {
     if (!rect) {

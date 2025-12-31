@@ -1,4 +1,4 @@
-// USE_DISCORD is from the CMakeLists file
+// USE_DISCORD is from CMakeLists.txt
 #ifdef USE_DISCORD
     #define _CRT_SECURE_NO_WARNINGS
     #include "Connect4/discord-rpc/index.h"
@@ -72,7 +72,7 @@
     }
 #else
     void C4_Discord_Init() {}
-    // Below function is to avoid compiler warnings
+    // Below code block is to avoid compiler warnings
     void C4_Discord_UpdateStatus(const char* stateText, const char* detailsText) { (void)stateText; (void)detailsText }
     void C4_Discord_Loop() {}
     void C4_Discord_Shutdown() {}

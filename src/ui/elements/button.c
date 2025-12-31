@@ -71,7 +71,7 @@ bool C4_UI_Button_InitProperties(
             !C4_UI_Symbol_InitProperties(
                 &button->symbol, symbol,
                 (SDL_FRect){destination.x, destination.y, symbolWidth, symbolHeight},
-                symbolRotationDegrees
+                symbolRotationDegrees, theme->textColor
             )
         ) {
             return false;
@@ -130,7 +130,8 @@ void C4_UI_Button_Draw(C4_UI_Button* button, SDL_Renderer* renderer) {
         C4_UI_Borders_Draw(&button->borders, renderer);
     }
     if (button->symbol.type != C4_UI_SymbolType_None) {
-        C4_UI_Symbol_Draw(&button->symbol, currentColors->symbol, renderer);
+        button->symbol.color = currentColors->symbol;
+        C4_UI_Symbol_Draw(&button->symbol, renderer);
     }
     if (button->text.str[0] != '\0') {
         button->text.color = currentColors->text;

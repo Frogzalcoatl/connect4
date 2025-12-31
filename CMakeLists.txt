@@ -201,5 +201,3 @@ else()
     # GCC and Clang handle the high-level feature correctly
     target_compile_features(${PROJECT_NAME} PRIVATE c_std_23)
 endif()
-
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)

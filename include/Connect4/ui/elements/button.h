@@ -20,7 +20,7 @@ typedef struct {
 } C4_UI_Button;
 
 bool C4_UI_Button_InitProperties(
-    C4_UI_Button* button, SDL_Renderer* renderer, const char* str,const SDL_FRect destination, C4_UI_SymbolType symbol,
+    C4_UI_Button* button, SDL_Renderer* renderer, const char* str, const SDL_FRect destination, C4_UI_SymbolType symbol,
     float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme
 );
 C4_UI_Button* C4_UI_Button_Create(

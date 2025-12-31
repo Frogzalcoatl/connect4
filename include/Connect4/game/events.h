@@ -1,6 +1,6 @@
 #pragma once
 #include <stdbool.h>
-#include "Connect4/ui/screens/index.h"
+#include "Connect4/game/screens/index.h"
 #include "Connect4/assets/sounds.h"
 #include "Connect4/game/board.h"
 
