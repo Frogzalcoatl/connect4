@@ -1,7 +1,8 @@
 # Vibe coded ah CMakeLists.txt file. I was struggling to figure it out myself ngl.
 
 cmake_minimum_required(VERSION 3.28)
-project(Connect4 LANGUAGES C)
+# Including CXX for discord-rpc
+project(Connect4 LANGUAGES C CXX)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
 
@@ -132,7 +133,7 @@ else()
         # Error if you assign a random integer to a pointer (prevents segfaults)
         -Werror=int-conversion
         # To disable the "no newline at end of file warning"
-        -Wno-newline-eof
+        $<$<C_COMPILER_ID:Clang>:-Wno-newline-eof>
         # Warn if data is lost (e.g. double -> float, int64 -> int8)
         -Wconversion
     )
@@ -159,23 +160,24 @@ if(WIN32 OR (UNIX AND NOT ANDROID AND NOT APPLE) OR (APPLE AND NOT IOS))
 endif()
 
 if(USE_DISCORD)
-    target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/deps/Discord/include")
+    set(DISCORD_RPC_PATH "${CMAKE_SOURCE_DIR}/deps/Discord/")
+    target_include_directories(${PROJECT_NAME} PRIVATE "${DISCORD_RPC_PATH}include")
     if(WIN32)
         # optimized means Release/MinSizeRel/RelWithDebInfo
         target_link_libraries(${PROJECT_NAME} PRIVATE
-            debug     "${CMAKE_SOURCE_DIR}/deps/Discord/win/dynamic/discord-rpc.lib"
-            optimized "${CMAKE_SOURCE_DIR}/deps/Discord/win/static/discord-rpc.lib"
+            debug     "${DISCORD_RPC_PATH}win/dynamic/discord-rpc.lib"
+            optimized "${DISCORD_RPC_PATH}win/static/discord-rpc.lib"
         )
-        # I cant figure out how to not copy the dll for the release version. Just remeber to remove it when sending the release to others.
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${CMAKE_SOURCE_DIR}/deps/Discord/win/dynamic/discord-rpc.dll"
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+            COMMAND $<$<CONFIG:Debug>:${CMAKE_COMMAND} -E copy_if_different "${DISCORD_RPC_PATH}win/dynamic/discord-rpc.dll" $<TARGET_FILE_DIR:${PROJECT_NAME}>>
+            COMMAND_EXPAND_LISTS
         ) 
     elseif(APPLE)
-        target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/deps/Discord/include/Discord/osx/libdiscord-rpc.a")
+        target_link_libraries(${PROJECT_NAME} PRIVATE "${DISCORD_RPC_PATH}osx/libdiscord-rpc.a")
     elseif(LINUX)
-        target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/deps/Discord/include/Discord/linux/libdiscord-rpc.a")
+        target_link_libraries(${PROJECT_NAME} PRIVATE "${DISCORD_RPC_PATH}linux/libdiscord-rpc.a")
+        # This tells the compiler/linker to allow the older static library
+        target_link_options(${PROJECT_NAME} PRIVATE "-no-pie")
     endif()
 endif()
 
