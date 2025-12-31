@@ -161,24 +161,33 @@ endif()
 
 if(USE_DISCORD)
     set(DISCORD_RPC_PATH "${CMAKE_SOURCE_DIR}/deps/Discord/")
-    target_include_directories(${PROJECT_NAME} PRIVATE "${DISCORD_RPC_PATH}include")
+    target_include_directories(${PROJECT_NAME} PRIVATE
+        "${DISCORD_RPC_PATH}/include"
+        "${DISCORD_RPC_PATH}/src"
+        "${DISCORD_RPC_PATH}/thirdparty/rapidjson-1.1.0/include"
+    )
+    set(DISCORD_SRC
+        "${DISCORD_RPC_PATH}/src/discord_rpc.cpp"
+        "${DISCORD_RPC_PATH}/src/rpc_connection.cpp"
+        "${DISCORD_RPC_PATH}/src/serialization.cpp"
+    )
     if(WIN32)
-        # optimized means Release/MinSizeRel/RelWithDebInfo
-        target_link_libraries(${PROJECT_NAME} PRIVATE
-            debug     "${DISCORD_RPC_PATH}win/dynamic/discord-rpc.lib"
-            optimized "${DISCORD_RPC_PATH}win/static/discord-rpc.lib"
+        list(APPEND DISCORD_SRC 
+            "${CMAKE_SOURCE_DIR}/deps/Discord/src/connection_win.cpp"
+            "${CMAKE_SOURCE_DIR}/deps/Discord/src/discord_register_win.cpp"
         )
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND $<$<CONFIG:Debug>:${CMAKE_COMMAND} -E copy_if_different "${DISCORD_RPC_PATH}win/dynamic/discord-rpc.dll" $<TARGET_FILE_DIR:${PROJECT_NAME}>>
-            COMMAND_EXPAND_LISTS
-        ) 
     elseif(APPLE)
-        target_link_libraries(${PROJECT_NAME} PRIVATE "${DISCORD_RPC_PATH}osx/libdiscord-rpc.a")
-    elseif(LINUX)
-        target_link_libraries(${PROJECT_NAME} PRIVATE "${DISCORD_RPC_PATH}linux/libdiscord-rpc.a")
-        # This tells the compiler/linker to allow the older static library
-        target_link_options(${PROJECT_NAME} PRIVATE "-no-pie")
+        list(APPEND DISCORD_SRC 
+            "${CMAKE_SOURCE_DIR}/deps/Discord/src/connection_unix.cpp"
+            "${CMAKE_SOURCE_DIR}/deps/Discord/src/discord_register_osx.m"
+        )
+    else() # Linux
+        list(APPEND DISCORD_SRC 
+            "${CMAKE_SOURCE_DIR}/deps/Discord/src/connection_unix.cpp"
+            "${CMAKE_SOURCE_DIR}/deps/Discord/src/discord_register_linux.cpp"
+        )
     endif()
+    target_sources(${PROJECT_NAME} PRIVATE ${DISCORD_SRC})
 endif()
 
 # So math.h always includes math defines (ex: M_PI)
