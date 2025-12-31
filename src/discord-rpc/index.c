@@ -2,7 +2,7 @@
 #ifdef USE_DISCORD
     #define _CRT_SECURE_NO_WARNINGS
     #include "Connect4/discord-rpc/index.h"
-    #include "discord-rpc/discord_rpc.h"
+    #include "discord_rpc.h"
     #include "SDL3/SDL.h"
     #include <string.h>
     #include <time.h>

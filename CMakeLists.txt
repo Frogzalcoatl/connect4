@@ -1,5 +1,3 @@
-# Vibe coded ah CMakeLists.txt file. I was struggling to figure it out myself ngl.
-
 cmake_minimum_required(VERSION 3.28)
 # Including CXX and OBJC for discord-rpc
 project(Connect4 LANGUAGES C CXX OBJC)
@@ -160,34 +158,17 @@ if(WIN32 OR (UNIX AND NOT ANDROID AND NOT APPLE) OR (APPLE AND NOT IOS))
 endif()
 
 if(USE_DISCORD)
-    set(DISCORD_RPC_PATH "${CMAKE_SOURCE_DIR}/deps/discord-rpc/")
-    target_include_directories(${PROJECT_NAME} PRIVATE
-        "${DISCORD_RPC_PATH}/include"
-        "${DISCORD_RPC_PATH}/include/discord-rpc"
-        "${DISCORD_RPC_PATH}/thirdparty/rapidjson-1.1.0/include"
-    )
-    set(DISCORD_SRC
-        "${DISCORD_RPC_PATH}/src/discord_rpc.cpp"
-        "${DISCORD_RPC_PATH}/src/rpc_connection.cpp"
-        "${DISCORD_RPC_PATH}/src/serialization.cpp"
-    )
-    if(WIN32)
-        list(APPEND DISCORD_SRC 
-            "${DISCORD_RPC_PATH}/src/connection_win.cpp"
-            "${DISCORD_RPC_PATH}/src/discord_register_win.cpp"
-        )
-    elseif(APPLE)
-        list(APPEND DISCORD_SRC 
-            "${DISCORD_RPC_PATH}/src/connection_unix.cpp"
-            "${DISCORD_RPC_PATH}/src/discord_register_osx.m"
-        )
-    else() # Linux
-        list(APPEND DISCORD_SRC 
-            "${DISCORD_RPC_PATH}/src/connection_unix.cpp"
-            "${DISCORD_RPC_PATH}/src/discord_register_linux.cpp"
-        )
-    endif()
-    target_sources(${PROJECT_NAME} PRIVATE ${DISCORD_SRC})
+    # This assumes deps/discord-rpc has its own CMakeLists.txt
+    # We disable their examples and unit tests
+    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    
+    add_subdirectory("${CMAKE_SOURCE_DIR}/deps/discord-rpc" EXCLUDE_FROM_ALL)
+    
+    target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/deps/discord-rpc/include)
+
+    # Link the target created by the discord-rpc subdirectory
+    target_link_libraries(${PROJECT_NAME} PRIVATE discord-rpc)
 endif()
 
 # So math.h always includes math defines (ex: M_PI)
@@ -203,3 +184,5 @@ else()
     # GCC and Clang handle the high-level feature correctly
     target_compile_features(${PROJECT_NAME} PRIVATE c_std_23)
 endif()
+
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
