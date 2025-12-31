@@ -1,8 +1,8 @@
 # Vibe coded ah CMakeLists.txt file. I was struggling to figure it out myself ngl.
 
 cmake_minimum_required(VERSION 3.28)
-# Including CXX for discord-rpc
-project(Connect4 LANGUAGES C CXX)
+# Including CXX and OBJC for discord-rpc
+project(Connect4 LANGUAGES C CXX OBJC)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
 
@@ -160,10 +160,10 @@ if(WIN32 OR (UNIX AND NOT ANDROID AND NOT APPLE) OR (APPLE AND NOT IOS))
 endif()
 
 if(USE_DISCORD)
-    set(DISCORD_RPC_PATH "${CMAKE_SOURCE_DIR}/deps/Discord/")
+    set(DISCORD_RPC_PATH "${CMAKE_SOURCE_DIR}/deps/discord-rpc/")
     target_include_directories(${PROJECT_NAME} PRIVATE
         "${DISCORD_RPC_PATH}/include"
-        "${DISCORD_RPC_PATH}/src"
+        "${DISCORD_RPC_PATH}/include/discord-rpc"
         "${DISCORD_RPC_PATH}/thirdparty/rapidjson-1.1.0/include"
     )
     set(DISCORD_SRC
@@ -173,18 +173,18 @@ if(USE_DISCORD)
     )
     if(WIN32)
         list(APPEND DISCORD_SRC 
-            "${CMAKE_SOURCE_DIR}/deps/Discord/src/connection_win.cpp"
-            "${CMAKE_SOURCE_DIR}/deps/Discord/src/discord_register_win.cpp"
+            "${DISCORD_RPC_PATH}/src/connection_win.cpp"
+            "${DISCORD_RPC_PATH}/src/discord_register_win.cpp"
         )
     elseif(APPLE)
         list(APPEND DISCORD_SRC 
-            "${CMAKE_SOURCE_DIR}/deps/Discord/src/connection_unix.cpp"
-            "${CMAKE_SOURCE_DIR}/deps/Discord/src/discord_register_osx.m"
+            "${DISCORD_RPC_PATH}/src/connection_unix.cpp"
+            "${DISCORD_RPC_PATH}/src/discord_register_osx.m"
         )
     else() # Linux
         list(APPEND DISCORD_SRC 
-            "${CMAKE_SOURCE_DIR}/deps/Discord/src/connection_unix.cpp"
-            "${CMAKE_SOURCE_DIR}/deps/Discord/src/discord_register_linux.cpp"
+            "${DISCORD_RPC_PATH}/src/connection_unix.cpp"
+            "${DISCORD_RPC_PATH}/src/discord_register_linux.cpp"
         )
     endif()
     target_sources(${PROJECT_NAME} PRIVATE ${DISCORD_SRC})

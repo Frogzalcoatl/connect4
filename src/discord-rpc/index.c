@@ -1,8 +1,8 @@
 // USE_DISCORD is from the CMakeLists file
 #ifdef USE_DISCORD
     #define _CRT_SECURE_NO_WARNINGS
-    #include "Connect4/discord/index.h"
-    #include "Discord/discord_rpc.h"
+    #include "Connect4/discord-rpc/index.h"
+    #include "discord-rpc/discord_rpc.h"
     #include "SDL3/SDL.h"
     #include <string.h>
     #include <time.h>

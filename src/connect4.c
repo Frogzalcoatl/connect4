@@ -8,7 +8,7 @@
 #include "Connect4/ui/screens/settings.h"
 #include "Connect4/assets/sounds.h"
 #include "Connect4/game/events.h"
-#include "Connect4/discord/index.h"
+#include "Connect4/discord-rpc/index.h"
 #include <stdlib.h>
 #include <time.h>
 
