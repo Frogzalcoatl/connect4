@@ -158,17 +158,34 @@ if(WIN32 OR (UNIX AND NOT ANDROID AND NOT APPLE) OR (APPLE AND NOT IOS))
 endif()
 
 if(USE_DISCORD)
-    # This assumes deps/discord-rpc has its own CMakeLists.txt
-    # We disable their examples and unit tests
-    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-    set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
-    
-    add_subdirectory("${CMAKE_SOURCE_DIR}/deps/discord-rpc" EXCLUDE_FROM_ALL)
-    
-    target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/deps/discord-rpc/include)
-
-    # Link the target created by the discord-rpc subdirectory
-    target_link_libraries(${PROJECT_NAME} PRIVATE discord-rpc)
+    set(DISCORD_RPC_DIR "${CMAKE_SOURCE_DIR}/deps/discord-rpc")
+    target_include_directories(${PROJECT_NAME} PRIVATE
+        "${DISCORD_RPC_DIR}/include"
+        "${DISCORD_RPC_DIR}/thirdparty/rapidjson-1.1.0/include"
+    )
+    set(DISCORD_SRC
+        "${DISCORD_RPC_DIR}/src/discord_rpc.cpp"
+        "${DISCORD_RPC_DIR}/src/rpc_connection.cpp"
+        "${DISCORD_RPC_DIR}/src/serialization.cpp"
+    )
+    if(WIN32)
+        list(APPEND DISCORD_SRC 
+            "${DISCORD_RPC_DIR}/src/connection_win.cpp"
+            "${DISCORD_RPC_DIR}/src/discord_register_win.cpp"
+        )
+    elseif(APPLE)
+        list(APPEND DISCORD_SRC 
+            "${DISCORD_RPC_DIR}/src/connection_unix.cpp"
+            "${DISCORD_RPC_DIR}/src/discord_register_osx.m"
+            target_link_libraries(${PROJECT_NAME} PRIVATE "-framework AppKit" "-framework Foundation")
+        )
+    else() # Linux
+        list(APPEND DISCORD_SRC 
+            "${DISCORD_RPC_DIR}/src/connection_unix.cpp"
+            "${DISCORD_RPC_DIR}/src/discord_register_linux.cpp"
+        )
+    endif()
+    target_sources(${PROJECT_NAME} PRIVATE ${DISCORD_SRC})
 endif()
 
 # So math.h always includes math defines (ex: M_PI)
