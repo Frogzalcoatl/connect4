@@ -56,3 +56,13 @@ void C4_UI_Button_TransformResize(C4_UI_Button* button, float x, float y, float 
 void C4_UI_Button_UpdateStr(C4_UI_Button* button, const char* str, SDL_Renderer* renderer);
 void C4_UI_Button_Reset(void* data);
 void C4_UI_Button_SetTheme(C4_UI_Button* button, const C4_UI_Theme* theme);
+
+typedef enum {
+    C4_UI_Button_CallbackType_OnClick = 1,
+    C4_UI_Button_CallbackType_WhilePressed,
+    C4_UI_Button_CallbackType_OnPressed,
+    C4_UI_Button_CallbackType_OnHover,
+    C4_UI_Button_CallbackType_Length
+} C4_UI_Button_CallbackType;
+
+void C4_UI_Button_SetDefaultCallback(C4_UI_Button_CallbackType type, C4_UI_Callback callback, void* context);

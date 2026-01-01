@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+static C4_UI_Callback DefaultCallbacks[C4_UI_Button_CallbackType_Length] = {0};
+static void* DefaultContexts[C4_UI_Button_CallbackType_Length] = {0};
+
 void C4_UI_Button_CenterElementsInBackground(C4_UI_Button* button, C4_Axis axis) {
     if (!button) {
         SDL_Log("Button is NULL");
@@ -104,14 +107,14 @@ bool C4_UI_Button_InitProperties(C4_UI_Button* button, SDL_Renderer* renderer, c
     button->isPressed = false;
     button->isActive = true;
     button->resetHoverOnClick = false;
-    button->OnClickCallback = NULL;
-    button->OnClickContext = NULL;
-    button->WhilePressedCallback = NULL;
-    button->WhilePressedContext = NULL;
-    button->OnHoverCallback = NULL;
-    button->OnHoverContext = NULL;
-    button->OnPressedCallback = NULL;
-    button->OnPressedContext = NULL;
+    button->OnClickCallback = DefaultCallbacks[C4_UI_Button_CallbackType_OnClick];
+    button->OnClickContext = DefaultContexts[C4_UI_Button_CallbackType_OnClick];
+    button->WhilePressedCallback = DefaultCallbacks[C4_UI_Button_CallbackType_WhilePressed];
+    button->WhilePressedContext = DefaultContexts[C4_UI_Button_CallbackType_WhilePressed];
+    button->OnPressedCallback = DefaultCallbacks[C4_UI_Button_CallbackType_OnPressed];
+    button->OnPressedContext = DefaultContexts[C4_UI_Button_CallbackType_OnPressed];
+    button->OnHoverCallback = DefaultCallbacks[C4_UI_Button_CallbackType_OnHover];
+    button->OnHoverContext = DefaultContexts[C4_UI_Button_CallbackType_OnHover];
     button->interval = 0.1f;
     button->delay = 0.5f;
     button->pressTimer = 0.f;
@@ -227,7 +230,7 @@ void C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event) {
         if (currentlyHovered != button->isHovered) {
             button->isHovered = currentlyHovered;
             SDL_SetCursor(C4_GetSystemCursor(currentlyHovered ? SDL_SYSTEM_CURSOR_POINTER : SDL_SYSTEM_CURSOR_DEFAULT));
-            if (button->OnHoverCallback) {
+            if (button->isHovered && button->OnHoverCallback) {
                 button->OnHoverCallback(button->OnHoverContext);
             }
         }
@@ -294,4 +297,12 @@ void C4_UI_Button_Reset(void* data) {
     C4_UI_Button* button = (C4_UI_Button*)data;
     button->isHovered = false;
     button->isPressed = false;
+}
+
+void C4_UI_Button_SetDefaultCallback(C4_UI_Button_CallbackType type, C4_UI_Callback callback, void* context) {
+    if (type < C4_UI_Button_CallbackType_OnClick || type >= C4_UI_Button_CallbackType_Length) {
+        return;
+    }
+    DefaultCallbacks[type] = callback;
+    DefaultContexts[type] = context;
 }
