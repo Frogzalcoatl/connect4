@@ -113,7 +113,11 @@ if(WIN32)
     set(ICON_RC resources/icon.rc)
 endif()
 
-add_executable(${PROJECT_NAME} ${WIN_FLAGS} ${SOURCES} ${GENERATED_SOURCES} ${ICON_RC})
+if(ANDROID)
+    add_library(${PROJECT_NAME} SHARED ${SOURCES} ${GENERATED_SOURCES})
+else()
+    add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${WIN_FLAGS} ${SOURCES} ${GENERATED_SOURCES} ${ICON_RC})
+endif()
 
 # Compiler Warnings
 if(MSVC)
@@ -142,18 +146,42 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     SDL3_ttf::SDL3_ttf
 )
 
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE 
+        version imm32 winmm setupapi comctl32 rpcrt4 shcore 
+        ole32 oleaut32 uuid advapi32 shell32 gdi32 user32 kernel32
+    )
+endif()
+
+if(APPLE)
+    target_link_libraries(${PROJECT_NAME} PRIVATE 
+        "-framework Foundation" 
+        "-framework AppKit" 
+        "-framework CoreAudio" 
+        "-framework CoreVideo" 
+        "-framework IOKit" 
+        "-framework Metal" 
+        "-framework QuartzCore"
+    )
+endif()
+
 target_include_directories(${PROJECT_NAME} PUBLIC 
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_BINARY_DIR}/generated
 )
 
 # --- DISCORD SDK SETUP ---
+set(IS_MOBILE FALSE)
+if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "iOS" OR CMAKE_SYSTEM_NAME STREQUAL "tvOS" OR CMAKE_SYSTEM_NAME STREQUAL "watchOS")
+    set(IS_MOBILE TRUE)
+endif()
+
 set(USE_DISCORD OFF)
 
 # Only enable Discord for Desktop platforms
-if(WIN32 OR (UNIX AND NOT ANDROID AND NOT APPLE) OR (APPLE AND NOT IOS))
+if((WIN32 OR UNIX OR APPLE) AND NOT IS_MOBILE)
     set(USE_DISCORD ON)
-    add_definitions(-DUSE_DISCORD)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_DISCORD)
     message(STATUS "discord-rpc enabled for this platform")
 endif()
 
@@ -177,7 +205,6 @@ if(USE_DISCORD)
         list(APPEND DISCORD_SRC 
             "${DISCORD_RPC_DIR}/src/connection_unix.cpp"
             "${DISCORD_RPC_DIR}/src/discord_register_osx.m"
-            target_link_libraries(${PROJECT_NAME} PRIVATE "-framework AppKit" "-framework Foundation")
         )
     else() # Linux
         list(APPEND DISCORD_SRC 

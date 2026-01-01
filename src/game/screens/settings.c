@@ -12,7 +12,7 @@ typedef struct {
 } C4_SettingsScreenData;
 static C4_SettingsScreenData settingsData;
 
-static bool IsUpdatingBoard() {
+static bool IsUpdatingBoard(void) {
     C4_Board* board = settingsData.game->board;
     return (
         board->width != settingsData.widthInput->currentValue ||
@@ -35,7 +35,7 @@ static const char CONFIRM_MESSAGE_BOARD_NOT_EMPTY[] = "Are you sure you want to 
 static void ApplyOnClick(void* context) {
     (void)context;
     C4_SettingsScreenData* data = &settingsData;
-    if (!IsUpdatingBoard(data)) {
+    if (!IsUpdatingBoard()) {
         return;
     }
     bool isBoardEmpty = C4_Board_IsEmpty(data->game->board);

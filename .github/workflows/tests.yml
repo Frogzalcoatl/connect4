@@ -18,6 +18,16 @@ jobs:
           - { name: Windows VS2022, os: windows-2022 }
           - { name: Linux GCC, os: ubuntu-latest }
           - { name: macOS, os: macos-latest }
+          - {
+              name: Android,
+              os: ubuntu-latest,
+              flags: "-DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=arm64-v8a",
+            }
+          - {
+              name: iOS,
+              os: macos-latest,
+              flags: "-G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64",
+            }
 
     steps:
       - name: Checkout
@@ -33,6 +43,13 @@ jobs:
           libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
           libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
           libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev
+
+      - name: Setup Java (for Android)
+        if: matrix.platform.name == 'Android'
+        uses: actions/setup-java@v3
+        with:
+          distribution: "zulu"
+          java-version: "17"
 
       - name: Configure
         run: cmake -B build ${{matrix.platform.flags}} -DCMAKE_BUILD_TYPE=Release
