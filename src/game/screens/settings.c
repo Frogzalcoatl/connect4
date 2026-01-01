@@ -147,7 +147,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
             .wrapWidth = 0
         }
     );
-    C4_UI_CenterInWindow(&settingsTitle->destination, C4_Axis_X);
+    C4_UI_CenterInWindow(&settingsTitle->destination, C4_Axis_X, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
 
     C4_UI_ButtonGroup* buttonGroup = C4_UI_Container_Add_ButtonGroup(
         cont, &(C4_UI_ButtonGroup_Config){
@@ -166,7 +166,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
     }
     C4_UI_Button* applyButton = &buttonGroup->buttons[0];
     applyButton->isActive = false;
-    C4_UI_ButtonGroup_CenterInWindow(buttonGroup, C4_Axis_X);
+    C4_UI_ButtonGroup_CenterInWindow(buttonGroup, C4_Axis_X, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
 
     C4_UI_Popup* confirmPopup = C4_UI_Container_Add_Popup(
         cont, &(C4_UI_Popup_Config){
@@ -185,7 +185,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
         C4_UI_Text_UpdateStr(&btn->text, POPUP_BUTTON_TEXT[i], game->renderer);
         btn->OnClickCallback = POPUP_ON_CLICKS[i];
     }
-    C4_UI_Popup_CenterInWindow(confirmPopup, game->renderer);
+    C4_UI_Popup_CenterInWindow(confirmPopup, game->renderer, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
 
     C4_UI_NumberInput* boardWidthInput = C4_UI_Container_Add_NumberInput(
         cont, &(C4_UI_NumberInput_Config){

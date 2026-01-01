@@ -1,7 +1,5 @@
 #include "Connect4/ui/elements/numberInput.h"
-#include "Connect4/connect4.h"
-#include "Connect4/constants.h"
-#include "Connect4/game/utils.h"
+#include "Connect4/ui/utils.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -202,11 +200,11 @@ void C4_UI_NumberInput_Draw(void* data, SDL_Renderer* renderer) {
     C4_UI_ButtonGroup_Draw(&numInput->buttonGroup, renderer);
 }
 
-void C4_UI_NumberInput_CenterInWindow(C4_UI_NumberInput* numInput, C4_Axis axis) {
+void C4_UI_NumberInput_CenterInWindow(C4_UI_NumberInput* numInput, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight) {
     if (!numInput) {
         return;
     }
-    C4_UI_CenterInWindow(&numInput->background.destination, axis);
+    C4_UI_CenterInWindow(&numInput->background.destination, axis, windowWidth, windowHeight);
     C4_UI_NumberInput_PositionElementsInBackground(numInput);
 }
 

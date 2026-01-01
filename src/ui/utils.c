@@ -1,4 +1,4 @@
-#include "Connect4/game/utils.h"
+#include "Connect4/ui/utils.h"
 #include <stdlib.h>
 
 int C4_GetRandomInt(int min, int max) {

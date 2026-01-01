@@ -31,7 +31,7 @@ C4_UI_Popup* C4_UI_Popup_Create(
 void C4_UI_Popup_FreeResources(C4_UI_Popup* popup);
 void C4_UI_Popup_Destroy(void* data);
 void C4_UI_Popup_Draw(void* data, SDL_Renderer* renderer);
-void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup, SDL_Renderer* renderer);
+void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup, SDL_Renderer* renderer, unsigned int windowWidth, unsigned int windowHeight);
 void C4_UI_Popup_Update(void* data, float deltaTime);
 void C4_UI_Popup_HandleMouseEvents(void* data, SDL_Event* event);
 void C4_UI_Popup_ResetButtons(void* data);

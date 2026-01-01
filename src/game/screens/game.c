@@ -51,7 +51,7 @@ void C4_SetScreen_Game(C4_Game* game) {
     );
     C4_Board_UpdateTestStr(game->board, boardText->str, sizeof(boardText->str));
     C4_UI_Text_ReloadTexture(boardText, game->renderer);
-    C4_UI_CenterInWindow(&boardText->destination, C4_Axis_X);
+    C4_UI_CenterInWindow(&boardText->destination, C4_Axis_X, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
 
     C4_UI_Button* backButton = C4_UI_Container_Add_Button(
         cont, &(C4_UI_Button_Config){
@@ -63,7 +63,7 @@ void C4_SetScreen_Game(C4_Game* game) {
         }
     );
     backButton->OnClickCallback = BackOnClick;
-    C4_UI_Button_CenterInWindow(backButton, C4_Axis_X);
+    C4_UI_Button_CenterInWindow(backButton, C4_Axis_X, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
 
     C4_UI_Popup* winnerPopup = C4_UI_Container_Add_Popup(
         cont, &(C4_UI_Popup_Config){
@@ -85,7 +85,7 @@ void C4_SetScreen_Game(C4_Game* game) {
     C4_UI_Text_UpdateStr(&returnToMenuButton->text, "Return to Menu", game->renderer);
     returnToMenuButton->OnClickCallback = ReturnToMenuOnClick;
 
-    C4_UI_Popup_CenterInWindow(winnerPopup, game->renderer);
+    C4_UI_Popup_CenterInWindow(winnerPopup, game->renderer, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
 
     gameData.boardText = boardText;
     gameData.game = game;

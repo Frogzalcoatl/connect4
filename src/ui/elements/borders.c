@@ -1,5 +1,4 @@
 #include "Connect4/ui/elements/borders.h"
-#include "Connect4/constants.h"
 #include <stdlib.h>
 
 bool C4_UI_Borders_InitProperties(C4_UI_Borders* element, const C4_UI_Borders_Config* config) {

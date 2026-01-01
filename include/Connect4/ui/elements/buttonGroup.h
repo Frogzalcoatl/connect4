@@ -33,5 +33,5 @@ void C4_UI_ButtonGroup_Draw(void* data, SDL_Renderer* renderer);
 void C4_UI_ButtonGroup_Update(void* data, float deltaTime);
 void C4_UI_ButtonGroup_HandleMouseEvents(void* data, SDL_Event* event);
 void C4_UI_ButtonGroup_TransformResize(C4_UI_ButtonGroup* group, const SDL_FRect rect);
-void C4_UI_ButtonGroup_CenterInWindow(C4_UI_ButtonGroup* group, C4_Axis axis);
+void C4_UI_ButtonGroup_CenterInWindow(C4_UI_ButtonGroup* group, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight);
 void C4_UI_ButtonGroup_Reset(void* data);

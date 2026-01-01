@@ -1,5 +1,4 @@
 #include "Connect4/ui/elements/popup.h"
-#include "Connect4/constants.h"
 #include <stdlib.h>
 
 #define C4_UI_POPUP_MARGIN 20
@@ -138,9 +137,11 @@ void C4_UI_Popup_Destroy(void* data) {
 }
 
 static void C4_UI_Popup_DrawScreenBackground(SDL_Renderer* renderer) {
+    SDL_Rect window;
+    SDL_GetRenderViewport(renderer, &window);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
-    SDL_RenderFillRect(renderer, &(SDL_FRect){0.f, 0.f, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT});
+    SDL_RenderFillRect(renderer, &(SDL_FRect){0.f, 0.f, (float)window.w, (float)window.h});
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }
 
@@ -163,12 +164,12 @@ void C4_UI_Popup_Draw(void* data, SDL_Renderer* renderer) {
     C4_UI_ButtonGroup_Draw(&popup->buttonGroup, renderer);
 }
 
-void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup, SDL_Renderer* renderer) {
+void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup, SDL_Renderer* renderer, unsigned int windowWidth, unsigned int windowHeight) {
     if (!popup) {
         SDL_Log("Popup element is NULL");
         return;
     }
-    C4_UI_CenterInWindow(&popup->background.destination, C4_Axis_XY);
+    C4_UI_CenterInWindow(&popup->background.destination, C4_Axis_XY, windowWidth, windowHeight);
     C4_UI_Popup_PositionElementsInBackground(popup, renderer);
 }
 

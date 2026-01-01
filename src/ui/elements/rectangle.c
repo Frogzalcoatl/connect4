@@ -1,5 +1,4 @@
 #include "Connect4/ui/elements/rectangle.h"
-#include "Connect4/constants.h"
 #include <stdlib.h>
 
 bool C4_UI_Rectangle_InitProperties(C4_UI_Rectangle* element, const C4_UI_Rectangle_Config* config) {

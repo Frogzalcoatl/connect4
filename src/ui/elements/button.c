@@ -258,12 +258,12 @@ void C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event) {
     }
 }
 
-void C4_UI_Button_CenterInWindow(C4_UI_Button* button, C4_Axis axis) {
+void C4_UI_Button_CenterInWindow(C4_UI_Button* button, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight) {
     if (!button) {
         SDL_Log("Button is NULL");
         return;
     }
-    C4_UI_CenterInWindow(&button->background.destination, axis);
+    C4_UI_CenterInWindow(&button->background.destination, axis, windowWidth, windowHeight);
     C4_UI_Button_CenterElementsInBackground(button, axis);
 }
 

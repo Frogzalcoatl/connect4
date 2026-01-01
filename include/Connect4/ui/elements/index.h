@@ -1,6 +1,5 @@
 #pragma once
 #include "SDL3/SDL.h"
-#include "Connect4/assets/fonts.h"
 
 typedef enum {
     C4_Axis_X,
@@ -8,4 +7,4 @@ typedef enum {
     C4_Axis_XY
 } C4_Axis;
 
-void C4_UI_CenterInWindow(SDL_FRect* rect, C4_Axis axis);
+void C4_UI_CenterInWindow(SDL_FRect* rect, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight);

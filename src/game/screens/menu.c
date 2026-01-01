@@ -81,7 +81,7 @@ void C4_SetScreen_Menu(C4_Game* game) {
     C4_UI_Text_UpdateStr(&popupOkButton->text, "Ok", game->renderer);
     popupOkButton->OnClickCallback = OnePlayerPopupOkOnClick;
     popupOkButton->OnClickContext = inDevelopmentPopup;
-    C4_UI_Popup_CenterInWindow(inDevelopmentPopup, game->renderer);
+    C4_UI_Popup_CenterInWindow(inDevelopmentPopup, game->renderer, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
 
     C4_UI_Popup* exitGamePopup = C4_UI_Container_Add_Popup(
         cont, &(C4_UI_Popup_Config){
@@ -106,7 +106,7 @@ void C4_SetScreen_Menu(C4_Game* game) {
         btn->OnClickCallback = POPUP_ON_CLICKS[i];
         btn->OnClickContext = POPUP_CLICK_CONTEXTS[i];
     }
-    C4_UI_Popup_CenterInWindow(exitGamePopup, game->renderer);
+    C4_UI_Popup_CenterInWindow(exitGamePopup, game->renderer, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
 
     C4_UI_Text* title = C4_UI_Container_Add_Text(
         cont, &(C4_UI_Text_Config){
@@ -119,7 +119,7 @@ void C4_SetScreen_Menu(C4_Game* game) {
             .wrapWidth = 0
         }
     );
-    C4_UI_CenterInWindow(&title->destination, C4_Axis_X);
+    C4_UI_CenterInWindow(&title->destination, C4_Axis_X, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
 
     C4_UI_ButtonGroup* buttonGroup = C4_UI_Container_Add_ButtonGroup(
         cont, &(C4_UI_ButtonGroup_Config){
@@ -137,5 +137,5 @@ void C4_SetScreen_Menu(C4_Game* game) {
         btn->OnClickCallback = BUTTON_GROUP_ON_CLICKS[i];
         btn->OnClickContext = BUTTON_GROUP_CLICK_CONTEXTS[i];
     }
-    C4_UI_ButtonGroup_CenterInWindow(buttonGroup, C4_Axis_X);
+    C4_UI_ButtonGroup_CenterInWindow(buttonGroup, C4_Axis_X, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
 }

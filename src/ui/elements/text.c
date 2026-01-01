@@ -1,5 +1,4 @@
 #include "Connect4/ui/elements/text.h"
-#include "Connect4/constants.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>

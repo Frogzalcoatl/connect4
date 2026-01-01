@@ -1,5 +1,4 @@
 #include "Connect4/ui/elements/buttonGroup.h"
-#include "Connect4/constants.h"
 #include <stdlib.h>
 
 static SDL_FRect C4_UI_ButtonGroup_GetUpdatedButtonRect(C4_UI_ButtonGroup* group, size_t index) {
@@ -152,11 +151,11 @@ void C4_UI_ButtonGroup_TransformResize(C4_UI_ButtonGroup* group, const SDL_FRect
     }
 }
 
-void C4_UI_ButtonGroup_CenterInWindow(C4_UI_ButtonGroup* group, C4_Axis axis) {
+void C4_UI_ButtonGroup_CenterInWindow(C4_UI_ButtonGroup* group, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight) {
     if (!group) {
         return;
     }
-    C4_UI_CenterInWindow(&group->bounds, axis);
+    C4_UI_CenterInWindow(&group->bounds, axis, windowWidth, windowHeight);
     C4_UI_ButtonGroup_TransformResize(group, group->bounds);
 }
 
