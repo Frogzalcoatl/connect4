@@ -6,7 +6,6 @@
 * Slider UIElement
 * Board UI
 * Improve win check efficiency (see WINCHECKCRITIQUE.md)
-* Fix sound delay
 * Use the TTF text engine thingy thingy instead of current text implementation
 * Improve UI cleanliness once code is done
 * Animated background (1:1 aspect ratio, aligned to center)

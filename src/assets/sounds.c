@@ -73,16 +73,21 @@ void C4_QuitAudio(void) {
 }
 
 void C4_PlaySound(C4_SoundEffect soundID) {
-    if (soundID < 0 || soundID >= C4_SoundEffect_ListSize) {
-        SDL_Log("Tried to play invalid sound ID");
+    if (soundID < 0 || soundID >= C4_SoundEffect_ListSize || deviceID == 0) {
         return;
     }
-    if (deviceID == 0) {
-        SDL_Log("Invalid sound device id");
-        return;
+    SDL_AudioStream* streamToUse = NULL;
+    for (int i = 0; i < MAX_STREAMS; i++) {
+        if (SDL_GetAudioStreamQueued(streams[i]) == 0) {
+            streamToUse = streams[i];
+            break;
+        }
     }
-    SDL_AudioStream* stream = streams[currentStreamIndex];
-    currentStreamIndex = (currentStreamIndex + 1) % MAX_STREAMS;
-    SDL_SetAudioStreamFormat(stream, &specs[soundID], NULL);
-    SDL_PutAudioStreamData(stream, buffers[soundID], (int)lengths[soundID]);
+    if (!streamToUse) {
+        streamToUse = streams[currentStreamIndex];
+        currentStreamIndex = (currentStreamIndex + 1) % MAX_STREAMS;
+        SDL_ClearAudioStream(streamToUse); 
+    }
+    SDL_SetAudioStreamFormat(streamToUse, &specs[soundID], NULL);
+    SDL_PutAudioStreamData(streamToUse, buffers[soundID], (int)lengths[soundID]);
 }
