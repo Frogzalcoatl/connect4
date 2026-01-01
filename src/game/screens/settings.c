@@ -142,7 +142,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
             .str = "Settings",
             .font = game->fontBold,
             .color = C4_UI_THEME_DEFAULT.textColor,
-            .ptSize = C4_SCREEN_SETTINGS_TITLE_PT_SIZE,
+            .ptSize = 100.f,
             .destinationX = 0.f,
             .destinationY = 0.f,
             .wrapWidth = 0
@@ -152,7 +152,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
 
     C4_UI_ButtonGroup* buttonGroup = C4_UI_Container_Add_ButtonGroup(
         cont, &(C4_UI_ButtonGroup_Config){
-            .destination = (SDL_FRect){0.f, C4_SCREEN_SETTINGS_BUTTON_GROUP_YPOS, C4_SCREEN_SETTINGS_BUTTON_GROUP_WIDTH, C4_SCREEN_SETTINGS_BUTTON_GROUP_HEIGHT},
+            .destination = (SDL_FRect){0.f, 900.f, 900.f, 100.f},
             .count = BUTTON_GROUP_COUNT,
             .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
             .margin = 15,
@@ -171,7 +171,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
 
     C4_UI_Popup* confirmPopup = C4_UI_Container_Add_Popup(
         cont, &(C4_UI_Popup_Config){
-            .destination = (SDL_FRect){0.f, 0.f, C4_SCREEN_SETTINGS_POPUP_WIDTH, C4_SCREEN_SETTINGS_POPUP_HEIGHT},
+            .destination = (SDL_FRect){0.f, 0.f, 800.f, 400.f},
             .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
             .buttonCount = POPUP_BUTTON_COUNT,
             .buttonGroupHeight = 100.f,

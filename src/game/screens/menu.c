@@ -67,7 +67,7 @@ void C4_SetScreen_Menu(C4_Game* game) {
 
     C4_UI_Popup* inDevelopmentPopup = C4_UI_Container_Add_Popup(
         cont, &(C4_UI_Popup_Config){
-            .destination = (SDL_FRect){0.f, 0.f, C4_SCREEN_SETTINGS_POPUP_WIDTH, C4_SCREEN_SETTINGS_POPUP_HEIGHT},
+            .destination = (SDL_FRect){0.f, 0.f, 800.f, 400.f},
             .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
             .buttonCount = 1,
             .buttonGroupHeight = 100.f,
@@ -85,7 +85,7 @@ void C4_SetScreen_Menu(C4_Game* game) {
 
     C4_UI_Popup* exitGamePopup = C4_UI_Container_Add_Popup(
         cont, &(C4_UI_Popup_Config){
-            .destination = (SDL_FRect){0.f, 0.f, C4_SCREEN_SETTINGS_POPUP_WIDTH, C4_SCREEN_SETTINGS_POPUP_HEIGHT},
+            .destination = (SDL_FRect){0.f, 0.f, 800.f, 400.f},
             .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
             .buttonCount = 2,
             .buttonGroupHeight = 100.f,
@@ -113,7 +113,7 @@ void C4_SetScreen_Menu(C4_Game* game) {
             .str = "Connect4",
             .font = game->fontBold,
             .color = C4_UI_THEME_DEFAULT.textColor,
-            .ptSize = C4_SCREEN_MENU_TITLE_PT_SIZE,
+            .ptSize = 200.f,
             .destinationX = 0.f,
             .destinationY = 50.f,
             .wrapWidth = 0
@@ -123,10 +123,10 @@ void C4_SetScreen_Menu(C4_Game* game) {
 
     C4_UI_ButtonGroup* buttonGroup = C4_UI_Container_Add_ButtonGroup(
         cont, &(C4_UI_ButtonGroup_Config){
-            .destination = (SDL_FRect){0.f, 375.f, C4_SCREEN_MENU_BUTTON_GROUP_WIDTH, C4_SCREEN_MENU_BUTTON_GROUP_HEIGHT},
+            .destination = (SDL_FRect){0.f, 375.f, 700.f, 500.f},
             .count = BUTTON_GROUP_COUNT,
             .buttonDirection = C4_UI_ButtonGroup_Direction_Vertical,
-            .margin = C4_SCREEN_MENU_BUTTON_GROUP_MARGIN,
+            .margin = 15,
             .font = game->fontBold,
             .theme = &C4_UI_THEME_DEFAULT
         }

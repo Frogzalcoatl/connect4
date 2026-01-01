@@ -52,7 +52,7 @@ void C4_SetScreen_Game(C4_Game* game) {
             .str = "",
             .font = game->fontRegular,
             .color = C4_UI_THEME_DEFAULT.textColor,
-            .ptSize = C4_SCREEN_GAME_TEST_TEXT_PT_SIZE,
+            .ptSize = 140.f,
             .destinationX = 0.f,
             .destinationY = 0.f,
             .wrapWidth = 0
@@ -65,7 +65,7 @@ void C4_SetScreen_Game(C4_Game* game) {
     C4_UI_Button* backButton = C4_UI_Container_Add_Button(
         cont, &(C4_UI_Button_Config){
             .text = "Back",
-            .destination = C4_SCREEN_GAME_BACK_BUTTON_RECT,
+            .destination = (SDL_FRect){0.f, 950.f, 400.f, 100.f},
             .symbol = C4_UI_SymbolType_None,
             .font = game->fontBold,
             .theme = &C4_UI_THEME_DEFAULT
@@ -77,7 +77,7 @@ void C4_SetScreen_Game(C4_Game* game) {
 
     C4_UI_Popup* winnerPopup = C4_UI_Container_Add_Popup(
         cont, &(C4_UI_Popup_Config){
-            .destination = (SDL_FRect){0.f, 0.f, C4_SCREEN_SETTINGS_POPUP_WIDTH, C4_SCREEN_SETTINGS_POPUP_HEIGHT},
+            .destination = (SDL_FRect){0.f, 0.f, 800.f, 400.f},
             .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
             .buttonCount = GAME_POPUP_BUTTONS_COUNT,
             .buttonGroupHeight = 100.f,
