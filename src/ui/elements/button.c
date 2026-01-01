@@ -28,8 +28,8 @@ void C4_UI_Button_CenterElementsInBackground(C4_UI_Button* button, C4_Axis axis)
 }
 
 bool C4_UI_Button_InitProperties(
-    C4_UI_Button* button, SDL_Renderer* renderer, const char* str, const SDL_FRect destination,
-    C4_UI_SymbolType symbol, float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme
+    C4_UI_Button* button, SDL_Renderer* renderer, const char* str, const SDL_FRect destination, C4_UI_SymbolType symbol,
+    float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme, C4_UI_Callback OnClick, void* OnClickContext
 ) {
     if (!renderer) {
         SDL_Log("Unable to init button properties. Renderer is NULL");
@@ -38,15 +38,10 @@ bool C4_UI_Button_InitProperties(
     if (!theme) {
         SDL_Log("Unable to init button properties. Theme is NULL");
     }
-    button->defaultColors = (C4_UI_ButtonColorInfo){
-        theme->buttonDefault.background, theme->buttonDefault.text, theme->buttonDefault.borders, theme->buttonDefault.symbol
-    };
-    button->hoverColors = (C4_UI_ButtonColorInfo){
-        theme->buttonHovered.background, theme->buttonHovered.text, theme->buttonHovered.borders, theme->buttonHovered.symbol
-    };
-    button->clickColors = (C4_UI_ButtonColorInfo){
-        theme->buttonPressed.background, theme->buttonPressed.text, theme->buttonPressed.borders, theme->buttonPressed.symbol
-    };
+    button->defaultColors = theme->buttonDefault;
+    button->hoverColors = theme->buttonHovered;
+    button->pressedColors = theme->buttonPressed;
+    button->inactiveColors = theme->buttonInactive;
     if (!C4_UI_Rectangle_InitProperties(&button->background, destination, button->defaultColors.background)) {
         return false;
     }
@@ -79,20 +74,24 @@ bool C4_UI_Button_InitProperties(
     }
     button->isHovered = false;
     button->isPressed = false;
+    button->isActive = true;
+    button->resetHoverOnClick = false;
+    button->OnClick = OnClick;
+    button->OnClickContext = OnClickContext;
     C4_UI_Button_CenterElementsInBackground(button, C4_Axis_XY);
     return true;
 }
 
 C4_UI_Button* C4_UI_Button_Create(
     SDL_Renderer* renderer, const char* str, const SDL_FRect destination, C4_UI_SymbolType symbol, float symbolWidth,
-    float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme
+    float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme, C4_UI_Callback OnClick, void* OnClickContext
 ) {
     C4_UI_Button* button = calloc(1, sizeof(C4_UI_Button));
     if (!button) {
         SDL_Log("Unable to allocate memory for button");
         return NULL;
     }
-    if (!C4_UI_Button_InitProperties(button, renderer, str, destination, symbol, symbolWidth, symbolHeight, symbolRotationDegrees, theme)) {
+    if (!C4_UI_Button_InitProperties(button, renderer, str, destination, symbol, symbolWidth, symbolHeight, symbolRotationDegrees, theme, OnClick, OnClickContext)) {
         C4_UI_Button_Destroy(button);
         return NULL;
     }
@@ -117,11 +116,14 @@ void C4_UI_Button_Draw(C4_UI_Button* button, SDL_Renderer* renderer) {
         SDL_Log("Button is NULL");
         return;
     }
-    C4_UI_ButtonColorInfo* currentColors = &button->defaultColors;
+    C4_UI_Button_ColorInfo* currentColors = &button->defaultColors;
     if (button->isPressed) {
-        currentColors = &button->clickColors;
+        currentColors = &button->pressedColors;
     } else if (button->isHovered) {
         currentColors = &button->hoverColors;
+    }
+    if (!button->isActive) {
+        currentColors = &button->inactiveColors;
     }
     button->background.color = currentColors->background;
     C4_UI_Rectangle_Draw(&button->background, renderer);
@@ -139,10 +141,13 @@ void C4_UI_Button_Draw(C4_UI_Button* button, SDL_Renderer* renderer) {
     }
 }
 
-bool C4_UI_Button_HandleMouseEvents(C4_UI_Button* button, SDL_Event* event) {
+void C4_UI_Button_HandleMouseEvents(C4_UI_Button* button, SDL_Event* event) {
     if (!button || !event) {
         SDL_Log("Button and/or event is NULL");
-        return false;
+        return;
+    }
+    if (!button->isActive) {
+        return;
     }
     if (event->type == SDL_EVENT_MOUSE_MOTION) {
         bool currentlyHovered = (
@@ -169,12 +174,14 @@ bool C4_UI_Button_HandleMouseEvents(C4_UI_Button* button, SDL_Event* event) {
         if (event->button.button == SDL_BUTTON_LEFT) {
             bool wasClicked = button->isPressed && button->isHovered;
             button->isPressed = false;
-            if (wasClicked)  {
-                return true;
+            if (wasClicked && button->OnClick)  {
+                button->OnClick(button->OnClickContext);
+                if (button->resetHoverOnClick) {
+                    button->isHovered = false;
+                }
             }
         }
     }
-    return false;
 }
 
 void C4_UI_Button_CenterInWindow(C4_UI_Button* button, C4_Axis axis) {
@@ -207,4 +214,10 @@ void C4_UI_Button_UpdateStr(C4_UI_Button* button, const char* str, SDL_Renderer*
     button->text.destination.x = backgroundCenterX - (button->text.destination.w / 2.f);
     float backgroundCenterY = button->background.destination.y + (button->background.destination.h / 2.f);
     button->text.destination.y = backgroundCenterY - (button->text.destination.h / 2.f);
+}
+
+void C4_UI_Button_Reset(void* button) {
+    C4_UI_Button* btn = (C4_UI_Button*)button;
+    btn->isHovered = false;
+    btn->isPressed = false;
 }

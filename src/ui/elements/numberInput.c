@@ -26,10 +26,33 @@ static void C4_UI_NumberInput_PositionElementsInBackground(C4_UI_NumberInput* nu
     );
 }
 
+// Temporary until i improve text rendering is improved to not require the renderer for every text update
+static SDL_Renderer* temporaryGlobalRenderer;
+
+void C4_UI_NumberInput_GenericIncrementOnClick(void* numberInputContext) {
+    C4_UI_NumberInput* numInput = (C4_UI_NumberInput*)numberInputContext;
+    if (numInput->currentValue < numInput->max) {
+        numInput->currentValue++;
+        snprintf(numInput->numberText.str, sizeof(numInput->numberText.str), "%d", numInput->currentValue);
+        C4_UI_Text_ReloadTexture(&numInput->numberText, temporaryGlobalRenderer);
+    }
+}
+
+void C4_UI_NumberInput_GenericDecrementOnClick(void* numberInputContext) {
+    C4_UI_NumberInput* numInput = (C4_UI_NumberInput*)numberInputContext;
+    if (numInput->currentValue > numInput->min) {
+        numInput->currentValue--;
+        snprintf(numInput->numberText.str, sizeof(numInput->numberText.str), "%d", numInput->currentValue);
+        C4_UI_Text_ReloadTexture(&numInput->numberText, temporaryGlobalRenderer);
+    }
+}
+
 bool C4_UI_NumberInput_InitProperties(
     C4_UI_NumberInput* numInput, SDL_Renderer* renderer, const SDL_FRect destination, unsigned int min, unsigned int max,
-    unsigned int startingValue, float arrowWidth, float arrowHeight, const C4_UI_Theme* theme
+    unsigned int startingValue, float arrowWidth, float arrowHeight, const C4_UI_Theme* theme, 
+    C4_UI_Callback Button1OnClick, void* Button1Context, C4_UI_Callback Button2OnClick, void* Button2Context
 ) {
+    temporaryGlobalRenderer = renderer;
     if (!numInput) {
         SDL_Log("Unable to init number input element. Pointer is NULL");
         return false;
@@ -66,8 +89,16 @@ bool C4_UI_NumberInput_InitProperties(
     }
     char startingValueStr[64];
     snprintf(startingValueStr, sizeof(startingValueStr), "%d", startingValue);
-    C4_UI_ButtonGroup_SetButtonIndex(&numInput->arrows, 0, renderer, "", C4_UI_SymbolType_Triangle, arrowWidth, arrowHeight, 0, theme);
-    C4_UI_ButtonGroup_SetButtonIndex(&numInput->arrows, 1, renderer, "", C4_UI_SymbolType_Triangle, arrowWidth, arrowHeight, 180, theme);
+    if (Button1OnClick == NULL) {
+        Button1OnClick = C4_UI_NumberInput_GenericIncrementOnClick;
+        Button1Context = numInput;
+    }
+    if (Button2OnClick == NULL) {
+        Button2OnClick = C4_UI_NumberInput_GenericDecrementOnClick;
+        Button2Context = numInput;
+    }
+    C4_UI_ButtonGroup_SetButtonIndex(&numInput->arrows, 0, renderer, "", C4_UI_SymbolType_Triangle, arrowWidth, arrowHeight, 0, theme, Button1OnClick, Button1Context);
+    C4_UI_ButtonGroup_SetButtonIndex(&numInput->arrows, 1, renderer, "", C4_UI_SymbolType_Triangle, arrowWidth, arrowHeight, 180, theme, Button2OnClick, Button2Context);
     float textPtSize = roundf(destination.h / 1.25f);
     if (!C4_UI_Text_InitProperties(&numInput->numberText, renderer, startingValueStr, C4_FontType_Regular, textPtSize, 0.f, 0.f, 0, theme->textColor)) {
         return false;
@@ -81,7 +112,8 @@ bool C4_UI_NumberInput_InitProperties(
 
 C4_UI_NumberInput* C4_UI_NumberInput_Create(
     SDL_Renderer* renderer, const SDL_FRect destination, unsigned int min, unsigned int max,
-    unsigned int startingValue, float arrowWidth, float arrowHeight, const C4_UI_Theme* theme
+    unsigned int startingValue, float arrowWidth, float arrowHeight, const C4_UI_Theme* theme,
+    C4_UI_Callback Button1OnClick, void* Button1Context, C4_UI_Callback Button2OnClick, void* Button2Context
 ) {
     C4_UI_NumberInput* numInput = calloc(1, sizeof(C4_UI_NumberInput));
     if (!numInput) {
@@ -90,7 +122,8 @@ C4_UI_NumberInput* C4_UI_NumberInput_Create(
     }
     if (
         !C4_UI_NumberInput_InitProperties(
-            numInput, renderer, destination, min, max, startingValue, arrowWidth, arrowHeight, theme
+            numInput, renderer, destination, min, max, startingValue, arrowWidth, arrowHeight, theme,
+            Button1OnClick, Button1Context, Button2OnClick, Button2Context
         )
     ) {
         return NULL;
@@ -137,31 +170,15 @@ void C4_UI_NumberInput_CenterInWindow(C4_UI_NumberInput* numInput, C4_Axis axis)
     C4_UI_NumberInput_PositionElementsInBackground(numInput);
 }
 
-void C4_UI_NumberInput_HandleMouseEvents(C4_UI_NumberInput* numInput, SDL_Event* event, SDL_Renderer* renderer) {
+void C4_UI_NumberInput_HandleMouseEvents(C4_UI_NumberInput* numInput, SDL_Event* event) {
     if (!numInput) {
         return;
     }
-    switch(C4_UI_ButtonGroup_HandleMouseEvents(&numInput->arrows, event)) {
-        // Up Button
-        case 0: {
-            if (numInput->currentValue + 1 <= numInput->max) {
-                numInput->currentValue++;
-                snprintf(numInput->numberText.str, sizeof(numInput->numberText.str), "%d", numInput->currentValue);
-                C4_UI_Text_ReloadTexture(&numInput->numberText, renderer);
-            }
-        }; break;
-        // Down Button
-        case 1: {
-            if (numInput->currentValue - 1 >= numInput->min) {
-                numInput->currentValue--;
-                snprintf(numInput->numberText.str, sizeof(numInput->numberText.str), "%d", numInput->currentValue);
-                C4_UI_Text_ReloadTexture(&numInput->numberText, renderer);
-            }
-        }; break;
-    }
+    C4_UI_ButtonGroup_HandleMouseEvents(&numInput->arrows, event);
 }
 
 void C4_UI_NumberInput_HandleKeyboardInput(C4_UI_NumberInput* numInput, SDL_Event* event, SDL_Renderer* renderer) {
+    (void)numInput; (void)event; (void)renderer;
     
 }
 
@@ -193,4 +210,12 @@ void C4_UI_NumberInput_ChangeMin(C4_UI_NumberInput* numInput, unsigned int newMi
         snprintf(numInput->numberText.str, sizeof(numInput->numberText.str), "%d", numInput->currentValue);
         C4_UI_Text_ReloadTexture(&numInput->numberText, renderer);
     }
+}
+
+void C4_UI_NumberInput_ResetButtons(void* data) {
+    if (!data) {
+        return;
+    }
+    C4_UI_NumberInput* numInput = (C4_UI_NumberInput*)data;
+    C4_UI_ButtonGroup_Reset(&numInput->arrows);
 }

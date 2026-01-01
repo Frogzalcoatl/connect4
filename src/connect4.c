@@ -42,7 +42,6 @@ void Connect4_Quit_Dependencies(void) {
     SDL_Quit();
 }
 
-// Returns false if screenchange was unsuccessful;
 static void C4_Game_ChangeScreen(C4_Game* game, C4_ScreenType type) {
     if (game == NULL) {
         SDL_Log("Unable to change game screen. Game is NULL");
@@ -142,7 +141,7 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
             }
             C4_Game_HandleKeyboardInput(game, eventSDL->key.scancode);
         }
-        C4_UI_Container_Update(&game->container, eventSDL);
+        C4_UI_Container_HandleEvent(&game->container, eventSDL);
     }
     while (C4_PollEvent(eventC4)) {
         switch (eventC4->type) {
@@ -151,9 +150,6 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
             }; break;
             case C4_EVENT_SCREEN_CHANGE: {
                 C4_Game_ChangeScreen(game, eventC4->screenChange.type);
-            }; break;
-            case C4_EVENT_GAME_OVER: {
-                
             }; break;
             case C4_EVENT_SOUND_REQUEST: {
                 C4_PlaySound(eventC4->sound.id);
@@ -169,10 +165,15 @@ void C4_Game_Run(C4_Game* game) {
     C4_Event eventC4;
     while (game->running) {
         C4_Game_HandleEvents(game, &eventSDL, &eventC4);
+        C4_UI_Container_Update(&game->container);
+
         SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
         SDL_RenderClear(game->renderer);
+
         C4_UI_Container_Draw(&game->container);
+
         SDL_RenderPresent(game->renderer);
+
         C4_Discord_Loop();
     }
 }

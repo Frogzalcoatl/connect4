@@ -26,6 +26,7 @@ typedef struct {
     void (*Draw)(void* data, SDL_Renderer* renderer);
     void (*Update)(void* data, SDL_Event* event);
     void (*Destroy)(void* data);
+    void (*Reset)(void* data);
 } C4_UI_Element;
 
 typedef struct C4_UI_Node {
@@ -41,13 +42,16 @@ typedef struct {
     //SDL_FRect bounds;
     C4_UI_Node* head;
     C4_UI_Node* tail;
+    // All button styles are reset when a popup is initally opened
+    bool buttonColorResetComplete;
 } C4_UI_Container;
 
 void C4_UI_Container_Init(C4_UI_Container* container, SDL_Renderer* renderer);
 void C4_UI_Container_Destroy(C4_UI_Container* container);
 void C4_UI_Container_Clear(C4_UI_Container* container);
 void C4_UI_Container_Draw(C4_UI_Container* container);
-void C4_UI_Container_Update(C4_UI_Container* container, SDL_Event* event);
+void C4_UI_Container_Update(C4_UI_Container* container);
+void C4_UI_Container_HandleEvent(C4_UI_Container* container, SDL_Event* event);
 
 C4_UI_Borders* C4_UI_Container_Add_Borders(
     C4_UI_Container* container, const SDL_FRect destination,
@@ -55,7 +59,8 @@ C4_UI_Borders* C4_UI_Container_Add_Borders(
 );
 C4_UI_Button* C4_UI_Container_Add_Button(
     C4_UI_Container* container, const SDL_FRect destination,
-    const char* str, const C4_UI_Theme* theme
+    const char* str, const C4_UI_Theme* theme, C4_UI_Callback OnClick,
+    void* OnClickContext
 );
 C4_UI_ButtonGroup* C4_UI_Container_Add_ButtonGroup(
     C4_UI_Container* container, const SDL_FRect bounds, size_t count,
@@ -63,7 +68,8 @@ C4_UI_ButtonGroup* C4_UI_Container_Add_ButtonGroup(
 );
 C4_UI_NumberInput* C4_UI_Container_Add_NumberInput(
     C4_UI_Container* container, const SDL_FRect destination, unsigned int min, unsigned int max,
-    unsigned int startingValue, float arrowWidth, float arrowHeight, const C4_UI_Theme* theme
+    unsigned int startingValue, float arrowWidth, float arrowHeight, const C4_UI_Theme* theme,
+    C4_UI_Callback Button1OnClick, void* Button1Context, C4_UI_Callback Button2OnClick, void* Button2Context
 );
 C4_UI_Popup* C4_UI_Container_Add_Popup(
     C4_UI_Container* container, const SDL_FRect destination, C4_UI_ButtonGroup_Direction buttonDirection,

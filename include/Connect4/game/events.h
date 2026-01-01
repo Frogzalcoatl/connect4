@@ -8,7 +8,6 @@ typedef enum {
     C4_EVENT_NONE,
     C4_EVENT_CLOSE_WINDOW,
     C4_EVENT_SCREEN_CHANGE,
-    C4_EVENT_GAME_OVER,
     C4_EVENT_SOUND_REQUEST
 } C4_EventType;
 
@@ -16,8 +15,8 @@ typedef struct {
     C4_EventType type;
     union {
         struct { C4_ScreenType type; } screenChange;
-        struct { C4_SlotState winnerId; } gameOver;
         struct { C4_SoundEffect id; } sound;
+        struct { uint8_t width; uint8_t height; uint8_t amountToWin; } boardSize;
     };
 } C4_Event;
 
@@ -26,5 +25,4 @@ void C4_PushEvent(C4_Event event);
 bool C4_PollEvent(C4_Event* event);
 void C4_PushEvent_CloseWindow(void);
 void C4_PushEvent_ScreenChange(C4_ScreenType screenType);
-void C4_PushEvent_GameOver(C4_SlotState winnerId);
 void C4_PushEvent_SoundRequest(C4_SoundEffect soundId);

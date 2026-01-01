@@ -52,7 +52,7 @@ bool C4_UI_ButtonGroup_InitProperties(C4_UI_ButtonGroup* group, SDL_Renderer* re
         return false;
     }
     for (size_t i = 0; i < group->count; i++) {
-        if (!C4_UI_Button_InitProperties(&group->buttons[i], renderer, "", C4_UI_ButtonGroup_GetUpdatedButtonRect(group, i), C4_UI_SymbolType_None, 1.f, 1.f, 0, theme)) {
+        if (!C4_UI_Button_InitProperties(&group->buttons[i], renderer, "", C4_UI_ButtonGroup_GetUpdatedButtonRect(group, i), C4_UI_SymbolType_None, 1.f, 1.f, 0, theme, NULL, NULL)) {
             return false;
         }
     }
@@ -93,7 +93,7 @@ void C4_UI_ButtonGroup_Destroy(C4_UI_ButtonGroup* group) {
 
 void C4_UI_ButtonGroup_SetButtonIndex(
     C4_UI_ButtonGroup* group, size_t buttonIndex, SDL_Renderer* renderer, const char* str,C4_UI_SymbolType symbol,
-    float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme
+    float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme, C4_UI_Callback OnClick, void* OnClickContext
 ) {
     if (!group) {
         SDL_Log("Unable to set button index %zu. Button group is NULL", buttonIndex);
@@ -106,7 +106,7 @@ void C4_UI_ButtonGroup_SetButtonIndex(
     C4_UI_Button* btn = &group->buttons[buttonIndex];
     C4_UI_Button_InitProperties(
         btn, renderer, str, btn->background.destination, symbol,
-        symbolWidth, symbolHeight, symbolRotationDegrees, theme
+        symbolWidth, symbolHeight, symbolRotationDegrees, theme, OnClick, OnClickContext
     );
 }
 
@@ -120,17 +120,14 @@ void C4_UI_ButtonGroup_Draw(C4_UI_ButtonGroup* group, SDL_Renderer* renderer) {
     }
 }
 
-int C4_UI_ButtonGroup_HandleMouseEvents(C4_UI_ButtonGroup* group, SDL_Event* event) {
+void C4_UI_ButtonGroup_HandleMouseEvents(C4_UI_ButtonGroup* group, SDL_Event* event) {
     if (!group || !event) {
         SDL_Log("Button group, event, and/or renderer is NULL");
-        return -1;
+        return;
     }
     for (size_t i = 0; i < group->count; i++) {
-        if (C4_UI_Button_HandleMouseEvents(&group->buttons[i], event)) {
-            return (int)i;
-        }
+        C4_UI_Button_HandleMouseEvents(&group->buttons[i], event);
     }
-    return -1;
 }
 
 void C4_UI_ButtonGroup_TransformResize(C4_UI_ButtonGroup* group, const SDL_FRect rect) {
@@ -151,4 +148,12 @@ void C4_UI_ButtonGroup_CenterInWindow(C4_UI_ButtonGroup* group, C4_Axis axis) {
     }
     C4_UI_CenterInWindow(&group->bounds, axis);
     C4_UI_ButtonGroup_TransformResize(group, group->bounds);
+}
+
+// void* to work in container
+void C4_UI_ButtonGroup_Reset(void* buttonGroup) {
+    C4_UI_ButtonGroup* group = (C4_UI_ButtonGroup*)buttonGroup;
+    for (size_t i = 0; i < group->count; i++) {
+        C4_UI_Button_Reset(&group->buttons[i]);
+    }
 }

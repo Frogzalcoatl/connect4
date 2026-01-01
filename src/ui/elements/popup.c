@@ -129,15 +129,15 @@ void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup, SDL_Renderer* renderer) {
     C4_UI_Popup_PositionElementsInBackground(popup, renderer);
 }
 
-int C4_UI_Popup_HandleMouseEvents(C4_UI_Popup* popup, SDL_Event* event) {
+void C4_UI_Popup_HandleMouseEvents(C4_UI_Popup* popup, SDL_Event* event) {
     if (!popup || !event) {
         SDL_Log("Popup element and/or event is NULL");
-        return -1;
+        return;
     }
     if (!popup->isShowing) {
-        return -1;
+        return;
     }
-    return C4_UI_ButtonGroup_HandleMouseEvents(&popup->buttonGroup, event);
+    C4_UI_ButtonGroup_HandleMouseEvents(&popup->buttonGroup, event);
 }
 
 void C4_UI_Popup_SetButtonText(C4_UI_Popup* popup, SDL_Renderer* renderer, size_t buttonIndex, const char* text) {
@@ -145,4 +145,12 @@ void C4_UI_Popup_SetButtonText(C4_UI_Popup* popup, SDL_Renderer* renderer, size_
         return;
     }
     C4_UI_Button_UpdateStr(&popup->buttonGroup.buttons[buttonIndex], text, renderer);
+}
+
+void C4_UI_Popup_ResetButtons(void* data) {
+    if (!data) {
+        return;
+    }
+    C4_UI_Popup* popup = (C4_UI_Popup*)data;
+    C4_UI_ButtonGroup_Reset(&popup->buttonGroup);
 }

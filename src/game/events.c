@@ -44,13 +44,6 @@ void C4_PushEvent_ScreenChange(C4_ScreenType screenType) {
     C4_PushEvent(event);
 }
 
-void C4_PushEvent_GameOver(C4_SlotState winnerId) {
-    C4_Event event;
-    event.type = C4_EVENT_GAME_OVER;
-    event.gameOver.winnerId = winnerId;
-    C4_PushEvent(event);
-}
-
 void C4_PushEvent_SoundRequest(C4_SoundEffect soundId) {
     C4_Event event;
     event.type = C4_EVENT_SOUND_REQUEST;
