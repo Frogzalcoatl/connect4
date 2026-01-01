@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.28)
 # Including CXX and OBJC for discord-rpc
-project(Connect4 LANGUAGES C CXX OBJC)
+project(Connect4 LANGUAGES C CXX)
+
+# For the one macos specific objective c file in discord-rpc
+# Android doesnt have an objective c compiler apparently
+if(APPLE)
+    enable_language(OBJC)
+endif()
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
 
@@ -119,49 +125,28 @@ else()
     add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${WIN_FLAGS} ${SOURCES} ${GENERATED_SOURCES} ${ICON_RC})
 endif()
 
-# Compiler Warnings
 if(MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE /W4)
+    target_compile_options(${PROJECT_NAME} PRIVATE /W3 /std:clatest)
 else()
-    target_compile_options(${PROJECT_NAME} PRIVATE 
-        # Standard set of warnings
-        -Wall
-        # Extra useful warnings (unused parameters, etc.)
-        -Wextra
-        # Warns about non-standard C code
-        -Wpedantic
-        # This is the specific flag that catches missing headers
-        -Werror=implicit-function-declaration
-        # Error if you assign a random integer to a pointer (prevents segfaults)
-        -Werror=int-conversion
-        # To disable the "no newline at end of file warning"
-        $<$<C_COMPILER_ID:Clang>:-Wno-newline-eof>
-        # Warn if data is lost (e.g. double -> float, int64 -> int8)
-        -Wconversion
-    )
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
+    target_compile_features(${PROJECT_NAME} PRIVATE c_std_23)
+    if(APPLE)
+        target_compile_options(${PROJECT_NAME} PRIVATE -Wno-error=incompatible-function-pointer-types)
+    endif()
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    SDL3::SDL3
-    SDL3_ttf::SDL3_ttf
-)
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
 
-if(WIN32)
-    target_link_libraries(${PROJECT_NAME} PRIVATE 
-        version imm32 winmm setupapi comctl32 rpcrt4 shcore 
-        ole32 oleaut32 uuid advapi32 shell32 gdi32 user32 kernel32
-    )
-endif()
+# if(WIN32)
+#     target_link_libraries(${PROJECT_NAME} PRIVATE 
+#         winmm imm32 version setupapi usp10 cfgmgr32 rpcrt4 shcore
+#         user32 gdi32 shell32 advapi32 ole32 oleaut32 uuid
+#     )
+# endif()
 
 if(APPLE)
     target_link_libraries(${PROJECT_NAME} PRIVATE 
-        "-framework Foundation" 
-        "-framework AppKit" 
-        "-framework CoreAudio" 
-        "-framework CoreVideo" 
-        "-framework IOKit" 
-        "-framework Metal" 
-        "-framework QuartzCore"
+        "-framework Foundation" "-framework AppKit" "-framework QuartzCore"
     )
 endif()
 
@@ -172,7 +157,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 # --- DISCORD SDK SETUP ---
 set(IS_MOBILE FALSE)
-if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "iOS" OR CMAKE_SYSTEM_NAME STREQUAL "tvOS" OR CMAKE_SYSTEM_NAME STREQUAL "watchOS")
+if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
     set(IS_MOBILE TRUE)
 endif()
 
@@ -181,50 +166,46 @@ set(USE_DISCORD OFF)
 # Only enable Discord for Desktop platforms
 if((WIN32 OR UNIX OR APPLE) AND NOT IS_MOBILE)
     set(USE_DISCORD ON)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_DISCORD)
-    message(STATUS "discord-rpc enabled for this platform")
 endif()
 
 if(USE_DISCORD)
     set(DISCORD_RPC_DIR "${CMAKE_SOURCE_DIR}/deps/discord-rpc")
+
     target_include_directories(${PROJECT_NAME} PRIVATE
         "${DISCORD_RPC_DIR}/include"
         "${DISCORD_RPC_DIR}/thirdparty/rapidjson-1.1.0/include"
     )
+
     set(DISCORD_SRC
         "${DISCORD_RPC_DIR}/src/discord_rpc.cpp"
         "${DISCORD_RPC_DIR}/src/rpc_connection.cpp"
         "${DISCORD_RPC_DIR}/src/serialization.cpp"
     )
+
     if(WIN32)
         list(APPEND DISCORD_SRC 
             "${DISCORD_RPC_DIR}/src/connection_win.cpp"
             "${DISCORD_RPC_DIR}/src/discord_register_win.cpp"
         )
+        target_compile_definitions(${PROJECT_NAME} PRIVATE DISCORD_WINDOWS)
     elseif(APPLE)
         list(APPEND DISCORD_SRC 
             "${DISCORD_RPC_DIR}/src/connection_unix.cpp"
             "${DISCORD_RPC_DIR}/src/discord_register_osx.m"
         )
+        target_compile_definitions(${PROJECT_NAME} PRIVATE DISCORD_OSX)
     else() # Linux
         list(APPEND DISCORD_SRC 
             "${DISCORD_RPC_DIR}/src/connection_unix.cpp"
             "${DISCORD_RPC_DIR}/src/discord_register_linux.cpp"
         )
+        target_compile_definitions(${PROJECT_NAME} PRIVATE DISCORD_LINUX)
     endif()
+
     target_sources(${PROJECT_NAME} PRIVATE ${DISCORD_SRC})
+    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_DISCORD)
+    message(STATUS "discord-rpc enabled")
 endif()
 
 # So math.h always includes math defines (ex: M_PI)
 target_compile_definitions(${PROJECT_NAME} PRIVATE _USE_MATH_DEFINES)
-
-if(MSVC)
-    # MSVC added /std:c11 and /std:c17, but for C23 features, 
-    # they currently use /std:clatest (which includes all C23 features).
-    # Some very recent versions also support /std:c23, 
-    # but /std:clatest is the most compatible way to unlock those features right now.
-    target_compile_options(${PROJECT_NAME} PRIVATE /std:clatest)
-else()
-    # GCC and Clang handle the high-level feature correctly
-    target_compile_features(${PROJECT_NAME} PRIVATE c_std_23)
-endif()
