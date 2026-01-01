@@ -16,7 +16,7 @@ static void C4_UI_NumberInput_PositionElementsInBackground(C4_UI_NumberInput* nu
     numInput->numberText.destination.x = dest->x + borderWidth + 10;
     numInput->numberText.destination.y = dest->y + (dest->h / 2.f) - (numInput->numberText.destination.h / 2.f);
     C4_UI_ButtonGroup_TransformResize(
-        &numInput->arrows,
+        &numInput->buttonGroup,
         (SDL_FRect){
             .x = dest->x + dest->w * 0.75f,
             .y = dest->y,
@@ -29,7 +29,7 @@ static void C4_UI_NumberInput_PositionElementsInBackground(C4_UI_NumberInput* nu
 // Temporary until i improve text rendering is improved to not require the renderer for every text update
 static SDL_Renderer* temporaryGlobalRenderer;
 
-void C4_UI_NumberInput_GenericIncrementOnClick(void* numberInputContext) {
+void C4_UI_NumberInput_GenericIncrementCallback(void* numberInputContext) {
     C4_UI_NumberInput* numInput = (C4_UI_NumberInput*)numberInputContext;
     if (numInput->currentValue < numInput->max) {
         numInput->currentValue++;
@@ -38,7 +38,7 @@ void C4_UI_NumberInput_GenericIncrementOnClick(void* numberInputContext) {
     }
 }
 
-void C4_UI_NumberInput_GenericDecrementOnClick(void* numberInputContext) {
+void C4_UI_NumberInput_GenericDecrementCallback(void* numberInputContext) {
     C4_UI_NumberInput* numInput = (C4_UI_NumberInput*)numberInputContext;
     if (numInput->currentValue > numInput->min) {
         numInput->currentValue--;
@@ -48,20 +48,24 @@ void C4_UI_NumberInput_GenericDecrementOnClick(void* numberInputContext) {
 }
 
 bool C4_UI_NumberInput_InitProperties(
-    C4_UI_NumberInput* numInput, SDL_Renderer* renderer, const SDL_FRect destination, unsigned int min, unsigned int max,
-    unsigned int startingValue, float arrowWidth, float arrowHeight, const C4_UI_Theme* theme, 
-    C4_UI_Callback Button1OnClick, void* Button1Context, C4_UI_Callback Button2OnClick, void* Button2Context
+    C4_UI_NumberInput* numInput, SDL_Renderer* renderer, const C4_UI_NumberInput_Config* config
 ) {
     temporaryGlobalRenderer = renderer;
     if (!numInput) {
         SDL_Log("Unable to init number input element. Pointer is NULL");
         return false;
     }
-    if (min > max) {
+    if (!config) {
+        return false;
+    }
+    if (!config->theme) {
+        return false;
+    }
+    if (config->min > config->max) {
         SDL_Log("Unable to init number input element. Min should be less than max");
         return false;
     }
-    if (startingValue < min || startingValue > max) {
+    if (config->startingValue < config->min || config->startingValue > config->max) {
         SDL_Log("Unable to init number input element. Starting value should be within min/max");
         return false;
     }
@@ -69,51 +73,89 @@ bool C4_UI_NumberInput_InitProperties(
         SDL_Log("Unable to init number input element. Renderer is NULL");
         return false;
     }
-    if (!theme) {
-        SDL_Log("Unable to init number input element. Theme is NULL");
-        return false;
-    }
-    if (!C4_UI_Borders_InitProperties(&numInput->borders, destination, theme->buttonDefault.borders, theme->borderWidth)) {
-        return false;
-    }
-    if (!C4_UI_Rectangle_InitProperties(&numInput->background, destination, (SDL_Color){0, 0, 0, 255})) {
-        return false;
-    }
     if (
-        !C4_UI_ButtonGroup_InitProperties(
-            &numInput->arrows, renderer, (SDL_FRect){0.f, 0.f, arrowWidth, destination.h / 2.f},
-            2, C4_UI_ButtonGroup_Direction_Vertical, 0, theme
+        !C4_UI_Borders_InitProperties(
+            &numInput->borders,
+            &(C4_UI_Borders_Config){
+                .destination = config->destination,
+                .color = config->theme->buttonDefault.borders,
+                .width = config->theme->borderWidth
+            }
         )
     ) {
         return false;
     }
-    char startingValueStr[64];
-    snprintf(startingValueStr, sizeof(startingValueStr), "%d", startingValue);
-    if (!Button1OnClick) {
-        Button1OnClick = C4_UI_NumberInput_GenericIncrementOnClick;
-        Button1Context = numInput;
-    }
-    if (!Button2OnClick) {
-        Button2OnClick = C4_UI_NumberInput_GenericDecrementOnClick;
-        Button2Context = numInput;
-    }
-    C4_UI_ButtonGroup_SetButtonIndex(&numInput->arrows, 0, renderer, "", C4_UI_SymbolType_Triangle, arrowWidth, arrowHeight, 0, theme, Button1OnClick, Button1Context);
-    C4_UI_ButtonGroup_SetButtonIndex(&numInput->arrows, 1, renderer, "", C4_UI_SymbolType_Triangle, arrowWidth, arrowHeight, 180, theme, Button2OnClick, Button2Context);
-    float textPtSize = roundf(destination.h / 1.25f);
-    if (!C4_UI_Text_InitProperties(&numInput->numberText, renderer, startingValueStr, C4_FontType_Regular, textPtSize, 0.f, 0.f, 0, theme->textColor)) {
+    if (
+        !C4_UI_Rectangle_InitProperties(
+            &numInput->background,
+            &(C4_UI_Rectangle_Config){
+                .destination = config->destination,
+                .color = (SDL_Color){0, 0, 0, 255}
+            }
+        )
+    ) {
         return false;
     }
-    numInput->min = min;
-    numInput->max = max;
-    numInput->currentValue = startingValue;
+    if (
+        !C4_UI_ButtonGroup_InitProperties(
+            &numInput->buttonGroup, renderer,
+            &(C4_UI_ButtonGroup_Config){
+                .destination = config->destination,
+                .count = 2,
+                .buttonDirection = C4_UI_ButtonGroup_Direction_Vertical,
+                .margin = 0,
+                .font = config->font,
+                .theme = config->theme
+            }
+        )
+    ) {
+        return false;
+    }
+    C4_UI_Button* btnIncrement = &numInput->buttonGroup.buttons[0];
+    btnIncrement->OnClickCallback = C4_UI_NumberInput_GenericIncrementCallback;
+    btnIncrement->OnClickContext = numInput;
+    btnIncrement->WhilePressedCallback = C4_UI_NumberInput_GenericIncrementCallback;
+    btnIncrement->WhilePressedContext = numInput;
+    btnIncrement->symbol.type = C4_UI_SymbolType_Triangle;
+    btnIncrement->symbol.destination.w = 20.f;
+    btnIncrement->symbol.destination.h = 20.f;
+    C4_UI_Button* btnDecrement = &numInput->buttonGroup.buttons[1];
+    btnDecrement->OnClickCallback = C4_UI_NumberInput_GenericDecrementCallback;
+    btnDecrement->OnClickContext = numInput;
+    btnDecrement->WhilePressedCallback = C4_UI_NumberInput_GenericDecrementCallback;
+    btnDecrement->WhilePressedContext = numInput;
+    btnDecrement->symbol.type = C4_UI_SymbolType_Triangle;
+    btnDecrement->symbol.destination.w = 20.f;
+    btnDecrement->symbol.destination.h = 20.f;
+    btnDecrement->symbol.rotationDegrees = 180;
+    float textPtSize = roundf(config->destination.h / 1.25f);
+    char startingValueStr[64];
+    snprintf(startingValueStr, sizeof(startingValueStr), "%d", config->startingValue);
+    if (
+        !C4_UI_Text_InitProperties(
+            &numInput->numberText, renderer,
+            &(C4_UI_Text_Config){
+                .str = startingValueStr,
+                .font = config->font,
+                .color = config->theme->textColor,
+                .ptSize = textPtSize,
+                .destinationX = 0.f,
+                .destinationY = 0.f,
+                .wrapWidth = 0
+            }
+        )
+    ) {
+        return false;
+    }
+    numInput->min = config->min;
+    numInput->max = config->max;
+    numInput->currentValue = config->startingValue;
     C4_UI_NumberInput_PositionElementsInBackground(numInput);
     return true;
 }
 
 C4_UI_NumberInput* C4_UI_NumberInput_Create(
-    SDL_Renderer* renderer, const SDL_FRect destination, unsigned int min, unsigned int max,
-    unsigned int startingValue, float arrowWidth, float arrowHeight, const C4_UI_Theme* theme,
-    C4_UI_Callback Button1OnClick, void* Button1Context, C4_UI_Callback Button2OnClick, void* Button2Context
+    SDL_Renderer* renderer, const C4_UI_NumberInput_Config* config
 ) {
     C4_UI_NumberInput* numInput = calloc(1, sizeof(C4_UI_NumberInput));
     if (!numInput) {
@@ -121,10 +163,7 @@ C4_UI_NumberInput* C4_UI_NumberInput_Create(
         return NULL;
     }
     if (
-        !C4_UI_NumberInput_InitProperties(
-            numInput, renderer, destination, min, max, startingValue, arrowWidth, arrowHeight, theme,
-            Button1OnClick, Button1Context, Button2OnClick, Button2Context
-        )
+        !C4_UI_NumberInput_InitProperties(numInput, renderer, config)
     ) {
         return NULL;
     }
@@ -136,7 +175,7 @@ void C4_UI_NumberInput_FreeResources(C4_UI_NumberInput* numInput) {
         return;
     }
     C4_UI_Text_FreeResources(&numInput->numberText);
-    C4_UI_ButtonGroup_FreeResources(&numInput->arrows);
+    C4_UI_ButtonGroup_FreeResources(&numInput->buttonGroup);
 }
 
 void C4_UI_NumberInput_Destroy(void* data) {
@@ -160,7 +199,7 @@ void C4_UI_NumberInput_Draw(void* data, SDL_Renderer* renderer) {
     C4_UI_Rectangle_Draw(&numInput->background, renderer);
     C4_UI_Text_Draw(&numInput->numberText, renderer);
     C4_UI_Borders_Draw(&numInput->borders, renderer);
-    C4_UI_ButtonGroup_Draw(&numInput->arrows, renderer);
+    C4_UI_ButtonGroup_Draw(&numInput->buttonGroup, renderer);
 }
 
 void C4_UI_NumberInput_CenterInWindow(C4_UI_NumberInput* numInput, C4_Axis axis) {
@@ -171,12 +210,20 @@ void C4_UI_NumberInput_CenterInWindow(C4_UI_NumberInput* numInput, C4_Axis axis)
     C4_UI_NumberInput_PositionElementsInBackground(numInput);
 }
 
+void C4_UI_NumberInput_Update(void* data, float deltaTime) {
+    if (!data) {
+        return;
+    }
+    C4_UI_NumberInput* numInput = (C4_UI_NumberInput*)data;
+    C4_UI_ButtonGroup_Update(&numInput->buttonGroup, deltaTime);
+}
+
 void C4_UI_NumberInput_HandleMouseEvents(void* data, SDL_Event* event) {
     if (!data) {
         return;
     }
     C4_UI_NumberInput* numInput = (C4_UI_NumberInput*)data;
-    C4_UI_ButtonGroup_HandleMouseEvents(&numInput->arrows, event);
+    C4_UI_ButtonGroup_HandleMouseEvents(&numInput->buttonGroup, event);
 }
 
 void C4_UI_NumberInput_HandleKeyboardInput(C4_UI_NumberInput* numInput, SDL_Event* event, SDL_Renderer* renderer) {
@@ -219,5 +266,5 @@ void C4_UI_NumberInput_ResetButtons(void* data) {
         return;
     }
     C4_UI_NumberInput* numInput = (C4_UI_NumberInput*)data;
-    C4_UI_ButtonGroup_Reset(&numInput->arrows);
+    C4_UI_ButtonGroup_Reset(&numInput->buttonGroup);
 }

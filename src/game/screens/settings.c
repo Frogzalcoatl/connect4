@@ -96,36 +96,36 @@ static void ChangeAmountToWinMax(void) {
 }
 static void WidthIncrementOnClick(void* context) {
     (void)context;
-    C4_UI_NumberInput_GenericIncrementOnClick(settingsData.widthInput);
+    C4_UI_NumberInput_GenericIncrementCallback(settingsData.widthInput);
     ChangeAmountToWinMax();
     ApplyButtonInactiveHandler();
 }
 static void WidthDecrementOnClick(void* context) {
     (void)context;
-    C4_UI_NumberInput_GenericDecrementOnClick(settingsData.widthInput);
+    C4_UI_NumberInput_GenericDecrementCallback(settingsData.widthInput);
     ChangeAmountToWinMax();
     ApplyButtonInactiveHandler();
 }
 static void HeightIncrementOnClick(void* context) {
     (void)context;
-    C4_UI_NumberInput_GenericIncrementOnClick(settingsData.heightInput);
+    C4_UI_NumberInput_GenericIncrementCallback(settingsData.heightInput);
     ChangeAmountToWinMax();
     ApplyButtonInactiveHandler();
 }
 static void HeightDecrementOnClick(void* context) {
     (void)context;
-    C4_UI_NumberInput_GenericDecrementOnClick(settingsData.heightInput);
+    C4_UI_NumberInput_GenericDecrementCallback(settingsData.heightInput);
     ChangeAmountToWinMax();
     ApplyButtonInactiveHandler();
 }
-static void AmountToWinIncrementOnClick(void* context) {
+static void WinAmountIncrementOnClick(void* context) {
     (void)context;
-    C4_UI_NumberInput_GenericIncrementOnClick(settingsData.winAmountInput);
+    C4_UI_NumberInput_GenericIncrementCallback(settingsData.winAmountInput);
     ApplyButtonInactiveHandler();
 }
-static void AmountToWinDecrementOnClick(void* context) {
+static void WinAmountDecrementOnClick(void* context) {
     (void)context;
-    C4_UI_NumberInput_GenericDecrementOnClick(settingsData.winAmountInput);
+    C4_UI_NumberInput_GenericDecrementCallback(settingsData.winAmountInput);
     ApplyButtonInactiveHandler();
 }
 
@@ -138,75 +138,143 @@ void C4_SetScreen_Settings(C4_Game* game) {
     game->currentScreen = C4_ScreenType_Settings;
 
     C4_UI_Text* settingsTitle = C4_UI_Container_Add_Text(
-        cont, "Settings", C4_FontType_Bold, C4_SCREEN_SETTINGS_TITLE_PT_SIZE,
-        0.f, 0.f, 0, C4_UI_THEME_DEFAULT.textColor
+        cont, &(C4_UI_Text_Config){
+            .str = "Settings",
+            .font = game->fontBold,
+            .color = C4_UI_THEME_DEFAULT.textColor,
+            .ptSize = C4_SCREEN_SETTINGS_TITLE_PT_SIZE,
+            .destinationX = 0.f,
+            .destinationY = 0.f,
+            .wrapWidth = 0
+        }
     );
     C4_UI_CenterInWindow(&settingsTitle->destination, C4_Axis_X);
 
     C4_UI_ButtonGroup* buttonGroup = C4_UI_Container_Add_ButtonGroup(
-        cont, (SDL_FRect){0.f, C4_SCREEN_SETTINGS_BUTTON_GROUP_YPOS,
-        C4_SCREEN_SETTINGS_BUTTON_GROUP_WIDTH, C4_SCREEN_SETTINGS_BUTTON_GROUP_HEIGHT},
-        BUTTON_GROUP_COUNT, C4_UI_ButtonGroup_Direction_Horizontal, 15, &C4_UI_THEME_DEFAULT
+        cont, &(C4_UI_ButtonGroup_Config){
+            .destination = (SDL_FRect){0.f, C4_SCREEN_SETTINGS_BUTTON_GROUP_YPOS, C4_SCREEN_SETTINGS_BUTTON_GROUP_WIDTH, C4_SCREEN_SETTINGS_BUTTON_GROUP_HEIGHT},
+            .count = BUTTON_GROUP_COUNT,
+            .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
+            .margin = 15,
+            .font = game->fontBold,
+            .theme = &C4_UI_THEME_DEFAULT
+        }
     );
     for (size_t i = 0; i < BUTTON_GROUP_COUNT; i++) {
-        C4_UI_ButtonGroup_SetButtonIndex(
-            buttonGroup, i, game->renderer, SETTINGS_BUTTONS_TEXT[i],
-            C4_UI_SymbolType_None, 0.f, 0.f, 0, &C4_UI_THEME_DEFAULT,
-            BUTTON_GROUP_ON_CLICKS[i], NULL
-        );
+        C4_UI_Button* btn = &buttonGroup->buttons[i];
+        C4_UI_Text_UpdateStr(&btn->text, SETTINGS_BUTTONS_TEXT[i], game->renderer);
+        btn->OnClickCallback = BUTTON_GROUP_ON_CLICKS[i];
     }
     C4_UI_Button* applyButton = &buttonGroup->buttons[0];
     applyButton->isActive = false;
     C4_UI_ButtonGroup_CenterInWindow(buttonGroup, C4_Axis_X);
 
     C4_UI_Popup* confirmPopup = C4_UI_Container_Add_Popup(
-        cont, (SDL_FRect){0.f, 0.f, C4_SCREEN_SETTINGS_POPUP_WIDTH, C4_SCREEN_SETTINGS_POPUP_HEIGHT},
-        C4_UI_ButtonGroup_Direction_Horizontal, 2, 100.f, CONFIRM_MESSAGE_DEFAULT,
-        &C4_UI_THEME_DEFAULT
+        cont, &(C4_UI_Popup_Config){
+            .destination = (SDL_FRect){0.f, 0.f, C4_SCREEN_SETTINGS_POPUP_WIDTH, C4_SCREEN_SETTINGS_POPUP_HEIGHT},
+            .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
+            .buttonCount = POPUP_BUTTON_COUNT,
+            .buttonGroupHeight = 100.f,
+            .message = CONFIRM_MESSAGE_DEFAULT,
+            .messageFont = game->fontRegular,
+            .buttonFont = game->fontBold,
+            .theme = &C4_UI_THEME_DEFAULT
+        }
     );
     for (size_t i = 0; i < POPUP_BUTTON_COUNT; i++) {
-        C4_UI_ButtonGroup_SetButtonIndex(
-            &confirmPopup->buttonGroup, i, game->renderer, POPUP_BUTTON_TEXT[i],
-            C4_UI_SymbolType_None, 0.f, 0.f, 0, &C4_UI_THEME_DEFAULT,
-            POPUP_ON_CLICKS[i], NULL
-        );
+        C4_UI_Button* btn = &confirmPopup->buttonGroup.buttons[i];
+        C4_UI_Text_UpdateStr(&btn->text, POPUP_BUTTON_TEXT[i], game->renderer);
+        btn->OnClickCallback = POPUP_ON_CLICKS[i];
     }
     C4_UI_Popup_CenterInWindow(confirmPopup, game->renderer);
 
     C4_UI_NumberInput* boardWidthInput = C4_UI_Container_Add_NumberInput(
-        cont, (SDL_FRect){1175.f, 175.f, 200.f, 100.f},
-        2, 10, game->board->width, 20.f, 20.f, &C4_UI_THEME_DEFAULT,
-        WidthIncrementOnClick, NULL, WidthDecrementOnClick, NULL
+        cont, &(C4_UI_NumberInput_Config){
+            .destination = (SDL_FRect){1175.f, 175.f, 200.f, 100.f},
+            .min = 2,
+            .max = 10,
+            .startingValue = game->board->width,
+            .font = game->fontRegular,
+            .theme = &C4_UI_THEME_DEFAULT
+        }
     );
+    C4_UI_Button* boardWidthIncrement = &boardWidthInput->buttonGroup.buttons[0];
+    boardWidthIncrement->OnClickCallback = WidthIncrementOnClick;
+    boardWidthIncrement->WhilePressedCallback = WidthIncrementOnClick;
+    C4_UI_Button* boardWidthDecrement = &boardWidthInput->buttonGroup.buttons[1];
+    boardWidthDecrement->OnClickCallback = WidthDecrementOnClick;
+    boardWidthDecrement->WhilePressedCallback = WidthDecrementOnClick;
 
     const float PT_SIZE = boardWidthInput->numberText.ptSize;
 
     C4_UI_Container_Add_Text(
-        cont, "Board Width", C4_FontType_Regular,
-        PT_SIZE, 475.f, 200.f, 0, C4_UI_THEME_DEFAULT.textColor
+        cont, &(C4_UI_Text_Config){
+            .str = "Board Width",
+            .font = game->fontRegular,
+            .color = C4_UI_THEME_DEFAULT.textColor,
+            .ptSize = PT_SIZE,
+            .destinationX = 475.f,
+            .destinationY = 200.f,
+            .wrapWidth = 0
+        }
     );
 
     C4_UI_NumberInput* boardHeightInput = C4_UI_Container_Add_NumberInput(
-        cont, (SDL_FRect){1175.f, 300.f, 200.f, 100.f},
-        2, 6, game->board->height, 20.f, 20.f, &C4_UI_THEME_DEFAULT,
-        HeightIncrementOnClick, NULL, HeightDecrementOnClick, NULL
+        cont, &(C4_UI_NumberInput_Config){
+            .destination = (SDL_FRect){1175.f, 300.f, 200.f, 100.f},
+            .min = 2,
+            .max = 6,
+            .startingValue = game->board->height,
+            .font = game->fontRegular,
+            .theme = &C4_UI_THEME_DEFAULT
+        }
     );
+    C4_UI_Button* boardHeightIncrement = &boardHeightInput->buttonGroup.buttons[0];
+    boardHeightIncrement->OnClickCallback = HeightIncrementOnClick;
+    boardHeightIncrement->WhilePressedCallback = HeightIncrementOnClick;
+    C4_UI_Button* boardHeightDecrement = &boardHeightInput->buttonGroup.buttons[1];
+    boardHeightDecrement->OnClickCallback = HeightDecrementOnClick;
+    boardHeightDecrement->WhilePressedCallback = HeightDecrementOnClick;
 
     C4_UI_Container_Add_Text(
-        cont, "Board Height", C4_FontType_Regular, PT_SIZE,
-        475.f, 325.f, 0, C4_UI_THEME_DEFAULT.textColor
+        cont, &(C4_UI_Text_Config){
+            .str = "Board Height",
+            .font = game->fontRegular,
+            .color = C4_UI_THEME_DEFAULT.textColor,
+            .ptSize = PT_SIZE,
+            .destinationX = 475.f,
+            .destinationY = 325.f,
+            .wrapWidth = 0
+        }
     );
 
     C4_UI_NumberInput* winAmountInput = C4_UI_Container_Add_NumberInput(
-        cont, (SDL_FRect){1175.f, 425.f, 200.f, 100.f}, 2,
-        C4_Board_GetMaxAmountToWin(game->board->width, game->board->height),
-        game->board->amountToWin, 20.f, 20.f, &C4_UI_THEME_DEFAULT,
-        AmountToWinIncrementOnClick, NULL, AmountToWinDecrementOnClick, NULL
+        cont, &(C4_UI_NumberInput_Config){
+            .destination = (SDL_FRect){1175.f, 425.f, 200.f, 100.f},
+            .min = 2,
+            .max = C4_Board_GetMaxAmountToWin(game->board->width, game->board->height),
+            .startingValue = game->board->amountToWin,
+            .font = game->fontRegular,
+            .theme = &C4_UI_THEME_DEFAULT
+        }
     );
+    C4_UI_Button* winAmountIncrement = &winAmountInput->buttonGroup.buttons[0];
+    winAmountIncrement->OnClickCallback = WinAmountIncrementOnClick;
+    winAmountIncrement->WhilePressedCallback = WinAmountIncrementOnClick;
+    C4_UI_Button* winAmountDecrement = &winAmountInput->buttonGroup.buttons[1];
+    winAmountDecrement->OnClickCallback = WinAmountDecrementOnClick;
+    winAmountDecrement->WhilePressedCallback = WinAmountDecrementOnClick;
 
     C4_UI_Container_Add_Text(
-        cont, "Amount to Win", C4_FontType_Regular, PT_SIZE,
-        475.f, 450.f, 0, C4_UI_THEME_DEFAULT.textColor
+        cont, &(C4_UI_Text_Config){
+            .str = "Amount to Win",
+            .font = game->fontRegular,
+            .color = C4_UI_THEME_DEFAULT.textColor,
+            .ptSize = PT_SIZE,
+            .destinationX = 475.f,
+            .destinationY = 450.f,
+            .wrapWidth = 0
+        }
     );
 
     settingsData.applyButton = applyButton;

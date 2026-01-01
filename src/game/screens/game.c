@@ -48,32 +48,53 @@ void C4_SetScreen_Game(C4_Game* game) {
     game->currentScreen = C4_ScreenType_Game;
 
     C4_UI_Text* boardText = C4_UI_Container_Add_Text(
-        cont, "", C4_FontType_Regular, C4_SCREEN_GAME_TEST_TEXT_PT_SIZE,
-        0.f, 0.f, 0, C4_UI_THEME_DEFAULT.textColor
+        cont, &(C4_UI_Text_Config){
+            .str = "",
+            .font = game->fontRegular,
+            .color = C4_UI_THEME_DEFAULT.textColor,
+            .ptSize = C4_SCREEN_GAME_TEST_TEXT_PT_SIZE,
+            .destinationX = 0.f,
+            .destinationY = 0.f,
+            .wrapWidth = 0
+        }
     );
     C4_Board_UpdateTestStr(game->board, boardText->str, sizeof(boardText->str));
     C4_UI_Text_ReloadTexture(boardText, game->renderer);
     C4_UI_CenterInWindow(&boardText->destination, C4_Axis_X);
 
     C4_UI_Button* backButton = C4_UI_Container_Add_Button(
-        cont, C4_SCREEN_GAME_BACK_BUTTON_RECT, "Back",
-        &C4_UI_THEME_DEFAULT, BackOnClick, NULL
+        cont, &(C4_UI_Button_Config){
+            .text = "Back",
+            .destination = C4_SCREEN_GAME_BACK_BUTTON_RECT,
+            .symbol = C4_UI_SymbolType_None,
+            .font = game->fontBold,
+            .theme = &C4_UI_THEME_DEFAULT
+        }
     );
+    backButton->OnClickCallback = BackOnClick;
     C4_UI_Button_CenterInWindow(backButton, C4_Axis_X);
 
+
     C4_UI_Popup* winnerPopup = C4_UI_Container_Add_Popup(
-        cont, (SDL_FRect){0.f, 0.f, C4_SCREEN_SETTINGS_POPUP_WIDTH,
-        C4_SCREEN_SETTINGS_POPUP_HEIGHT}, C4_UI_ButtonGroup_Direction_Horizontal,
-        GAME_POPUP_BUTTONS_COUNT, 100.f, "", &C4_UI_THEME_DEFAULT
+        cont, &(C4_UI_Popup_Config){
+            .destination = (SDL_FRect){0.f, 0.f, C4_SCREEN_SETTINGS_POPUP_WIDTH, C4_SCREEN_SETTINGS_POPUP_HEIGHT},
+            .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
+            .buttonCount = GAME_POPUP_BUTTONS_COUNT,
+            .buttonGroupHeight = 100.f,
+            .message = "",
+            .messageFont = game->fontRegular,
+            .buttonFont = game->fontBold,
+            .theme = &C4_UI_THEME_DEFAULT
+        }
     );
-    C4_UI_ButtonGroup_SetButtonIndex(
-        &winnerPopup->buttonGroup, 0, game->renderer, "Play Again",
-        C4_UI_SymbolType_None, 0.f, 0.f, 0, &C4_UI_THEME_DEFAULT, PlayAgainOnClick, NULL
-    );
-    C4_UI_ButtonGroup_SetButtonIndex(
-        &winnerPopup->buttonGroup, 1, game->renderer, "Return to Menu",
-        C4_UI_SymbolType_None, 0.f, 0.f, 0, &C4_UI_THEME_DEFAULT, ReturnToMenuOnClick, NULL
-    );
+    C4_UI_Button* playAgainButton = &winnerPopup->buttonGroup.buttons[0];
+    C4_UI_Text_UpdateStr(&playAgainButton->text, "Play Again", game->renderer);
+    playAgainButton->OnClickCallback = PlayAgainOnClick;
+    
+    C4_UI_Button* returnToMenuButton = &winnerPopup->buttonGroup.buttons[1];
+    C4_UI_Text_UpdateStr(&returnToMenuButton->text, "Return to Menu", game->renderer);
+    returnToMenuButton->OnClickCallback = ReturnToMenuOnClick;
+
     C4_UI_Popup_CenterInWindow(winnerPopup, game->renderer);
 
     gameData.boardText = boardText;

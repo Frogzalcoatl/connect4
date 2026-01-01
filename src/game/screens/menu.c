@@ -65,52 +65,77 @@ void C4_SetScreen_Menu(C4_Game* game) {
     C4_UI_Container_Clear(cont);
     game->currentScreen = C4_ScreenType_Menu;
 
-    C4_UI_Popup* exitGamePopup = C4_UI_Container_Add_Popup(
-        cont, (SDL_FRect){0.f, 0.f, C4_SCREEN_SETTINGS_POPUP_WIDTH, C4_SCREEN_SETTINGS_POPUP_HEIGHT},
-        C4_UI_ButtonGroup_Direction_Horizontal, 2, 100.f, "Do you want to exit Connect4?", &C4_UI_THEME_DEFAULT
-    );
-
     C4_UI_Popup* inDevelopmentPopup = C4_UI_Container_Add_Popup(
-        cont, (SDL_FRect){0.f, 0.f, C4_SCREEN_SETTINGS_POPUP_WIDTH, C4_SCREEN_SETTINGS_POPUP_HEIGHT},
-        C4_UI_ButtonGroup_Direction_Horizontal, 1, 100.f, "This is still in development!", &C4_UI_THEME_DEFAULT
+        cont, &(C4_UI_Popup_Config){
+            .destination = (SDL_FRect){0.f, 0.f, C4_SCREEN_SETTINGS_POPUP_WIDTH, C4_SCREEN_SETTINGS_POPUP_HEIGHT},
+            .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
+            .buttonCount = 1,
+            .buttonGroupHeight = 100.f,
+            .message = "This is still in development!",
+            .messageFont = game->fontRegular,
+            .buttonFont = game->fontBold,
+            .theme = &C4_UI_THEME_DEFAULT
+        }
     );
-    C4_UI_ButtonGroup_SetButtonIndex(
-        &inDevelopmentPopup->buttonGroup, 0, game->renderer, "Ok", C4_UI_SymbolType_None,
-        0.f, 0.f, 0, &C4_UI_THEME_DEFAULT,
-        OnePlayerPopupOkOnClick, inDevelopmentPopup
-    );
+    C4_UI_Button* popupOkButton = &inDevelopmentPopup->buttonGroup.buttons[0];
+    C4_UI_Text_UpdateStr(&popupOkButton->text, "Ok", game->renderer);
+    popupOkButton->OnClickCallback = OnePlayerPopupOkOnClick;
+    popupOkButton->OnClickContext = inDevelopmentPopup;
     C4_UI_Popup_CenterInWindow(inDevelopmentPopup, game->renderer);
+
+    C4_UI_Popup* exitGamePopup = C4_UI_Container_Add_Popup(
+        cont, &(C4_UI_Popup_Config){
+            .destination = (SDL_FRect){0.f, 0.f, C4_SCREEN_SETTINGS_POPUP_WIDTH, C4_SCREEN_SETTINGS_POPUP_HEIGHT},
+            .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
+            .buttonCount = 2,
+            .buttonGroupHeight = 100.f,
+            .message = "Do you want to exit Connect4?",
+            .messageFont = game->fontRegular,
+            .buttonFont = game->fontBold,
+            .theme = &C4_UI_THEME_DEFAULT
+        }
+    );
 
     POPUP_CLICK_CONTEXTS[1] = exitGamePopup;
     BUTTON_GROUP_CLICK_CONTEXTS[0] = inDevelopmentPopup;
     BUTTON_GROUP_CLICK_CONTEXTS[3] = exitGamePopup;
 
     for (size_t i = 0; i < POPUP_BUTTON_COUNT; i++) {
-        C4_UI_ButtonGroup_SetButtonIndex(
-            &exitGamePopup->buttonGroup, i, game->renderer, POPUP_TEXT[i], 
-            C4_UI_SymbolType_None, 0.f, 0.f, 0, &C4_UI_THEME_DEFAULT,
-            POPUP_ON_CLICKS[i], POPUP_CLICK_CONTEXTS[i]
-        );
+        C4_UI_Button* btn = &exitGamePopup->buttonGroup.buttons[i];
+        C4_UI_Text_UpdateStr(&btn->text, POPUP_TEXT[i], game->renderer);
+        btn->OnClickCallback = POPUP_ON_CLICKS[i];
+        btn->OnClickContext = POPUP_CLICK_CONTEXTS[i];
     }
     C4_UI_Popup_CenterInWindow(exitGamePopup, game->renderer);
 
     C4_UI_Text* title = C4_UI_Container_Add_Text(
-        cont, "Connect4", C4_FontType_Bold, C4_SCREEN_MENU_TITLE_PT_SIZE,
-        0.f, 50.f, 0, C4_UI_THEME_DEFAULT.textColor
+        cont, &(C4_UI_Text_Config){
+            .str = "Connect4",
+            .font = game->fontBold,
+            .color = C4_UI_THEME_DEFAULT.textColor,
+            .ptSize = C4_SCREEN_MENU_TITLE_PT_SIZE,
+            .destinationX = 0.f,
+            .destinationY = 50.f,
+            .wrapWidth = 0
+        }
     );
     C4_UI_CenterInWindow(&title->destination, C4_Axis_X);
 
     C4_UI_ButtonGroup* buttonGroup = C4_UI_Container_Add_ButtonGroup(
-        cont, (SDL_FRect){0.f, 375.f, C4_SCREEN_MENU_BUTTON_GROUP_WIDTH, C4_SCREEN_MENU_BUTTON_GROUP_HEIGHT},
-        BUTTON_GROUP_COUNT, C4_UI_ButtonGroup_Direction_Vertical, C4_SCREEN_MENU_BUTTON_GROUP_MARGIN,
-        &C4_UI_THEME_DEFAULT
+        cont, &(C4_UI_ButtonGroup_Config){
+            .destination = (SDL_FRect){0.f, 375.f, C4_SCREEN_MENU_BUTTON_GROUP_WIDTH, C4_SCREEN_MENU_BUTTON_GROUP_HEIGHT},
+            .count = BUTTON_GROUP_COUNT,
+            .buttonDirection = C4_UI_ButtonGroup_Direction_Vertical,
+            .margin = C4_SCREEN_MENU_BUTTON_GROUP_MARGIN,
+            .font = game->fontBold,
+            .theme = &C4_UI_THEME_DEFAULT
+        }
     );
     for (size_t i = 0; i < BUTTON_GROUP_COUNT; i++) {
-        C4_UI_ButtonGroup_SetButtonIndex(
-            buttonGroup, i, game->renderer, MENU_BUTTON_GROUP_TEXT[i],
-            C4_UI_SymbolType_None, 0.f, 0.f, 0, &C4_UI_THEME_DEFAULT,
-            BUTTON_GROUP_ON_CLICKS[i], BUTTON_GROUP_CLICK_CONTEXTS[i]
-        );
+        C4_UI_Button* btn = &buttonGroup->buttons[i];
+        C4_UI_Text_UpdateStr(&btn->text, MENU_BUTTON_GROUP_TEXT[i], game->renderer);
+        btn->OnClickCallback = BUTTON_GROUP_ON_CLICKS[i];
+        btn->OnClickContext = BUTTON_GROUP_CLICK_CONTEXTS[i];
     }
     C4_UI_ButtonGroup_CenterInWindow(buttonGroup, C4_Axis_X);
 }

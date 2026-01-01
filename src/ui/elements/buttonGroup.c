@@ -25,47 +25,64 @@ static SDL_FRect C4_UI_ButtonGroup_GetUpdatedButtonRect(C4_UI_ButtonGroup* group
     return rect;
 }
 
-bool C4_UI_ButtonGroup_InitProperties(C4_UI_ButtonGroup* group, SDL_Renderer* renderer, const SDL_FRect bounds, size_t count, C4_UI_ButtonGroup_Direction direction, unsigned int margin, const C4_UI_Theme* theme) {
+bool C4_UI_ButtonGroup_InitProperties(C4_UI_ButtonGroup* group, SDL_Renderer* renderer, const C4_UI_ButtonGroup_Config* config) {
     if (!group) {
         SDL_Log("Unable to init button group properties. Pointer is NULL");
         return false;
     }
-    if (!theme) {
+    if (!config) {
+        return false;
+    }
+    if (!config->theme) {
         SDL_Log("Unable to init button group properties. Theme is NULL");
         return false;
     }
-    if (count == 0) {
+    if (config->count == 0) {
         SDL_Log("Button group count must be greater than 0");
         return false;
     }
-    if (direction != C4_UI_ButtonGroup_Direction_Vertical && direction != C4_UI_ButtonGroup_Direction_Horizontal) {
+    if (
+        config->buttonDirection != C4_UI_ButtonGroup_Direction_Vertical &&
+        config->buttonDirection != C4_UI_ButtonGroup_Direction_Horizontal
+    ) {
         SDL_Log("Invalid button group direction");
         return false;
     }
-    group->bounds = bounds;
-    group->direction = direction;
-    group->margin = margin;
-    group->count = count;
-    group->buttons = calloc(count, sizeof(C4_UI_Button));
+    group->bounds = config->destination;
+    group->direction = config->buttonDirection;
+    group->margin = config->margin;
+    group->count = config->count;
+    group->buttons = calloc(group->count, sizeof(C4_UI_Button));
     if (!group->buttons) {
         SDL_Log("Unable to allocate memory for buttons in button group.");
         return false;
     }
     for (size_t i = 0; i < group->count; i++) {
-        if (!C4_UI_Button_InitProperties(&group->buttons[i], renderer, "", C4_UI_ButtonGroup_GetUpdatedButtonRect(group, i), C4_UI_SymbolType_None, 1.f, 1.f, 0, theme, NULL, NULL)) {
+        if (
+            !C4_UI_Button_InitProperties(
+                &group->buttons[i], renderer,
+                &(C4_UI_Button_Config){
+                    .text = "",
+                    .destination = C4_UI_ButtonGroup_GetUpdatedButtonRect(group, i),
+                    .symbol = C4_UI_SymbolType_None,
+                    .font = config->font,
+                    .theme = config->theme
+                }
+            )
+        ) {
             return false;
         }
     }
     return true;
 }
 
-C4_UI_ButtonGroup* C4_UI_ButtonGroup_Create(SDL_Renderer* renderer, const SDL_FRect bounds, size_t count, C4_UI_ButtonGroup_Direction direction, unsigned int margin, const C4_UI_Theme* theme) {
+C4_UI_ButtonGroup* C4_UI_ButtonGroup_Create(SDL_Renderer* renderer, const C4_UI_ButtonGroup_Config* config) {
     C4_UI_ButtonGroup* group = calloc(1, sizeof(C4_UI_ButtonGroup));
     if (!group) {
         SDL_Log("Unable to allocate memory for button group");
         return NULL;
     }
-    if (!C4_UI_ButtonGroup_InitProperties(group, renderer, bounds, count, direction, margin, theme)) {
+    if (!C4_UI_ButtonGroup_InitProperties(group, renderer, config)) {
         C4_UI_ButtonGroup_Destroy(group);
         return NULL;
     }
@@ -92,25 +109,6 @@ void C4_UI_ButtonGroup_Destroy(void* data) {
     free(group);
 }
 
-void C4_UI_ButtonGroup_SetButtonIndex(
-    C4_UI_ButtonGroup* group, size_t buttonIndex, SDL_Renderer* renderer, const char* str,C4_UI_SymbolType symbol,
-    float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme, C4_UI_Callback callback, void* callbackContext
-) {
-    if (!group) {
-        SDL_Log("Unable to set button index %zu. Button group is NULL", buttonIndex);
-        return;
-    }
-    if (buttonIndex >= group->count) {
-        SDL_Log("Unable to set button index %zu. Out of bounds.", buttonIndex);
-        return;
-    }
-    C4_UI_Button* btn = &group->buttons[buttonIndex];
-    C4_UI_Button_InitProperties(
-        btn, renderer, str, btn->background.destination, symbol,
-        symbolWidth, symbolHeight, symbolRotationDegrees, theme, callback, callbackContext
-    );
-}
-
 void C4_UI_ButtonGroup_Draw(void* data, SDL_Renderer* renderer) {
     if (!data) {
         return;
@@ -118,6 +116,16 @@ void C4_UI_ButtonGroup_Draw(void* data, SDL_Renderer* renderer) {
     C4_UI_ButtonGroup* group = (C4_UI_ButtonGroup*)data;
     for (size_t i = 0; i < group->count; i++) {
         C4_UI_Button_Draw(&group->buttons[i], renderer);
+    }
+}
+
+void C4_UI_ButtonGroup_Update(void* data, float deltaTime) {
+    if (!data) {
+        return;
+    }
+    C4_UI_ButtonGroup* group = (C4_UI_ButtonGroup*)data;
+    for (size_t i = 0; i < group->count; i++) {
+        C4_UI_Button_Update(&group->buttons[i], deltaTime);
     }
 }
 

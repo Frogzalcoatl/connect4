@@ -2,23 +2,26 @@
 #include "Connect4/constants.h"
 #include <stdlib.h>
 
-bool C4_UI_Rectangle_InitProperties(C4_UI_Rectangle* element, const SDL_FRect destination, const SDL_Color color) {
+bool C4_UI_Rectangle_InitProperties(C4_UI_Rectangle* element, const C4_UI_Rectangle_Config* config) {
     if (!element) {
         SDL_Log("Unable to init destination element properties. Pointer is NULL");
         return false;
     }
-    element->destination = destination;
-    element->color = color;
+    if (!config) {
+        return false;
+    }
+    element->destination = config->destination;
+    element->color = config->color;
     return true;
 }
 
-C4_UI_Rectangle* C4_UI_Rectangle_Create(const SDL_FRect destination, const SDL_Color color) {
+C4_UI_Rectangle* C4_UI_Rectangle_Create(const C4_UI_Rectangle_Config* config) {
     C4_UI_Rectangle* element = calloc(1, sizeof(C4_UI_Rectangle));
     if (!element) {
         SDL_Log("Unable to allocate memory for rectangle element");
         return NULL;
     }
-    if (!C4_UI_Rectangle_InitProperties(element, destination, color)) {
+    if (!C4_UI_Rectangle_InitProperties(element, config)) {
         C4_UI_Rectangle_Destroy(element);
         return NULL;
     }

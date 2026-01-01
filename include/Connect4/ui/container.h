@@ -24,9 +24,10 @@ typedef struct {
     void* data;
     C4_UI_ElementType type;
     void (*Draw)(void* data, SDL_Renderer* renderer);
-    void (*Update)(void* data, SDL_Event* event);
+    void (*HandleEvents)(void* data, SDL_Event* event);
     void (*Destroy)(void* data);
     void (*Reset)(void* data);
+    void (*Update)(void* data, float deltaTime);
 } C4_UI_Element;
 
 typedef struct C4_UI_Node {
@@ -50,39 +51,30 @@ void C4_UI_Container_Init(C4_UI_Container* container, SDL_Renderer* renderer);
 void C4_UI_Container_Destroy(C4_UI_Container* container);
 void C4_UI_Container_Clear(C4_UI_Container* container);
 void C4_UI_Container_Draw(C4_UI_Container* container);
-void C4_UI_Container_Update(C4_UI_Container* container);
+void C4_UI_Container_Update(C4_UI_Container* container, float deltaTime);
 void C4_UI_Container_HandleEvent(C4_UI_Container* container, SDL_Event* event);
 
 C4_UI_Borders* C4_UI_Container_Add_Borders(
-    C4_UI_Container* container, const SDL_FRect destination,
-    const SDL_Color color, const unsigned int width
+    C4_UI_Container* container, const C4_UI_Borders_Config* config
 );
 C4_UI_Button* C4_UI_Container_Add_Button(
-    C4_UI_Container* container, const SDL_FRect destination,
-    const char* str, const C4_UI_Theme* theme, C4_UI_Callback callback,
-    void* callbackContext
+    C4_UI_Container* container, const C4_UI_Button_Config* config
 );
 C4_UI_ButtonGroup* C4_UI_Container_Add_ButtonGroup(
-    C4_UI_Container* container, const SDL_FRect bounds, size_t count,
-    C4_UI_ButtonGroup_Direction direction, unsigned int margin, const C4_UI_Theme* theme
+    C4_UI_Container* container, const C4_UI_ButtonGroup_Config* config
 );
 C4_UI_NumberInput* C4_UI_Container_Add_NumberInput(
-    C4_UI_Container* container, const SDL_FRect destination, unsigned int min, unsigned int max,
-    unsigned int startingValue, float arrowWidth, float arrowHeight, const C4_UI_Theme* theme,
-    C4_UI_Callback Button1OnClick, void* Button1Context, C4_UI_Callback Button2OnClick, void* Button2Context
+    C4_UI_Container* container, const C4_UI_NumberInput_Config* config
 );
 C4_UI_Popup* C4_UI_Container_Add_Popup(
-    C4_UI_Container* container, const SDL_FRect destination, C4_UI_ButtonGroup_Direction buttonDirection,
-    size_t buttonCount, float buttonGroupHeight, const char* messageText, const C4_UI_Theme* theme
+    C4_UI_Container* container, const C4_UI_Popup_Config* config
 );
 C4_UI_Rectangle* C4_UI_Container_Add_Rectangle(
-    C4_UI_Container* container, const SDL_FRect destination, const SDL_Color color 
+    C4_UI_Container* container, const C4_UI_Rectangle_Config* config
 );
 C4_UI_Symbol* C4_UI_Container_Add_Symbol(
-    C4_UI_Container* container, C4_UI_SymbolType type,
-    const SDL_FRect destination, int rotationDegrees, const SDL_Color color
+    C4_UI_Container* container, const C4_UI_Symbol_Config* config
 );
 C4_UI_Text* C4_UI_Container_Add_Text(
-    C4_UI_Container* container, const char* str, C4_FontType font, float ptSize,
-    float destinationX, float destinationY, int wrapWidth, SDL_Color color
+    C4_UI_Container* container, const C4_UI_Text_Config* config
 );

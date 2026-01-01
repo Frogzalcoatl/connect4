@@ -6,3 +6,5 @@ typedef enum {
     C4_ScreenType_Settings,
     C4_ScreenType_ScreenCount
 } C4_ScreenType;
+
+void C4_DefaultButtonHoverCallback(void* data);

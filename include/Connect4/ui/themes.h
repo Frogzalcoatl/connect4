@@ -1,6 +1,5 @@
 #pragma once
 #include "SDL3/SDL.h"
-#include "Connect4/assets/fonts.h"
 
 typedef struct {
     SDL_Color background;
@@ -14,7 +13,6 @@ typedef struct {
     C4_UI_Button_ColorInfo buttonHovered;
     C4_UI_Button_ColorInfo buttonPressed;
     C4_UI_Button_ColorInfo buttonInactive;
-    C4_FontType buttonFont;
     float defaultPtSize;
     unsigned int borderWidth;
     SDL_Color textColor;

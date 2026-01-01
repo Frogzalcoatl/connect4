@@ -97,12 +97,14 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
 
     game->board = C4_Board_Create(boardWidth, boardHeight, amountToWin);
 
+    game->fontRegular = C4_GetFont(C4_FontType_Regular);
+    game->fontBold = C4_GetFont(C4_FontType_Bold);
+
     C4_UI_Container_Init(&game->container, game->renderer);
 
     C4_Game_ChangeScreen(game, C4_ScreenType_Menu);
     game->running = false;
     game->isFullscreen = false;
-
     return game;
 }
 
@@ -163,9 +165,14 @@ void C4_Game_Run(C4_Game* game) {
     game->running = true;
     SDL_Event eventSDL;
     C4_Event eventC4;
+    Uint64 lastTicks = SDL_GetTicks();
     while (game->running) {
+        Uint64 currentTicks = SDL_GetTicks();
+        float deltaTime = (float)(currentTicks - lastTicks) / 1000.0f;
+        lastTicks = currentTicks;
+
         C4_Game_HandleEvents(game, &eventSDL, &eventC4);
-        C4_UI_Container_Update(&game->container);
+        C4_UI_Container_Update(&game->container, deltaTime);
 
         SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
         SDL_RenderClear(game->renderer);

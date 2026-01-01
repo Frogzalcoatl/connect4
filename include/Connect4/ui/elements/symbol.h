@@ -13,9 +13,16 @@ typedef struct {
     SDL_FRect destination;
     int rotationDegrees;
     SDL_Color color;
+} C4_UI_Symbol_Config;
+
+typedef struct {
+    C4_UI_SymbolType type;
+    SDL_FRect destination;
+    int rotationDegrees;
+    SDL_Color color;
 } C4_UI_Symbol;
 
-bool C4_UI_Symbol_InitProperties(C4_UI_Symbol* symbol, C4_UI_SymbolType type, const SDL_FRect destination, int rotationDegrees, const SDL_Color color);
-C4_UI_Symbol* C4_UI_Symbol_Create(C4_UI_SymbolType type, const SDL_FRect destination, int rotationDegrees, const SDL_Color color);
+bool C4_UI_Symbol_InitProperties(C4_UI_Symbol* symbol, const C4_UI_Symbol_Config* config);
+C4_UI_Symbol* C4_UI_Symbol_Create(const C4_UI_Symbol_Config* config);
 void C4_UI_Symbol_Destroy(void* data);
 void C4_UI_Symbol_Draw(void* data, SDL_Renderer* renderer);

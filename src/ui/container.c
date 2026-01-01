@@ -75,7 +75,7 @@ void C4_UI_Container_HandleEvent(C4_UI_Container* container, SDL_Event* event) {
             C4_UI_Popup* popup = (C4_UI_Popup*)current->element.data;
             if (popup->isShowing) {
                 isPopupActive = true;
-                current->element.Update(current->element.data, event);
+                current->element.HandleEvents(current->element.data, event);
             }
         }
         current = current->next;
@@ -84,8 +84,8 @@ void C4_UI_Container_HandleEvent(C4_UI_Container* container, SDL_Event* event) {
         current = container->head;
         while (current) {
             if (current->element.type != C4_UI_ElementType_Popup) {
-                if (current->element.Update) {
-                    current->element.Update(current->element.data, event);
+                if (current->element.HandleEvents) {
+                    current->element.HandleEvents(current->element.data, event);
                 }
             }
             current = current->next;
@@ -93,9 +93,12 @@ void C4_UI_Container_HandleEvent(C4_UI_Container* container, SDL_Event* event) {
     }
 }
 
-void C4_UI_Container_Update(C4_UI_Container* container) {
+void C4_UI_Container_Update(C4_UI_Container* container, float deltaTime) {
     if (!container) {
         return;
+    }
+    if (deltaTime <= 0.f) {
+        deltaTime = 0.0001f;
     }
     bool isPopupShowing = false;
     C4_UI_Node* current = container->head;
@@ -121,8 +124,15 @@ void C4_UI_Container_Update(C4_UI_Container* container) {
             container->buttonColorResetComplete = true;
             SDL_SetCursor(C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT));
         }
-    } else {
-        container->buttonColorResetComplete = false;
+        return;
+    }
+    container->buttonColorResetComplete = false;
+    current = container->head;
+    while (current) {
+        if (current->element.Update) {
+            current->element.Update(current->element.data, deltaTime);
+        }
+        current = current->next;
     }
 }
 
@@ -130,9 +140,10 @@ static void C4_UI_Container_AddNode(
     C4_UI_Container* container, void* data,
     C4_UI_ElementType type,
     void (*Draw)(void*, SDL_Renderer*),
-    void (*Update)(void*, SDL_Event*),
+    void (*HandleEvents)(void*, SDL_Event*),
     void (*Destroy)(void*),
-    void (*Reset)(void*)
+    void (*Reset)(void*),
+    void (*Update)(void*, float deltaTime)
 ) {
     // Some elements dont have an update function
     if (
@@ -149,9 +160,10 @@ static void C4_UI_Container_AddNode(
     newNode->element.data = data;
     newNode->element.type = type;
     newNode->element.Draw = Draw;
-    newNode->element.Update = Update;
+    newNode->element.HandleEvents = HandleEvents;
     newNode->element.Destroy = Destroy;
     newNode->element.Reset = Reset;
+    newNode->element.Update = Update;
     newNode->next = NULL;
     if (!container->head) {
         container->head = newNode;
@@ -163,142 +175,123 @@ static void C4_UI_Container_AddNode(
 }
 
 C4_UI_Borders* C4_UI_Container_Add_Borders(
-    C4_UI_Container* container, const SDL_FRect destination,
-    const SDL_Color color, const unsigned int width
+    C4_UI_Container* container, const C4_UI_Borders_Config* config
 ) {
     if (!container) {
         return NULL;
     }
-    C4_UI_Borders* borders = C4_UI_Borders_Create(destination, color, width);
+    C4_UI_Borders* borders = C4_UI_Borders_Create(config);
     C4_UI_Container_AddNode(
         container, borders, C4_UI_ElementType_Borders,
-        C4_UI_Borders_Draw, NULL, C4_UI_Borders_Destroy, NULL
+        C4_UI_Borders_Draw, NULL, C4_UI_Borders_Destroy, NULL, NULL
     );
     return borders;
 }
 
 C4_UI_Button* C4_UI_Container_Add_Button(
-    C4_UI_Container* container, const SDL_FRect destination,
-    const char* str, const C4_UI_Theme* theme, C4_UI_Callback callback,
-    void* callbackContext
+    C4_UI_Container* container, const C4_UI_Button_Config* config
 ) {
     if (!container) {
         return NULL;
     }
-    C4_UI_Button* button = C4_UI_Button_Create(
-        container->renderer, str, destination,
-        C4_UI_SymbolType_None, 0.f, 0.f, 0, theme,
-        callback, callbackContext
-    );
+    C4_UI_Button* button = C4_UI_Button_Create(container->renderer, config);
     C4_UI_Container_AddNode(
         container, button, C4_UI_ElementType_Button,
         C4_UI_Button_Draw, C4_UI_Button_HandleMouseEvents,
-        C4_UI_Button_Destroy, C4_UI_Button_Reset
+        C4_UI_Button_Destroy, C4_UI_Button_Reset, C4_UI_Button_Update
     );
     return button;
 }
 
 C4_UI_ButtonGroup* C4_UI_Container_Add_ButtonGroup(
-    C4_UI_Container* container, const SDL_FRect bounds, size_t count,
-    C4_UI_ButtonGroup_Direction direction, unsigned int margin, const C4_UI_Theme* theme
+    C4_UI_Container* container, const C4_UI_ButtonGroup_Config* config
 ) {
     if (!container) {
         return NULL;
     }
-    C4_UI_ButtonGroup* buttonGroup = C4_UI_ButtonGroup_Create(
-        container->renderer, bounds, count, direction, margin, theme
-    );
+    C4_UI_ButtonGroup* buttonGroup = C4_UI_ButtonGroup_Create(container->renderer, config);
     C4_UI_Container_AddNode(
         container, buttonGroup, C4_UI_ElementType_ButtonGroup,
         C4_UI_ButtonGroup_Draw, C4_UI_ButtonGroup_HandleMouseEvents,
-        C4_UI_ButtonGroup_Destroy, C4_UI_ButtonGroup_Reset
+        C4_UI_ButtonGroup_Destroy, C4_UI_ButtonGroup_Reset, C4_UI_ButtonGroup_Update
     );
     return buttonGroup;
 }
 
 C4_UI_NumberInput* C4_UI_Container_Add_NumberInput(
-    C4_UI_Container* container, const SDL_FRect destination, unsigned int min, unsigned int max,
-    unsigned int startingValue, float arrowWidth, float arrowHeight, const C4_UI_Theme* theme,
-    C4_UI_Callback Button1OnClick, void* Button1Context, C4_UI_Callback Button2OnClick, void* Button2Context
+    C4_UI_Container* container, const C4_UI_NumberInput_Config* config
 ) {
     if (!container) {
         return NULL;
     }
-    C4_UI_NumberInput* numInput = C4_UI_NumberInput_Create(
-        container->renderer, destination, min, max, startingValue,
-        arrowWidth, arrowHeight, theme,
-        Button1OnClick, Button1Context, Button2OnClick, Button2Context
-    );
+    C4_UI_NumberInput* numInput = C4_UI_NumberInput_Create(container->renderer, config);
     C4_UI_Container_AddNode(
         container, numInput, C4_UI_ElementType_NumberInput,
         C4_UI_NumberInput_Draw, C4_UI_NumberInput_HandleMouseEvents,
-        C4_UI_NumberInput_Destroy, C4_UI_NumberInput_ResetButtons
+        C4_UI_NumberInput_Destroy, C4_UI_NumberInput_ResetButtons,
+        C4_UI_NumberInput_Update
     );
     return numInput;
 }
 
 C4_UI_Popup* C4_UI_Container_Add_Popup(
-    C4_UI_Container* container, const SDL_FRect destination, C4_UI_ButtonGroup_Direction buttonDirection,
-    size_t buttonCount, float buttonGroupHeight, const char* messageText, const C4_UI_Theme* theme
+    C4_UI_Container* container, const C4_UI_Popup_Config* config
 ) {
     if (!container) {
         return NULL;
     }
     C4_UI_Popup* popup = C4_UI_Popup_Create(
-        container->renderer, destination, buttonDirection,
-        buttonCount, buttonGroupHeight, messageText, theme
+        container->renderer, config
     );
     C4_UI_Container_AddNode(
         container, popup, C4_UI_ElementType_Popup,
         C4_UI_Popup_Draw, C4_UI_Popup_HandleMouseEvents,
-        C4_UI_Popup_Destroy, C4_UI_Popup_ResetButtons
+        C4_UI_Popup_Destroy, C4_UI_Popup_ResetButtons,
+        C4_UI_Popup_Update
     );
     return popup;
 }
 
 C4_UI_Rectangle* C4_UI_Container_Add_Rectangle(
-    C4_UI_Container* container, const SDL_FRect destination, const SDL_Color color 
+    C4_UI_Container* container, const C4_UI_Rectangle_Config* config
 ) {
     if (!container) {
         return NULL;
     }
-    C4_UI_Rectangle* rectangle = C4_UI_Rectangle_Create(destination, color);
+    C4_UI_Rectangle* rectangle = C4_UI_Rectangle_Create(config);
     C4_UI_Container_AddNode(
         container, rectangle, C4_UI_ElementType_Rectangle,
-        C4_UI_Rectangle_Draw, NULL, C4_UI_Rectangle_Destroy, NULL
+        C4_UI_Rectangle_Draw, NULL, C4_UI_Rectangle_Destroy, NULL, NULL
     );
     return rectangle;
 }
 
 C4_UI_Symbol* C4_UI_Container_Add_Symbol(
-    C4_UI_Container* container, C4_UI_SymbolType type,
-    const SDL_FRect destination, int rotationDegrees, const SDL_Color color
+    C4_UI_Container* container, const C4_UI_Symbol_Config* config
 ) {
     if (!container) {
         return NULL;
     }
-    C4_UI_Symbol* symbol = C4_UI_Symbol_Create(type, destination, rotationDegrees, color);
+    C4_UI_Symbol* symbol = C4_UI_Symbol_Create(config);
     C4_UI_Container_AddNode(
         container, symbol, C4_UI_ElementType_Symbol,
-        C4_UI_Symbol_Draw, NULL, C4_UI_Symbol_Destroy, NULL
+        C4_UI_Symbol_Draw, NULL, C4_UI_Symbol_Destroy, NULL, NULL
     );
     return symbol;
 }
 
 C4_UI_Text* C4_UI_Container_Add_Text(
-    C4_UI_Container* container, const char* str, C4_FontType font, float ptSize,
-    float destinationX, float destinationY, int wrapWidth, SDL_Color color
+    C4_UI_Container* container, const C4_UI_Text_Config* config
 ) {
     if (!container) {
         return NULL;
     }
     C4_UI_Text* text = C4_UI_Text_Create(
-        container->renderer, str, font, ptSize,
-        destinationX, destinationY, wrapWidth, color
+        container->renderer, config
     );
     C4_UI_Container_AddNode(
         container, text, C4_UI_ElementType_Text,
-        C4_UI_Text_Draw, NULL, C4_UI_Text_Destroy, NULL
+        C4_UI_Text_Draw, NULL, C4_UI_Text_Destroy, NULL, NULL
     );
     return text;
 }

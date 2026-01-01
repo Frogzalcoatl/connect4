@@ -2,29 +2,32 @@
 #include <math.h>
 #include <stdlib.h>
 
-bool C4_UI_Symbol_InitProperties(C4_UI_Symbol* symbol, C4_UI_SymbolType type, const SDL_FRect destination, int rotationDegrees, const SDL_Color color) {
+bool C4_UI_Symbol_InitProperties(C4_UI_Symbol* symbol, const C4_UI_Symbol_Config* config) {
     if (!symbol) {
         SDL_Log("Unable to init symbol properties. Pointer is NULL");
         return false;
     }
-    if (type < C4_UI_SymbolType_None || type >= C4_UI_SymbolType_Length) {
+    if (!config) {
+        return false;
+    }
+    if (config->type < C4_UI_SymbolType_None || config->type >= C4_UI_SymbolType_Length) {
         SDL_Log("Unable to init symbol properties. Invalid symbol type");
         return false;
     }
-    symbol->type = type;
-    symbol->destination = destination;
-    symbol->rotationDegrees = rotationDegrees;
-    symbol->color = color;
+    symbol->type = config->type;
+    symbol->destination = config->destination;
+    symbol->rotationDegrees = config->rotationDegrees;
+    symbol->color = config->color;
     return true;
 }
 
-C4_UI_Symbol* C4_UI_Symbol_Create(C4_UI_SymbolType type, const SDL_FRect destination, int rotationDegrees, const SDL_Color color) {
+C4_UI_Symbol* C4_UI_Symbol_Create(const C4_UI_Symbol_Config* config) {
     C4_UI_Symbol* symbol = calloc(1, sizeof(C4_UI_Symbol));
     if (!symbol) {
         SDL_Log("Unable to allocate memory for symbol element");
         return NULL;
     }
-    if (!C4_UI_Symbol_InitProperties(symbol, type, destination, rotationDegrees, color)) {
+    if (!C4_UI_Symbol_InitProperties(symbol, config)) {
         C4_UI_Symbol_Destroy(symbol);
         return NULL;
     }

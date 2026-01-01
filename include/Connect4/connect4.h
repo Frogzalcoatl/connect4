@@ -16,6 +16,8 @@ typedef struct {
     C4_ScreenType currentScreen;
     bool running;
     bool isFullscreen;
+    TTF_Font* fontRegular;
+    TTF_Font* fontBold;
 } C4_Game;
 
 C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountToWin);

@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
-bool C4_UI_Text_InitProperties(C4_UI_Text* element, SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, float destinationX, float destinationY, int wrapWidth, const SDL_Color color) {
+bool C4_UI_Text_InitProperties(C4_UI_Text* element, SDL_Renderer* renderer, const C4_UI_Text_Config* config) {
     if (!element) {
         SDL_Log("Unable to init text element properties. Pointer is NULL");
         return false;
@@ -14,34 +14,37 @@ bool C4_UI_Text_InitProperties(C4_UI_Text* element, SDL_Renderer* renderer, cons
         SDL_Log("Unable to init text element properties. renderer is NULL.");
         return false;
     }
-    if (!str) {
+    if (!config) {
+        return false;
+    }
+    if (!config->str) {
         SDL_Log("Unable to init text element properties. str is NULL");
         return false;
     }
-    element->font = C4_GetFont(font);
-    if (!element->font) {
-        SDL_Log("Unable to get text element font");
+    if (!config->font) {
+        SDL_Log("Text element font is NULL");
         return false;
     }
-    if (ptSize <= 0) {
+    element->font = config->font;
+    if (config->ptSize <= 0) {
         SDL_Log("Unable to create text element. ptSize must be greater than 0.");
         return false;
     }
-    element->ptSize = ptSize;
-    element->destination = (SDL_FRect){destinationX, destinationY, 0.f, 0.f};
-    element->color = color;
-    element->wrapWidth = wrapWidth;
-    C4_UI_Text_UpdateStr(element, str, renderer);
+    element->ptSize = config->ptSize;
+    element->destination = (SDL_FRect){config->destinationX, config->destinationY, 0.f, 0.f};
+    element->color = config->color;
+    element->wrapWidth = config->wrapWidth;
+    C4_UI_Text_UpdateStr(element, config->str, renderer);
     return true;
 }
 
-C4_UI_Text* C4_UI_Text_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, float destinationX, float destinationY, int wrapWidth, const SDL_Color color) {
+C4_UI_Text* C4_UI_Text_Create(SDL_Renderer* renderer, const C4_UI_Text_Config* config) {
     C4_UI_Text* element = calloc(1, sizeof(C4_UI_Text));
     if (!element) {
         SDL_Log("Unable to allocate memory for text element");
         return NULL;
     }
-    if (!C4_UI_Text_InitProperties(element, renderer, str, font, ptSize, destinationX, destinationY, wrapWidth, color)) {
+    if (!C4_UI_Text_InitProperties(element, renderer, config)) {
         C4_UI_Text_Destroy(element);
         return NULL;
     }

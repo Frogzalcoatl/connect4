@@ -34,7 +34,6 @@
     .borders    = (SDL_Color){60, 60, 60, 255}, \
     .symbol     = (SDL_Color){110, 110, 110, 255}\
     },\
-    .buttonFont = C4_FontType_Bold,\
     .defaultPtSize = 32.f,\
     .borderWidth = 3,\
     .textColor = (SDL_Color){230, 230, 230, 255}\
