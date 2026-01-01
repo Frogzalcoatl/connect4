@@ -125,6 +125,21 @@ else()
     add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${WIN_FLAGS} ${SOURCES} ${GENERATED_SOURCES} ${ICON_RC})
 endif()
 
+if(APPLE)
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.yourname.${PROJECT_NAME}"
+        MACOSX_BUNDLE_BUNDLE_VERSION "1.0.0"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0.0"
+    )
+
+    # Disable Code Signing (Required for GitHub Actions to pass)
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO"
+        XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO"
+        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
+    )
+endif()
+
 if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /W3 /std:clatest)
 else()
@@ -136,13 +151,6 @@ else()
 endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
-
-# if(WIN32)
-#     target_link_libraries(${PROJECT_NAME} PRIVATE 
-#         winmm imm32 version setupapi usp10 cfgmgr32 rpcrt4 shcore
-#         user32 gdi32 shell32 advapi32 ole32 oleaut32 uuid
-#     )
-# endif()
 
 if(APPLE)
     target_link_libraries(${PROJECT_NAME} PRIVATE 

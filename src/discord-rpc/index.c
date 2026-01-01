@@ -73,7 +73,7 @@
 #else
     void C4_Discord_Init() {}
     // Below code block is to avoid compiler warnings
-    void C4_Discord_UpdateStatus(const char* stateText, const char* detailsText) { (void)stateText; (void)detailsText }
+    void C4_Discord_UpdateStatus(const char* stateText, const char* detailsText) { (void)stateText; (void)detailsText; }
     void C4_Discord_Loop() {}
     void C4_Discord_Shutdown() {}
 #endif
