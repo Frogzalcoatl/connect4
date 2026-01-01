@@ -43,7 +43,7 @@ void Connect4_Quit_Dependencies(void) {
 }
 
 static void C4_Game_ChangeScreen(C4_Game* game, C4_ScreenType type) {
-    if (game == NULL) {
+    if (!game) {
         SDL_Log("Unable to change game screen. Game is NULL");
         return;
     }

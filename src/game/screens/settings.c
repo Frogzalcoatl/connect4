@@ -130,7 +130,7 @@ static void AmountToWinDecrementOnClick(void* context) {
 }
 
 void C4_SetScreen_Settings(C4_Game* game) {
-    if (game == NULL) {
+    if (!game) {
         return;
     }
     C4_UI_Container* cont = &game->container;

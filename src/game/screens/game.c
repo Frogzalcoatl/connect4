@@ -40,7 +40,7 @@ static void BackOnClick(void* context) {
 }
 
 void C4_SetScreen_Game(C4_Game* game) {
-    if (game == NULL) {
+    if (!game) {
         return;
     }
     C4_UI_Container* cont = &game->container;

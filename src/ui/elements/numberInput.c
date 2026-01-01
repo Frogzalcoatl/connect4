@@ -89,11 +89,11 @@ bool C4_UI_NumberInput_InitProperties(
     }
     char startingValueStr[64];
     snprintf(startingValueStr, sizeof(startingValueStr), "%d", startingValue);
-    if (Button1OnClick == NULL) {
+    if (!Button1OnClick) {
         Button1OnClick = C4_UI_NumberInput_GenericIncrementOnClick;
         Button1Context = numInput;
     }
-    if (Button2OnClick == NULL) {
+    if (!Button2OnClick) {
         Button2OnClick = C4_UI_NumberInput_GenericDecrementOnClick;
         Button2Context = numInput;
     }

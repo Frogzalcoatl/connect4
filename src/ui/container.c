@@ -3,12 +3,12 @@
 #include <stdlib.h>
 
 void C4_UI_Container_Init(C4_UI_Container* container, SDL_Renderer* renderer) {
-    if (container == NULL) {
+    if (!container) {
         return;
     }
     container->head = NULL;
     container->tail = NULL;
-    if (renderer == NULL) {
+    if (!renderer) {
         SDL_Log("Warning: Container renderer is NULL");
     }
     container->renderer = renderer;
@@ -16,7 +16,7 @@ void C4_UI_Container_Init(C4_UI_Container* container, SDL_Renderer* renderer) {
 }
 
 void C4_UI_Container_Clear(C4_UI_Container* container) {
-    if (container == NULL) {
+    if (!container) {
         return;
     }
     C4_UI_Node* current = container->head;
@@ -33,7 +33,7 @@ void C4_UI_Container_Clear(C4_UI_Container* container) {
 }
 
 void C4_UI_Container_Destroy(C4_UI_Container* container) {
-    if (container == NULL) {
+    if (!container) {
         return;
     }
     C4_UI_Container_Clear(container);
@@ -41,7 +41,7 @@ void C4_UI_Container_Destroy(C4_UI_Container* container) {
 }
 
 void C4_UI_Container_Draw(C4_UI_Container* container) {
-    if (container == NULL || container->renderer == NULL) {
+    if (!container || !container->renderer) {
         return;
     }
     C4_UI_Node* current = container->head;
@@ -136,13 +136,13 @@ static void C4_UI_Container_AddNode(
 ) {
     // Some elements dont have an update function
     if (
-        container == NULL || data == NULL ||
-        Draw == NULL || Destroy == NULL
+        !container || !data ||
+        !Draw || !Destroy
     ) {
         return;
     }
     C4_UI_Node* newNode = calloc(1, sizeof(C4_UI_Node));
-    if (newNode == NULL) {
+    if (!newNode) {
         SDL_Log("Unable to add Node to C4 Container");
         return;
     }
@@ -153,7 +153,7 @@ static void C4_UI_Container_AddNode(
     newNode->element.Destroy = Destroy;
     newNode->element.Reset = Reset;
     newNode->next = NULL;
-    if (container->head == NULL) {
+    if (!container->head) {
         container->head = newNode;
         container->tail = newNode;
     } else {
@@ -166,7 +166,7 @@ C4_UI_Borders* C4_UI_Container_Add_Borders(
     C4_UI_Container* container, const SDL_FRect destination,
     const SDL_Color color, const unsigned int width
 ) {
-    if (container == NULL) {
+    if (!container) {
         return NULL;
     }
     C4_UI_Borders* borders = C4_UI_Borders_Create(destination, color, width);
@@ -182,7 +182,7 @@ C4_UI_Button* C4_UI_Container_Add_Button(
     const char* str, const C4_UI_Theme* theme, C4_UI_Callback callback,
     void* callbackContext
 ) {
-    if (container == NULL) {
+    if (!container) {
         return NULL;
     }
     C4_UI_Button* button = C4_UI_Button_Create(
@@ -202,7 +202,7 @@ C4_UI_ButtonGroup* C4_UI_Container_Add_ButtonGroup(
     C4_UI_Container* container, const SDL_FRect bounds, size_t count,
     C4_UI_ButtonGroup_Direction direction, unsigned int margin, const C4_UI_Theme* theme
 ) {
-    if (container == NULL) {
+    if (!container) {
         return NULL;
     }
     C4_UI_ButtonGroup* buttonGroup = C4_UI_ButtonGroup_Create(
@@ -221,7 +221,7 @@ C4_UI_NumberInput* C4_UI_Container_Add_NumberInput(
     unsigned int startingValue, float arrowWidth, float arrowHeight, const C4_UI_Theme* theme,
     C4_UI_Callback Button1OnClick, void* Button1Context, C4_UI_Callback Button2OnClick, void* Button2Context
 ) {
-    if (container == NULL) {
+    if (!container) {
         return NULL;
     }
     C4_UI_NumberInput* numInput = C4_UI_NumberInput_Create(
@@ -241,7 +241,7 @@ C4_UI_Popup* C4_UI_Container_Add_Popup(
     C4_UI_Container* container, const SDL_FRect destination, C4_UI_ButtonGroup_Direction buttonDirection,
     size_t buttonCount, float buttonGroupHeight, const char* messageText, const C4_UI_Theme* theme
 ) {
-    if (container == NULL) {
+    if (!container) {
         return NULL;
     }
     C4_UI_Popup* popup = C4_UI_Popup_Create(
@@ -259,7 +259,7 @@ C4_UI_Popup* C4_UI_Container_Add_Popup(
 C4_UI_Rectangle* C4_UI_Container_Add_Rectangle(
     C4_UI_Container* container, const SDL_FRect destination, const SDL_Color color 
 ) {
-    if (container == NULL) {
+    if (!container) {
         return NULL;
     }
     C4_UI_Rectangle* rectangle = C4_UI_Rectangle_Create(destination, color);
@@ -274,7 +274,7 @@ C4_UI_Symbol* C4_UI_Container_Add_Symbol(
     C4_UI_Container* container, C4_UI_SymbolType type,
     const SDL_FRect destination, int rotationDegrees, const SDL_Color color
 ) {
-    if (container == NULL) {
+    if (!container) {
         return NULL;
     }
     C4_UI_Symbol* symbol = C4_UI_Symbol_Create(type, destination, rotationDegrees, color);
@@ -289,7 +289,7 @@ C4_UI_Text* C4_UI_Container_Add_Text(
     C4_UI_Container* container, const char* str, C4_FontType font, float ptSize,
     float destinationX, float destinationY, int wrapWidth, SDL_Color color
 ) {
-    if (container == NULL) {
+    if (!container) {
         return NULL;
     }
     C4_UI_Text* text = C4_UI_Text_Create(
