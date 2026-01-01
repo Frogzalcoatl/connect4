@@ -1,3 +1,5 @@
+# Ngl couldnt figure this file out without ai
+
 cmake_minimum_required(VERSION 3.28)
 # Including CXX and OBJC for discord-rpc
 project(Connect4 LANGUAGES C CXX)
@@ -130,6 +132,7 @@ if(APPLE)
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.yourname.${PROJECT_NAME}"
         MACOSX_BUNDLE_BUNDLE_VERSION "1.0.0"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0.0"
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.yourname.${PROJECT_NAME}"
     )
 
     # Disable Code Signing (Required for GitHub Actions to pass)
@@ -153,9 +156,22 @@ endif()
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
 
 if(APPLE)
-    target_link_libraries(${PROJECT_NAME} PRIVATE 
-        "-framework Foundation" "-framework AppKit" "-framework QuartzCore"
-    )
+    if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        # iOS Frameworks
+        target_link_libraries(${PROJECT_NAME} PRIVATE 
+            "-framework Foundation" 
+            "-framework UIKit" 
+            "-framework QuartzCore" 
+            "-framework CoreGraphics"
+        )
+    else()
+        # macOS Frameworks
+        target_link_libraries(${PROJECT_NAME} PRIVATE 
+            "-framework Foundation" 
+            "-framework AppKit" 
+            "-framework QuartzCore"
+        )
+    endif()
 endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
