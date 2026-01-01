@@ -139,19 +139,20 @@ void C4_UI_NumberInput_FreeResources(C4_UI_NumberInput* numInput) {
     C4_UI_ButtonGroup_FreeResources(&numInput->arrows);
 }
 
-void C4_UI_NumberInput_Destroy(C4_UI_NumberInput* numInput) {
-    if (!numInput) {
+void C4_UI_NumberInput_Destroy(void* data) {
+    if (!data) {
         return;
     }
+    C4_UI_NumberInput* numInput = (C4_UI_NumberInput*)data;
     C4_UI_NumberInput_FreeResources(numInput);
     free(numInput);
 }
 
-void C4_UI_NumberInput_Draw(C4_UI_NumberInput* numInput, SDL_Renderer* renderer) {
-    if (!numInput) {
-        SDL_Log("Unable to draw number input element. Pointer is NULL");
+void C4_UI_NumberInput_Draw(void* data, SDL_Renderer* renderer) {
+    if (!data) {
         return;
     }
+    C4_UI_NumberInput* numInput = (C4_UI_NumberInput*)data;
     if (!renderer) {
         SDL_Log("Unable to draw number input element. Renderer is NULL");
         return;
@@ -170,10 +171,11 @@ void C4_UI_NumberInput_CenterInWindow(C4_UI_NumberInput* numInput, C4_Axis axis)
     C4_UI_NumberInput_PositionElementsInBackground(numInput);
 }
 
-void C4_UI_NumberInput_HandleMouseEvents(C4_UI_NumberInput* numInput, SDL_Event* event) {
-    if (!numInput) {
+void C4_UI_NumberInput_HandleMouseEvents(void* data, SDL_Event* event) {
+    if (!data) {
         return;
     }
+    C4_UI_NumberInput* numInput = (C4_UI_NumberInput*)data;
     C4_UI_ButtonGroup_HandleMouseEvents(&numInput->arrows, event);
 }
 

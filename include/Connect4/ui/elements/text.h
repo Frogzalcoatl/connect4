@@ -22,7 +22,7 @@ typedef struct {
 bool C4_UI_Text_InitProperties(C4_UI_Text* element, SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, float destinationX, float destinationY, int wrapWidth, const SDL_Color color);
 C4_UI_Text* C4_UI_Text_Create(SDL_Renderer* renderer, const char* str, C4_FontType font, float ptSize, float destinationX, float destinationY, int wrapWidth, const SDL_Color color);
 void C4_UI_Text_FreeResources(C4_UI_Text* element);
-void C4_UI_Text_Destroy(C4_UI_Text* element);
+void C4_UI_Text_Destroy(void* data);
 void C4_UI_Text_UpdateStr(C4_UI_Text* element, const char* newStr, SDL_Renderer* renderer);
-void C4_UI_Text_Draw(C4_UI_Text* element, SDL_Renderer* renderer);
+void C4_UI_Text_Draw(void* data, SDL_Renderer* renderer);
 void C4_UI_Text_ReloadTexture(C4_UI_Text* element, SDL_Renderer* renderer);

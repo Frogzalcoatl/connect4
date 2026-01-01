@@ -31,10 +31,11 @@ C4_UI_Symbol* C4_UI_Symbol_Create(C4_UI_SymbolType type, const SDL_FRect destina
     return symbol;
 }
 
-void C4_UI_Symbol_Destroy(C4_UI_Symbol* symbol) {
-    if (!symbol) {
+void C4_UI_Symbol_Destroy(void* data) {
+    if (!data) {
         return;
     }
+    C4_UI_Symbol* symbol = (C4_UI_Symbol*)data;
     free(symbol);
 }
 
@@ -87,11 +88,12 @@ static void C4_UI_Symbol_DrawTriangle(C4_UI_Symbol* symbol, SDL_Renderer* render
     SDL_RenderGeometry(renderer, NULL, vertices, 3, NULL, 0);
 }
 
-void C4_UI_Symbol_Draw(C4_UI_Symbol* symbol, SDL_Renderer* renderer) {
-    if (!symbol) {
+void C4_UI_Symbol_Draw(void* data, SDL_Renderer* renderer) {
+    if (!data) {
         SDL_Log("Tried to draw NULL symbol element. Ignoring");
         return;
     }
+    C4_UI_Symbol* symbol = (C4_UI_Symbol*)data;
     if (!renderer) {
         SDL_Log("Unable to draw symbol element. SDL Renderer is NULL");
         return;

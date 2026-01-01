@@ -26,19 +26,21 @@ C4_UI_Borders* C4_UI_Borders_Create(const SDL_FRect destination, const SDL_Color
     return element;
 }
 
-void C4_UI_Borders_Destroy(C4_UI_Borders* element) {
-    if (!element) {
+void C4_UI_Borders_Destroy(void* data) {
+    if (!data) {
         SDL_Log("Tried to destroy NULL borders element");
         return;
     }
+    C4_UI_Borders* element = (C4_UI_Borders*)data;
     free(element);
 }
 
-void C4_UI_Borders_Draw(C4_UI_Borders* element, SDL_Renderer* renderer) {
-    if (!element) {
-        SDL_Log("Borders element is NULL");
+void C4_UI_Borders_Draw(void* data, SDL_Renderer* renderer) {
+    if (!data) {
+        SDL_Log("Unable to draw Borders element. Pointer is NULL");
         return;
     }
+    C4_UI_Borders* element = (C4_UI_Borders*)data;
     SDL_SetRenderDrawColor(renderer, element->color.r, element->color.g, element->color.b, element->color.a);
     SDL_FRect topBorder = {element->destination.x, element->destination.y, element->destination.w, (float)element->width};
     SDL_FRect bottomBorder = {element->destination.x, element->destination.y + element->destination.h - (float)element->width, element->destination.w, (float)element->width};

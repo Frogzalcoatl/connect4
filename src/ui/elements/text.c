@@ -55,11 +55,12 @@ void C4_UI_Text_FreeResources(C4_UI_Text* element) {
     }
 }
 
-void C4_UI_Text_Destroy(C4_UI_Text* element) {
-    if (!element) {
+void C4_UI_Text_Destroy(void* data) {
+    if (!data) {
         SDL_Log("Tried to destroy NULL text element");
         return;
     }
+    C4_UI_Text* element = (C4_UI_Text*)data;
     C4_UI_Text_FreeResources(element);
     free(element);
 }
@@ -102,11 +103,12 @@ void C4_UI_Text_UpdateStr(C4_UI_Text* element, const char* newStr, SDL_Renderer*
     C4_UI_Text_ReloadTexture(element, renderer);
 }
 
-void C4_UI_Text_Draw(C4_UI_Text* element, SDL_Renderer* renderer) {
-    if (!element) {
+void C4_UI_Text_Draw(void* data, SDL_Renderer* renderer) {
+    if (!data) {
         SDL_Log("Text element is NULL");
         return;
     }
+    C4_UI_Text* element = (C4_UI_Text*)data;
     if (!element->texture) {
         // Doesnt need a log since this would be true if the text element is currently an empty string
         return;

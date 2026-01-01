@@ -10,5 +10,5 @@ typedef struct {
 
 bool C4_UI_Borders_InitProperties(C4_UI_Borders* element, const SDL_FRect destination, const SDL_Color color, const unsigned int width);
 C4_UI_Borders* C4_UI_Borders_Create(const SDL_FRect destination, const SDL_Color color, const unsigned int width);
-void C4_UI_Borders_Destroy(C4_UI_Borders* element);
-void C4_UI_Borders_Draw(C4_UI_Borders* element, SDL_Renderer* renderer);
+void C4_UI_Borders_Destroy(void* data);
+void C4_UI_Borders_Draw(void* data, SDL_Renderer* renderer);

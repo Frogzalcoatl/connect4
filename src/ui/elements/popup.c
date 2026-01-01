@@ -86,11 +86,12 @@ void C4_UI_Popup_FreeResources(C4_UI_Popup* popup) {
     C4_UI_Text_FreeResources(&popup->message);
 }
 
-void C4_UI_Popup_Destroy(C4_UI_Popup* popup) {
-    if (!popup) {
+void C4_UI_Popup_Destroy(void* data) {
+    if (!data) {
         SDL_Log("Tried to destroy NULL popup element");
         return;
     }
+    C4_UI_Popup* popup = (C4_UI_Popup*)data;
     C4_UI_Popup_FreeResources(popup);
     free(popup);
 }
@@ -102,11 +103,12 @@ static void C4_UI_Popup_DrawScreenBackground(SDL_Renderer* renderer) {
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }
 
-void C4_UI_Popup_Draw(C4_UI_Popup* popup, SDL_Renderer* renderer) {
-    if (!popup) {
+void C4_UI_Popup_Draw(void* data, SDL_Renderer* renderer) {
+    if (!data) {
         SDL_Log("Popup element is NULL");
         return;
     }
+    C4_UI_Popup* popup = (C4_UI_Popup*)data;
     if (!renderer) {
         return;
     }
@@ -129,11 +131,12 @@ void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup, SDL_Renderer* renderer) {
     C4_UI_Popup_PositionElementsInBackground(popup, renderer);
 }
 
-void C4_UI_Popup_HandleMouseEvents(C4_UI_Popup* popup, SDL_Event* event) {
-    if (!popup || !event) {
+void C4_UI_Popup_HandleMouseEvents(void* data, SDL_Event* event) {
+    if (!data || !event) {
         SDL_Log("Popup element and/or event is NULL");
         return;
     }
+    C4_UI_Popup* popup = (C4_UI_Popup*)data;
     if (!popup->isShowing) {
         return;
     }

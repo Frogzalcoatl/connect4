@@ -83,10 +83,11 @@ void C4_UI_ButtonGroup_FreeResources(C4_UI_ButtonGroup* group) {
     group->buttons = NULL;
 }
 
-void C4_UI_ButtonGroup_Destroy(C4_UI_ButtonGroup* group) {
-    if (!group) {
+void C4_UI_ButtonGroup_Destroy(void* data) {
+    if (!data) {
         return;
     }
+    C4_UI_ButtonGroup* group = (C4_UI_ButtonGroup*)data;
     C4_UI_ButtonGroup_FreeResources(group);
     free(group);
 }
@@ -110,21 +111,22 @@ void C4_UI_ButtonGroup_SetButtonIndex(
     );
 }
 
-void C4_UI_ButtonGroup_Draw(C4_UI_ButtonGroup* group, SDL_Renderer* renderer) {
-    if (!group) {
-        SDL_Log("Unable to draw button group. Pointer is NULL");
+void C4_UI_ButtonGroup_Draw(void* data, SDL_Renderer* renderer) {
+    if (!data) {
         return;
     }
+    C4_UI_ButtonGroup* group = (C4_UI_ButtonGroup*)data;
     for (size_t i = 0; i < group->count; i++) {
         C4_UI_Button_Draw(&group->buttons[i], renderer);
     }
 }
 
-void C4_UI_ButtonGroup_HandleMouseEvents(C4_UI_ButtonGroup* group, SDL_Event* event) {
-    if (!group || !event) {
+void C4_UI_ButtonGroup_HandleMouseEvents(void* data, SDL_Event* event) {
+    if (!data || !event) {
         SDL_Log("Button group, event, and/or renderer is NULL");
         return;
     }
+    C4_UI_ButtonGroup* group = (C4_UI_ButtonGroup*)data;
     for (size_t i = 0; i < group->count; i++) {
         C4_UI_Button_HandleMouseEvents(&group->buttons[i], event);
     }
@@ -151,8 +153,11 @@ void C4_UI_ButtonGroup_CenterInWindow(C4_UI_ButtonGroup* group, C4_Axis axis) {
 }
 
 // void* to work in container
-void C4_UI_ButtonGroup_Reset(void* buttonGroup) {
-    C4_UI_ButtonGroup* group = (C4_UI_ButtonGroup*)buttonGroup;
+void C4_UI_ButtonGroup_Reset(void* data) {
+    if (!data) {
+        return;
+    }
+    C4_UI_ButtonGroup* group = (C4_UI_ButtonGroup*)data;
     for (size_t i = 0; i < group->count; i++) {
         C4_UI_Button_Reset(&group->buttons[i]);
     }

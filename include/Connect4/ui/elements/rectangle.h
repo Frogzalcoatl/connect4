@@ -9,5 +9,5 @@ typedef struct {
 
 bool C4_UI_Rectangle_InitProperties(C4_UI_Rectangle* element, const SDL_FRect destination, const SDL_Color color);
 C4_UI_Rectangle* C4_UI_Rectangle_Create(const SDL_FRect destination, const SDL_Color color);
-void C4_UI_Rectangle_Destroy(C4_UI_Rectangle* element);
-void C4_UI_Rectangle_Draw(C4_UI_Rectangle* element, SDL_Renderer* renderer);
+void C4_UI_Rectangle_Destroy(void* data);
+void C4_UI_Rectangle_Draw(void* data, SDL_Renderer* renderer);

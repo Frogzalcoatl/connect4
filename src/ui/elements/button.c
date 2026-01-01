@@ -102,20 +102,22 @@ void C4_UI_Button_FreeResources(C4_UI_Button* button) {
     C4_UI_Text_FreeResources(&button->text);
 }
 
-void C4_UI_Button_Destroy(C4_UI_Button* button) {
-    if (!button) {
+void C4_UI_Button_Destroy(void* data) {
+    if (!data) {
         SDL_Log("Tried to destroy NULL button");
         return;
     }
+    C4_UI_Button* button = (C4_UI_Button*)data;
     C4_UI_Button_FreeResources(button);
     free(button);
 }
 
-void C4_UI_Button_Draw(C4_UI_Button* button, SDL_Renderer* renderer) {
-    if (!button) {
+void C4_UI_Button_Draw(void* data, SDL_Renderer* renderer) {
+    if (!data) {
         SDL_Log("Button is NULL");
         return;
     }
+    C4_UI_Button* button = (C4_UI_Button*)data;
     C4_UI_Button_ColorInfo* currentColors = &button->defaultColors;
     if (button->isPressed) {
         currentColors = &button->pressedColors;
@@ -141,9 +143,13 @@ void C4_UI_Button_Draw(C4_UI_Button* button, SDL_Renderer* renderer) {
     }
 }
 
-void C4_UI_Button_HandleMouseEvents(C4_UI_Button* button, SDL_Event* event) {
-    if (!button || !event) {
-        SDL_Log("Button and/or event is NULL");
+void C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event) {
+    if (!data) {
+        return;
+    }
+    C4_UI_Button* button = (C4_UI_Button*)data;
+    if (!event) {
+        SDL_Log("Event is NULL");
         return;
     }
     if (!button->isActive) {
@@ -217,8 +223,11 @@ void C4_UI_Button_UpdateStr(C4_UI_Button* button, const char* str, SDL_Renderer*
     button->text.destination.y = backgroundCenterY - (button->text.destination.h / 2.f);
 }
 
-void C4_UI_Button_Reset(void* button) {
-    C4_UI_Button* btn = (C4_UI_Button*)button;
-    btn->isHovered = false;
-    btn->isPressed = false;
+void C4_UI_Button_Reset(void* data) {
+    if (!data) {
+        return;
+    }
+    C4_UI_Button* button = (C4_UI_Button*)data;
+    button->isHovered = false;
+    button->isPressed = false;
 }

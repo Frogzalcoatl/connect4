@@ -20,8 +20,8 @@ C4_UI_Popup* C4_UI_Popup_Create(
     float buttonGroupHeight, const char* messageText, const C4_UI_Theme* theme
 );
 void C4_UI_Popup_FreeResources(C4_UI_Popup* popup);
-void C4_UI_Popup_Destroy(C4_UI_Popup* popup);
-void C4_UI_Popup_Draw(C4_UI_Popup* popup, SDL_Renderer* renderer);
+void C4_UI_Popup_Destroy(void* data);
+void C4_UI_Popup_Draw(void* data, SDL_Renderer* renderer);
 void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup, SDL_Renderer* renderer);
-void C4_UI_Popup_HandleMouseEvents(C4_UI_Popup* popup, SDL_Event* event);
+void C4_UI_Popup_HandleMouseEvents(void* data, SDL_Event* event);
 void C4_UI_Popup_ResetButtons(void* data);
