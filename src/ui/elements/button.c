@@ -29,7 +29,7 @@ void C4_UI_Button_CenterElementsInBackground(C4_UI_Button* button, C4_Axis axis)
 
 bool C4_UI_Button_InitProperties(
     C4_UI_Button* button, SDL_Renderer* renderer, const char* str, const SDL_FRect destination, C4_UI_SymbolType symbol,
-    float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme, C4_UI_Callback OnClick, void* OnClickContext
+    float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme, C4_UI_Callback callback, void* callbackContext
 ) {
     if (!renderer) {
         SDL_Log("Unable to init button properties. Renderer is NULL");
@@ -76,22 +76,22 @@ bool C4_UI_Button_InitProperties(
     button->isPressed = false;
     button->isActive = true;
     button->resetHoverOnClick = false;
-    button->OnClick = OnClick;
-    button->OnClickContext = OnClickContext;
+    button->callback = callback;
+    button->callbackContext = callbackContext;
     C4_UI_Button_CenterElementsInBackground(button, C4_Axis_XY);
     return true;
 }
 
 C4_UI_Button* C4_UI_Button_Create(
     SDL_Renderer* renderer, const char* str, const SDL_FRect destination, C4_UI_SymbolType symbol, float symbolWidth,
-    float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme, C4_UI_Callback OnClick, void* OnClickContext
+    float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme, C4_UI_Callback callback, void* callbackContext
 ) {
     C4_UI_Button* button = calloc(1, sizeof(C4_UI_Button));
     if (!button) {
         SDL_Log("Unable to allocate memory for button");
         return NULL;
     }
-    if (!C4_UI_Button_InitProperties(button, renderer, str, destination, symbol, symbolWidth, symbolHeight, symbolRotationDegrees, theme, OnClick, OnClickContext)) {
+    if (!C4_UI_Button_InitProperties(button, renderer, str, destination, symbol, symbolWidth, symbolHeight, symbolRotationDegrees, theme, callback, callbackContext)) {
         C4_UI_Button_Destroy(button);
         return NULL;
     }
@@ -174,10 +174,11 @@ void C4_UI_Button_HandleMouseEvents(C4_UI_Button* button, SDL_Event* event) {
         if (event->button.button == SDL_BUTTON_LEFT) {
             bool wasClicked = button->isPressed && button->isHovered;
             button->isPressed = false;
-            if (wasClicked && button->OnClick)  {
-                button->OnClick(button->OnClickContext);
+            if (wasClicked && button->callback)  {
+                button->callback(button->callbackContext);
                 if (button->resetHoverOnClick) {
                     button->isHovered = false;
+                    button->isPressed = false;
                 }
             }
         }

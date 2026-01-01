@@ -179,8 +179,8 @@ C4_UI_Borders* C4_UI_Container_Add_Borders(
 
 C4_UI_Button* C4_UI_Container_Add_Button(
     C4_UI_Container* container, const SDL_FRect destination,
-    const char* str, const C4_UI_Theme* theme, C4_UI_Callback OnClick,
-    void* OnClickContext
+    const char* str, const C4_UI_Theme* theme, C4_UI_Callback callback,
+    void* callbackContext
 ) {
     if (container == NULL) {
         return NULL;
@@ -188,7 +188,7 @@ C4_UI_Button* C4_UI_Container_Add_Button(
     C4_UI_Button* button = C4_UI_Button_Create(
         container->renderer, str, destination,
         C4_UI_SymbolType_None, 0.f, 0.f, 0, theme,
-        OnClick, OnClickContext
+        callback, callbackContext
     );
     C4_UI_Container_AddNode(
         container, button, C4_UI_ElementType_Button,

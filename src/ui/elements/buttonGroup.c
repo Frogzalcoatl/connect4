@@ -93,7 +93,7 @@ void C4_UI_ButtonGroup_Destroy(C4_UI_ButtonGroup* group) {
 
 void C4_UI_ButtonGroup_SetButtonIndex(
     C4_UI_ButtonGroup* group, size_t buttonIndex, SDL_Renderer* renderer, const char* str,C4_UI_SymbolType symbol,
-    float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme, C4_UI_Callback OnClick, void* OnClickContext
+    float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme, C4_UI_Callback callback, void* callbackContext
 ) {
     if (!group) {
         SDL_Log("Unable to set button index %zu. Button group is NULL", buttonIndex);
@@ -106,7 +106,7 @@ void C4_UI_ButtonGroup_SetButtonIndex(
     C4_UI_Button* btn = &group->buttons[buttonIndex];
     C4_UI_Button_InitProperties(
         btn, renderer, str, btn->background.destination, symbol,
-        symbolWidth, symbolHeight, symbolRotationDegrees, theme, OnClick, OnClickContext
+        symbolWidth, symbolHeight, symbolRotationDegrees, theme, callback, callbackContext
     );
 }
 

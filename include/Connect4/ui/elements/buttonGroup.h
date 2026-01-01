@@ -22,7 +22,7 @@ void C4_UI_ButtonGroup_FreeResources(C4_UI_ButtonGroup* group);
 void C4_UI_ButtonGroup_Destroy(C4_UI_ButtonGroup* group);
 void C4_UI_ButtonGroup_SetButtonIndex(
     C4_UI_ButtonGroup* group, size_t buttonIndex, SDL_Renderer* renderer, const char* str, C4_UI_SymbolType symbol,
-    float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme, C4_UI_Callback OnClick, void* OnClickContext
+    float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme, C4_UI_Callback callback, void* callbackContext
 );
 void C4_UI_ButtonGroup_Draw(C4_UI_ButtonGroup* group, SDL_Renderer* renderer);
 void C4_UI_ButtonGroup_HandleMouseEvents(C4_UI_ButtonGroup* group, SDL_Event* event);

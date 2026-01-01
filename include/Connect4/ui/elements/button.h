@@ -22,17 +22,17 @@ typedef struct {
     bool isPressed;
     bool isActive;
     bool resetHoverOnClick;
-    C4_UI_Callback OnClick;
-    void* OnClickContext;
+    C4_UI_Callback callback;
+    void* callbackContext;
 } C4_UI_Button;
 
 bool C4_UI_Button_InitProperties(
     C4_UI_Button* button, SDL_Renderer* renderer, const char* str, const SDL_FRect destination, C4_UI_SymbolType symbol,
-    float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme, C4_UI_Callback OnClick, void* OnClickContext
+    float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme, C4_UI_Callback callback, void* OnClickContext
 );
 C4_UI_Button* C4_UI_Button_Create(
     SDL_Renderer* renderer, const char* str, const SDL_FRect destination, C4_UI_SymbolType symbol,
-    float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme, C4_UI_Callback OnClick, void* OnClickContext
+    float symbolWidth, float symbolHeight, int symbolRotationDegrees, const C4_UI_Theme* theme, C4_UI_Callback callback, void* OnClickContext
 );
 void C4_UI_Button_FreeResources(C4_UI_Button* button);
 void C4_UI_Button_Destroy(C4_UI_Button* button);

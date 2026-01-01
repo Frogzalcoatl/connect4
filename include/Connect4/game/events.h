@@ -16,7 +16,6 @@ typedef struct {
     union {
         struct { C4_ScreenType type; } screenChange;
         struct { C4_SoundEffect id; } sound;
-        struct { uint8_t width; uint8_t height; uint8_t amountToWin; } boardSize;
     };
 } C4_Event;
 

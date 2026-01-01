@@ -42,7 +42,7 @@ typedef struct {
     //SDL_FRect bounds;
     C4_UI_Node* head;
     C4_UI_Node* tail;
-    // All button styles are reset when a popup is initally opened
+    // Every button's colors are reset when a popup is initally opened
     bool buttonColorResetComplete;
 } C4_UI_Container;
 
@@ -59,8 +59,8 @@ C4_UI_Borders* C4_UI_Container_Add_Borders(
 );
 C4_UI_Button* C4_UI_Container_Add_Button(
     C4_UI_Container* container, const SDL_FRect destination,
-    const char* str, const C4_UI_Theme* theme, C4_UI_Callback OnClick,
-    void* OnClickContext
+    const char* str, const C4_UI_Theme* theme, C4_UI_Callback callback,
+    void* callbackContext
 );
 C4_UI_ButtonGroup* C4_UI_Container_Add_ButtonGroup(
     C4_UI_Container* container, const SDL_FRect bounds, size_t count,
