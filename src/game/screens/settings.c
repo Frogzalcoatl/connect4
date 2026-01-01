@@ -22,10 +22,6 @@ static bool IsUpdatingBoard(void) {
 }
 
 #define BUTTON_GROUP_COUNT 2
-typedef enum {
-    Settings_ButtonGroup_Apply,
-    Settings_ButtonGroup_Cancel
-} Settings_ButtonGroup;
 static const char SETTINGS_BUTTONS_TEXT[BUTTON_GROUP_COUNT][16] = {
     "Apply",
     "Cancel",
@@ -57,10 +53,6 @@ static const C4_UI_Callback BUTTON_GROUP_ON_CLICKS[BUTTON_GROUP_COUNT] = {
 };
 
 #define POPUP_BUTTON_COUNT 2
-typedef enum {
-    Settings_PopupButtons_Yes,
-    Settings_PopupButtons_Back
-} Settings_PopupButtons;
 static const char POPUP_BUTTON_TEXT[POPUP_BUTTON_COUNT][8] = {
     "Yes",
     "Back"
@@ -84,6 +76,7 @@ static const C4_UI_Callback POPUP_ON_CLICKS[BUTTON_GROUP_COUNT] = {
 static void ApplyButtonInactiveHandler(void) {
     settingsData.applyButton->isActive = IsUpdatingBoard();
 }
+
 static void ChangeAmountToWinMax(void) {
     C4_UI_NumberInput_ChangeMax(
         settingsData.winAmountInput,
@@ -94,35 +87,41 @@ static void ChangeAmountToWinMax(void) {
         settingsData.game->renderer
     );
 }
+
 static void WidthIncrementOnClick(void* context) {
     (void)context;
     C4_UI_NumberInput_GenericIncrementCallback(settingsData.widthInput);
     ChangeAmountToWinMax();
     ApplyButtonInactiveHandler();
 }
+
 static void WidthDecrementOnClick(void* context) {
     (void)context;
     C4_UI_NumberInput_GenericDecrementCallback(settingsData.widthInput);
     ChangeAmountToWinMax();
     ApplyButtonInactiveHandler();
 }
+
 static void HeightIncrementOnClick(void* context) {
     (void)context;
     C4_UI_NumberInput_GenericIncrementCallback(settingsData.heightInput);
     ChangeAmountToWinMax();
     ApplyButtonInactiveHandler();
 }
+
 static void HeightDecrementOnClick(void* context) {
     (void)context;
     C4_UI_NumberInput_GenericDecrementCallback(settingsData.heightInput);
     ChangeAmountToWinMax();
     ApplyButtonInactiveHandler();
 }
+
 static void WinAmountIncrementOnClick(void* context) {
     (void)context;
     C4_UI_NumberInput_GenericIncrementCallback(settingsData.winAmountInput);
     ApplyButtonInactiveHandler();
 }
+
 static void WinAmountDecrementOnClick(void* context) {
     (void)context;
     C4_UI_NumberInput_GenericDecrementCallback(settingsData.winAmountInput);

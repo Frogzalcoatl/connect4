@@ -15,15 +15,6 @@ static void C4_GameScreen_ResetGame() {
     C4_UI_Text_ReloadTexture(gameData.boardText, gameData.game->renderer);
 }
 
-#define GAME_POPUP_BUTTONS_COUNT 2
-typedef enum {
-    Game_PopupButtons_PlayAgain,
-    Game_PopupButtons_ReturnToMenu
-} Game_PopupButtons;
-static const char GAME_POPUP_BUTTONS_TEXT[GAME_POPUP_BUTTONS_COUNT][16] = {
-    "Play Again",
-    "Return to Menu"
-};
 static void PlayAgainOnClick(void* context) {
     (void)context;
     gameData.winnerPopup->isShowing = false;
@@ -74,12 +65,11 @@ void C4_SetScreen_Game(C4_Game* game) {
     backButton->OnClickCallback = BackOnClick;
     C4_UI_Button_CenterInWindow(backButton, C4_Axis_X);
 
-
     C4_UI_Popup* winnerPopup = C4_UI_Container_Add_Popup(
         cont, &(C4_UI_Popup_Config){
             .destination = (SDL_FRect){0.f, 0.f, 800.f, 400.f},
             .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
-            .buttonCount = GAME_POPUP_BUTTONS_COUNT,
+            .buttonCount = 2,
             .buttonGroupHeight = 100.f,
             .message = "",
             .messageFont = game->fontRegular,
