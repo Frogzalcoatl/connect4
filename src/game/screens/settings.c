@@ -93,6 +93,7 @@ static void WidthIncrementOnClick(void* context) {
     C4_UI_NumberInput_GenericIncrementCallback(settingsData.widthInput);
     ChangeAmountToWinMax();
     ApplyButtonInactiveHandler();
+    C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.widthInput);
 }
 
 static void WidthDecrementOnClick(void* context) {
@@ -100,6 +101,7 @@ static void WidthDecrementOnClick(void* context) {
     C4_UI_NumberInput_GenericDecrementCallback(settingsData.widthInput);
     ChangeAmountToWinMax();
     ApplyButtonInactiveHandler();
+    C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.widthInput);
 }
 
 static void HeightIncrementOnClick(void* context) {
@@ -107,6 +109,7 @@ static void HeightIncrementOnClick(void* context) {
     C4_UI_NumberInput_GenericIncrementCallback(settingsData.heightInput);
     ChangeAmountToWinMax();
     ApplyButtonInactiveHandler();
+    C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.heightInput);
 }
 
 static void HeightDecrementOnClick(void* context) {
@@ -114,18 +117,21 @@ static void HeightDecrementOnClick(void* context) {
     C4_UI_NumberInput_GenericDecrementCallback(settingsData.heightInput);
     ChangeAmountToWinMax();
     ApplyButtonInactiveHandler();
+    C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.heightInput);
 }
 
 static void WinAmountIncrementOnClick(void* context) {
     (void)context;
     C4_UI_NumberInput_GenericIncrementCallback(settingsData.winAmountInput);
     ApplyButtonInactiveHandler();
+    C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.winAmountInput);
 }
 
 static void WinAmountDecrementOnClick(void* context) {
     (void)context;
     C4_UI_NumberInput_GenericDecrementCallback(settingsData.winAmountInput);
     ApplyButtonInactiveHandler();
+    C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.winAmountInput);
 }
 
 void C4_SetScreen_Settings(C4_Game* game) {

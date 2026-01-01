@@ -188,8 +188,14 @@ void C4_UI_Button_Update(void* data, float deltaTime) {
         return;
     }
     C4_UI_Button* button = (C4_UI_Button*)data;
+    if (!button->isActive) {
+        button->isPressed = false;
+        button->isHovered = false;
+        button->isRepeating = false;
+        button->pressTimer = 0.f;
+    }
     if (!button || !button->isPressed || !button->WhilePressedCallback) {
-        button->pressTimer = 0.0f;
+        button->pressTimer = 0.f;
         button->isRepeating = false;
         return;
     }
@@ -197,13 +203,13 @@ void C4_UI_Button_Update(void* data, float deltaTime) {
     if (!button->isRepeating) {
         if (button->pressTimer >= button->delay) {
             button->WhilePressedCallback(button->WhilePressedContext);
-            button->pressTimer = 0.0f;
+            button->pressTimer = 0.f;
             button->isRepeating = true;
         }
     } else {
         if (button->pressTimer >= button->interval) {
             button->WhilePressedCallback(button->WhilePressedContext);
-            button->pressTimer = 0.0f;
+            button->pressTimer = 0.f;
         }
     }
 }

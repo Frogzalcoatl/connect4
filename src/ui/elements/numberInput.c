@@ -27,22 +27,42 @@ static void C4_UI_NumberInput_PositionElementsInBackground(C4_UI_NumberInput* nu
 // Temporary until i improve text rendering is improved to not require the renderer for every text update
 static SDL_Renderer* temporaryGlobalRenderer;
 
+void C4_UI_NumberInput_GenericButtonInactiveHandler(C4_UI_NumberInput* numInput) {
+    if (!numInput) {
+        return;
+    }
+
+    C4_UI_Button* incrementButton = &numInput->buttonGroup.buttons[0];
+    incrementButton->isActive = numInput->currentValue < numInput->max;
+
+    C4_UI_Button* decrementButton = &numInput->buttonGroup.buttons[1];
+    decrementButton->isActive = numInput->currentValue > numInput->min;
+}
+
 void C4_UI_NumberInput_GenericIncrementCallback(void* numberInputContext) {
+    if (!numberInputContext) {
+        return;
+    }
     C4_UI_NumberInput* numInput = (C4_UI_NumberInput*)numberInputContext;
     if (numInput->currentValue < numInput->max) {
         numInput->currentValue++;
         snprintf(numInput->numberText.str, sizeof(numInput->numberText.str), "%d", numInput->currentValue);
         C4_UI_Text_ReloadTexture(&numInput->numberText, temporaryGlobalRenderer);
     }
+    C4_UI_NumberInput_GenericButtonInactiveHandler(numInput);
 }
 
 void C4_UI_NumberInput_GenericDecrementCallback(void* numberInputContext) {
+    if (!numberInputContext) {
+        return;
+    }
     C4_UI_NumberInput* numInput = (C4_UI_NumberInput*)numberInputContext;
     if (numInput->currentValue > numInput->min) {
         numInput->currentValue--;
         snprintf(numInput->numberText.str, sizeof(numInput->numberText.str), "%d", numInput->currentValue);
         C4_UI_Text_ReloadTexture(&numInput->numberText, temporaryGlobalRenderer);
     }
+    C4_UI_NumberInput_GenericButtonInactiveHandler(numInput);
 }
 
 bool C4_UI_NumberInput_InitProperties(
@@ -149,6 +169,7 @@ bool C4_UI_NumberInput_InitProperties(
     numInput->max = config->max;
     numInput->currentValue = config->startingValue;
     C4_UI_NumberInput_PositionElementsInBackground(numInput);
+    C4_UI_NumberInput_GenericButtonInactiveHandler(numInput);
     return true;
 }
 

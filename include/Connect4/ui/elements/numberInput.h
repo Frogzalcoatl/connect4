@@ -39,4 +39,5 @@ void C4_UI_NumberInput_ChangeMax(C4_UI_NumberInput* numInput, unsigned int newMa
 void C4_UI_NumberInput_ChangeMin(C4_UI_NumberInput* numInput, unsigned int newMin, SDL_Renderer* renderer);
 void C4_UI_NumberInput_GenericIncrementCallback(void* numberInputContext);
 void C4_UI_NumberInput_GenericDecrementCallback(void* numberInputContext);
+void C4_UI_NumberInput_GenericButtonInactiveHandler(C4_UI_NumberInput* numInput);
 void C4_UI_NumberInput_ResetButtons(void* data);

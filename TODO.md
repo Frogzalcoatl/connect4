@@ -1,8 +1,7 @@
 # TODO
 
-* Handle mouse and keyboard input inside the ui manager
-    * Some way to track what the keyboard is currently focused on (text boxes, etc)
-* Detect when a button is held down
+* Keyboard cursor (Use arrow keys to navigate buttons)
+    * Can also be used to track whether the keyboard is focused on text boxes, etc
 * Slider UIElement
 * Board UI
 * Improve win check efficiency (see WINCHECKCRITIQUE.md)
