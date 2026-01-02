@@ -17,6 +17,10 @@ bool Connect4_Init_Dependencies(void) {
     // To simulate touch events for testing
     // SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "1");
 
+    // Force Android to use the older, often more stable OpenSL ES driver
+    // The app was making loud ah clicking sounds when i tested it on my phone without this
+    SDL_SetHint(SDL_HINT_AUDIO_DRIVER, "openslES");
+
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
         // The error is inserted at %s
         SDL_Log("SDL_Init failed: %s", SDL_GetError());
