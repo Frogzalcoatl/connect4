@@ -17,11 +17,11 @@ jobs:
         platform:
           - { name: Windows VS2022, os: windows-2022 }
           - { name: Linux GCC, os: ubuntu-latest }
-          - { name: macOS, os: macos-latest }
+          - { name: MacOS, os: macos-latest }
           # Android configuration (No flags needed, Gradle handles it)
           - { name: Android, os: ubuntu-latest }
           - {
-              name: iOS,
+              name: IOS,
               os: macos-latest,
               flags: "-G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64",
             }
@@ -82,9 +82,10 @@ jobs:
         with:
           name: Connect4-${{ matrix.platform.name }}
           path: |
-            build/bin/*.so
-            build/bin/*.exe
-            build/bin/Connect4.app
+            build/bin/**/*.so
+            build/bin/**/*.exe
+            build/bin/**/*.dll
+            build/bin/**/Connect4.app
             build/bin/Connect4
             *.ipa
             android/app/build/outputs/apk/debug/*.apk
