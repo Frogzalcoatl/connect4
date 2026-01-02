@@ -8,6 +8,7 @@ android {
     namespace = "org.libsdl.app"
     compileSdkVersion 35
     ndkVersion = "28.2.13676358"
+
     defaultConfig {
         applicationId "com.frogzalcoatl.connect4"
         minSdkVersion 21
@@ -15,32 +16,33 @@ android {
         versionCode 1
         versionName "1.0"
         externalNativeBuild {
-            ndkBuild {
-                arguments "APP_PLATFORM=android-21"
-                // abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
-                abiFilters 'arm64-v8a'
-            }
             cmake {
                 arguments "-DANDROID_PLATFORM=android-21", "-DANDROID_STL=c++_static"
-                // abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
                 abiFilters 'arm64-v8a'
-                path "../../../CMakeLists.txt" 
-                version "3.28.0"
             }
         }
     }
+    externalNativeBuild {
+        cmake {
+            path "../../../CMakeLists.txt" 
+            version "3.28.0"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
     applicationVariants.all { variant ->
         tasks["merge${variant.name.capitalize()}Assets"]
             .dependsOn("externalNativeBuild${variant.name.capitalize()}")
     }
+
     lint {
-        abortOnError = false
+        abortOnError false
     }
 }
 
