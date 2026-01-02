@@ -49,9 +49,8 @@ jobs:
         run: |
           cd android-project
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-          echo "ndk.dir=$ANDROID_NDK_LATEST_HOME" >> local.properties
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace
 
       - name: Configure
         if: matrix.platform.name != 'Android'

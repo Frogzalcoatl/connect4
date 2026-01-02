@@ -1,6 +1,6 @@
 # Ngl couldnt figure this file out without ai
 
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.22)
 # Including CXX and OBJC for discord-rpc
 project(Connect4 LANGUAGES C CXX)
 
