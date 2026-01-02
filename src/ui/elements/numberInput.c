@@ -130,16 +130,12 @@ bool C4_UI_NumberInput_InitProperties(
         return false;
     }
     C4_UI_Button* btnIncrement = &numInput->buttonGroup.buttons[0];
-    btnIncrement->OnClickCallback = C4_UI_NumberInput_GenericIncrementCallback;
-    btnIncrement->OnClickContext = numInput;
     btnIncrement->WhilePressedCallback = C4_UI_NumberInput_GenericIncrementCallback;
     btnIncrement->WhilePressedContext = numInput;
     btnIncrement->symbol.type = C4_UI_SymbolType_Triangle;
     btnIncrement->symbol.destination.w = 20.f;
     btnIncrement->symbol.destination.h = 20.f;
     C4_UI_Button* btnDecrement = &numInput->buttonGroup.buttons[1];
-    btnDecrement->OnClickCallback = C4_UI_NumberInput_GenericDecrementCallback;
-    btnDecrement->OnClickContext = numInput;
     btnDecrement->WhilePressedCallback = C4_UI_NumberInput_GenericDecrementCallback;
     btnDecrement->WhilePressedContext = numInput;
     btnDecrement->symbol.type = C4_UI_SymbolType_Triangle;

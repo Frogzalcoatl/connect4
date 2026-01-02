@@ -42,8 +42,12 @@ void Connect4_Quit_Dependencies(void) {
     SDL_Quit();
 }
 
-static void DefaultButtonHoverCallback(void* context) {
+static void GlobalOnHoverSound(void* context) {
     C4_PushEvent_SoundRequest(C4_SoundEffect_ButtonHover);
+}
+
+static void GlobalOnClickSound(void* context) {
+    C4_PushEvent_SoundRequest(C4_SoundEffect_ButtonClick);
 }
 
 static void C4_Game_ChangeScreen(C4_Game* game, C4_ScreenType type) {
@@ -104,7 +108,8 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
     game->fontRegular = C4_GetFont(C4_FontType_Regular);
     game->fontBold = C4_GetFont(C4_FontType_Bold);
 
-    C4_UI_Button_SetDefaultCallback(C4_UI_Button_CallbackType_OnHover, DefaultButtonHoverCallback, NULL);
+    C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnHover, GlobalOnHoverSound, NULL);
+    C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnClick, GlobalOnClickSound, NULL);
 
     C4_UI_Container_Init(&game->container, game->renderer);
 

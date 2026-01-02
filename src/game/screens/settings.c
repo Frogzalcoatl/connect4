@@ -88,50 +88,51 @@ static void ChangeAmountToWinMax(void) {
     );
 }
 
-static void WidthIncrementOnClick(void* context) {
+static void UniversalWhilePressedFuncs() {
+    ChangeAmountToWinMax();
+    ApplyButtonInactiveHandler();
+    C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.winAmountInput);
+    C4_PushEvent_SoundRequest(C4_SoundEffect_ButtonClick);
+}
+
+static void WidthIncrementWhilePressed(void* context) {
     (void)context;
     C4_UI_NumberInput_GenericIncrementCallback(settingsData.widthInput);
-    ChangeAmountToWinMax();
-    ApplyButtonInactiveHandler();
     C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.widthInput);
+    UniversalWhilePressedFuncs();
 }
 
-static void WidthDecrementOnClick(void* context) {
+static void WidthDecrementWhilePressed(void* context) {
     (void)context;
     C4_UI_NumberInput_GenericDecrementCallback(settingsData.widthInput);
-    ChangeAmountToWinMax();
-    ApplyButtonInactiveHandler();
     C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.widthInput);
+    UniversalWhilePressedFuncs();
 }
 
-static void HeightIncrementOnClick(void* context) {
+static void HeightIncrementWhilePressed(void* context) {
     (void)context;
     C4_UI_NumberInput_GenericIncrementCallback(settingsData.heightInput);
-    ChangeAmountToWinMax();
-    ApplyButtonInactiveHandler();
     C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.heightInput);
+    UniversalWhilePressedFuncs();
 }
 
-static void HeightDecrementOnClick(void* context) {
+static void HeightDecrementWhilePressed(void* context) {
     (void)context;
     C4_UI_NumberInput_GenericDecrementCallback(settingsData.heightInput);
-    ChangeAmountToWinMax();
-    ApplyButtonInactiveHandler();
     C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.heightInput);
+    UniversalWhilePressedFuncs();
 }
 
-static void WinAmountIncrementOnClick(void* context) {
+static void WinAmountIncrementWhilePressed(void* context) {
     (void)context;
     C4_UI_NumberInput_GenericIncrementCallback(settingsData.winAmountInput);
-    ApplyButtonInactiveHandler();
-    C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.winAmountInput);
+    UniversalWhilePressedFuncs();
 }
 
-static void WinAmountDecrementOnClick(void* context) {
+static void WinAmountDecrementWhilePressed(void* context) {
     (void)context;
     C4_UI_NumberInput_GenericDecrementCallback(settingsData.winAmountInput);
-    ApplyButtonInactiveHandler();
-    C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.winAmountInput);
+    UniversalWhilePressedFuncs();
 }
 
 void C4_SetScreen_Settings(C4_Game* game) {
@@ -204,11 +205,9 @@ void C4_SetScreen_Settings(C4_Game* game) {
         }
     );
     C4_UI_Button* boardWidthIncrement = &boardWidthInput->buttonGroup.buttons[0];
-    boardWidthIncrement->OnClickCallback = WidthIncrementOnClick;
-    boardWidthIncrement->WhilePressedCallback = WidthIncrementOnClick;
+    boardWidthIncrement->WhilePressedCallback = WidthIncrementWhilePressed;
     C4_UI_Button* boardWidthDecrement = &boardWidthInput->buttonGroup.buttons[1];
-    boardWidthDecrement->OnClickCallback = WidthDecrementOnClick;
-    boardWidthDecrement->WhilePressedCallback = WidthDecrementOnClick;
+    boardWidthDecrement->WhilePressedCallback = WidthDecrementWhilePressed;
 
     const float PT_SIZE = boardWidthInput->numberText.ptSize;
 
@@ -235,11 +234,9 @@ void C4_SetScreen_Settings(C4_Game* game) {
         }
     );
     C4_UI_Button* boardHeightIncrement = &boardHeightInput->buttonGroup.buttons[0];
-    boardHeightIncrement->OnClickCallback = HeightIncrementOnClick;
-    boardHeightIncrement->WhilePressedCallback = HeightIncrementOnClick;
+    boardHeightIncrement->WhilePressedCallback = HeightIncrementWhilePressed;
     C4_UI_Button* boardHeightDecrement = &boardHeightInput->buttonGroup.buttons[1];
-    boardHeightDecrement->OnClickCallback = HeightDecrementOnClick;
-    boardHeightDecrement->WhilePressedCallback = HeightDecrementOnClick;
+    boardHeightDecrement->WhilePressedCallback = HeightDecrementWhilePressed;
 
     C4_UI_Container_Add_Text(
         cont, &(C4_UI_Text_Config){
@@ -264,11 +261,9 @@ void C4_SetScreen_Settings(C4_Game* game) {
         }
     );
     C4_UI_Button* winAmountIncrement = &winAmountInput->buttonGroup.buttons[0];
-    winAmountIncrement->OnClickCallback = WinAmountIncrementOnClick;
-    winAmountIncrement->WhilePressedCallback = WinAmountIncrementOnClick;
+    winAmountIncrement->WhilePressedCallback = WinAmountIncrementWhilePressed;
     C4_UI_Button* winAmountDecrement = &winAmountInput->buttonGroup.buttons[1];
-    winAmountDecrement->OnClickCallback = WinAmountDecrementOnClick;
-    winAmountDecrement->WhilePressedCallback = WinAmountDecrementOnClick;
+    winAmountDecrement->WhilePressedCallback = WinAmountDecrementWhilePressed;
 
     C4_UI_Container_Add_Text(
         cont, &(C4_UI_Text_Config){

@@ -65,4 +65,4 @@ typedef enum {
     C4_UI_Button_CallbackType_Length
 } C4_UI_Button_CallbackType;
 
-void C4_UI_Button_SetDefaultCallback(C4_UI_Button_CallbackType type, C4_UI_Callback callback, void* context);
+void C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType type, C4_UI_Callback callback, void* context);
