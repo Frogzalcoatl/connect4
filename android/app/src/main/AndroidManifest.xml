@@ -71,7 +71,6 @@
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="true"
         android:theme="@style/AppTheme"
-        android:enableOnBackInvokedCallback="false"
         android:hardwareAccelerated="true" >
 
         <!-- Example of setting SDL hints from AndroidManifest.xml:
@@ -86,6 +85,11 @@
             android:preferMinimalPostProcessing="true"
             android:exported="true"
             >
+            
+            <!-- *** THIS IS THE NEW LINE YOU NEEDED *** -->
+            <meta-data android:name="SDL_MAIN_SHARED_LIBRARY" android:value="main" />
+            <!-- ************************************* -->
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

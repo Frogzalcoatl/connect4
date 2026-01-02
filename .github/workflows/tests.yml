@@ -44,12 +44,24 @@ jobs:
           libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
           libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev
 
+      - name: Setup Java
+        if: matrix.platform.name == 'Android'
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17" # Android Gradle Plugin 8.0+ requires Java 17
+
+      - name: Setup Android SDK
+        if: matrix.platform.name == 'Android'
+        uses: android-actions/setup-android@v3
+
       - name: Build Android APK
         if: matrix.platform.name == 'Android'
         run: |
-          cd android-project
-          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          cd android
+          # Give execution permission to the gradle wrapper
           chmod +x gradlew
+          # Build the debug APK
           ./gradlew assembleDebug --stacktrace
 
       - name: Configure
