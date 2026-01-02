@@ -13,23 +13,31 @@
 #include <time.h>
 
 bool Connect4_Init_Dependencies(void) {
-    srand((unsigned int)time(NULL));
+
+    // To simulate touch events for testing
+    // SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "1");
+
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
         // The error is inserted at %s
         SDL_Log("SDL_Init failed: %s", SDL_GetError());
         return false;
     }
+
     // I like logs starting under the file path of the exe in my ide.
     SDL_Log("");
+    
     if (!TTF_Init()) {
         SDL_Log("TTF_Init failed: %s", SDL_GetError());
         return false;
     }
+
     if (!C4_InitAudio()) {
         SDL_Log("C4_InitAudio failed");
         return false;
     }
+
     C4_Discord_Init();
+
     return true;
 }
 
@@ -40,14 +48,6 @@ void Connect4_Quit_Dependencies(void) {
     C4_QuitAudio();
     TTF_Quit();
     SDL_Quit();
-}
-
-static void GlobalOnHoverSound(void* context) {
-    C4_PlaySound(C4_SoundEffect_ButtonHover);
-}
-
-static void GlobalOnClickSound(void* context) {
-    C4_PlaySound(C4_SoundEffect_ButtonClick);
 }
 
 static void C4_Game_ChangeScreen(C4_Game* game, C4_ScreenType type) {
@@ -80,6 +80,27 @@ static void C4_Game_ChangeScreen(C4_Game* game, C4_ScreenType type) {
     return;
 }
 
+static void C4_Game_HoverSound(void* context) {
+    (void)context;
+    C4_PlaySound(C4_SoundEffect_ButtonHover);
+}
+
+static void C4_Game_ClickSound(void* context) {
+    (void)context;
+    C4_PlaySound(C4_SoundEffect_ButtonClick);
+}
+
+static void C4_Game_ButtonSounds_SetTouchMode(bool value) {
+    // Touch screens hear the hover sound when they initially press the button
+    if (value) {
+        C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnPress, C4_Game_HoverSound, NULL);
+        C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnHover, NULL, NULL);
+    } else {
+        C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnPress, NULL, NULL);
+        C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnHover, C4_Game_HoverSound, NULL);
+    }
+}
+
 C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountToWin) {
     C4_Game* game = calloc(1, sizeof(C4_Game));
     if (!game) {
@@ -108,8 +129,16 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
     game->fontRegular = C4_GetFont(C4_FontType_Regular);
     game->fontBold = C4_GetFont(C4_FontType_Bold);
 
-    C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnHover, GlobalOnHoverSound, NULL);
-    C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnClick, GlobalOnClickSound, NULL);
+    C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnRelease, C4_Game_ClickSound, NULL);
+
+    #if SDL_PLATFORM_ANDROID || SDL_PLATFORM_IOS
+        C4_Game_ButtonSounds_SetTouchMode(true);
+    #else
+        C4_Game_ButtonSounds_SetTouchMode(false);
+    #endif
+    if (SDL_GetHintBoolean(SDL_HINT_MOUSE_TOUCH_EVENTS, false)) {
+        C4_Game_ButtonSounds_SetTouchMode(true);
+    }
 
     C4_UI_Container_Init(&game->container, game->renderer);
 
@@ -132,7 +161,7 @@ void C4_Game_Destroy(C4_Game* game) {
     if (game->window) {
         SDL_DestroyWindow(game->window);
     }
-    free(game);
+    SDL_free(game);
 }
 
 static void C4_Game_HandleKeyboardInput(C4_Game* game, int scancode) {

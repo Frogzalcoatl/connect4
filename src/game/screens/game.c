@@ -18,7 +18,7 @@ static void C4_GameScreen_ResetGame() {
 static void PlayAgainOnClick(void* context) {
     (void)context;
     gameData.winnerPopup->isShowing = false;
-    
+    C4_GameScreen_ResetGame();
 }
 static void ReturnToMenuOnClick(void* context) {
     (void)context;
@@ -62,7 +62,7 @@ void C4_SetScreen_Game(C4_Game* game) {
             .theme = &C4_UI_THEME_DEFAULT
         }
     );
-    backButton->OnClickCallback = BackOnClick;
+    backButton->OnReleaseCallback = BackOnClick;
     C4_UI_Button_CenterInWindow(backButton, C4_Axis_X, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
 
     C4_UI_Popup* winnerPopup = C4_UI_Container_Add_Popup(
@@ -79,11 +79,11 @@ void C4_SetScreen_Game(C4_Game* game) {
     );
     C4_UI_Button* playAgainButton = &winnerPopup->buttonGroup.buttons[0];
     C4_UI_Text_UpdateStr(&playAgainButton->text, "Play Again", game->renderer);
-    playAgainButton->OnClickCallback = PlayAgainOnClick;
+    playAgainButton->OnReleaseCallback = PlayAgainOnClick;
     
     C4_UI_Button* returnToMenuButton = &winnerPopup->buttonGroup.buttons[1];
     C4_UI_Text_UpdateStr(&returnToMenuButton->text, "Return to Menu", game->renderer);
-    returnToMenuButton->OnClickCallback = ReturnToMenuOnClick;
+    returnToMenuButton->OnReleaseCallback = ReturnToMenuOnClick;
 
     C4_UI_Popup_CenterInWindow(winnerPopup, game->renderer, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
 

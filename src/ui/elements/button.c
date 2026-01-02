@@ -107,12 +107,12 @@ bool C4_UI_Button_InitProperties(C4_UI_Button* button, SDL_Renderer* renderer, c
     button->isPressed = false;
     button->isActive = true;
     button->resetHoverOnClick = false;
-    button->OnClickCallback = NULL;
+    button->OnReleaseCallback = NULL;
     button->OnClickContext = NULL;
     button->WhilePressedCallback = NULL;
     button->WhilePressedContext = NULL;
-    button->OnPressedCallback = NULL;
-    button->OnPressedContext = NULL;
+    button->OnPressCallback = NULL;
+    button->OnPressContect = NULL;
     button->OnHoverCallback = NULL;
     button->OnHoverContext = NULL;
     button->interval = 0.1f;
@@ -194,7 +194,7 @@ void C4_UI_Button_Update(void* data, float deltaTime) {
         button->isRepeating = false;
         button->pressTimer = 0.f;
     }
-    if (!button || !button->isPressed || !button->WhilePressedCallback && !PostCallbacks[C4_UI_Button_CallbackType_WhilePressed]) {
+    if (!button || !button->isPressed || (!button->WhilePressedCallback && !PostCallbacks[C4_UI_Button_CallbackType_WhilePressed])) {
         button->pressTimer = 0.f;
         button->isRepeating = false;
         return;
@@ -264,13 +264,13 @@ void C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event) {
     } else if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
         if (event->button.button == SDL_BUTTON_LEFT && button->isHovered) {
             button->isPressed = true;
-            if (button->OnPressedCallback) {
-                button->OnPressedCallback(button->OnPressedContext);
-                if (PostCallbacks[C4_UI_Button_CallbackType_OnPressed]) {
-                    PostCallbacks[C4_UI_Button_CallbackType_OnPressed](
-                        PostCallbackContexts[C4_UI_Button_CallbackType_OnPressed]
-                    );
-                }
+            if (button->OnPressCallback) {
+                button->OnPressCallback(button->OnPressContect);
+            }
+            if (PostCallbacks[C4_UI_Button_CallbackType_OnPress]) {
+                PostCallbacks[C4_UI_Button_CallbackType_OnPress](
+                    PostCallbackContexts[C4_UI_Button_CallbackType_OnPress]
+                );
             }
             if (button->WhilePressedCallback) {
                 button->WhilePressedCallback(button->WhilePressedContext);
@@ -285,11 +285,11 @@ void C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event) {
         if (event->button.button == SDL_BUTTON_LEFT) {
             bool wasClicked = button->isPressed && button->isHovered;
             button->isPressed = false;
-            if (wasClicked && button->OnClickCallback)  {
-                button->OnClickCallback(button->OnClickContext);
-                if (PostCallbacks[C4_UI_Button_CallbackType_OnClick]) {
-                    PostCallbacks[C4_UI_Button_CallbackType_OnClick](
-                        PostCallbackContexts[C4_UI_Button_CallbackType_OnClick]
+            if (wasClicked && button->OnReleaseCallback)  {
+                button->OnReleaseCallback(button->OnClickContext);
+                if (PostCallbacks[C4_UI_Button_CallbackType_OnRelease]) {
+                    PostCallbacks[C4_UI_Button_CallbackType_OnRelease](
+                        PostCallbackContexts[C4_UI_Button_CallbackType_OnRelease]
                     );
                 }
                 if (button->resetHoverOnClick) {
@@ -342,7 +342,7 @@ void C4_UI_Button_Reset(void* data) {
 }
 
 void C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType type, C4_UI_Callback callback, void* context) {
-    if (type < C4_UI_Button_CallbackType_OnClick || type >= C4_UI_Button_CallbackType_Length) {
+    if (type < C4_UI_Button_CallbackType_OnRelease || type >= C4_UI_Button_CallbackType_Length) {
         return;
     }
     PostCallbacks[type] = callback;

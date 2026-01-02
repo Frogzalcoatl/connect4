@@ -79,7 +79,7 @@ void C4_SetScreen_Menu(C4_Game* game) {
     );
     C4_UI_Button* popupOkButton = &inDevelopmentPopup->buttonGroup.buttons[0];
     C4_UI_Text_UpdateStr(&popupOkButton->text, "Ok", game->renderer);
-    popupOkButton->OnClickCallback = OnePlayerPopupOkOnClick;
+    popupOkButton->OnReleaseCallback = OnePlayerPopupOkOnClick;
     popupOkButton->OnClickContext = inDevelopmentPopup;
     C4_UI_Popup_CenterInWindow(inDevelopmentPopup, game->renderer, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
 
@@ -103,7 +103,7 @@ void C4_SetScreen_Menu(C4_Game* game) {
     for (size_t i = 0; i < POPUP_BUTTON_COUNT; i++) {
         C4_UI_Button* btn = &exitGamePopup->buttonGroup.buttons[i];
         C4_UI_Text_UpdateStr(&btn->text, POPUP_TEXT[i], game->renderer);
-        btn->OnClickCallback = POPUP_ON_CLICKS[i];
+        btn->OnReleaseCallback = POPUP_ON_CLICKS[i];
         btn->OnClickContext = POPUP_CLICK_CONTEXTS[i];
     }
     C4_UI_Popup_CenterInWindow(exitGamePopup, game->renderer, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
@@ -134,7 +134,7 @@ void C4_SetScreen_Menu(C4_Game* game) {
     for (size_t i = 0; i < BUTTON_GROUP_COUNT; i++) {
         C4_UI_Button* btn = &buttonGroup->buttons[i];
         C4_UI_Text_UpdateStr(&btn->text, MENU_BUTTON_GROUP_TEXT[i], game->renderer);
-        btn->OnClickCallback = BUTTON_GROUP_ON_CLICKS[i];
+        btn->OnReleaseCallback = BUTTON_GROUP_ON_CLICKS[i];
         btn->OnClickContext = BUTTON_GROUP_CLICK_CONTEXTS[i];
     }
     C4_UI_ButtonGroup_CenterInWindow(buttonGroup, C4_Axis_X, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);

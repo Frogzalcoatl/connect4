@@ -1,8 +1,44 @@
-build
-out
-.cache
-.idea
-.vs
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
+build/
+out/
+.cache/
+.vs/
+.vscode/
+compile_commands.json
+generated/
+
+# --- Android Studio / Gradle Config ---
+# Local configuration file (sdk path, etc) - NEVER commit this
+local.properties
+# Gradle cache and wrapper files
+.gradle/
+android/.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# --- Android Build Outputs ---
+# The massive build folders created by Android Studio
+android/app/build/
+android/build/
+
+# --- Android Native / CMake Caches ---
+# This is the folder causing your previous issues. 
+# It contains the cached CMake configuration for Android.
+.cxx/
+.externalNativeBuild/
+
+# --- Android Binaries ---
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# --- IDE / Editor Metadata ---
+.idea/
+*.iml
+*.swp
+.DS_Store
+Thumbs.db
+
+# --- Android Studio Capture/Logs ---
+captures/
+*.hprof

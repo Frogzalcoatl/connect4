@@ -18,11 +18,8 @@ jobs:
           - { name: Windows VS2022, os: windows-2022 }
           - { name: Linux GCC, os: ubuntu-latest }
           - { name: macOS, os: macos-latest }
-          - {
-              name: Android,
-              os: ubuntu-latest,
-              flags: "-DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=arm64-v8a -DANDROID_STL=c++_static -DANDROID_PLATFORM=android-21",
-            }
+          # Android configuration (No flags needed, Gradle handles it)
+          - { name: Android, os: ubuntu-latest }
           - {
               name: iOS,
               os: macos-latest,
@@ -33,6 +30,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # --- LINUX DEPENDENCIES ---
       - name: Install Linux Dependencies
         if: runner.os == 'Linux' && matrix.platform.name != 'Android'
         run: |
@@ -44,12 +42,33 @@ jobs:
           libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
           libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev
 
+      # --- ANDROID SETUP ---
+      - name: Setup Java
+        if: matrix.platform.name == 'Android'
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17" # Required for newer Android Gradle Plugins
+
+      # --- STANDARD CMAKE CONFIGURE (Skipped for Android) ---
       - name: Configure
+        if: matrix.platform.name != 'Android'
         run: cmake -B build ${{matrix.platform.flags}} -DCMAKE_BUILD_TYPE=Release
 
+      # --- STANDARD CMAKE BUILD (Skipped for Android) ---
       - name: Build
+        if: matrix.platform.name != 'Android'
         run: cmake --build build --config Release
 
+      # --- ANDROID GRADLE BUILD ---
+      - name: Build Android APK
+        if: matrix.platform.name == 'Android'
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      # --- IOS PACKAGING ---
       - name: Create iOS IPA
         if: matrix.platform.name == 'iOS'
         run: |
@@ -57,6 +76,7 @@ jobs:
           cp -r build/bin/Connect4.app Payload/
           zip -r Connect4.ipa Payload
 
+      # --- ARTIFACT UPLOAD ---
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -67,3 +87,4 @@ jobs:
             build/bin/Connect4.app
             build/bin/Connect4
             *.ipa
+            android/app/build/outputs/apk/debug/*.apk

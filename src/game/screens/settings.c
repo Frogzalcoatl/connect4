@@ -169,7 +169,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
     for (size_t i = 0; i < BUTTON_GROUP_COUNT; i++) {
         C4_UI_Button* btn = &buttonGroup->buttons[i];
         C4_UI_Text_UpdateStr(&btn->text, SETTINGS_BUTTONS_TEXT[i], game->renderer);
-        btn->OnClickCallback = BUTTON_GROUP_ON_CLICKS[i];
+        btn->OnReleaseCallback = BUTTON_GROUP_ON_CLICKS[i];
     }
     C4_UI_Button* applyButton = &buttonGroup->buttons[0];
     applyButton->isActive = false;
@@ -190,7 +190,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
     for (size_t i = 0; i < POPUP_BUTTON_COUNT; i++) {
         C4_UI_Button* btn = &confirmPopup->buttonGroup.buttons[i];
         C4_UI_Text_UpdateStr(&btn->text, POPUP_BUTTON_TEXT[i], game->renderer);
-        btn->OnClickCallback = POPUP_ON_CLICKS[i];
+        btn->OnReleaseCallback = POPUP_ON_CLICKS[i];
     }
     C4_UI_Popup_CenterInWindow(confirmPopup, game->renderer, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
 

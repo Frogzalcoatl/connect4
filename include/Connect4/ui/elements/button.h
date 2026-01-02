@@ -29,12 +29,12 @@ typedef struct {
     bool isPressed;
     bool isActive;
     bool resetHoverOnClick;
-    C4_UI_Callback OnClickCallback;
+    C4_UI_Callback OnReleaseCallback;
     void* OnClickContext;
     C4_UI_Callback WhilePressedCallback;
     void* WhilePressedContext;
-    C4_UI_Callback OnPressedCallback;
-    void* OnPressedContext;
+    C4_UI_Callback OnPressCallback;
+    void* OnPressContect;
     C4_UI_Callback OnHoverCallback;
     void* OnHoverContext;
     float delay;
@@ -58,9 +58,9 @@ void C4_UI_Button_Reset(void* data);
 void C4_UI_Button_SetTheme(C4_UI_Button* button, const C4_UI_Theme* theme);
 
 typedef enum {
-    C4_UI_Button_CallbackType_OnClick = 1,
+    C4_UI_Button_CallbackType_OnRelease = 1,
     C4_UI_Button_CallbackType_WhilePressed,
-    C4_UI_Button_CallbackType_OnPressed,
+    C4_UI_Button_CallbackType_OnPress,
     C4_UI_Button_CallbackType_OnHover,
     C4_UI_Button_CallbackType_Length
 } C4_UI_Button_CallbackType;
