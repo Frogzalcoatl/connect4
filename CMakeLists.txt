@@ -12,7 +12,10 @@ endif()
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
+
 set(CMAKE_BUILD_PARALLEL_LEVEL 0 CACHE STRING "Number of parallel build jobs")
 
 # --- SDL3 SETUP ---
@@ -122,21 +125,23 @@ if(WIN32)
 endif()
 
 if(ANDROID)
-    add_library(${PROJECT_NAME} SHARED ${SOURCES} ${GENERATED_SOURCES})
+    set(EXE_NAME main)
+    add_library(${EXE_NAME} SHARED ${SOURCES} ${GENERATED_SOURCES})
 else()
-    add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${WIN_FLAGS} ${SOURCES} ${GENERATED_SOURCES} ${ICON_RC})
+    set(EXE_NAME ${PROJECT_NAME})
+    add_executable(${EXE_NAME} MACOSX_BUNDLE ${WIN_FLAGS} ${SOURCES} ${GENERATED_SOURCES} ${ICON_RC})
 endif()
 
 if(APPLE)
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-        MACOSX_BUNDLE_GUI_IDENTIFIER "com.yourname.${PROJECT_NAME}"
+    set_target_properties(${EXE_NAME} PROPERTIES
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.yourname.${EXE_NAME}"
         MACOSX_BUNDLE_BUNDLE_VERSION "1.0.0"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0.0"
-        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.yourname.${PROJECT_NAME}"
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.yourname.${EXE_NAME}"
     )
 
     # Disable Code Signing (Required for GitHub Actions to pass)
-    set_target_properties(${PROJECT_NAME} PROPERTIES
+    set_target_properties(${EXE_NAME} PROPERTIES
         XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO"
         XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO"
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
@@ -144,21 +149,21 @@ if(APPLE)
 endif()
 
 if(MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE /W3 /std:clatest)
+    target_compile_options(${EXE_NAME} PRIVATE /W3 /std:clatest)
 else()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
-    target_compile_features(${PROJECT_NAME} PRIVATE c_std_23)
+    target_compile_options(${EXE_NAME} PRIVATE -Wall -Wextra)
+    target_compile_features(${EXE_NAME} PRIVATE c_std_23)
     if(APPLE)
-        target_compile_options(${PROJECT_NAME} PRIVATE -Wno-error=incompatible-function-pointer-types)
+        target_compile_options(${EXE_NAME} PRIVATE -Wno-error=incompatible-function-pointer-types)
     endif()
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
+target_link_libraries(${EXE_NAME} PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
 
 if(APPLE)
     if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
         # iOS Frameworks
-        target_link_libraries(${PROJECT_NAME} PRIVATE 
+        target_link_libraries(${EXE_NAME} PRIVATE 
             "-framework Foundation" 
             "-framework UIKit" 
             "-framework QuartzCore" 
@@ -166,7 +171,7 @@ if(APPLE)
         )
     else()
         # macOS Frameworks
-        target_link_libraries(${PROJECT_NAME} PRIVATE 
+        target_link_libraries(${EXE_NAME} PRIVATE 
             "-framework Foundation" 
             "-framework AppKit" 
             "-framework QuartzCore"
@@ -174,7 +179,7 @@ if(APPLE)
     endif()
 endif()
 
-target_include_directories(${PROJECT_NAME} PUBLIC 
+target_include_directories(${EXE_NAME} PUBLIC 
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_BINARY_DIR}/generated
 )
@@ -195,7 +200,7 @@ endif()
 if(USE_DISCORD)
     set(DISCORD_RPC_DIR "${CMAKE_SOURCE_DIR}/deps/discord-rpc")
 
-    target_include_directories(${PROJECT_NAME} PRIVATE
+    target_include_directories(${EXE_NAME} PRIVATE
         "${DISCORD_RPC_DIR}/include"
         "${DISCORD_RPC_DIR}/thirdparty/rapidjson-1.1.0/include"
     )
@@ -211,25 +216,25 @@ if(USE_DISCORD)
             "${DISCORD_RPC_DIR}/src/connection_win.cpp"
             "${DISCORD_RPC_DIR}/src/discord_register_win.cpp"
         )
-        target_compile_definitions(${PROJECT_NAME} PRIVATE DISCORD_WINDOWS)
+        target_compile_definitions(${EXE_NAME} PRIVATE DISCORD_WINDOWS)
     elseif(APPLE)
         list(APPEND DISCORD_SRC 
             "${DISCORD_RPC_DIR}/src/connection_unix.cpp"
             "${DISCORD_RPC_DIR}/src/discord_register_osx.m"
         )
-        target_compile_definitions(${PROJECT_NAME} PRIVATE DISCORD_OSX)
+        target_compile_definitions(${EXE_NAME} PRIVATE DISCORD_OSX)
     else() # Linux
         list(APPEND DISCORD_SRC 
             "${DISCORD_RPC_DIR}/src/connection_unix.cpp"
             "${DISCORD_RPC_DIR}/src/discord_register_linux.cpp"
         )
-        target_compile_definitions(${PROJECT_NAME} PRIVATE DISCORD_LINUX)
+        target_compile_definitions(${EXE_NAME} PRIVATE DISCORD_LINUX)
     endif()
 
-    target_sources(${PROJECT_NAME} PRIVATE ${DISCORD_SRC})
-    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_DISCORD)
+    target_sources(${EXE_NAME} PRIVATE ${DISCORD_SRC})
+    target_compile_definitions(${EXE_NAME} PRIVATE USE_DISCORD)
     message(STATUS "discord-rpc enabled")
 endif()
 
 # So math.h always includes math defines (ex: M_PI)
-target_compile_definitions(${PROJECT_NAME} PRIVATE _USE_MATH_DEFINES)
+target_compile_definitions(${EXE_NAME} PRIVATE _USE_MATH_DEFINES)
