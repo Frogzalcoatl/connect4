@@ -92,7 +92,7 @@ static void UniversalWhilePressedFuncs() {
     ChangeAmountToWinMax();
     ApplyButtonInactiveHandler();
     C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.winAmountInput);
-    C4_PushEvent_SoundRequest(C4_SoundEffect_ButtonClick);
+    C4_PlaySound(C4_SoundEffect_ButtonClick);
 }
 
 static void WidthIncrementWhilePressed(void* context) {

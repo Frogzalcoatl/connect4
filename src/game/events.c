@@ -43,10 +43,3 @@ void C4_PushEvent_ScreenChange(C4_ScreenType screenType) {
     event.screenChange.type = screenType;
     C4_PushEvent(event);
 }
-
-void C4_PushEvent_SoundRequest(C4_SoundEffect soundId) {
-    C4_Event event;
-    event.type = C4_EVENT_SOUND_REQUEST;
-    event.sound.id = soundId;
-    C4_PushEvent(event);
-}

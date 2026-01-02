@@ -43,11 +43,11 @@ void Connect4_Quit_Dependencies(void) {
 }
 
 static void GlobalOnHoverSound(void* context) {
-    C4_PushEvent_SoundRequest(C4_SoundEffect_ButtonHover);
+    C4_PlaySound(C4_SoundEffect_ButtonHover);
 }
 
 static void GlobalOnClickSound(void* context) {
-    C4_PushEvent_SoundRequest(C4_SoundEffect_ButtonClick);
+    C4_PlaySound(C4_SoundEffect_ButtonClick);
 }
 
 static void C4_Game_ChangeScreen(C4_Game* game, C4_ScreenType type) {
@@ -163,9 +163,6 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
             }; break;
             case C4_EVENT_SCREEN_CHANGE: {
                 C4_Game_ChangeScreen(game, eventC4->screenChange.type);
-            }; break;
-            case C4_EVENT_SOUND_REQUEST: {
-                C4_PlaySound(eventC4->sound.id);
             }; break;
             default: break;
         }

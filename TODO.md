@@ -1,5 +1,7 @@
 # TODO
 
+* UI Scale Setting
+* Change UI Layout based on window aspect ratio
 * Keyboard cursor (Use arrow keys to navigate buttons)
     * Can also be used to track whether the keyboard is focused on text boxes, etc
 * Slider UIElement
