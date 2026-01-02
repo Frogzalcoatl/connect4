@@ -2,7 +2,7 @@ plugins {
      id 'com.android.application'
 }
 
-def buildWithCMake = project.hasProperty('BUILD_WITH_CMAKE');
+def buildWithCMake = true;
 
 android {
     namespace = "org.libsdl.app"
@@ -13,13 +13,8 @@ android {
         versionCode 1
         versionName "1.0"
         externalNativeBuild {
-            ndkBuild {
-                arguments "-DANDROID_STL=c++_shared"
-                // abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
-                abiFilters 'arm64-v8a'
-            }
             cmake {
-                arguments "-DANDROID_PLATFORM=android-21", "-DANDROID_STL=c++_static"
+                arguments "-DANDROID_PLATFORM=android-21", "-DANDROID_STL=c++_shared"
                 // abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
                 abiFilters 'arm64-v8a'
             }
@@ -40,14 +35,8 @@ android {
             jniLibs.srcDir 'libs'
         }
         externalNativeBuild {
-            if (buildWithCMake) {
-                cmake {
-                    path file("../../CMakeLists.txt")
-                }
-            } else {
-                ndkBuild {
-                    path 'jni/Android.mk'
-                }
+            cmake {
+                path file("../../CMakeLists.txt")
             }
         }
 

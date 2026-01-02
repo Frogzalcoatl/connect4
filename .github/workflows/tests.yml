@@ -58,6 +58,8 @@ jobs:
       - name: Build Android APK
         if: matrix.platform.name == 'Android'
         run: |
+          rm -f android/app/jni/Android.mk
+          rm -f android/app/jni/Application.mk
           cd android
           # Give execution permission to the gradle wrapper
           chmod +x gradlew
@@ -85,5 +87,5 @@ jobs:
           name: Connect4-${{ matrix.platform.name }}
           path: |
             build/bin/
-            android-project/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/debug/*.apk
             *.ipa
