@@ -1,0 +1,29 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Android: Build APK (Debug)",
+            "type": "shell",
+            "command": "./gradlew assembleDebug",
+            "options": {
+                "cwd": "${workspaceFolder}/android"
+            },
+            "group": "build",
+            "windows": {
+                "command": ".\\gradlew.bat assembleDebug"
+            }
+        },
+        {
+            "label": "Android: Clean and Rebuild APK (Debug)",
+            "type": "shell",
+            "command": "./gradlew clean assembleDebug",
+            "options": {
+                "cwd": "${workspaceFolder}/android"
+            },
+            "group": "build",
+            "windows": {
+                "command": ".\\gradlew.bat clean assembleDebug"
+            }
+        }
+    ]
+}
