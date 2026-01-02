@@ -56,8 +56,9 @@ if(NOT SDL3_FOUND)
 endif()
 
 # --- SDL3_ttf SETUP ---
-set(SDLTTF_SHARED ${SDL_SHARED_MODE} CACHE BOOL "Build shared libraries" FORCE)
-set(SDLTTF_STATIC ${SDL_STATIC_MODE} CACHE BOOL "Build static libraries" FORCE)
+set(SDLTTF_SHARED OFF CACHE BOOL "Build shared libraries" FORCE)
+set(SDLTTF_STATIC ON CACHE BOOL "Build static libraries" FORCE)
+
 set(SDLTTF_SAMPLES OFF CACHE BOOL "Build SDL3_ttf samples" FORCE)
 set(SDLTTF_VENDORED ON CACHE BOOL "Use vendored FreeType/HarfBuzz" FORCE)
 
