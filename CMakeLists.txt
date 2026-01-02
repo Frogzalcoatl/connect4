@@ -18,9 +18,17 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
 
 set(CMAKE_BUILD_PARALLEL_LEVEL 0 CACHE STRING "Number of parallel build jobs")
 
+set(SDL_SHARED_MODE OFF)
+set(SDL_STATIC_MODE ON)
+
+if(ANDROID)
+    set(SDL_SHARED_MODE ON)
+    set(SDL_STATIC_MODE OFF)
+endif()
+
 # --- SDL3 SETUP ---
-set(SDL_SHARED OFF CACHE BOOL "Build shared libraries" FORCE)
-set(SDL_STATIC ON CACHE BOOL "Build static libraries" FORCE)
+set(SDL_SHARED ${SDL_SHARED_MODE} CACHE BOOL "Build shared libraries" FORCE)
+set(SDL_STATIC ${SDL_STATIC_MODE} CACHE BOOL "Build static libraries" FORCE)
 set(SDL_TEST_LIBRARY OFF CACHE BOOL "Build SDL test library" FORCE)
 set(SDL_DISABLE_INSTALL ON CACHE BOOL "Don't add install targets for SDL" FORCE)
 
@@ -48,11 +56,10 @@ if(NOT SDL3_FOUND)
 endif()
 
 # --- SDL3_ttf SETUP ---
-set(SDLTTF_SHARED OFF CACHE BOOL "Build shared libraries" FORCE)
-set(SDLTTF_STATIC ON  CACHE BOOL "Build static libraries" FORCE)
+set(SDLTTF_SHARED ${SDL_SHARED_MODE} CACHE BOOL "Build shared libraries" FORCE)
+set(SDLTTF_STATIC ${SDL_STATIC_MODE} CACHE BOOL "Build static libraries" FORCE)
 set(SDLTTF_SAMPLES OFF CACHE BOOL "Build SDL3_ttf samples" FORCE)
 set(SDLTTF_VENDORED ON CACHE BOOL "Use vendored FreeType/HarfBuzz" FORCE)
-set(SDLTTF_NSC_INTROSPECTION OFF CACHE BOOL "Enable NSC Introspection" FORCE)
 
 find_package(SDL3_ttf CONFIG QUIET)
 
