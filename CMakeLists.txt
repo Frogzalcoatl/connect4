@@ -38,6 +38,13 @@ if(NOT SDL3_FOUND)
         OVERRIDE_FIND_PACKAGE
     )
     FetchContent_MakeAvailable(SDL3)
+    if(NOT TARGET SDL3::SDL3)
+        if(TARGET SDL3-static)
+            add_library(SDL3::SDL3 ALIAS SDL3-static)
+        elseif(TARGET SDL3)
+            add_library(SDL3::SDL3 ALIAS SDL3)
+        endif()
+    endif()
 endif()
 
 # --- SDL3_ttf SETUP ---
@@ -61,6 +68,13 @@ if(NOT SDL3_ttf_FOUND)
         OVERRIDE_FIND_PACKAGE
     )
     FetchContent_MakeAvailable(SDL3_ttf)
+    if(NOT TARGET SDL3_ttf::SDL3_ttf)
+        if(TARGET SDL3_ttf-static)
+            add_library(SDL3_ttf::SDL3_ttf ALIAS SDL3_ttf-static)
+        elseif(TARGET SDL3_ttf)
+            add_library(SDL3_ttf::SDL3_ttf ALIAS SDL3_ttf)
+        endif()
+    endif()
 endif()
 
 # Function to read a file and turn it into a C file / header
