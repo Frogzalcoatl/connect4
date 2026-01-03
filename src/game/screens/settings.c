@@ -72,6 +72,8 @@ static void PopupYesOnClick(void* context) {
     C4_Board_ChangeSize(data->game->board, (uint8_t)data->widthInput->currentValue, (uint8_t)data->heightInput->currentValue);
     data->game->board->amountToWin = (uint8_t)data->winAmountInput->currentValue;
     data->game->UIScale = settingsData.UIScaleInput->currentValue / 100.f;
+    data->game->container.destinationX = C4_BASE_WINDOW_WIDTH / 2.f - C4_BASE_WINDOW_WIDTH * data->game->UIScale / 2.f;
+    data->game->container.destinationY = C4_BASE_WINDOW_HEIGHT / 2.f - C4_BASE_WINDOW_HEIGHT * data->game->UIScale / 2.f;
     C4_PushEvent_ScreenChange(C4_ScreenType_Menu);
 }
 static void PopupBackOnClick(void* context) {
