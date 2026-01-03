@@ -105,14 +105,13 @@ void C4_UI_Text_UpdateStr(C4_UI_Text* element, const char* newStr, SDL_Renderer*
     C4_UI_Text_ReloadTexture(element, renderer);
 }
 
-void C4_UI_Text_Draw(void* data, SDL_Renderer* renderer) {
+void C4_UI_Text_Draw(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY) {
     if (!data) {
         SDL_Log("Text element is NULL");
         return;
     }
     C4_UI_Text* element = (C4_UI_Text*)data;
     if (!element->texture) {
-        // Doesnt need a log since this would be true if the text element is currently an empty string
         return;
     }
     if (!renderer) {
@@ -124,5 +123,9 @@ void C4_UI_Text_Draw(void* data, SDL_Renderer* renderer) {
     }
     SDL_SetTextureColorMod(element->texture, element->color.r, element->color.g, element->color.b);
     SDL_SetTextureAlphaMod(element->texture, element->color.a);
-    SDL_RenderTexture(renderer, element->texture, NULL, &element->destination);
+
+    SDL_FRect drawRect;
+    C4_UI_GetScaledRect(&element->destination, &drawRect, scale, parentX, parentY);
+
+    SDL_RenderTexture(renderer, element->texture, NULL, &drawRect);
 }

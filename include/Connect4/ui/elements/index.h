@@ -8,3 +8,6 @@ typedef enum {
 } C4_Axis;
 
 void C4_UI_CenterInWindow(SDL_FRect* rect, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight);
+void C4_UI_GetScaledRect (
+    const SDL_FRect* baseRect, SDL_FRect* returnedRect, float scale, float parentX, float parentY
+);

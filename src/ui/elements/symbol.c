@@ -1,4 +1,5 @@
 #include "Connect4/ui/elements/symbol.h"
+#include "Connect4/ui/elements/index.h"
 #include <math.h>
 #include <stdlib.h>
 
@@ -56,7 +57,7 @@ static SDL_FPoint C4_UI_RotatePoint(SDL_FPoint point, SDL_FPoint center, float d
     return (SDL_FPoint){rotatedX + center.x, rotatedY + center.y}; 
 }
 
-static void C4_UI_Symbol_DrawTriangle(C4_UI_Symbol* symbol, SDL_Renderer* renderer) {
+static void C4_UI_Symbol_DrawTriangle(C4_UI_Symbol* symbol, SDL_Renderer* renderer, float scale, float parentX, float parentY) {
     if (!symbol) {
         return;
     }
@@ -72,17 +73,16 @@ static void C4_UI_Symbol_DrawTriangle(C4_UI_Symbol* symbol, SDL_Renderer* render
         vertices[i].color = fColor;
         vertices[i].tex_coord = (SDL_FPoint){0.f, 0.f};
     }
-    float x = symbol->destination.x;
-    float y = symbol->destination.y;
-    float w = symbol->destination.w;
-    float h = symbol->destination.h;
+
+    SDL_FRect drawRect;
+    C4_UI_GetScaledRect(&symbol->destination, &drawRect, scale, parentX, parentY);
 
     SDL_FPoint rawPoints[3];
-    rawPoints[0] = (SDL_FPoint){x + w / 2.f, y};
-    rawPoints[1] = (SDL_FPoint){x, y + h};
-    rawPoints[2] = (SDL_FPoint){x + w, y + h};
+    rawPoints[0] = (SDL_FPoint){drawRect.x + drawRect.w / 2.f, drawRect.y};
+    rawPoints[1] = (SDL_FPoint){drawRect.x, drawRect.y + drawRect.h};
+    rawPoints[2] = (SDL_FPoint){drawRect.x + drawRect.w, drawRect.y + drawRect.h};
 
-    SDL_FPoint center = {x + w / 2.f, y + h / 2.f};
+    SDL_FPoint center = {drawRect.x + drawRect.w / 2.f, drawRect.y + drawRect.h / 2.f};
 
     for (int i = 0; i < 3; i++) {
         vertices[i].position = C4_UI_RotatePoint(rawPoints[i], center, (float)symbol->rotationDegrees);
@@ -91,7 +91,7 @@ static void C4_UI_Symbol_DrawTriangle(C4_UI_Symbol* symbol, SDL_Renderer* render
     SDL_RenderGeometry(renderer, NULL, vertices, 3, NULL, 0);
 }
 
-void C4_UI_Symbol_Draw(void* data, SDL_Renderer* renderer) {
+void C4_UI_Symbol_Draw(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY) {
     if (!data) {
         SDL_Log("Tried to draw NULL symbol element. Ignoring");
         return;
@@ -103,7 +103,7 @@ void C4_UI_Symbol_Draw(void* data, SDL_Renderer* renderer) {
     }
     switch (symbol->type) {
         case C4_UI_SymbolType_Triangle: {
-            C4_UI_Symbol_DrawTriangle(symbol, renderer);
+            C4_UI_Symbol_DrawTriangle(symbol, renderer, scale, parentX, parentY);
         }; break;
         default: break;
     }

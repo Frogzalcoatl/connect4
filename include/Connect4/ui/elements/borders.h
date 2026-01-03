@@ -18,4 +18,4 @@ typedef struct {
 bool C4_UI_Borders_InitProperties(C4_UI_Borders* element, const C4_UI_Borders_Config* config);
 C4_UI_Borders* C4_UI_Borders_Create(const C4_UI_Borders_Config* config);
 void C4_UI_Borders_Destroy(void* data);
-void C4_UI_Borders_Draw(void* data, SDL_Renderer* renderer);
+void C4_UI_Borders_Draw(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY);

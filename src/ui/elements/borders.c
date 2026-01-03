@@ -37,7 +37,7 @@ void C4_UI_Borders_Destroy(void* data) {
     free(element);
 }
 
-void C4_UI_Borders_Draw(void* data, SDL_Renderer* renderer) {
+void C4_UI_Borders_Draw(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY) {
     if (!data) {
         SDL_Log("Unable to draw Borders element. Pointer is NULL");
         return;
@@ -46,11 +46,19 @@ void C4_UI_Borders_Draw(void* data, SDL_Renderer* renderer) {
     if (element->width == 0) {
         return;
     }
+
+    SDL_FRect drawRect;
+    C4_UI_GetScaledRect(&element->destination, &drawRect, scale, parentX, parentY);
+    
+    float scaledBorderWidth = (float)element->width * scale;
+
+    SDL_FRect topBorder = {drawRect.x, drawRect.y, drawRect.w, scaledBorderWidth};
+    SDL_FRect bottomBorder = {drawRect.x, drawRect.y + drawRect.h - scaledBorderWidth, drawRect.w, scaledBorderWidth};
+    SDL_FRect leftBorder = {drawRect.x, drawRect.y, scaledBorderWidth, drawRect.h};
+    SDL_FRect rightBorder = {drawRect.x + drawRect.w - scaledBorderWidth, drawRect.y, scaledBorderWidth, drawRect.h};
+
     SDL_SetRenderDrawColor(renderer, element->color.r, element->color.g, element->color.b, element->color.a);
-    SDL_FRect topBorder = {element->destination.x, element->destination.y, element->destination.w, (float)element->width};
-    SDL_FRect bottomBorder = {element->destination.x, element->destination.y + element->destination.h - (float)element->width, element->destination.w, (float)element->width};
-    SDL_FRect leftBorder = {element->destination.x, element->destination.y, (float)element->width, element->destination.h};
-    SDL_FRect rightBorder = {element->destination.x + element->destination.w - (float)element->width, element->destination.y, (float)element->width, element->destination.h};
+
     SDL_RenderFillRect(renderer, &topBorder);
     SDL_RenderFillRect(renderer, &bottomBorder);
     SDL_RenderFillRect(renderer, &leftBorder);

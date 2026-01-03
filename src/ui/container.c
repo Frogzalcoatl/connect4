@@ -2,7 +2,7 @@
 #include "Connect4/ui/cursorManager.h"
 #include <stdlib.h>
 
-void C4_UI_Container_Init(C4_UI_Container* container, SDL_Renderer* renderer) {
+void C4_UI_Container_Init(C4_UI_Container* container, SDL_Renderer* renderer, float destinationX, float destinationY) {
     if (!container) {
         return;
     }
@@ -13,6 +13,8 @@ void C4_UI_Container_Init(C4_UI_Container* container, SDL_Renderer* renderer) {
     }
     container->renderer = renderer;
     container->buttonColorResetComplete = true;
+    container->destinationX = destinationX;
+    container->destinationY = destinationY;
 }
 
 void C4_UI_Container_Clear(C4_UI_Container* container) {
@@ -40,7 +42,7 @@ void C4_UI_Container_Destroy(C4_UI_Container* container) {
     free(container);
 }
 
-void C4_UI_Container_Draw(C4_UI_Container* container) {
+void C4_UI_Container_Draw(C4_UI_Container* container, float scale) {
     if (!container || !container->renderer) {
         return;
     }
@@ -48,7 +50,7 @@ void C4_UI_Container_Draw(C4_UI_Container* container) {
     while (current != NULL) {
         C4_UI_Node* next = current->next;
         if (current->element.Draw && current->element.type != C4_UI_ElementType_Popup) {
-            current->element.Draw(current->element.data, container->renderer);
+            current->element.Draw(current->element.data, container->renderer, scale, container->destinationX, container->destinationY);
         }
         current = next;
     }
@@ -57,14 +59,14 @@ void C4_UI_Container_Draw(C4_UI_Container* container) {
     while (current != NULL) {
         if (current->element.type == C4_UI_ElementType_Popup) {
             if (current->element.Draw) {
-                current->element.Draw(current->element.data, container->renderer);
+                current->element.Draw(current->element.data, container->renderer, scale, container->destinationX, container->destinationY);
             }
         }
         current = current->next;
     }
 }
 
-void C4_UI_Container_HandleEvent(C4_UI_Container* container, SDL_Event* event) {
+void C4_UI_Container_HandleEvent(C4_UI_Container* container, SDL_Event* event, float scale) {
     if (!container || !event) {
         return;
     }
@@ -75,7 +77,7 @@ void C4_UI_Container_HandleEvent(C4_UI_Container* container, SDL_Event* event) {
             C4_UI_Popup* popup = (C4_UI_Popup*)current->element.data;
             if (popup->isShowing) {
                 isPopupActive = true;
-                current->element.HandleEvents(current->element.data, event);
+                current->element.HandleEvents(current->element.data, event, scale, container->destinationX, container->destinationY);
             }
         }
         current = current->next;
@@ -85,7 +87,7 @@ void C4_UI_Container_HandleEvent(C4_UI_Container* container, SDL_Event* event) {
         while (current) {
             if (current->element.type != C4_UI_ElementType_Popup) {
                 if (current->element.HandleEvents) {
-                    current->element.HandleEvents(current->element.data, event);
+                    current->element.HandleEvents(current->element.data, event, scale, container->destinationX, container->destinationY);
                 }
             }
             current = current->next;
@@ -139,8 +141,8 @@ void C4_UI_Container_Update(C4_UI_Container* container, float deltaTime) {
 static void C4_UI_Container_AddNode(
     C4_UI_Container* container, void* data,
     C4_UI_ElementType type,
-    void (*Draw)(void*, SDL_Renderer*),
-    void (*HandleEvents)(void*, SDL_Event*),
+    void (*Draw)(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY),
+    void (*HandleEvents)(void* data, SDL_Event* event, float scale, float parentX, float parentY),
     void (*Destroy)(void*),
     void (*Reset)(void*),
     void (*Update)(void*, float deltaTime)

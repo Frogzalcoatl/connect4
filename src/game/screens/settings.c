@@ -1,12 +1,14 @@
 #include "Connect4/game/screens/settings.h"
 #include "Connect4/game/events.h"
 #include "Connect4/constants.h"
+#include <stdio.h>
 
 typedef struct {
     C4_Game* game;
     C4_UI_NumberInput* widthInput;
     C4_UI_NumberInput* heightInput;
     C4_UI_NumberInput* winAmountInput;
+    C4_UI_NumberInput* UIScaleInput;
     C4_UI_Popup* confirmPopup;
     C4_UI_Button* applyButton;
 } C4_SettingsScreenData;
@@ -21,6 +23,13 @@ static bool IsUpdatingBoard(void) {
     );
 }
 
+static bool IsUpdatingSettings(void) {
+    return (
+        IsUpdatingBoard() ||
+        settingsData.UIScaleInput->currentValue / 100.f != settingsData.game->UIScale
+    );
+}
+
 #define BUTTON_GROUP_COUNT 2
 static const char SETTINGS_BUTTONS_TEXT[BUTTON_GROUP_COUNT][16] = {
     "Apply",
@@ -31,7 +40,7 @@ static const char CONFIRM_MESSAGE_BOARD_NOT_EMPTY[] = "Are you sure you want to 
 static void ApplyOnClick(void* context) {
     (void)context;
     C4_SettingsScreenData* data = &settingsData;
-    if (!IsUpdatingBoard()) {
+    if (!IsUpdatingSettings()) {
         return;
     }
     bool isBoardEmpty = C4_Board_IsEmpty(data->game->board);
@@ -62,6 +71,7 @@ static void PopupYesOnClick(void* context) {
     C4_SettingsScreenData* data = &settingsData;
     C4_Board_ChangeSize(data->game->board, (uint8_t)data->widthInput->currentValue, (uint8_t)data->heightInput->currentValue);
     data->game->board->amountToWin = (uint8_t)data->winAmountInput->currentValue;
+    data->game->UIScale = settingsData.UIScaleInput->currentValue / 100.f;
     C4_PushEvent_ScreenChange(C4_ScreenType_Menu);
 }
 static void PopupBackOnClick(void* context) {
@@ -74,7 +84,7 @@ static const C4_UI_Callback POPUP_ON_CLICKS[BUTTON_GROUP_COUNT] = {
 };
 
 static void ApplyButtonInactiveHandler(void) {
-    settingsData.applyButton->isActive = IsUpdatingBoard();
+    settingsData.applyButton->isActive = IsUpdatingSettings();
 }
 
 static void ChangeAmountToWinMax(void) {
@@ -88,7 +98,7 @@ static void ChangeAmountToWinMax(void) {
     );
 }
 
-static void UniversalWhilePressedFuncs() {
+static void UniversalWhilePressedFuncs(void) {
     ChangeAmountToWinMax();
     ApplyButtonInactiveHandler();
     C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.winAmountInput);
@@ -132,6 +142,28 @@ static void WinAmountIncrementWhilePressed(void* context) {
 static void WinAmountDecrementWhilePressed(void* context) {
     (void)context;
     C4_UI_NumberInput_GenericDecrementCallback(settingsData.winAmountInput);
+    UniversalWhilePressedFuncs();
+}
+
+static void UIScaleIncrementWhilePressed(void* context) {
+    (void)context;
+    C4_UI_NumberInput* input = settingsData.UIScaleInput;
+    if (input->currentValue < input->max) {
+        input->currentValue += 10;
+        snprintf(input->numberText.str, sizeof(input->numberText.str), "%d", input->currentValue);
+        C4_UI_Text_ReloadTexture(&input->numberText, settingsData.game->renderer);
+    }
+    UniversalWhilePressedFuncs();
+}
+
+static void UIScaleDecrementWhilePressed(void* context) {
+    (void)context;
+    C4_UI_NumberInput* input = settingsData.UIScaleInput;
+    if (input->currentValue > input->min) {
+        input->currentValue -= 10;
+        snprintf(input->numberText.str, sizeof(input->numberText.str), "%d", input->currentValue);
+        C4_UI_Text_ReloadTexture(&input->numberText, settingsData.game->renderer);
+    }
     UniversalWhilePressedFuncs();
 }
 
@@ -277,10 +309,38 @@ void C4_SetScreen_Settings(C4_Game* game) {
         }
     );
 
+    C4_UI_NumberInput* UIScaleInput = C4_UI_Container_Add_NumberInput(
+        cont, &(C4_UI_NumberInput_Config){
+            .destination = (SDL_FRect){1175.f, 550.f, 200.f, 100.f},
+            .min = 20,
+            .max = 250,
+            .startingValue = (unsigned int)(game->UIScale * 100),
+            .font = game->fontRegular,
+            .theme = &C4_UI_THEME_DEFAULT
+        }
+    );
+    C4_UI_Button* UIScaleIncrement = &UIScaleInput->buttonGroup.buttons[0];
+    UIScaleIncrement->WhilePressedCallback = UIScaleIncrementWhilePressed;
+    C4_UI_Button* UIScaleDecrement = &UIScaleInput->buttonGroup.buttons[1];
+    UIScaleDecrement->WhilePressedCallback = UIScaleDecrementWhilePressed;
+
+    C4_UI_Container_Add_Text(
+        cont, &(C4_UI_Text_Config){
+            .str = "UI Scale",
+            .font = game->fontRegular,
+            .color = C4_UI_THEME_DEFAULT.textColor,
+            .ptSize = PT_SIZE,
+            .destinationX = 475.f,
+            .destinationY = 575.f,
+            .wrapWidth = 0
+        }
+    );
+
     settingsData.applyButton = applyButton;
     settingsData.confirmPopup = confirmPopup;
     settingsData.game = game;
     settingsData.heightInput = boardHeightInput;
     settingsData.widthInput = boardWidthInput;
     settingsData.winAmountInput = winAmountInput;
+    settingsData.UIScaleInput = UIScaleInput;
 }

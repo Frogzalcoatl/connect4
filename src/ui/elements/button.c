@@ -152,7 +152,7 @@ void C4_UI_Button_Destroy(void* data) {
     free(button);
 }
 
-void C4_UI_Button_Draw(void* data, SDL_Renderer* renderer) {
+void C4_UI_Button_Draw(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY) {
     if (!data) {
         SDL_Log("Button is NULL");
         return;
@@ -167,19 +167,20 @@ void C4_UI_Button_Draw(void* data, SDL_Renderer* renderer) {
     if (!button->isActive) {
         currentColors = &button->inactiveColors;
     }
+
     button->background.color = currentColors->background;
-    C4_UI_Rectangle_Draw(&button->background, renderer);
+    C4_UI_Rectangle_Draw(&button->background, renderer, scale, parentX, parentY);
     if (button->borders.width > 0) {
         button->borders.color = currentColors->borders;
-        C4_UI_Borders_Draw(&button->borders, renderer);
+        C4_UI_Borders_Draw(&button->borders, renderer, scale, parentX, parentY);
     }
     if (button->symbol.type != C4_UI_SymbolType_None) {
         button->symbol.color = currentColors->symbol;
-        C4_UI_Symbol_Draw(&button->symbol, renderer);
+        C4_UI_Symbol_Draw(&button->symbol, renderer, scale, parentX, parentY);
     }
     if (button->text.str[0] != '\0') {
         button->text.color = currentColors->text;
-        C4_UI_Text_Draw(&button->text, renderer);
+        C4_UI_Text_Draw(&button->text, renderer, scale, parentX, parentY);
     }
 }
 
@@ -228,7 +229,7 @@ void C4_UI_Button_Update(void* data, float deltaTime) {
     }
 }
 
-void C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event) {
+void C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY) {
     if (!data) {
         return;
     }
@@ -240,12 +241,16 @@ void C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event) {
     if (!button->isActive) {
         return;
     }
+
+    SDL_FRect scaledRect;
+    C4_UI_GetScaledRect(&button->background.destination, &scaledRect, scale, parentX, parentY);
+
     if (event->type == SDL_EVENT_MOUSE_MOTION) {
         bool currentlyHovered = (
-            event->motion.x >= button->background.destination.x &&
-            event->motion.x <= button->background.destination.x + button->background.destination.w &&
-            event->motion.y >= button->background.destination.y &&
-            event->motion.y <= button->background.destination.y + button->background.destination.h
+            event->motion.x >= scaledRect.x &&
+            event->motion.x <= scaledRect.x + scaledRect.w &&
+            event->motion.y >= scaledRect.y &&
+            event->motion.y <= scaledRect.y + scaledRect.h
         );
         if (currentlyHovered != button->isHovered) {
             button->isHovered = currentlyHovered;

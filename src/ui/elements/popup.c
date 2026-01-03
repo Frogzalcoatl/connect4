@@ -145,7 +145,7 @@ static void C4_UI_Popup_DrawScreenBackground(SDL_Renderer* renderer) {
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }
 
-void C4_UI_Popup_Draw(void* data, SDL_Renderer* renderer) {
+void C4_UI_Popup_Draw(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY) {
     if (!data) {
         SDL_Log("Popup element is NULL");
         return;
@@ -158,10 +158,10 @@ void C4_UI_Popup_Draw(void* data, SDL_Renderer* renderer) {
         return;
     }
     C4_UI_Popup_DrawScreenBackground(renderer);
-    C4_UI_Rectangle_Draw(&popup->background, renderer);
-    C4_UI_Borders_Draw(&popup->borders, renderer);
-    C4_UI_Text_Draw(&popup->message, renderer);
-    C4_UI_ButtonGroup_Draw(&popup->buttonGroup, renderer);
+    C4_UI_Rectangle_Draw(&popup->background, renderer, scale, parentX, parentY);
+    C4_UI_Borders_Draw(&popup->borders, renderer, scale, parentX, parentY);
+    C4_UI_Text_Draw(&popup->message, renderer, scale, parentX, parentY);
+    C4_UI_ButtonGroup_Draw(&popup->buttonGroup, renderer, scale, parentX, parentY);
 }
 
 void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup, SDL_Renderer* renderer, unsigned int windowWidth, unsigned int windowHeight) {
@@ -181,7 +181,7 @@ void C4_UI_Popup_Update(void* data, float deltaTime) {
     C4_UI_ButtonGroup_Update(&popup->buttonGroup, deltaTime);
 }
 
-void C4_UI_Popup_HandleMouseEvents(void* data, SDL_Event* event) {
+void C4_UI_Popup_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY) {
     if (!data || !event) {
         SDL_Log("Popup element and/or event is NULL");
         return;
@@ -190,7 +190,7 @@ void C4_UI_Popup_HandleMouseEvents(void* data, SDL_Event* event) {
     if (!popup->isShowing) {
         return;
     }
-    C4_UI_ButtonGroup_HandleMouseEvents(&popup->buttonGroup, event);
+    C4_UI_ButtonGroup_HandleMouseEvents(&popup->buttonGroup, event, scale, parentX, parentY);
 }
 
 void C4_UI_Popup_SetButtonText(C4_UI_Popup* popup, SDL_Renderer* renderer, size_t buttonIndex, const char* text) {

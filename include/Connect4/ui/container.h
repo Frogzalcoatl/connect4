@@ -23,8 +23,8 @@ typedef enum {
 typedef struct {
     void* data;
     C4_UI_ElementType type;
-    void (*Draw)(void* data, SDL_Renderer* renderer);
-    void (*HandleEvents)(void* data, SDL_Event* event);
+    void (*Draw)(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY);
+    void (*HandleEvents)(void* data, SDL_Event* event, float scale, float parentX, float parentY);
     void (*Destroy)(void* data);
     void (*Reset)(void* data);
     void (*Update)(void* data, float deltaTime);
@@ -40,19 +40,20 @@ typedef struct {
     SDL_Renderer* renderer;
 
     // [Owns] properties specific to this struct
-    //SDL_FRect bounds;
+    float destinationX;
+    float destinationY;
     C4_UI_Node* head;
     C4_UI_Node* tail;
     // Every button's colors are reset when a popup is initally opened
     bool buttonColorResetComplete;
 } C4_UI_Container;
 
-void C4_UI_Container_Init(C4_UI_Container* container, SDL_Renderer* renderer);
+void C4_UI_Container_Init(C4_UI_Container* container, SDL_Renderer* renderer, float destinationX, float destinationY);
 void C4_UI_Container_Destroy(C4_UI_Container* container);
 void C4_UI_Container_Clear(C4_UI_Container* container);
-void C4_UI_Container_Draw(C4_UI_Container* container);
+void C4_UI_Container_Draw(C4_UI_Container* container, float scale);
 void C4_UI_Container_Update(C4_UI_Container* container, float deltaTime);
-void C4_UI_Container_HandleEvent(C4_UI_Container* container, SDL_Event* event);
+void C4_UI_Container_HandleEvent(C4_UI_Container* container, SDL_Event* event, float scale);
 
 C4_UI_Borders* C4_UI_Container_Add_Borders(
     C4_UI_Container* container, const C4_UI_Borders_Config* config

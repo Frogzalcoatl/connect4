@@ -202,7 +202,7 @@ void C4_UI_NumberInput_Destroy(void* data) {
     free(numInput);
 }
 
-void C4_UI_NumberInput_Draw(void* data, SDL_Renderer* renderer) {
+void C4_UI_NumberInput_Draw(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY) {
     if (!data) {
         return;
     }
@@ -211,10 +211,10 @@ void C4_UI_NumberInput_Draw(void* data, SDL_Renderer* renderer) {
         SDL_Log("Unable to draw number input element. Renderer is NULL");
         return;
     }
-    C4_UI_Rectangle_Draw(&numInput->background, renderer);
-    C4_UI_Text_Draw(&numInput->numberText, renderer);
-    C4_UI_Borders_Draw(&numInput->borders, renderer);
-    C4_UI_ButtonGroup_Draw(&numInput->buttonGroup, renderer);
+    C4_UI_Rectangle_Draw(&numInput->background, renderer, scale, parentX, parentY);
+    C4_UI_Text_Draw(&numInput->numberText, renderer, scale, parentX, parentY);
+    C4_UI_Borders_Draw(&numInput->borders, renderer, scale, parentX, parentY);
+    C4_UI_ButtonGroup_Draw(&numInput->buttonGroup, renderer, scale, parentX, parentY);
 }
 
 void C4_UI_NumberInput_CenterInWindow(C4_UI_NumberInput* numInput, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight) {
@@ -233,12 +233,12 @@ void C4_UI_NumberInput_Update(void* data, float deltaTime) {
     C4_UI_ButtonGroup_Update(&numInput->buttonGroup, deltaTime);
 }
 
-void C4_UI_NumberInput_HandleMouseEvents(void* data, SDL_Event* event) {
+void C4_UI_NumberInput_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY) {
     if (!data) {
         return;
     }
     C4_UI_NumberInput* numInput = (C4_UI_NumberInput*)data;
-    C4_UI_ButtonGroup_HandleMouseEvents(&numInput->buttonGroup, event);
+    C4_UI_ButtonGroup_HandleMouseEvents(&numInput->buttonGroup, event, scale, parentX, parentY);
 }
 
 void C4_UI_NumberInput_HandleKeyboardInput(C4_UI_NumberInput* numInput, SDL_Event* event, SDL_Renderer* renderer) {

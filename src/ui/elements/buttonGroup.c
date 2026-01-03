@@ -108,13 +108,13 @@ void C4_UI_ButtonGroup_Destroy(void* data) {
     free(group);
 }
 
-void C4_UI_ButtonGroup_Draw(void* data, SDL_Renderer* renderer) {
+void C4_UI_ButtonGroup_Draw(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY) {
     if (!data) {
         return;
     }
     C4_UI_ButtonGroup* group = (C4_UI_ButtonGroup*)data;
     for (size_t i = 0; i < group->count; i++) {
-        C4_UI_Button_Draw(&group->buttons[i], renderer);
+        C4_UI_Button_Draw(&group->buttons[i], renderer, scale, parentX, parentY);
     }
 }
 
@@ -128,14 +128,14 @@ void C4_UI_ButtonGroup_Update(void* data, float deltaTime) {
     }
 }
 
-void C4_UI_ButtonGroup_HandleMouseEvents(void* data, SDL_Event* event) {
+void C4_UI_ButtonGroup_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY) {
     if (!data || !event) {
         SDL_Log("Button group, event, and/or renderer is NULL");
         return;
     }
     C4_UI_ButtonGroup* group = (C4_UI_ButtonGroup*)data;
     for (size_t i = 0; i < group->count; i++) {
-        C4_UI_Button_HandleMouseEvents(&group->buttons[i], event);
+        C4_UI_Button_HandleMouseEvents(&group->buttons[i], event, scale, parentX, parentY);
     }
 }
 

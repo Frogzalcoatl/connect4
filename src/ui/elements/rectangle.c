@@ -36,12 +36,16 @@ void C4_UI_Rectangle_Destroy(void* data) {
     free(element);
 }
 
-void C4_UI_Rectangle_Draw(void* data, SDL_Renderer* renderer) {
+void C4_UI_Rectangle_Draw(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY) {
     if (!data) {
         SDL_Log("Rectangle element is NULL");
         return;
     }
     C4_UI_Rectangle* element = (C4_UI_Rectangle*)data;
+
+    SDL_FRect drawRect;
+    C4_UI_GetScaledRect(&element->destination, &drawRect, scale, parentX, parentY);
+
     SDL_SetRenderDrawColor(renderer, element->color.r, element->color.g, element->color.b, element->color.a);
-    SDL_RenderFillRect(renderer, &element->destination);
+    SDL_RenderFillRect(renderer, &drawRect);
 }
