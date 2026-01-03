@@ -19,7 +19,11 @@ bool Connect4_Init_Dependencies(void) {
 
     // Force Android to use the older, often more stable OpenSL ES driver
     // The app was making loud ah clicking sounds when i tested it on my phone without this
-    SDL_SetHint(SDL_HINT_AUDIO_DRIVER, "openslES");
+    #if SDL_PLATFORM_ANDROID
+        if (!SDL_SetHint(SDL_HINT_AUDIO_DRIVER, "openslES")) {
+            SDL_ResetHint(SDL_HINT_AUDIO_DRIVER);
+        }
+    #endif
 
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
         // The error is inserted at %s

@@ -45,3 +45,5 @@ Thumbs.db
 # --- Android Studio Capture/Logs ---
 captures/
 *.hprof
+
+android/.vscode/

@@ -7,7 +7,8 @@
 * Slider UIElement
 * Board UI
 * Improve win check efficiency (see WINCHECKCRITIQUE.md)
-* Use the TTF text engine thingy thingy instead of current text implementation
+* Use glyphs for fonts so you dont have to reload textures for every text element
+* Look in to using SDL mixer and SDL image
 * Improve UI cleanliness once code is done
 * Animated background (1:1 aspect ratio, aligned to center)
 * Background music
