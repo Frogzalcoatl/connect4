@@ -10,13 +10,14 @@
 #include "Connect4/game/events.h"
 #include "Connect4/discord-rpc/index.h"
 #include "Connect4/android/quit.h"
+#include "Connect4/ui/utils.h"
 #include <stdlib.h>
 #include <time.h>
 
 bool Connect4_Init_Dependencies(void) {
 
     // To simulate touch events for testing
-    SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "1");
+    // SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "1");
 
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
         // The error is inserted at %s
@@ -107,12 +108,6 @@ static void C4_Game_ClickSound(void* context) {
     C4_PlaySound(C4_SoundEffect_ButtonClick);
 }
 
-static void C4_Game_BothSounds(void* context) {
-    (void)context;
-    C4_PlaySound(C4_SoundEffect_ButtonHover);
-    C4_PlaySound(C4_SoundEffect_ButtonClick);
-}
-
 static void C4_Game_ButtonSounds_SetTouchMode(bool value) {
     // Touch screens dont need hover sounds
     // Would be annoying if you swiped your finger across the screen and heard a million button sounds lol
@@ -132,10 +127,19 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
         return NULL;
     }
 
-    int initialWindowWidth = 1280;
-    int initialWindowHeight = 720;
+    SDL_WindowFlags windowFlags;
+    #if SDL_PLATFORM_ANDROID || SDL_PLATFORM_IOS
+        windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN;
+    #else
+        windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED;
+    #endif
 
-    game->window = SDL_CreateWindow("Connect4", initialWindowWidth, initialWindowHeight, SDL_WINDOW_RESIZABLE);
+    // In case the user's monitor size is smaller than 800x600 for whatever reason 
+    const SDL_DisplayMode* mode = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
+    int initialWindowWidth = C4_Min(mode->w, 800);
+    int initialWindowHeight = C4_Min(mode->h, 600);
+
+    game->window = SDL_CreateWindow("Connect4", initialWindowWidth, initialWindowHeight, windowFlags);
     if (!game->window) {
         SDL_Log("Unable to create SDL Window: %s", SDL_GetError());
         C4_Game_Destroy(game);
