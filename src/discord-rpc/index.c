@@ -31,6 +31,8 @@
         handlers.ready = handleDiscordReady;
         handlers.disconnected = handleDiscordDisconnected;
         handlers.errored = handleDiscordDisconnected;
+        // See https://discord.com/developers/applications/1454580494376108218/information if you wanna change the icon or smth
+        // Gotta be signed in to frogzalcoatl. Can add other users to the application somehow i think.
         Discord_Initialize("1454580494376108218", &handlers, 1, NULL);
         startTime = time(NULL);
     }

@@ -151,8 +151,9 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
     }
     SDL_SetRenderVSync(game->renderer, 1);
 
-    SDL_GetWindowSizeInPixels(game->window, &initialWindowWidth, &initialWindowHeight);
-    game->currentLayout = C4_UI_GetCurrentLayout(initialWindowWidth, initialWindowHeight);
+    int windowWidth, windowHeight;
+    SDL_GetWindowSizeInPixels(game->window, &windowWidth, &windowHeight);
+    game->currentLayout = C4_UI_GetCurrentLayout(windowWidth, windowHeight);
     C4_Game_UpdateWindowProperties(game);
 
     game->board = C4_Board_Create(boardWidth, boardHeight, amountToWin);
@@ -222,7 +223,6 @@ static void C4_Game_UpdateUI(C4_Game* game) {
 
 static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* eventC4) {
     while (SDL_PollEvent(eventSDL)) {
-        SDL_ConvertEventToRenderCoordinates(game->renderer, eventSDL);
         if (eventSDL->type == SDL_EVENT_QUIT) {
             game->running = false;
         } else if (eventSDL->type == SDL_EVENT_KEY_DOWN) {
@@ -234,6 +234,7 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
             game->currentLayout= C4_UI_GetCurrentLayout(eventSDL->window.data1, eventSDL->window.data2);
             C4_Game_UpdateUI(game);
         }
+        SDL_ConvertEventToRenderCoordinates(game->renderer, eventSDL);
         C4_UI_Container_HandleEvent(&game->container, eventSDL, game->UIScale);
     }
     while (C4_PollEvent(eventC4)) {

@@ -97,7 +97,7 @@ sdk.dir=C\:\\Users\\YourName\\AppData\\Local\\Android\\Sdk
 sdk.dir=/Users/YourName/Library/Android/sdk
 ```
 
-3. **Build**
+### 3. **Build**
 Using Command Line to build the .apk:
 ```bash
 cd android

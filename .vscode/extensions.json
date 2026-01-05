@@ -1,7 +1,7 @@
 {
     "recommendations": [
         "ms-vscode.cpptools-extension-pack",
-        // If you plan on messing around in the android/ folder
+        // Below is optional, recommended if you plan on messing around in the android/ folder
         "vscjava.vscode-gradle"
     ]
 }
