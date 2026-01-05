@@ -16,15 +16,7 @@
 bool Connect4_Init_Dependencies(void) {
 
     // To simulate touch events for testing
-    // SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "1");
-
-    // Force Android to use the older, often more stable OpenSL ES driver
-    // The app was making loud ah clicking sounds when i tested it on my phone without this
-    #if SDL_PLATFORM_ANDROID
-        if (!SDL_SetHint(SDL_HINT_AUDIO_DRIVER, "openslES")) {
-            SDL_ResetHint(SDL_HINT_AUDIO_DRIVER);
-        }
-    #endif
+    SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "1");
 
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
         // The error is inserted at %s
@@ -115,14 +107,21 @@ static void C4_Game_ClickSound(void* context) {
     C4_PlaySound(C4_SoundEffect_ButtonClick);
 }
 
+static void C4_Game_BothSounds(void* context) {
+    (void)context;
+    C4_PlaySound(C4_SoundEffect_ButtonHover);
+    C4_PlaySound(C4_SoundEffect_ButtonClick);
+}
+
 static void C4_Game_ButtonSounds_SetTouchMode(bool value) {
-    // Touch screens hear the hover sound when they initially press the button
+    // Touch screens dont need hover sounds
+    // Would be annoying if you swiped your finger across the screen and heard a million button sounds lol
     if (value) {
-        C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnPress, C4_Game_HoverSound, NULL);
         C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnHover, NULL, NULL);
+        C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnRelease, C4_Game_ClickSound, NULL);
     } else {
-        C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnPress, NULL, NULL);
         C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnHover, C4_Game_HoverSound, NULL);
+        C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnRelease, C4_Game_ClickSound, NULL);
     }
 }
 
@@ -160,8 +159,6 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
 
     game->fontRegular = C4_GetFont(C4_FontType_Regular);
     game->fontBold = C4_GetFont(C4_FontType_Bold);
-
-    C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnRelease, C4_Game_ClickSound, NULL);
 
     #if SDL_PLATFORM_ANDROID || SDL_PLATFORM_IOS
         C4_Game_ButtonSounds_SetTouchMode(true);

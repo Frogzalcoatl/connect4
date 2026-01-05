@@ -1,7 +1,5 @@
 # TODO
 
-* Fix android click sounds
-    * See settings number input to understand whats wrong
 * Keyboard cursor (Use arrow keys to navigate buttons)
     * Can also be used to track whether the keyboard is focused on text boxes, etc
 * Implement ui element stacks similar to button groups, except for any element type

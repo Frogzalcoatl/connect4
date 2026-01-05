@@ -221,6 +221,7 @@ static void UIScaleIncrementWhilePressed(void* context) {
         snprintf(input->numberText.str, sizeof(input->numberText.str), "%d", input->currentValue);
         C4_UI_Text_ReloadTexture(&input->numberText, settingsData.game->renderer);
     }
+    C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.UIScaleInput);
     UniversalWhilePressedFuncs();
 }
 
@@ -232,6 +233,7 @@ static void UIScaleDecrementWhilePressed(void* context) {
         snprintf(input->numberText.str, sizeof(input->numberText.str), "%d", input->currentValue);
         C4_UI_Text_ReloadTexture(&input->numberText, settingsData.game->renderer);
     }
+    C4_UI_NumberInput_GenericButtonInactiveHandler(settingsData.UIScaleInput);
     UniversalWhilePressedFuncs();
 }
 
