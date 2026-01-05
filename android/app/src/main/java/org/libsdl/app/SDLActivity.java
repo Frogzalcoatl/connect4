@@ -62,6 +62,25 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     private static final int SDL_MAJOR_VERSION = 3;
     private static final int SDL_MINOR_VERSION = 4;
     private static final int SDL_MICRO_VERSION = 0;
+
+    // Added by meh
+    public static void quitAndRemoveTask() {
+        if (mSingleton != null) {
+            final Activity activity = mSingleton;
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (Build.VERSION.SDK_INT >= 21) {
+                        activity.finishAndRemoveTask();
+                    } else {
+                        activity.finish();
+                    }
+                    // Ensure the process dies to prevent "App isn't responding"
+                    System.exit(0); 
+                }
+            });
+        }
+    }
 /*
     // Display InputType.SOURCE/CLASS of events and devices
     //

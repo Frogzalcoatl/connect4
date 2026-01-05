@@ -150,6 +150,15 @@ if(ANDROID)
     target_link_libraries(${EXE_NAME} PRIVATE m)
 endif()
 
+# Attempt to find JNI on the host machine (Windows/Mac/Linux)
+# This allows IntelliSense to find <jni.h> even when not building for Android.
+find_package(JNI QUIET)
+
+if(JNI_FOUND)
+    target_include_directories(${EXE_NAME} PRIVATE ${JNI_INCLUDE_DIRS})
+    message(STATUS "JNI headers found at: ${JNI_INCLUDE_DIRS}")
+endif()
+
 if(APPLE)
     if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
         target_link_libraries(${EXE_NAME} PRIVATE "-framework Foundation" "-framework UIKit" "-framework QuartzCore" "-framework CoreGraphics")

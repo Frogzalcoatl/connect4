@@ -9,6 +9,7 @@
 #include "Connect4/assets/sounds.h"
 #include "Connect4/game/events.h"
 #include "Connect4/discord-rpc/index.h"
+#include "Connect4/android/quit.h"
 #include <stdlib.h>
 #include <time.h>
 
@@ -239,6 +240,9 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
         switch (eventC4->type) {
             case C4_EVENT_CLOSE_WINDOW: {
                 game->running = false;
+                #ifdef SDL_PLATFORM_ANDROID
+                    Android_QuitAndRemoveTask();
+                #endif
             }; break;
             case C4_EVENT_SCREEN_CHANGE: {
                 C4_Game_ChangeScreen(game, eventC4->screenChange.type);

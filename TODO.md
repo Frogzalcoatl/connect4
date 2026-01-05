@@ -1,7 +1,7 @@
 # TODO
 
-* Change UI Layout based on window aspect ratio
-    * Be sure to find formatting functions that are the same in both layouts and put them outside the switch statement to avoid repetition
+* Fix android click sounds
+    * See settings number input to understand whats wrong
 * Keyboard cursor (Use arrow keys to navigate buttons)
     * Can also be used to track whether the keyboard is focused on text boxes, etc
 * Implement ui element stacks similar to button groups, except for any element type

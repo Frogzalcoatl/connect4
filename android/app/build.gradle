@@ -1,5 +1,5 @@
 plugins {
-     id 'com.android.application'
+    id 'com.android.application'
 }
 
 def buildWithCMake = true;
@@ -13,7 +13,6 @@ android {
         targetSdkVersion 35
         versionCode 1
         versionName "1.0"
-        setProperty("archivesBaseName", "Connect4")
         externalNativeBuild {
             ndkBuild {
                 arguments "APP_PLATFORM=android-21"
@@ -36,6 +35,10 @@ android {
     applicationVariants.all { variant ->
         tasks["merge${variant.name.capitalize()}Assets"]
             .dependsOn("externalNativeBuild${variant.name.capitalize()}")
+
+        variant.outputs.all {
+            outputFileName = "Connect4.apk"
+        }
     }
     if (!project.hasProperty('EXCLUDE_NATIVE_LIBS')) {
         sourceSets.main {
