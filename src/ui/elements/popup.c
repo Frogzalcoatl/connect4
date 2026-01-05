@@ -3,6 +3,16 @@
 
 #define C4_UI_POPUP_MARGIN 20
 
+static void C4_UI_Popup_PositionButtonGroupInBackground(C4_UI_Popup* popup) {
+    SDL_FRect* rect = &popup->background.destination;
+    SDL_FRect buttonGroupRect;
+    buttonGroupRect.x = rect->x + (float)popup->borders.width + C4_UI_POPUP_MARGIN;
+    buttonGroupRect.w = rect->w - (float)popup->borders.width - (((float)popup->borders.width + C4_UI_POPUP_MARGIN) * 2.f);
+    buttonGroupRect.h = popup->buttonGroup.bounds.h;
+    buttonGroupRect.y = rect->y + rect->h - buttonGroupRect.h - (float)popup->borders.width - C4_UI_POPUP_MARGIN;
+    C4_UI_ButtonGroup_ChangeDestination(&popup->buttonGroup, buttonGroupRect);
+}
+
 static void C4_UI_Popup_PositionElementsInBackground(C4_UI_Popup* popup, SDL_Renderer* renderer) {
     if (!popup) {
         SDL_Log("Tried to position NULL popup elements");
@@ -14,12 +24,7 @@ static void C4_UI_Popup_PositionElementsInBackground(C4_UI_Popup* popup, SDL_Ren
     popup->message.wrapWidth = (int)rect->w - (int)popup->borders.width * 2 - C4_UI_POPUP_MARGIN;
     C4_UI_Text_ReloadTexture(&popup->message, renderer);
     popup->borders.destination = popup->background.destination;
-    SDL_FRect buttonGroupRect;
-    buttonGroupRect.x = rect->x + (float)popup->borders.width + C4_UI_POPUP_MARGIN;
-    buttonGroupRect.w = rect->w - (float)popup->borders.width - (((float)popup->borders.width + C4_UI_POPUP_MARGIN) * 2.f);
-    buttonGroupRect.h = popup->buttonGroup.bounds.h;
-    buttonGroupRect.y = rect->y + rect->h - buttonGroupRect.h - (float)popup->borders.width - C4_UI_POPUP_MARGIN;
-    C4_UI_ButtonGroup_TransformResize(&popup->buttonGroup, buttonGroupRect);
+    C4_UI_Popup_PositionButtonGroupInBackground(popup);
 }
 
 bool C4_UI_Popup_InitProperties(
@@ -164,12 +169,12 @@ void C4_UI_Popup_Draw(void* data, SDL_Renderer* renderer, float scale, float par
     C4_UI_ButtonGroup_Draw(&popup->buttonGroup, renderer, scale, parentX, parentY);
 }
 
-void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup, SDL_Renderer* renderer, unsigned int windowWidth, unsigned int windowHeight) {
+void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup, SDL_Renderer* renderer, unsigned int windowWidth, unsigned int windowHeight, float UIScale) {
     if (!popup) {
         SDL_Log("Popup element is NULL");
         return;
     }
-    C4_UI_CenterInWindow(&popup->background.destination, C4_Axis_XY, windowWidth, windowHeight);
+    C4_UI_CenterInWindow(&popup->background.destination, C4_Axis_XY, windowWidth, windowHeight, UIScale);
     C4_UI_Popup_PositionElementsInBackground(popup, renderer);
 }
 
@@ -206,4 +211,22 @@ void C4_UI_Popup_ResetButtons(void* data) {
     }
     C4_UI_Popup* popup = (C4_UI_Popup*)data;
     C4_UI_ButtonGroup_Reset(&popup->buttonGroup);
+}
+
+void C4_UI_Popup_ChangeDestination(C4_UI_Popup* popup, const SDL_FRect newDestination, SDL_Renderer* renderer) {
+    if (!popup) {
+        return;
+    }
+    popup->background.destination = newDestination;
+    popup->borders.destination = newDestination;
+    C4_UI_Popup_PositionElementsInBackground(popup, renderer);
+}
+
+void C4_UI_Popup_ChangeButtonGroupHeight(C4_UI_Popup* popup, float height) {
+    if (!popup) {
+        return;
+    }
+    popup->buttonGroup.bounds.h = height;
+    C4_UI_ButtonGroup_ChangeDestination(&popup->buttonGroup, popup->buttonGroup.bounds);
+    C4_UI_Popup_PositionButtonGroupInBackground(popup);
 }

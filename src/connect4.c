@@ -58,6 +58,21 @@ void Connect4_Quit_Dependencies(void) {
     SDL_Quit();
 }
 
+static void C4_Game_UpdateWindowProperties(C4_Game* game) {
+    if (game->currentLayout == C4_UI_LayoutType_Wide) {
+        game->windowWidth = C4_WIDE_LAYOUT_BASE_WINDOW_WIDTH;
+        game->windowHeight = C4_WIDE_LAYOUT_BASE_WINDOW_HEIGHT;
+    } else if (game->currentLayout == C4_UI_LayoutType_Tall) {
+        game->windowWidth = C4_TALL_LAYOUT_BASE_WINDOW_WIDTH;
+        game->windowHeight = C4_TALL_LAYOUT_BASE_WINDOW_HEIGHT;
+    } else {
+        game->windowWidth = 0;
+        game->windowHeight = 0;
+    }
+    game->currentLayout = C4_UI_GetCurrentLayout(game->windowWidth, game->windowHeight);
+    SDL_SetRenderLogicalPresentation(game->renderer, game->windowWidth, game->windowHeight, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+}
+
 static void C4_Game_ChangeScreen(C4_Game* game, C4_ScreenType type) {
     if (!game) {
         SDL_Log("Unable to change game screen. Game is NULL");
@@ -70,6 +85,7 @@ static void C4_Game_ChangeScreen(C4_Game* game, C4_ScreenType type) {
     if (type == game->currentScreen) {
         return;
     }
+    C4_Game_UpdateWindowProperties(game);
     switch (type) {
         case C4_ScreenType_Menu: {
             C4_SetScreen_Menu(game);
@@ -116,7 +132,10 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
         return NULL;
     }
 
-    game->window = SDL_CreateWindow("Connect4", 1280, 720, SDL_WINDOW_RESIZABLE);
+    int initialWindowWidth = 1280;
+    int initialWindowHeight = 720;
+
+    game->window = SDL_CreateWindow("Connect4", initialWindowWidth, initialWindowHeight, SDL_WINDOW_RESIZABLE);
     if (!game->window) {
         SDL_Log("Unable to create SDL Window: %s", SDL_GetError());
         C4_Game_Destroy(game);
@@ -129,8 +148,11 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
         C4_Game_Destroy(game);
         return NULL;
     }
-    SDL_SetRenderLogicalPresentation(game->renderer, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);
     SDL_SetRenderVSync(game->renderer, 1);
+
+    SDL_GetWindowSizeInPixels(game->window, &initialWindowWidth, &initialWindowHeight);
+    game->currentLayout = C4_UI_GetCurrentLayout(initialWindowWidth, initialWindowHeight);
+    C4_Game_UpdateWindowProperties(game);
 
     game->board = C4_Board_Create(boardWidth, boardHeight, amountToWin);
 
@@ -150,10 +172,10 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
 
     C4_UI_Container_Init(&game->container, game->renderer, 0.f, 0.f);
 
+    game->UIScale = 1.f;
     C4_Game_ChangeScreen(game, C4_ScreenType_Menu);
     game->running = false;
     game->isFullscreen = false;
-    game->UIScale = 1.f;
     return game;
 }
 
@@ -181,6 +203,22 @@ static void C4_Game_HandleKeyboardInput(C4_Game* game, int scancode) {
     }
 }
 
+static void C4_Game_UpdateUI(C4_Game* game) {
+    C4_Game_UpdateWindowProperties(game);
+    switch (game->currentScreen) {
+        case C4_ScreenType_Menu: {
+            C4_UpdateUILayout_Menu(game->currentLayout);
+        }; break;
+        case C4_ScreenType_Settings: {
+            C4_UpdateUILayout_Settings(game->currentLayout);
+        }; break;
+        case C4_ScreenType_Game: {
+            C4_UpdateUILayout_Game(game->currentLayout);
+        }; break;
+        default: break;
+    }
+}
+
 static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* eventC4) {
     while (SDL_PollEvent(eventSDL)) {
         SDL_ConvertEventToRenderCoordinates(game->renderer, eventSDL);
@@ -191,6 +229,9 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
                 continue;
             }
             C4_Game_HandleKeyboardInput(game, eventSDL->key.scancode);
+        } else if (eventSDL->type == SDL_EVENT_WINDOW_RESIZED) {
+            game->currentLayout= C4_UI_GetCurrentLayout(eventSDL->window.data1, eventSDL->window.data2);
+            C4_Game_UpdateUI(game);
         }
         C4_UI_Container_HandleEvent(&game->container, eventSDL, game->UIScale);
     }

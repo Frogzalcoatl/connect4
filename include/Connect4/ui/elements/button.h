@@ -51,8 +51,8 @@ void C4_UI_Button_Draw(void* data, SDL_Renderer* renderer, float scale, float pa
 void C4_UI_Button_Update(void* data, float deltaTime);
 void C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY);
 void C4_UI_Button_CenterElementsInBackground(C4_UI_Button* button, C4_Axis axis);
-void C4_UI_Button_CenterInWindow(C4_UI_Button* button, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight);
-void C4_UI_Button_TransformResize(C4_UI_Button* button, float x, float y, float w, float h);
+void C4_UI_Button_CenterInWindow(C4_UI_Button* button, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight, float UIScale);
+void C4_UI_Button_ChangeDestination(C4_UI_Button* button, const SDL_FRect newDestination);
 void C4_UI_Button_UpdateStr(C4_UI_Button* button, const char* str, SDL_Renderer* renderer);
 void C4_UI_Button_Reset(void* data);
 void C4_UI_Button_SetTheme(C4_UI_Button* button, const C4_UI_Theme* theme);
@@ -65,4 +65,7 @@ typedef enum {
     C4_UI_Button_CallbackType_Length
 } C4_UI_Button_CallbackType;
 
+// Post callbacks run directly after their respective callback types.
+// Can be used to create general functions for a specfic callback type that runs for every button.
+// ex: a sound effect that plays after every OnRelease callback
 void C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType type, C4_UI_Callback callback, void* context);

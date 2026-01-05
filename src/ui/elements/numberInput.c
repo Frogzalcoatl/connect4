@@ -13,7 +13,7 @@ static void C4_UI_NumberInput_PositionElementsInBackground(C4_UI_NumberInput* nu
     numInput->borders.destination = *dest;
     numInput->numberText.destination.x = dest->x + borderWidth + 10;
     numInput->numberText.destination.y = dest->y + (dest->h / 2.f) - (numInput->numberText.destination.h / 2.f);
-    C4_UI_ButtonGroup_TransformResize(
+    C4_UI_ButtonGroup_ChangeDestination(
         &numInput->buttonGroup,
         (SDL_FRect){
             .x = dest->x + dest->w * 0.75f,
@@ -217,11 +217,11 @@ void C4_UI_NumberInput_Draw(void* data, SDL_Renderer* renderer, float scale, flo
     C4_UI_ButtonGroup_Draw(&numInput->buttonGroup, renderer, scale, parentX, parentY);
 }
 
-void C4_UI_NumberInput_CenterInWindow(C4_UI_NumberInput* numInput, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight) {
+void C4_UI_NumberInput_CenterInWindow(C4_UI_NumberInput* numInput, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight, float UIScale) {
     if (!numInput) {
         return;
     }
-    C4_UI_CenterInWindow(&numInput->background.destination, axis, windowWidth, windowHeight);
+    C4_UI_CenterInWindow(&numInput->background.destination, axis, windowWidth, windowHeight, UIScale);
     C4_UI_NumberInput_PositionElementsInBackground(numInput);
 }
 
@@ -282,4 +282,12 @@ void C4_UI_NumberInput_ResetButtons(void* data) {
     }
     C4_UI_NumberInput* numInput = (C4_UI_NumberInput*)data;
     C4_UI_ButtonGroup_Reset(&numInput->buttonGroup);
+}
+
+void C4_UI_NumberInput_ChangeDestination(C4_UI_NumberInput* numInput, const SDL_FRect newDestination) {
+    if (!numInput) {
+        return;
+    }
+    numInput->background.destination = newDestination;
+    C4_UI_NumberInput_PositionElementsInBackground(numInput);
 }

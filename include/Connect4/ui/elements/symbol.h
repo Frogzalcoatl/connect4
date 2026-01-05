@@ -26,3 +26,4 @@ bool C4_UI_Symbol_InitProperties(C4_UI_Symbol* symbol, const C4_UI_Symbol_Config
 C4_UI_Symbol* C4_UI_Symbol_Create(const C4_UI_Symbol_Config* config);
 void C4_UI_Symbol_Destroy(void* data);
 void C4_UI_Symbol_Draw(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY);
+void C4_UI_Symbol_ChangeDestination(C4_UI_Symbol* symbol, const SDL_FRect newDestination);

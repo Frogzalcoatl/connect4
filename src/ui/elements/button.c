@@ -305,21 +305,21 @@ void C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event, float scale, f
     }
 }
 
-void C4_UI_Button_CenterInWindow(C4_UI_Button* button, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight) {
+void C4_UI_Button_CenterInWindow(C4_UI_Button* button, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight, float UIScale) {
     if (!button) {
         SDL_Log("Button is NULL");
         return;
     }
-    C4_UI_CenterInWindow(&button->background.destination, axis, windowWidth, windowHeight);
-    C4_UI_Button_CenterElementsInBackground(button, axis);
+    C4_UI_CenterInWindow(&button->background.destination, axis, windowWidth, windowHeight, UIScale);
+    C4_UI_Button_CenterElementsInBackground(button, C4_Axis_XY);
 }
 
-void C4_UI_Button_TransformResize(C4_UI_Button* button, float x, float y, float w, float h) {
+void C4_UI_Button_ChangeDestination(C4_UI_Button* button, const SDL_FRect newDestination) {
     if (!button) {
         SDL_Log("Tried to resize NULL button");
         return;
     }
-    button->background.destination = (SDL_FRect){x, y, w, h};
+    button->background.destination = newDestination;
     C4_UI_Button_CenterElementsInBackground(button, C4_Axis_XY);
 }
 

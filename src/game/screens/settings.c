@@ -5,14 +5,80 @@
 
 typedef struct {
     C4_Game* game;
+    C4_UI_Text* title;
+    C4_UI_ButtonGroup* buttonGroup;
     C4_UI_NumberInput* widthInput;
     C4_UI_NumberInput* heightInput;
     C4_UI_NumberInput* winAmountInput;
     C4_UI_NumberInput* UIScaleInput;
     C4_UI_Popup* confirmPopup;
     C4_UI_Button* applyButton;
+    C4_UI_Text* width;
+    C4_UI_Text* height;
+    C4_UI_Text* winAmount;
+    C4_UI_Text* UIScale;
 } C4_SettingsScreenData;
 static C4_SettingsScreenData settingsData;
+
+void C4_UpdateUILayout_Settings(C4_UI_LayoutType layout) {
+    C4_Game* game = settingsData.game;
+
+    switch (layout) {
+        case C4_UI_LayoutType_Wide: {
+            settingsData.heightInput->background.destination.x = 1175.f;
+            C4_UI_NumberInput_ChangeDestination(settingsData.heightInput, settingsData.heightInput->background.destination);
+            settingsData.height->destination.x = 475.f;
+
+            settingsData.widthInput->background.destination.x = 1175.f;
+            C4_UI_NumberInput_ChangeDestination(settingsData.widthInput, settingsData.widthInput->background.destination);
+            settingsData.width->destination.x = 475.f;
+
+            settingsData.winAmountInput->background.destination.x = 1175.f;
+            C4_UI_NumberInput_ChangeDestination(settingsData.winAmountInput, settingsData.winAmountInput->background.destination);
+            settingsData.winAmount->destination.x = 475.f;
+
+            settingsData.UIScaleInput->background.destination.x = 1175.f;
+            C4_UI_NumberInput_ChangeDestination(settingsData.UIScaleInput, settingsData.UIScaleInput->background.destination);
+            settingsData.UIScale->destination.x = 475.f;
+            
+        }; break;
+        case C4_UI_LayoutType_Tall: {
+            settingsData.heightInput->background.destination.x = 800.f;
+            C4_UI_NumberInput_ChangeDestination(settingsData.heightInput, settingsData.heightInput->background.destination);
+            settingsData.height->destination.x = 100.f;
+
+            settingsData.widthInput->background.destination.x = 800.f;
+            C4_UI_NumberInput_ChangeDestination(settingsData.widthInput, settingsData.widthInput->background.destination);
+            settingsData.width->destination.x = 100.f;
+
+            settingsData.winAmountInput->background.destination.x = 800.f;
+            C4_UI_NumberInput_ChangeDestination(settingsData.winAmountInput, settingsData.winAmountInput->background.destination);
+            settingsData.winAmount->destination.x = 100.f;
+
+            settingsData.UIScaleInput->background.destination.x = 800.f;
+            C4_UI_NumberInput_ChangeDestination(settingsData.UIScaleInput, settingsData.UIScaleInput->background.destination);
+            settingsData.UIScale->destination.x = 100.f;
+        }; break;
+        default: break;
+    }
+
+    C4_UI_CenterInWindow(
+        &settingsData.title->destination, C4_Axis_X,
+        game->windowWidth, game->windowHeight,
+        game->UIScale
+    );
+
+    settingsData.buttonGroup->bounds.y = game->windowHeight - settingsData.buttonGroup->bounds.h - 50.f;
+    C4_UI_ButtonGroup_CenterInWindow(settingsData.buttonGroup, C4_Axis_X,
+        game->windowWidth, game->windowHeight,
+        game->UIScale
+    );
+
+    C4_UI_Popup_CenterInWindow(settingsData.confirmPopup, game->renderer,
+        game->windowWidth, game->windowHeight,
+        game->UIScale
+    );
+}
 
 static bool IsUpdatingBoard(void) {
     C4_Board* board = settingsData.game->board;
@@ -69,11 +135,11 @@ static const char POPUP_BUTTON_TEXT[POPUP_BUTTON_COUNT][8] = {
 static void PopupYesOnClick(void* context) {
     (void)context;
     C4_SettingsScreenData* data = &settingsData;
-    C4_Board_ChangeSize(data->game->board, (uint8_t)data->widthInput->currentValue, (uint8_t)data->heightInput->currentValue);
-    data->game->board->amountToWin = (uint8_t)data->winAmountInput->currentValue;
+    if (IsUpdatingBoard()) {
+        C4_Board_ChangeSize(data->game->board, (uint8_t)data->widthInput->currentValue, (uint8_t)data->heightInput->currentValue);
+        data->game->board->amountToWin = (uint8_t)data->winAmountInput->currentValue;
+    }
     data->game->UIScale = settingsData.UIScaleInput->currentValue / 100.f;
-    data->game->container.destinationX = C4_BASE_WINDOW_WIDTH / 2.f - C4_BASE_WINDOW_WIDTH * data->game->UIScale / 2.f;
-    data->game->container.destinationY = C4_BASE_WINDOW_HEIGHT / 2.f - C4_BASE_WINDOW_HEIGHT * data->game->UIScale / 2.f;
     C4_PushEvent_ScreenChange(C4_ScreenType_Menu);
 }
 static void PopupBackOnClick(void* context) {
@@ -176,8 +242,9 @@ void C4_SetScreen_Settings(C4_Game* game) {
     C4_UI_Container* cont = &game->container;
     C4_UI_Container_Clear(cont);
     game->currentScreen = C4_ScreenType_Settings;
+    settingsData.game = game;
 
-    C4_UI_Text* settingsTitle = C4_UI_Container_Add_Text(
+    settingsData.title = C4_UI_Container_Add_Text(
         cont, &(C4_UI_Text_Config){
             .str = "Settings",
             .font = game->fontBold,
@@ -188,9 +255,8 @@ void C4_SetScreen_Settings(C4_Game* game) {
             .wrapWidth = 0
         }
     );
-    C4_UI_CenterInWindow(&settingsTitle->destination, C4_Axis_X, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
 
-    C4_UI_ButtonGroup* buttonGroup = C4_UI_Container_Add_ButtonGroup(
+    settingsData.buttonGroup = C4_UI_Container_Add_ButtonGroup(
         cont, &(C4_UI_ButtonGroup_Config){
             .destination = (SDL_FRect){0.f, 900.f, 900.f, 100.f},
             .count = BUTTON_GROUP_COUNT,
@@ -201,15 +267,14 @@ void C4_SetScreen_Settings(C4_Game* game) {
         }
     );
     for (size_t i = 0; i < BUTTON_GROUP_COUNT; i++) {
-        C4_UI_Button* btn = &buttonGroup->buttons[i];
+        C4_UI_Button* btn = &settingsData.buttonGroup->buttons[i];
         C4_UI_Text_UpdateStr(&btn->text, SETTINGS_BUTTONS_TEXT[i], game->renderer);
         btn->OnReleaseCallback = BUTTON_GROUP_ON_CLICKS[i];
     }
-    C4_UI_Button* applyButton = &buttonGroup->buttons[0];
-    applyButton->isActive = false;
-    C4_UI_ButtonGroup_CenterInWindow(buttonGroup, C4_Axis_X, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
+    settingsData.applyButton = &settingsData.buttonGroup->buttons[0];
+    settingsData.applyButton->isActive = false;
 
-    C4_UI_Popup* confirmPopup = C4_UI_Container_Add_Popup(
+    settingsData.confirmPopup = C4_UI_Container_Add_Popup(
         cont, &(C4_UI_Popup_Config){
             .destination = (SDL_FRect){0.f, 0.f, 800.f, 400.f},
             .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
@@ -222,13 +287,12 @@ void C4_SetScreen_Settings(C4_Game* game) {
         }
     );
     for (size_t i = 0; i < POPUP_BUTTON_COUNT; i++) {
-        C4_UI_Button* btn = &confirmPopup->buttonGroup.buttons[i];
+        C4_UI_Button* btn = &settingsData.confirmPopup->buttonGroup.buttons[i];
         C4_UI_Text_UpdateStr(&btn->text, POPUP_BUTTON_TEXT[i], game->renderer);
         btn->OnReleaseCallback = POPUP_ON_CLICKS[i];
     }
-    C4_UI_Popup_CenterInWindow(confirmPopup, game->renderer, C4_BASE_WINDOW_WIDTH, C4_BASE_WINDOW_HEIGHT);
 
-    C4_UI_NumberInput* boardWidthInput = C4_UI_Container_Add_NumberInput(
+    settingsData.widthInput = C4_UI_Container_Add_NumberInput(
         cont, &(C4_UI_NumberInput_Config){
             .destination = (SDL_FRect){1175.f, 175.f, 200.f, 100.f},
             .min = 2,
@@ -238,14 +302,14 @@ void C4_SetScreen_Settings(C4_Game* game) {
             .theme = &C4_UI_THEME_DEFAULT
         }
     );
-    C4_UI_Button* boardWidthIncrement = &boardWidthInput->buttonGroup.buttons[0];
+    C4_UI_Button* boardWidthIncrement = &settingsData.widthInput->buttonGroup.buttons[0];
     boardWidthIncrement->WhilePressedCallback = WidthIncrementWhilePressed;
-    C4_UI_Button* boardWidthDecrement = &boardWidthInput->buttonGroup.buttons[1];
+    C4_UI_Button* boardWidthDecrement = &settingsData.widthInput->buttonGroup.buttons[1];
     boardWidthDecrement->WhilePressedCallback = WidthDecrementWhilePressed;
 
-    const float PT_SIZE = boardWidthInput->numberText.ptSize;
+    const float PT_SIZE = settingsData.widthInput->numberText.ptSize;
 
-    C4_UI_Container_Add_Text(
+    settingsData.width = C4_UI_Container_Add_Text(
         cont, &(C4_UI_Text_Config){
             .str = "Board Width",
             .font = game->fontRegular,
@@ -257,7 +321,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
         }
     );
 
-    C4_UI_NumberInput* boardHeightInput = C4_UI_Container_Add_NumberInput(
+    settingsData.heightInput = C4_UI_Container_Add_NumberInput(
         cont, &(C4_UI_NumberInput_Config){
             .destination = (SDL_FRect){1175.f, 300.f, 200.f, 100.f},
             .min = 2,
@@ -267,12 +331,12 @@ void C4_SetScreen_Settings(C4_Game* game) {
             .theme = &C4_UI_THEME_DEFAULT
         }
     );
-    C4_UI_Button* boardHeightIncrement = &boardHeightInput->buttonGroup.buttons[0];
+    C4_UI_Button* boardHeightIncrement = &settingsData.heightInput->buttonGroup.buttons[0];
     boardHeightIncrement->WhilePressedCallback = HeightIncrementWhilePressed;
-    C4_UI_Button* boardHeightDecrement = &boardHeightInput->buttonGroup.buttons[1];
+    C4_UI_Button* boardHeightDecrement = &settingsData.heightInput->buttonGroup.buttons[1];
     boardHeightDecrement->WhilePressedCallback = HeightDecrementWhilePressed;
 
-    C4_UI_Container_Add_Text(
+    settingsData.height = C4_UI_Container_Add_Text(
         cont, &(C4_UI_Text_Config){
             .str = "Board Height",
             .font = game->fontRegular,
@@ -284,7 +348,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
         }
     );
 
-    C4_UI_NumberInput* winAmountInput = C4_UI_Container_Add_NumberInput(
+    settingsData.winAmountInput = C4_UI_Container_Add_NumberInput(
         cont, &(C4_UI_NumberInput_Config){
             .destination = (SDL_FRect){1175.f, 425.f, 200.f, 100.f},
             .min = 2,
@@ -294,12 +358,12 @@ void C4_SetScreen_Settings(C4_Game* game) {
             .theme = &C4_UI_THEME_DEFAULT
         }
     );
-    C4_UI_Button* winAmountIncrement = &winAmountInput->buttonGroup.buttons[0];
+    C4_UI_Button* winAmountIncrement = &settingsData.winAmountInput->buttonGroup.buttons[0];
     winAmountIncrement->WhilePressedCallback = WinAmountIncrementWhilePressed;
-    C4_UI_Button* winAmountDecrement = &winAmountInput->buttonGroup.buttons[1];
+    C4_UI_Button* winAmountDecrement = &settingsData.winAmountInput->buttonGroup.buttons[1];
     winAmountDecrement->WhilePressedCallback = WinAmountDecrementWhilePressed;
 
-    C4_UI_Container_Add_Text(
+    settingsData.winAmount = C4_UI_Container_Add_Text(
         cont, &(C4_UI_Text_Config){
             .str = "Amount to Win",
             .font = game->fontRegular,
@@ -311,7 +375,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
         }
     );
 
-    C4_UI_NumberInput* UIScaleInput = C4_UI_Container_Add_NumberInput(
+    settingsData.UIScaleInput = C4_UI_Container_Add_NumberInput(
         cont, &(C4_UI_NumberInput_Config){
             .destination = (SDL_FRect){1175.f, 550.f, 200.f, 100.f},
             .min = 20,
@@ -321,12 +385,12 @@ void C4_SetScreen_Settings(C4_Game* game) {
             .theme = &C4_UI_THEME_DEFAULT
         }
     );
-    C4_UI_Button* UIScaleIncrement = &UIScaleInput->buttonGroup.buttons[0];
+    C4_UI_Button* UIScaleIncrement = &settingsData.UIScaleInput->buttonGroup.buttons[0];
     UIScaleIncrement->WhilePressedCallback = UIScaleIncrementWhilePressed;
-    C4_UI_Button* UIScaleDecrement = &UIScaleInput->buttonGroup.buttons[1];
+    C4_UI_Button* UIScaleDecrement = &settingsData.UIScaleInput->buttonGroup.buttons[1];
     UIScaleDecrement->WhilePressedCallback = UIScaleDecrementWhilePressed;
 
-    C4_UI_Container_Add_Text(
+    settingsData.UIScale = C4_UI_Container_Add_Text(
         cont, &(C4_UI_Text_Config){
             .str = "UI Scale",
             .font = game->fontRegular,
@@ -338,11 +402,5 @@ void C4_SetScreen_Settings(C4_Game* game) {
         }
     );
 
-    settingsData.applyButton = applyButton;
-    settingsData.confirmPopup = confirmPopup;
-    settingsData.game = game;
-    settingsData.heightInput = boardHeightInput;
-    settingsData.widthInput = boardWidthInput;
-    settingsData.winAmountInput = winAmountInput;
-    settingsData.UIScaleInput = UIScaleInput;
+    C4_UpdateUILayout_Settings(game->currentLayout);
 }

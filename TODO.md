@@ -1,9 +1,10 @@
 # TODO
 
-* UI Scale Setting
 * Change UI Layout based on window aspect ratio
+    * Be sure to find formatting functions that are the same in both layouts and put them outside the switch statement to avoid repetition
 * Keyboard cursor (Use arrow keys to navigate buttons)
     * Can also be used to track whether the keyboard is focused on text boxes, etc
+* Implement ui element stacks similar to button groups, except for any element type
 * Slider UIElement
 * Board UI
 * Improve win check efficiency (see WINCHECKCRITIQUE.md)

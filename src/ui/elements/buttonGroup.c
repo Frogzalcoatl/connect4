@@ -139,7 +139,7 @@ void C4_UI_ButtonGroup_HandleMouseEvents(void* data, SDL_Event* event, float sca
     }
 }
 
-void C4_UI_ButtonGroup_TransformResize(C4_UI_ButtonGroup* group, const SDL_FRect rect) {
+void C4_UI_ButtonGroup_ChangeDestination(C4_UI_ButtonGroup* group, const SDL_FRect rect) {
     if (!group) {
         return;
     }
@@ -147,16 +147,16 @@ void C4_UI_ButtonGroup_TransformResize(C4_UI_ButtonGroup* group, const SDL_FRect
     SDL_FRect buttonRect;
     for (size_t i = 0; i < group->count; i++) {
         buttonRect = C4_UI_ButtonGroup_GetUpdatedButtonRect(group, i);
-        C4_UI_Button_TransformResize(&group->buttons[i], buttonRect.x, buttonRect.y, buttonRect.w, buttonRect.h);
+        C4_UI_Button_ChangeDestination(&group->buttons[i], buttonRect);
     }
 }
 
-void C4_UI_ButtonGroup_CenterInWindow(C4_UI_ButtonGroup* group, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight) {
+void C4_UI_ButtonGroup_CenterInWindow(C4_UI_ButtonGroup* group, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight, float UIScale) {
     if (!group) {
         return;
     }
-    C4_UI_CenterInWindow(&group->bounds, axis, windowWidth, windowHeight);
-    C4_UI_ButtonGroup_TransformResize(group, group->bounds);
+    C4_UI_CenterInWindow(&group->bounds, axis, windowWidth, windowHeight, UIScale);
+    C4_UI_ButtonGroup_ChangeDestination(group, group->bounds);
 }
 
 // void* to work in container
@@ -167,5 +167,27 @@ void C4_UI_ButtonGroup_Reset(void* data) {
     C4_UI_ButtonGroup* group = (C4_UI_ButtonGroup*)data;
     for (size_t i = 0; i < group->count; i++) {
         C4_UI_Button_Reset(&group->buttons[i]);
+    }
+}
+
+void C4_UI_ButtonGroup_ChangeDirection(C4_UI_ButtonGroup* group, C4_UI_ButtonGroup_Direction direction) {
+    if (!group) {
+        return;
+    }
+    if (group->direction == direction) {
+        return;
+    }
+    group->direction = direction;
+    for (size_t i = 0; i < group->count; i++) {
+        C4_UI_Button_ChangeDestination(
+            &group->buttons[i],
+            C4_UI_ButtonGroup_GetUpdatedButtonRect(group, i)
+        );
+    }
+} 
+
+void C4_UI_ButtonGroup_ChangePtSize(C4_UI_ButtonGroup* group, float ptSize, SDL_Renderer* renderer) {
+    for (size_t i = 0; i < group->count; i++) {
+        C4_UI_Text_ChangePtSize(&group->buttons[i].text, ptSize, renderer);
     }
 }

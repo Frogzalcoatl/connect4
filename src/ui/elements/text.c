@@ -72,7 +72,10 @@ void C4_UI_Text_ReloadTexture(C4_UI_Text* element, SDL_Renderer* renderer) {
         SDL_Log("Text element is NULL");
         return;
     }
-    SDL_DestroyTexture(element->texture);
+    if (element->texture) {
+        SDL_DestroyTexture(element->texture);
+        element->texture = NULL;
+    }
     size_t strLength = strlen(element->str);
     if (strLength == 0) {
         return;
@@ -87,6 +90,7 @@ void C4_UI_Text_ReloadTexture(C4_UI_Text* element, SDL_Renderer* renderer) {
         element->destination.h = (float)tempSurface->h;
         SDL_DestroySurface(tempSurface);
     } else {
+        element->texture = NULL;
         element->destination.w = 0;
         element->destination.h = 0;
     }
@@ -128,4 +132,24 @@ void C4_UI_Text_Draw(void* data, SDL_Renderer* renderer, float scale, float pare
     C4_UI_GetScaledRect(&element->destination, &drawRect, scale, parentX, parentY);
 
     SDL_RenderTexture(renderer, element->texture, NULL, &drawRect);
+}
+
+void C4_UI_Text_ChangeDestination(C4_UI_Text* element, float x, float y) {
+    if (!element) {
+        return;
+    }
+    element->destination.x = x;
+    element->destination.y = y;
+}
+
+void C4_UI_Text_ChangePtSize(C4_UI_Text* element, float ptSize, SDL_Renderer* renderer) {
+    if (
+        !element ||
+        ptSize == element->ptSize ||
+        ptSize <= 0
+    ) {
+        return;
+    }
+    element->ptSize = ptSize;
+    C4_UI_Text_ReloadTexture(element, renderer);
 }

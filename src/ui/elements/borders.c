@@ -64,3 +64,10 @@ void C4_UI_Borders_Draw(void* data, SDL_Renderer* renderer, float scale, float p
     SDL_RenderFillRect(renderer, &leftBorder);
     SDL_RenderFillRect(renderer, &rightBorder);
 }
+
+void C4_UI_Borders_ChangeDestination(C4_UI_Borders* element, const SDL_FRect destination) {
+    if (!element) {
+        return;
+    }
+    element->destination = destination;
+}

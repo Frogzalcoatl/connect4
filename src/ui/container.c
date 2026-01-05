@@ -147,7 +147,7 @@ static void C4_UI_Container_AddNode(
     void (*Reset)(void*),
     void (*Update)(void*, float deltaTime)
 ) {
-    // Some elements dont have an update function
+    // Some elements dont have update and/or reset functions
     if (
         !container || !data ||
         !Draw || !Destroy

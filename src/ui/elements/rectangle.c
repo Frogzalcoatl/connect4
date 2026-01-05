@@ -49,3 +49,10 @@ void C4_UI_Rectangle_Draw(void* data, SDL_Renderer* renderer, float scale, float
     SDL_SetRenderDrawColor(renderer, element->color.r, element->color.g, element->color.b, element->color.a);
     SDL_RenderFillRect(renderer, &drawRect);
 }
+
+void C4_UI_Rectangle_ChangeDestination(C4_UI_Rectangle* element, const SDL_FRect newDestination) {
+    if (!element) {
+        return;
+    }
+    element->destination = newDestination;
+}

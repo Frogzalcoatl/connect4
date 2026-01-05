@@ -16,3 +16,4 @@ bool C4_UI_Rectangle_InitProperties(C4_UI_Rectangle* element, const C4_UI_Rectan
 C4_UI_Rectangle* C4_UI_Rectangle_Create(const C4_UI_Rectangle_Config* config);
 void C4_UI_Rectangle_Destroy(void* data);
 void C4_UI_Rectangle_Draw(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY);
+void C4_UI_Rectangle_ChangeDestination(C4_UI_Rectangle* element, const SDL_FRect newDestination);

@@ -35,3 +35,5 @@ void C4_UI_Text_Destroy(void* data);
 void C4_UI_Text_UpdateStr(C4_UI_Text* element, const char* newStr, SDL_Renderer* renderer);
 void C4_UI_Text_Draw(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY);
 void C4_UI_Text_ReloadTexture(C4_UI_Text* element, SDL_Renderer* renderer);
+void C4_UI_Text_ChangeDestination(C4_UI_Text* element, float x, float y);
+void C4_UI_Text_ChangePtSize(C4_UI_Text* element, float ptSize, SDL_Renderer* renderer);

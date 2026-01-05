@@ -108,3 +108,10 @@ void C4_UI_Symbol_Draw(void* data, SDL_Renderer* renderer, float scale, float pa
         default: break;
     }
 }
+
+void C4_UI_Symbol_ChangeDestination(C4_UI_Symbol* symbol, const SDL_FRect newDestination) {
+    if (!symbol) {
+        return;
+    }
+    symbol->destination = newDestination;
+}

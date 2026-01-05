@@ -57,7 +57,6 @@ C4_Board* C4_Board_Create(uint8_t width, uint8_t height, uint8_t amountToWin) {
     newBoard->width = width;
     newBoard->height = height;
     newBoard->amountToWin = amountToWin;
-    // Randomly select either player 1 or 2
     newBoard->currentPlayer = C4_SlotState_Player1;
     return newBoard;
 }
