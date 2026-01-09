@@ -54,6 +54,7 @@ void C4_UI_Canvas_Clear(C4_UI_Canvas* canvas);
 void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float scale);
 void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime);
 void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float scale);
+void C4_UI_Canvas_ResetButtons(C4_UI_Canvas* canvas);
 
 C4_UI_Borders* C4_UI_Canvas_Add_Borders(
     C4_UI_Canvas* canvas, const C4_UI_Borders_Config* config

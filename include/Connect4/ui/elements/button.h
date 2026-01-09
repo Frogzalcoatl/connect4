@@ -30,11 +30,11 @@ typedef struct {
     bool isActive;
     bool resetHoverOnClick;
     C4_UI_Callback OnReleaseCallback;
-    void* OnClickContext;
+    void* OnReleaseContext;
     C4_UI_Callback WhilePressedCallback;
     void* WhilePressedContext;
     C4_UI_Callback OnPressCallback;
-    void* OnPressContect;
+    void* OnPressContext;
     C4_UI_Callback OnHoverCallback;
     void* OnHoverContext;
     float delay;

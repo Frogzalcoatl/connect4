@@ -4,6 +4,7 @@
 #include "Connect4/game/board.h"
 #include "Connect4/ui/canvas.h"
 #include "Connect4/game/screens/index.h"
+#include "Connect4/ui/screen.h"
 
 bool Connect4_Init_Dependencies(void);
 void Connect4_Quit_Dependencies(void);
@@ -12,16 +13,17 @@ typedef struct {
     SDL_Window* window;
     SDL_Renderer* renderer;
     C4_Board* board;
-    C4_UI_Canvas canvas;
-    C4_ScreenType currentScreen;
+    C4_UI_Screen* screens[C4_ScreenType_ScreenCount];
+    C4_UI_Screen* currentScreen;
+    C4_ScreenType currentScreenType;
     bool running;
     bool isFullscreen;
     TTF_Font* fontRegular;
     TTF_Font* fontBold;
     float UIScale;
     C4_UI_LayoutType currentLayout;
-    unsigned int windowWidth;
-    unsigned int windowHeight;
+    unsigned int presentationWidth;
+    unsigned int presentationHeight;
 } C4_Game;
 
 C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountToWin);

@@ -52,50 +52,57 @@ void Connect4_Quit_Dependencies(void) {
     SDL_Quit();
 }
 
-static void C4_Game_UpdateWindowProperties(C4_Game* game) {
+static void C4_Game_UpdateWindowProperties(C4_Game* game, unsigned int actualWindowWidth, unsigned int actualWindowHeight) {
+    game->currentLayout = C4_UI_GetCurrentLayout(actualWindowWidth, actualWindowHeight);
     if (game->currentLayout == C4_UI_LayoutType_Wide) {
-        game->windowWidth = C4_WIDE_LAYOUT_BASE_WINDOW_WIDTH;
-        game->windowHeight = C4_WIDE_LAYOUT_BASE_WINDOW_HEIGHT;
+        game->presentationWidth = C4_WIDE_LAYOUT_BASE_WINDOW_WIDTH;
+        game->presentationHeight = C4_WIDE_LAYOUT_BASE_WINDOW_HEIGHT;
     } else if (game->currentLayout == C4_UI_LayoutType_Tall) {
-        game->windowWidth = C4_TALL_LAYOUT_BASE_WINDOW_WIDTH;
-        game->windowHeight = C4_TALL_LAYOUT_BASE_WINDOW_HEIGHT;
+        game->presentationWidth = C4_TALL_LAYOUT_BASE_WINDOW_WIDTH;
+        game->presentationHeight = C4_TALL_LAYOUT_BASE_WINDOW_HEIGHT;
     } else {
-        game->windowWidth = 0;
-        game->windowHeight = 0;
+        game->presentationWidth = 0;
+        game->presentationHeight = 0;
     }
-    game->currentLayout = C4_UI_GetCurrentLayout(game->windowWidth, game->windowHeight);
-    SDL_SetRenderLogicalPresentation(game->renderer, game->windowWidth, game->windowHeight, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+    SDL_SetRenderLogicalPresentation(game->renderer, game->presentationWidth, game->presentationHeight, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 }
 
-static void C4_Game_ChangeScreen(C4_Game* game, C4_ScreenType type) {
-    if (!game) {
-        SDL_Log("Unable to change game screen. Game is NULL");
-        return;
+static bool C4_Game_WindowSetup(C4_Game* game) {
+    SDL_WindowFlags windowFlags;
+    #if SDL_PLATFORM_ANDROID || SDL_PLATFORM_IOS
+        windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN;
+    #else
+        windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED;
+    #endif
+
+    const SDL_DisplayMode* mode = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
+    // In case the user's monitor size is smaller than 800x600 for whatever reason
+    int initialWindowWidth = C4_Min(mode->w, 800);
+    int initialWindowHeight = C4_Min(mode->h, 600);
+
+    game->window = SDL_CreateWindow("Connect4", initialWindowWidth, initialWindowHeight, windowFlags);
+    if (!game->window) {
+        SDL_Log("Unable to create SDL Window: %s", SDL_GetError());
+        return false;
     }
-    if (type < 0 || type >= C4_ScreenType_ScreenCount) {
-        SDL_Log("Unable to change game screen. Type is Invalid");
-        return;
+
+    int windowWidth, windowHeight;
+    SDL_GetWindowSizeInPixels(game->window, &windowWidth, &windowHeight);
+    C4_Game_UpdateWindowProperties(game, windowWidth, windowHeight);
+
+    return true;
+}
+
+static bool C4_Game_RendererSetup(C4_Game* game) {
+    game->renderer = SDL_CreateRenderer(game->window, NULL);
+    if (!game->renderer) {
+        SDL_Log("Unable to create SDL renderer: %s", SDL_GetError());
+        return false;
     }
-    if (type == game->currentScreen) {
-        return;
-    }
-    C4_Game_UpdateWindowProperties(game);
-    switch (type) {
-        case C4_ScreenType_Menu: {
-            C4_SetScreen_Menu(game);
-            C4_Discord_UpdateStatus("In the Menus", NULL);
-        }; break;
-        case C4_ScreenType_Settings: {
-            C4_SetScreen_Settings(game);
-        }; break;
-        case C4_ScreenType_Game: {
-            C4_SetScreen_Game(game);
-            C4_Discord_UpdateStatus("In 2 Player Mode", NULL);
-        }; break;
-        default: break;
-    }
-    SDL_SetCursor(C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT));
-    return;
+
+    SDL_SetRenderVSync(game->renderer, 1);
+
+    return true;
 }
 
 static void C4_Game_HoverSound(void* context) {
@@ -120,50 +127,7 @@ static void C4_Game_ButtonSounds_SetTouchMode(bool value) {
     }
 }
 
-C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountToWin) {
-    C4_Game* game = calloc(1, sizeof(C4_Game));
-    if (!game) {
-        SDL_Log("Unable allocate memory for C4 Game");
-        return NULL;
-    }
-
-    SDL_WindowFlags windowFlags;
-    #if SDL_PLATFORM_ANDROID || SDL_PLATFORM_IOS
-        windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN;
-    #else
-        windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED;
-    #endif
-
-    // In case the user's monitor size is smaller than 800x600 for whatever reason 
-    const SDL_DisplayMode* mode = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
-    int initialWindowWidth = C4_Min(mode->w, 800);
-    int initialWindowHeight = C4_Min(mode->h, 600);
-
-    game->window = SDL_CreateWindow("Connect4", initialWindowWidth, initialWindowHeight, windowFlags);
-    if (!game->window) {
-        SDL_Log("Unable to create SDL Window: %s", SDL_GetError());
-        C4_Game_Destroy(game);
-        return NULL;
-    }
-    
-    game->renderer = SDL_CreateRenderer(game->window, NULL);
-    if (!game->renderer) {
-        SDL_Log("Unable to create SDL renderer: %s", SDL_GetError());
-        C4_Game_Destroy(game);
-        return NULL;
-    }
-    SDL_SetRenderVSync(game->renderer, 1);
-
-    int windowWidth, windowHeight;
-    SDL_GetWindowSizeInPixels(game->window, &windowWidth, &windowHeight);
-    game->currentLayout = C4_UI_GetCurrentLayout(windowWidth, windowHeight);
-    C4_Game_UpdateWindowProperties(game);
-
-    game->board = C4_Board_Create(boardWidth, boardHeight, amountToWin);
-
-    game->fontRegular = C4_GetFont(C4_FontType_Regular);
-    game->fontBold = C4_GetFont(C4_FontType_Bold);
-
+static void C4_Game_TouchModeSetup(void) {
     #if SDL_PLATFORM_ANDROID || SDL_PLATFORM_IOS
         C4_Game_ButtonSounds_SetTouchMode(true);
     #else
@@ -172,13 +136,88 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
     if (SDL_GetHintBoolean(SDL_HINT_MOUSE_TOUCH_EVENTS, false)) {
         C4_Game_ButtonSounds_SetTouchMode(true);
     }
+}
 
-    C4_UI_Canvas_Init(&game->canvas, game->renderer, 0.f, 0.f);
+static C4_UI_Screen* (*C4_ScreenCreationArray[C4_ScreenType_ScreenCount])(C4_Game* game) = {
+    C4_MenuScreen_Create,
+    C4_GameScreen_Create,
+    C4_SettingsScreen_Create,
+};
+static bool C4_Game_CreateScreens(C4_Game* game) {
+    for (size_t i = 0; i < C4_ScreenType_ScreenCount; i++) {
+        game->screens[i] = C4_ScreenCreationArray[i](game);
+        if (!game->screens[i]) {
+            SDL_Log("Unable to create screen index: %zu", i);
+            return false;
+        }
+    }
+    return true;
+}
+
+static void C4_Game_SetScreen(C4_Game* game, C4_ScreenType type) {
+    if (!game) {
+        SDL_Log("Unable to change game screen. Game is NULL");
+        return;
+    }
+    if (type < 0 || type >= C4_ScreenType_ScreenCount) {
+        SDL_Log("Unable to change game screen. Type is Invalid");
+        return;
+    }
+    if (game->screens[type] == NULL) {
+        return;
+    }
+    game->currentScreenType = type;
+    game->currentScreen = game->screens[type];
+    if (game->currentScreen->OnEnter) {
+        game->currentScreen->OnEnter(game->currentScreen);
+    }
+    C4_UI_Canvas_ResetButtons(&game->currentScreen->canvas);
+    SDL_SetCursor(C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT));
+    if (game->currentScreen->HandleWindowResize) {
+        game->currentScreen->HandleWindowResize(game->currentScreen, game->currentLayout);
+    }
+
+    if (game->currentScreenType == C4_ScreenType_Menu) {
+        C4_Discord_UpdateStatus("In the Menus", NULL);
+    } else if (game->currentScreenType == C4_ScreenType_Game) {
+        C4_Discord_UpdateStatus("In MultiPlayer", NULL);
+    }
+}
+
+C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountToWin) {
+    C4_Game* game = calloc(1, sizeof(C4_Game));
+    if (!game) {
+        SDL_Log("Unable allocate memory for C4 Game");
+        return NULL;
+    }
+
+    if (!C4_Game_WindowSetup(game)) {
+        C4_Game_Destroy(game);
+        return NULL;
+    }
+
+    if (!C4_Game_RendererSetup(game)) {
+        C4_Game_Destroy(game);
+        return NULL;
+    }
+
+    game->board = C4_Board_Create(boardWidth, boardHeight, amountToWin);
+    game->fontRegular = C4_GetFont(C4_FontType_Regular);
+    game->fontBold = C4_GetFont(C4_FontType_Bold);
+
+    C4_Game_TouchModeSetup();
 
     game->UIScale = 1.f;
-    C4_Game_ChangeScreen(game, C4_ScreenType_Menu);
     game->running = false;
     game->isFullscreen = false;
+
+    if (!C4_Game_CreateScreens(game)) {
+        C4_Game_Destroy(game);
+        return NULL;
+    }
+
+    C4_Game_SetScreen(game, C4_ScreenType_Menu);
+
     return game;
 }
 
@@ -187,7 +226,13 @@ void C4_Game_Destroy(C4_Game* game) {
         SDL_Log("Tried to destroy NULL C4 Game");
         return;
     }
-    C4_UI_Canvas_Destroy(&game->canvas);
+    for (size_t i = 0; i < C4_ScreenType_ScreenCount; i++) {
+        if (game->screens[i]->Destroy) {
+            game->screens[i]->Destroy(game->screens[i]);
+        }
+        game->screens[i] = NULL;
+    }
+    game->currentScreen = NULL;
     C4_Board_Destroy(game->board);
     if (game->renderer) {
         SDL_DestroyRenderer(game->renderer);
@@ -195,7 +240,7 @@ void C4_Game_Destroy(C4_Game* game) {
     if (game->window) {
         SDL_DestroyWindow(game->window);
     }
-    SDL_free(game);
+    free(game);
 }
 
 static void C4_Game_HandleKeyboardInput(C4_Game* game, int scancode) {
@@ -203,22 +248,6 @@ static void C4_Game_HandleKeyboardInput(C4_Game* game, int scancode) {
         game->isFullscreen = !game->isFullscreen;
         SDL_SetWindowFullscreen(game->window, game->isFullscreen);
         return;
-    }
-}
-
-static void C4_Game_UpdateUI(C4_Game* game) {
-    C4_Game_UpdateWindowProperties(game);
-    switch (game->currentScreen) {
-        case C4_ScreenType_Menu: {
-            C4_UpdateUILayout_Menu(game->currentLayout);
-        }; break;
-        case C4_ScreenType_Settings: {
-            C4_UpdateUILayout_Settings(game->currentLayout);
-        }; break;
-        case C4_ScreenType_Game: {
-            C4_UpdateUILayout_Game(game->currentLayout);
-        }; break;
-        default: break;
     }
 }
 
@@ -232,11 +261,15 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
             }
             C4_Game_HandleKeyboardInput(game, eventSDL->key.scancode);
         } else if (eventSDL->type == SDL_EVENT_WINDOW_RESIZED) {
-            game->currentLayout= C4_UI_GetCurrentLayout(eventSDL->window.data1, eventSDL->window.data2);
-            C4_Game_UpdateUI(game);
+            unsigned int windowWidth = eventSDL->window.data1;
+            unsigned int windowHeight = eventSDL->window.data2;
+            C4_Game_UpdateWindowProperties(game, windowWidth, windowHeight);
+            game->currentScreen->HandleWindowResize(game->currentScreen, game->currentLayout);
         }
         SDL_ConvertEventToRenderCoordinates(game->renderer, eventSDL);
-        C4_UI_Canvas_HandleEvent(&game->canvas, eventSDL, game->UIScale);
+        if (game->currentScreen->HandleEvent) {
+            game->currentScreen->HandleEvent(game->currentScreen, eventSDL, game->UIScale);
+        }
     }
     while (C4_PollEvent(eventC4)) {
         switch (eventC4->type) {
@@ -247,7 +280,7 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
                 #endif
             }; break;
             case C4_EVENT_SCREEN_CHANGE: {
-                C4_Game_ChangeScreen(game, eventC4->screenChange.type);
+                C4_Game_SetScreen(game, eventC4->screenChange.type);
             }; break;
             default: break;
         }
@@ -265,12 +298,16 @@ void C4_Game_Run(C4_Game* game) {
         lastTicks = currentTicks;
 
         C4_Game_HandleEvents(game, &eventSDL, &eventC4);
-        C4_UI_Canvas_Update(&game->canvas, deltaTime);
+        if (game->currentScreen->Update) {
+            game->currentScreen->Update(game->currentScreen, deltaTime);
+        }
 
         SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
         SDL_RenderClear(game->renderer);
 
-        C4_UI_Canvas_Draw(&game->canvas, game->UIScale);
+        if (game->currentScreen->Draw) {
+            game->currentScreen->Draw(game->currentScreen, game->UIScale);
+        }
 
         SDL_RenderPresent(game->renderer);
 

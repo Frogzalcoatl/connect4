@@ -138,6 +138,16 @@ void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime) {
     }
 }
 
+void C4_UI_Canvas_ResetButtons(C4_UI_Canvas* canvas) {
+    C4_UI_Node* current = canvas->head;
+    while (current) {
+        if (current->element.Reset) {
+            current->element.Reset(current->element.data);
+        }
+        current = current->next;
+    }
+}
+
 static void C4_UI_Canvas_AddNode(
     C4_UI_Canvas* canvas, void* data,
     C4_UI_ElementType type,

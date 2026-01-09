@@ -1,8 +1,8 @@
 # TODO
 
-* Look in to making a screen struct
 * Z indexing
 * Implement ui element stacks. They would be similar to button groups, except for any element type
+    * Consider deleting button groups after these are implemented
 * Keyboard cursor (Use arrow keys to navigate buttons)
     * Can also be used to track whether the keyboard is focused on text boxes, etc
 * Slider UIElement
