@@ -159,7 +159,7 @@ void C4_UI_ButtonGroup_CenterInWindow(C4_UI_ButtonGroup* group, C4_Axis axis, un
     C4_UI_ButtonGroup_ChangeDestination(group, group->bounds);
 }
 
-// void* to work in container
+// void* to work in canvas
 void C4_UI_ButtonGroup_Reset(void* data) {
     if (!data) {
         return;

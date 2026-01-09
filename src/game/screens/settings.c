@@ -241,12 +241,12 @@ void C4_SetScreen_Settings(C4_Game* game) {
     if (!game) {
         return;
     }
-    C4_UI_Container* cont = &game->container;
-    C4_UI_Container_Clear(cont);
+    C4_UI_Canvas* cont = &game->canvas;
+    C4_UI_Canvas_Clear(cont);
     game->currentScreen = C4_ScreenType_Settings;
     settingsData.game = game;
 
-    settingsData.title = C4_UI_Container_Add_Text(
+    settingsData.title = C4_UI_Canvas_Add_Text(
         cont, &(C4_UI_Text_Config){
             .str = "Settings",
             .font = game->fontBold,
@@ -258,7 +258,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
         }
     );
 
-    settingsData.buttonGroup = C4_UI_Container_Add_ButtonGroup(
+    settingsData.buttonGroup = C4_UI_Canvas_Add_ButtonGroup(
         cont, &(C4_UI_ButtonGroup_Config){
             .destination = (SDL_FRect){0.f, 900.f, 900.f, 100.f},
             .count = BUTTON_GROUP_COUNT,
@@ -276,7 +276,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
     settingsData.applyButton = &settingsData.buttonGroup->buttons[0];
     settingsData.applyButton->isActive = false;
 
-    settingsData.confirmPopup = C4_UI_Container_Add_Popup(
+    settingsData.confirmPopup = C4_UI_Canvas_Add_Popup(
         cont, &(C4_UI_Popup_Config){
             .destination = (SDL_FRect){0.f, 0.f, 800.f, 400.f},
             .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
@@ -294,7 +294,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
         btn->OnReleaseCallback = POPUP_ON_CLICKS[i];
     }
 
-    settingsData.widthInput = C4_UI_Container_Add_NumberInput(
+    settingsData.widthInput = C4_UI_Canvas_Add_NumberInput(
         cont, &(C4_UI_NumberInput_Config){
             .destination = (SDL_FRect){1175.f, 175.f, 200.f, 100.f},
             .min = 2,
@@ -311,7 +311,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
 
     const float PT_SIZE = settingsData.widthInput->numberText.ptSize;
 
-    settingsData.width = C4_UI_Container_Add_Text(
+    settingsData.width = C4_UI_Canvas_Add_Text(
         cont, &(C4_UI_Text_Config){
             .str = "Board Width",
             .font = game->fontRegular,
@@ -323,7 +323,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
         }
     );
 
-    settingsData.heightInput = C4_UI_Container_Add_NumberInput(
+    settingsData.heightInput = C4_UI_Canvas_Add_NumberInput(
         cont, &(C4_UI_NumberInput_Config){
             .destination = (SDL_FRect){1175.f, 300.f, 200.f, 100.f},
             .min = 2,
@@ -338,7 +338,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
     C4_UI_Button* boardHeightDecrement = &settingsData.heightInput->buttonGroup.buttons[1];
     boardHeightDecrement->WhilePressedCallback = HeightDecrementWhilePressed;
 
-    settingsData.height = C4_UI_Container_Add_Text(
+    settingsData.height = C4_UI_Canvas_Add_Text(
         cont, &(C4_UI_Text_Config){
             .str = "Board Height",
             .font = game->fontRegular,
@@ -350,7 +350,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
         }
     );
 
-    settingsData.winAmountInput = C4_UI_Container_Add_NumberInput(
+    settingsData.winAmountInput = C4_UI_Canvas_Add_NumberInput(
         cont, &(C4_UI_NumberInput_Config){
             .destination = (SDL_FRect){1175.f, 425.f, 200.f, 100.f},
             .min = 2,
@@ -365,7 +365,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
     C4_UI_Button* winAmountDecrement = &settingsData.winAmountInput->buttonGroup.buttons[1];
     winAmountDecrement->WhilePressedCallback = WinAmountDecrementWhilePressed;
 
-    settingsData.winAmount = C4_UI_Container_Add_Text(
+    settingsData.winAmount = C4_UI_Canvas_Add_Text(
         cont, &(C4_UI_Text_Config){
             .str = "Amount to Win",
             .font = game->fontRegular,
@@ -377,7 +377,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
         }
     );
 
-    settingsData.UIScaleInput = C4_UI_Container_Add_NumberInput(
+    settingsData.UIScaleInput = C4_UI_Canvas_Add_NumberInput(
         cont, &(C4_UI_NumberInput_Config){
             .destination = (SDL_FRect){1175.f, 550.f, 200.f, 100.f},
             .min = 20,
@@ -392,7 +392,7 @@ void C4_SetScreen_Settings(C4_Game* game) {
     C4_UI_Button* UIScaleDecrement = &settingsData.UIScaleInput->buttonGroup.buttons[1];
     UIScaleDecrement->WhilePressedCallback = UIScaleDecrementWhilePressed;
 
-    settingsData.UIScale = C4_UI_Container_Add_Text(
+    settingsData.UIScale = C4_UI_Canvas_Add_Text(
         cont, &(C4_UI_Text_Config){
             .str = "UI Scale",
             .font = game->fontRegular,

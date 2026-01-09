@@ -173,7 +173,7 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
         C4_Game_ButtonSounds_SetTouchMode(true);
     }
 
-    C4_UI_Container_Init(&game->container, game->renderer, 0.f, 0.f);
+    C4_UI_Canvas_Init(&game->canvas, game->renderer, 0.f, 0.f);
 
     game->UIScale = 1.f;
     C4_Game_ChangeScreen(game, C4_ScreenType_Menu);
@@ -187,7 +187,7 @@ void C4_Game_Destroy(C4_Game* game) {
         SDL_Log("Tried to destroy NULL C4 Game");
         return;
     }
-    C4_UI_Container_Destroy(&game->container);
+    C4_UI_Canvas_Destroy(&game->canvas);
     C4_Board_Destroy(game->board);
     if (game->renderer) {
         SDL_DestroyRenderer(game->renderer);
@@ -236,7 +236,7 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
             C4_Game_UpdateUI(game);
         }
         SDL_ConvertEventToRenderCoordinates(game->renderer, eventSDL);
-        C4_UI_Container_HandleEvent(&game->container, eventSDL, game->UIScale);
+        C4_UI_Canvas_HandleEvent(&game->canvas, eventSDL, game->UIScale);
     }
     while (C4_PollEvent(eventC4)) {
         switch (eventC4->type) {
@@ -265,12 +265,12 @@ void C4_Game_Run(C4_Game* game) {
         lastTicks = currentTicks;
 
         C4_Game_HandleEvents(game, &eventSDL, &eventC4);
-        C4_UI_Container_Update(&game->container, deltaTime);
+        C4_UI_Canvas_Update(&game->canvas, deltaTime);
 
         SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
         SDL_RenderClear(game->renderer);
 
-        C4_UI_Container_Draw(&game->container, game->UIScale);
+        C4_UI_Canvas_Draw(&game->canvas, game->UIScale);
 
         SDL_RenderPresent(game->renderer);
 

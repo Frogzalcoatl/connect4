@@ -168,11 +168,11 @@ void C4_SetScreen_Menu(C4_Game* game) {
 
     menuData.game = game;
 
-    C4_UI_Container* cont = &game->container;
-    C4_UI_Container_Clear(cont);
+    C4_UI_Canvas* cont = &game->canvas;
+    C4_UI_Canvas_Clear(cont);
     game->currentScreen = C4_ScreenType_Menu;
 
-    menuData.inDevelopmentPopup = C4_UI_Container_Add_Popup(
+    menuData.inDevelopmentPopup = C4_UI_Canvas_Add_Popup(
         cont, &(C4_UI_Popup_Config){
             .destination = C4_EMPTY_SDL_FRECT,
             .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
@@ -189,7 +189,7 @@ void C4_SetScreen_Menu(C4_Game* game) {
     popupOkButton->OnReleaseCallback = OnePlayerPopupOkOnClick;
     popupOkButton->OnClickContext = menuData.inDevelopmentPopup;
 
-    menuData.exitGamePopup = C4_UI_Container_Add_Popup(
+    menuData.exitGamePopup = C4_UI_Canvas_Add_Popup(
         cont, &(C4_UI_Popup_Config){
             .destination = C4_EMPTY_SDL_FRECT,
             .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
@@ -211,7 +211,7 @@ void C4_SetScreen_Menu(C4_Game* game) {
         btn->OnClickContext = POPUP_CLICK_CONTEXTS[i];
     }
 
-    menuData.title = C4_UI_Container_Add_Text(
+    menuData.title = C4_UI_Canvas_Add_Text(
         cont, &(C4_UI_Text_Config){
             .str = "Connect4",
             .font = game->fontBold,
@@ -223,7 +223,7 @@ void C4_SetScreen_Menu(C4_Game* game) {
         }
     );
 
-    menuData.buttonGroup = C4_UI_Container_Add_ButtonGroup(
+    menuData.buttonGroup = C4_UI_Canvas_Add_ButtonGroup(
         cont, &(C4_UI_ButtonGroup_Config){
             .destination = C4_EMPTY_SDL_FRECT,
             .count = BUTTON_GROUP_COUNT,

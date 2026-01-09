@@ -56,12 +56,12 @@ void C4_SetScreen_Game(C4_Game* game) {
     if (!game) {
         return;
     }
-    C4_UI_Container* cont = &game->container;
-    C4_UI_Container_Clear(cont);
+    C4_UI_Canvas* cont = &game->canvas;
+    C4_UI_Canvas_Clear(cont);
     game->currentScreen = C4_ScreenType_Game;
     gameData.game = game;
 
-    gameData.boardText = C4_UI_Container_Add_Text(
+    gameData.boardText = C4_UI_Canvas_Add_Text(
         cont, &(C4_UI_Text_Config){
             .str = "",
             .font = game->fontRegular,
@@ -75,7 +75,7 @@ void C4_SetScreen_Game(C4_Game* game) {
     C4_Board_UpdateTestStr(game->board, gameData.boardText->str, sizeof(gameData.boardText->str));
     C4_UI_Text_ReloadTexture(gameData.boardText, game->renderer);
 
-    gameData.backButton = C4_UI_Container_Add_Button(
+    gameData.backButton = C4_UI_Canvas_Add_Button(
         cont, &(C4_UI_Button_Config){
             .text = "Back",
             .destination = (SDL_FRect){0.f, 0.f, 400.f, 100.f},
@@ -86,7 +86,7 @@ void C4_SetScreen_Game(C4_Game* game) {
     );
     gameData.backButton->OnReleaseCallback = BackOnClick;
 
-    gameData.winnerPopup = C4_UI_Container_Add_Popup(
+    gameData.winnerPopup = C4_UI_Canvas_Add_Popup(
         cont, &(C4_UI_Popup_Config){
             .destination = (SDL_FRect){0.f, 0.f, 800.f, 400.f},
             .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
