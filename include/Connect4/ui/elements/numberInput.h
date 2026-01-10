@@ -33,7 +33,7 @@ void C4_UI_NumberInput_Destroy(void* data);
 void C4_UI_NumberInput_Draw(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY);
 void C4_UI_NumberInput_CenterInWindow(C4_UI_NumberInput* numInput, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight, float UIScale);
 void C4_UI_NumberInput_Update(void* data, float deltaTime);
-void C4_UI_NumberInput_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY);
+bool C4_UI_NumberInput_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY);
 void C4_UI_NumberInput_HandleKeyboardInput(C4_UI_NumberInput* numInput, SDL_Event* event, SDL_Renderer* renderer);
 void C4_UI_NumberInput_ChangeMax(C4_UI_NumberInput* numInput, unsigned int newMax, SDL_Renderer* renderer);
 void C4_UI_NumberInput_ChangeMin(C4_UI_NumberInput* numInput, unsigned int newMin, SDL_Renderer* renderer);

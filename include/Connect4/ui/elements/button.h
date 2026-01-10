@@ -4,6 +4,7 @@
 #include "Connect4/ui/elements/borders.h"
 #include "Connect4/ui/elements/symbol.h"
 #include "Connect4/ui/themes.h"
+#include "Connect4/game/input/input.h"
 #include <stdbool.h>
 
 typedef void (*C4_UI_Callback)(void* context);
@@ -25,7 +26,10 @@ typedef struct {
     C4_UI_Button_ColorInfo hoverColors;
     C4_UI_Button_ColorInfo pressedColors;
     C4_UI_Button_ColorInfo inactiveColors;
+    // For mouse input
     bool isHovered;
+    // For input actions
+    bool isFocused;
     bool isPressed;
     bool isActive;
     bool resetHoverOnClick;
@@ -49,13 +53,14 @@ void C4_UI_Button_FreeResources(C4_UI_Button* button);
 void C4_UI_Button_Destroy(void* data);
 void C4_UI_Button_Draw(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY);
 void C4_UI_Button_Update(void* data, float deltaTime);
-void C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY);
+bool C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY);
 void C4_UI_Button_CenterElementsInBackground(C4_UI_Button* button, C4_Axis axis);
 void C4_UI_Button_CenterInWindow(C4_UI_Button* button, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight, float UIScale);
 void C4_UI_Button_ChangeDestination(C4_UI_Button* button, const SDL_FRect newDestination);
 void C4_UI_Button_UpdateStr(C4_UI_Button* button, const char* str, SDL_Renderer* renderer);
 void C4_UI_Button_Reset(void* data);
 void C4_UI_Button_SetTheme(C4_UI_Button* button, const C4_UI_Theme* theme);
+bool C4_UI_Button_HandleAction(void* data, C4_InputAction action);
 
 typedef enum {
     C4_UI_Button_CallbackType_OnRelease = 1,

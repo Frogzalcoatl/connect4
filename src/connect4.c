@@ -11,6 +11,8 @@
 #include "Connect4/discord-rpc/index.h"
 #include "Connect4/android/quit.h"
 #include "Connect4/ui/utils.h"
+#include "Connect4/game/input/input.h"
+#include "assets_gamecontrollerdb_txt.h"
 #include <stdlib.h>
 #include <time.h>
 
@@ -19,11 +21,15 @@ bool Connect4_Init_Dependencies(void) {
     // To simulate touch events for testing
     // SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "1");
 
-    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD)) {
         // The error is inserted at %s
         SDL_Log("SDL_Init failed: %s", SDL_GetError());
         return false;
     }
+
+    SDL_IOStream* io = SDL_IOFromConstMem(assets_gamecontrollerdb_txt_data, assets_gamecontrollerdb_txt_size);
+    SDL_AddGamepadMappingsFromIO(io, true);
+    SDL_AddGamepadMapping(SAHARS_RETROLINK_CONTROLLER_MAPPING);
 
     // I like logs starting under the file path of the exe in my ide.
     SDL_Log("");
@@ -44,6 +50,7 @@ bool Connect4_Init_Dependencies(void) {
 }
 
 void Connect4_Quit_Dependencies(void) {
+    C4_Input_Shutdown();
     C4_Discord_Shutdown();
     C4_CloseAllFonts();
     C4_DestroyAllCursors();

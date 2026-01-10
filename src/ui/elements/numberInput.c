@@ -233,12 +233,12 @@ void C4_UI_NumberInput_Update(void* data, float deltaTime) {
     C4_UI_ButtonGroup_Update(&numInput->buttonGroup, deltaTime);
 }
 
-void C4_UI_NumberInput_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY) {
+bool C4_UI_NumberInput_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY) {
     if (!data) {
-        return;
+        return false;
     }
     C4_UI_NumberInput* numInput = (C4_UI_NumberInput*)data;
-    C4_UI_ButtonGroup_HandleMouseEvents(&numInput->buttonGroup, event, scale, parentX, parentY);
+    return C4_UI_ButtonGroup_HandleMouseEvents(&numInput->buttonGroup, event, scale, parentX, parentY);
 }
 
 void C4_UI_NumberInput_HandleKeyboardInput(C4_UI_NumberInput* numInput, SDL_Event* event, SDL_Renderer* renderer) {

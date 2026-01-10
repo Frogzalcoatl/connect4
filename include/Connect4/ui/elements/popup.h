@@ -33,7 +33,7 @@ void C4_UI_Popup_Destroy(void* data);
 void C4_UI_Popup_Draw(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY);
 void C4_UI_Popup_CenterInWindow(C4_UI_Popup* popup, SDL_Renderer* renderer, unsigned int windowWidth, unsigned int windowHeight, float UIScale);
 void C4_UI_Popup_Update(void* data, float deltaTime);
-void C4_UI_Popup_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY);
+bool C4_UI_Popup_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY);
 void C4_UI_Popup_ResetButtons(void* data);
 void C4_UI_Popup_ChangeDestination(C4_UI_Popup* popup, const SDL_FRect newDestination, SDL_Renderer* renderer);
 void C4_UI_Popup_ChangeButtonGroupHeight(C4_UI_Popup* popup, float height);

@@ -31,7 +31,7 @@ void C4_UI_ButtonGroup_FreeResources(C4_UI_ButtonGroup* group);
 void C4_UI_ButtonGroup_Destroy(void* data);
 void C4_UI_ButtonGroup_Draw(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY);
 void C4_UI_ButtonGroup_Update(void* data, float deltaTime);
-void C4_UI_ButtonGroup_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY);
+bool C4_UI_ButtonGroup_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY);
 void C4_UI_ButtonGroup_ChangeDestination(C4_UI_ButtonGroup* group, const SDL_FRect rect);
 void C4_UI_ButtonGroup_CenterInWindow(C4_UI_ButtonGroup* group, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight, float UIScale);
 void C4_UI_ButtonGroup_Reset(void* data);

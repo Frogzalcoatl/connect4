@@ -42,3 +42,4 @@
 // other
 #define C4_EMPTY_SDL_FRECT (SDL_FRect){0.f, 0.f, 1.f, 1.f}
 #define C4_DEFAULT_PT_SIZE_TALL_LAYOUT 75.f
+#define SAHARS_RETROLINK_CONTROLLER_MAPPING "03000000790000000600000000000000,SaharsRetrolinkController,platform:Windows,a:b6,b:b8,start:b9,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,"

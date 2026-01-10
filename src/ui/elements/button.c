@@ -103,6 +103,7 @@ bool C4_UI_Button_InitProperties(C4_UI_Button* button, SDL_Renderer* renderer, c
     ) {
         return false;
     }
+    button->isFocused = false;
     button->isHovered = false;
     button->isPressed = false;
     button->isActive = true;
@@ -161,7 +162,7 @@ void C4_UI_Button_Draw(void* data, SDL_Renderer* renderer, float scale, float pa
     C4_UI_Button_ColorInfo* currentColors = &button->defaultColors;
     if (button->isPressed) {
         currentColors = &button->pressedColors;
-    } else if (button->isHovered) {
+    } else if (button->isHovered || button->isFocused) {
         currentColors = &button->hoverColors;
     }
     if (!button->isActive) {
@@ -229,17 +230,18 @@ void C4_UI_Button_Update(void* data, float deltaTime) {
     }
 }
 
-void C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY) {
+// Returns true if a callback is run (even if the callback is NULL)
+bool C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY) {
     if (!data) {
-        return;
+        return false;
     }
     C4_UI_Button* button = (C4_UI_Button*)data;
     if (!event) {
         SDL_Log("Event is NULL");
-        return;
+        return false;
     }
     if (!button->isActive) {
-        return;
+        return false;
     }
 
     SDL_FRect scaledRect;
@@ -264,6 +266,7 @@ void C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event, float scale, f
                         PostCallbackContexts[C4_UI_Button_CallbackType_OnHover]
                     );
                 }
+                return true;
             }
         }
     } else if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
@@ -285,13 +288,16 @@ void C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event, float scale, f
                     PostCallbackContexts[C4_UI_Button_CallbackType_WhilePressed]
                 );
             }
+            return true;
         }
     } else if (event->type == SDL_EVENT_MOUSE_BUTTON_UP) {
         if (event->button.button == SDL_BUTTON_LEFT) {
-            bool wasClicked = button->isPressed && button->isHovered;
+            bool wasReleased = button->isPressed && button->isHovered;
             button->isPressed = false;
-            if (wasClicked && button->OnReleaseCallback)  {
-                button->OnReleaseCallback(button->OnReleaseContext);
+            if (wasReleased) {
+                if (button->OnReleaseCallback) {
+                    button->OnReleaseCallback(button->OnReleaseContext);
+                }
                 if (PostCallbacks[C4_UI_Button_CallbackType_OnRelease]) {
                     PostCallbacks[C4_UI_Button_CallbackType_OnRelease](
                         PostCallbackContexts[C4_UI_Button_CallbackType_OnRelease]
@@ -300,9 +306,11 @@ void C4_UI_Button_HandleMouseEvents(void* data, SDL_Event* event, float scale, f
                 if (button->resetHoverOnClick) {
                     button->isPressed = false;
                 }
+                return true;
             }
         }
     }
+    return false;
 }
 
 void C4_UI_Button_CenterInWindow(C4_UI_Button* button, C4_Axis axis, unsigned int windowWidth, unsigned int windowHeight, float UIScale) {
@@ -352,4 +360,40 @@ void C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType type, C4_UI_Callback
     }
     PostCallbacks[type] = callback;
     PostCallbackContexts[type] = context;
+}
+
+bool C4_UI_Button_HandleAction(void* data, C4_InputAction action) {
+    if (!data) {
+        return false;
+    }
+    C4_UI_Button* button = (C4_UI_Button*)data;
+    if (!button->isActive) {
+        return false;
+    }
+    if (!button->isFocused) {
+        return false;
+    }
+    switch (action) {
+        case C4_ACTION_CONFIRM: {
+            button->isPressed = true;
+            if (button->OnPressCallback) {
+                button->OnPressCallback(button->OnPressContext);
+            }
+            if (PostCallbacks[C4_UI_Button_CallbackType_OnPress]) {
+                PostCallbacks[C4_UI_Button_CallbackType_OnPress](PostCallbackContexts[C4_UI_Button_CallbackType_OnPress]);
+            }
+            if (button->OnReleaseCallback) {
+                button->OnReleaseCallback(button->OnReleaseContext);
+            }
+            if (PostCallbacks[C4_UI_Button_CallbackType_OnRelease]) {
+                PostCallbacks[C4_UI_Button_CallbackType_OnRelease](PostCallbackContexts[C4_UI_Button_CallbackType_OnRelease]);
+            }
+            return true;
+        };
+        case C4_ACTION_CANCEL: {
+            // idk maybe add something here
+            return true;
+        }
+        default: return false;
+    }
 }

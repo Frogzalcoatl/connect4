@@ -186,16 +186,16 @@ void C4_UI_Popup_Update(void* data, float deltaTime) {
     C4_UI_ButtonGroup_Update(&popup->buttonGroup, deltaTime);
 }
 
-void C4_UI_Popup_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY) {
+bool C4_UI_Popup_HandleMouseEvents(void* data, SDL_Event* event, float scale, float parentX, float parentY) {
     if (!data || !event) {
         SDL_Log("Popup element and/or event is NULL");
-        return;
+        return false;
     }
     C4_UI_Popup* popup = (C4_UI_Popup*)data;
     if (!popup->isShowing) {
-        return;
+        return false;
     }
-    C4_UI_ButtonGroup_HandleMouseEvents(&popup->buttonGroup, event, scale, parentX, parentY);
+    return C4_UI_ButtonGroup_HandleMouseEvents(&popup->buttonGroup, event, scale, parentX, parentY);
 }
 
 void C4_UI_Popup_SetButtonText(C4_UI_Popup* popup, SDL_Renderer* renderer, size_t buttonIndex, const char* text) {

@@ -10,6 +10,7 @@
 #include "Connect4/ui/elements/text.h"
 
 typedef enum {
+    C4_UI_ElementType_None,
     C4_UI_ElementType_Borders,
     C4_UI_ElementType_Button,
     C4_UI_ElementType_ButtonGroup,
@@ -24,15 +25,23 @@ typedef struct {
     void* data;
     C4_UI_ElementType type;
     void (*Draw)(void* data, SDL_Renderer* renderer, float scale, float parentX, float parentY);
-    void (*HandleEvents)(void* data, SDL_Event* event, float scale, float parentX, float parentY);
+    bool (*HandleEvents)(void* data, SDL_Event* event, float scale, float parentX, float parentY);
     void (*Destroy)(void* data);
     void (*Reset)(void* data);
     void (*Update)(void* data, float deltaTime);
+    bool (*HandleAction)(void* data, C4_InputAction action);
 } C4_UI_Element;
 
 typedef struct C4_UI_Node {
     C4_UI_Element element;
     struct C4_UI_Node* next;
+
+    struct C4_UI_Node* navUp;
+    struct C4_UI_Node* navDown;
+    struct C4_UI_Node* navLeft;
+    struct C4_UI_Node* navRight;
+
+    bool isFocusable;
 } C4_UI_Node;
 
 typedef struct {
@@ -44,8 +53,11 @@ typedef struct {
     float destinationY;
     C4_UI_Node* head;
     C4_UI_Node* tail;
+
     // Every button's colors are reset when a popup is initally opened
     bool buttonColorResetComplete;
+
+    C4_UI_Node* focusedNode;
 } C4_UI_Canvas;
 
 void C4_UI_Canvas_Init(C4_UI_Canvas* canvas, SDL_Renderer* renderer, float destinationX, float destinationY);
@@ -55,6 +67,7 @@ void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float scale);
 void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime);
 void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float scale);
 void C4_UI_Canvas_ResetButtons(C4_UI_Canvas* canvas);
+C4_UI_Node* C4_UI_Canvas_GetLastNode(C4_UI_Canvas* canvas);
 
 C4_UI_Borders* C4_UI_Canvas_Add_Borders(
     C4_UI_Canvas* canvas, const C4_UI_Borders_Config* config
