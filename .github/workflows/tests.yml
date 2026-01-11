@@ -1,6 +1,6 @@
 name: Tests
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 defaults:
   run:
@@ -18,7 +18,6 @@ jobs:
           - { name: Windows VS2022, os: windows-2022 }
           - { name: Linux GCC, os: ubuntu-latest }
           - { name: MacOS, os: macos-latest }
-          # Android configuration (No flags needed, Gradle handles it)
           - { name: Android, os: ubuntu-latest }
           - {
               name: IOS,
@@ -92,16 +91,33 @@ jobs:
           cp -r "$APP_PATH" Payload/
           zip -r Connect4.ipa Payload
 
+      # --- PREPARE ARTIFACTS (FLATTENING) ---
+      - name: Prepare Artifacts
+        run: |
+          mkdir -p staging
+
+          # Windows
+          find build -name "*.exe" -exec cp {} staging/ \; 2>/dev/null || true
+          find build -name "*.dll" -exec cp {} staging/ \; 2>/dev/null || true
+
+          # Linux/Mac Binaries
+          # We look for the file 'Connect4' specifically to avoid copying intermediate object files
+          if [ -f "build/bin/Connect4" ]; then cp "build/bin/Connect4" staging/; fi
+
+          # Android APK
+          find android -name "*.apk" -exec cp {} staging/ \; 2>/dev/null || true
+
+          # iOS IPA
+          find . -name "*.ipa" -exec cp {} staging/ \; 2>/dev/null || true
+
+          # Mac .app bundles (Zipping them first is best practice for artifacts)
+          if [ -d "build/bin/Connect4.app" ]; then 
+             cp -r "build/bin/Connect4.app" staging/
+          fi
+
       # --- ARTIFACT UPLOAD ---
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Connect4-${{ matrix.platform.name }}
-          path: |
-            build/bin/**/*.so
-            build/bin/**/*.exe
-            build/bin/**/*.dll
-            build/bin/**/Connect4.app
-            build/bin/Connect4
-            *.ipa
-            android/app/build/outputs/apk/debug/*.apk
+          path: staging/*
