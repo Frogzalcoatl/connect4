@@ -16,6 +16,15 @@
 #include <stdlib.h>
 #include <time.h>
 
+void Connect4_SetKeyboardInputVerbs(void) {
+    C4_Input_SetVerbScancode(C4_INPUT_VERB_NAV_UP, SDL_SCANCODE_UP);
+    C4_Input_SetVerbScancode(C4_INPUT_VERB_NAV_DOWN, SDL_SCANCODE_DOWN);
+    C4_Input_SetVerbScancode(C4_INPUT_VERB_NAV_RIGHT, SDL_SCANCODE_RIGHT);
+    C4_Input_SetVerbScancode(C4_INPUT_VERB_NAV_LEFT, SDL_SCANCODE_LEFT);
+    C4_Input_SetVerbScancode(C4_INPUT_VERB_CONFIRM, SDL_SCANCODE_RETURN);
+    // Cancel is set to escape by default dont need to set it here.
+}
+
 bool Connect4_Init_Dependencies(void) {
 
     // To simulate touch events for testing
@@ -44,14 +53,17 @@ bool Connect4_Init_Dependencies(void) {
         return false;
     }
 
+    C4_Input_Init();
+    Connect4_SetKeyboardInputVerbs();
+
     C4_Discord_Init();
 
     return true;
 }
 
 void Connect4_Quit_Dependencies(void) {
-    C4_Input_Shutdown();
     C4_Discord_Shutdown();
+    C4_Input_Shutdown();
     C4_CloseAllFonts();
     C4_DestroyAllCursors();
     C4_QuitAudio();

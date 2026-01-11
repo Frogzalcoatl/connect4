@@ -10,50 +10,49 @@ static SDL_Gamepad* activeGamepad = NULL;
 
 static bool onlyAcceptInputFromActiveGamepad = true;
 
+static SDL_Scancode scancodeToInputVerb[C4_INPUT_VERB_COUNT] = {0};
+
+void C4_Input_Init(void) {
+    scancodeToInputVerb[C4_INPUT_VERB_CANCEL] = SDL_SCANCODE_ESCAPE;
+}
+
+void C4_Input_SetVerbScancode(C4_InputVerb inputVerb, SDL_Scancode scancode) {
+    if (inputVerb <= 0 || inputVerb >= C4_INPUT_VERB_COUNT) {
+        return;
+    }
+    scancodeToInputVerb[inputVerb] = scancode;
+}
+
 void C4_Gamepad_OnlyAcceptInputFromActiveGamepad(bool value) {
     onlyAcceptInputFromActiveGamepad = value;
 }
 
 static C4_InputVerb C4_MapScancodeToVerb(SDL_Scancode scancode) {
-    switch (scancode) {
-        case SDL_SCANCODE_W:
-        case SDL_SCANCODE_UP: return C4_INPUT_NAV_UP;
-
-        case SDL_SCANCODE_S:
-        case SDL_SCANCODE_DOWN: return C4_INPUT_NAV_DOWN;
-
-        case SDL_SCANCODE_D:
-        case SDL_SCANCODE_RIGHT: return C4_INPUT_NAV_RIGHT;
-
-        case SDL_SCANCODE_A:
-        case SDL_SCANCODE_LEFT: return C4_INPUT_NAV_LEFT;
-
-        case SDL_SCANCODE_KP_ENTER:
-        case SDL_SCANCODE_RETURN: return C4_INPUT_CONFIRM;
-
-        case SDL_SCANCODE_ESCAPE: return C4_INPUT_CANCEL;
-
-        default: return C4_INPUT_NONE;
-    }
+    for (C4_InputVerb inputVerb = 1; inputVerb < C4_INPUT_VERB_COUNT; inputVerb++) {
+        if (scancode == scancodeToInputVerb[inputVerb]) {
+            return inputVerb;
+        }
+    } 
+    return C4_INPUT_VERB_NONE;
 }
 
 static C4_InputVerb C4_MapButtonToVerb(Uint8 button) {
     switch (button) {
-        case SDL_GAMEPAD_BUTTON_DPAD_UP: return C4_INPUT_NAV_UP;
-        case SDL_GAMEPAD_BUTTON_DPAD_DOWN: return C4_INPUT_NAV_DOWN;
-        case SDL_GAMEPAD_BUTTON_DPAD_LEFT: return C4_INPUT_NAV_LEFT;
-        case SDL_GAMEPAD_BUTTON_DPAD_RIGHT: return C4_INPUT_NAV_RIGHT;
+        case SDL_GAMEPAD_BUTTON_DPAD_UP: return C4_INPUT_VERB_NAV_UP;
+        case SDL_GAMEPAD_BUTTON_DPAD_DOWN: return C4_INPUT_VERB_NAV_DOWN;
+        case SDL_GAMEPAD_BUTTON_DPAD_LEFT: return C4_INPUT_VERB_NAV_LEFT;
+        case SDL_GAMEPAD_BUTTON_DPAD_RIGHT: return C4_INPUT_VERB_NAV_RIGHT;
         
         // South is A on Xbox, X on PlayStation, B on Switch
-        case SDL_GAMEPAD_BUTTON_SOUTH: return C4_INPUT_CONFIRM;
+        case SDL_GAMEPAD_BUTTON_SOUTH: return C4_INPUT_VERB_CONFIRM;
         
         // East is B on Xbox, O on PlayStation, A on Switch
-        case SDL_GAMEPAD_BUTTON_EAST: return C4_INPUT_CANCEL;
+        case SDL_GAMEPAD_BUTTON_EAST: return C4_INPUT_VERB_CANCEL;
         
-        case SDL_GAMEPAD_BUTTON_START: return C4_INPUT_CONFIRM;
-        case SDL_GAMEPAD_BUTTON_BACK: return C4_INPUT_CANCEL;
+        case SDL_GAMEPAD_BUTTON_START: return C4_INPUT_VERB_CONFIRM;
+        case SDL_GAMEPAD_BUTTON_BACK: return C4_INPUT_VERB_CANCEL;
         
-        default: return C4_INPUT_NONE;
+        default: return C4_INPUT_VERB_NONE;
     }
 }
 
@@ -86,7 +85,7 @@ void C4_Input_Shutdown(void) {
 
 C4_InputEvent C4_GetInput(SDL_Event* event) {
     C4_InputEvent input = {
-        .verb = C4_INPUT_NONE,
+        .verb = C4_INPUT_VERB_NONE,
         .state = C4_INPUT_STATE_RELEASED
     };
 
@@ -144,7 +143,7 @@ C4_InputEvent C4_GetInput(SDL_Event* event) {
         onlyAcceptInputFromActiveGamepad &&
         event->type >= SDL_EVENT_GAMEPAD_AXIS_MOTION &&
         event->type <= SDL_EVENT_GAMEPAD_STEAM_HANDLE_UPDATED &&
-        event->gdevice.which == SDL_GetGamepadID(activeGamepad)
+        event->gdevice.which != SDL_GetGamepadID(activeGamepad)
     ) {
         return input;
     }

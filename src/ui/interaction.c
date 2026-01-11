@@ -40,7 +40,7 @@ bool C4_UI_Interaction_HandleAction(C4_UI_Interaction* input, C4_InputEvent even
         return false;
     }
     switch (event.verb) {
-        case C4_INPUT_CONFIRM: {
+        case C4_INPUT_VERB_CONFIRM: {
             if (event.state == C4_INPUT_STATE_PRESSED) {
                 input->isPressed = true;
                 if (input->OnPress) input->OnPress(input->context);
@@ -54,7 +54,7 @@ bool C4_UI_Interaction_HandleAction(C4_UI_Interaction* input, C4_InputEvent even
                 return true;
             }
         } break;
-        case C4_INPUT_CANCEL: {
+        case C4_INPUT_VERB_CANCEL: {
             // idk maybe add something here
             return true;
         } break;

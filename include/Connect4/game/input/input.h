@@ -4,13 +4,14 @@
 #define C4_MAX_GAMEPADS 8
 
 typedef enum {
-    C4_INPUT_NONE,
-    C4_INPUT_NAV_UP,
-    C4_INPUT_NAV_DOWN,
-    C4_INPUT_NAV_RIGHT,
-    C4_INPUT_NAV_LEFT,
-    C4_INPUT_CONFIRM,
-    C4_INPUT_CANCEL
+    C4_INPUT_VERB_NONE,
+    C4_INPUT_VERB_NAV_UP,
+    C4_INPUT_VERB_NAV_DOWN,
+    C4_INPUT_VERB_NAV_RIGHT,
+    C4_INPUT_VERB_NAV_LEFT,
+    C4_INPUT_VERB_CONFIRM,
+    C4_INPUT_VERB_CANCEL,
+    C4_INPUT_VERB_COUNT
 } C4_InputVerb;
 
 typedef enum {
@@ -23,9 +24,11 @@ typedef struct {
     C4_InputState state;
 } C4_InputEvent;
 
+void C4_Input_Init(void);
 void C4_Input_Shutdown(void);
 C4_InputEvent C4_GetInput(SDL_Event* event);
 void C4_Gamepad_SetActiveIndex(int index);
 void C4_Gamepad_GetNames(char** returnValue, size_t returnValueSize);
 void C4_Gamepad_GetActiveName(char* returnValue, size_t returnValueSize);
 void C4_Gamepad_OnlyAcceptInputFromActiveGamepad(bool value);
+void C4_Input_SetVerbScancode(C4_InputVerb inputVerb, SDL_Scancode scancode);

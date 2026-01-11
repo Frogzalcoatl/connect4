@@ -88,22 +88,22 @@ static void C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event)
 
     C4_UI_Node* focusedNode = canvas->focusedNode;
     switch (event.verb) {
-        case C4_INPUT_NAV_UP: {
+        case C4_INPUT_VERB_NAV_UP: {
             if (focusedNode->navUp) {
                 C4_UI_Canvas_SetFocus(canvas, focusedNode->navUp);
             }
         }; break;
-        case C4_INPUT_NAV_DOWN: {
+        case C4_INPUT_VERB_NAV_DOWN: {
             if (focusedNode->navDown) {
                 C4_UI_Canvas_SetFocus(canvas, focusedNode->navDown);
             }
         }; break;
-        case C4_INPUT_NAV_RIGHT: {
+        case C4_INPUT_VERB_NAV_RIGHT: {
             if (focusedNode->navRight) {
                 C4_UI_Canvas_SetFocus(canvas, focusedNode->navRight);
             }
         }; break;
-        case C4_INPUT_NAV_LEFT: {
+        case C4_INPUT_VERB_NAV_LEFT: {
             if (focusedNode->navLeft) {
                 C4_UI_Canvas_SetFocus(canvas, focusedNode->navLeft);
             }
@@ -133,7 +133,7 @@ void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float scal
     (void)scale;
     C4_InputEvent inputEvent = C4_GetInput(event);
 
-    if (inputEvent.verb != C4_INPUT_NONE) {
+    if (inputEvent.verb != C4_INPUT_VERB_NONE) {
         if (SDL_CursorVisible()) {
             SDL_HideCursor();
             C4_UI_Canvas_ResetInteractions(canvas);
