@@ -93,6 +93,15 @@ void C4_Input_Shutdown(void) {
     }
 }
 
+void C4_Input_ResetVerbState(C4_InputVerb verb) {
+    if (verb <= 0 || verb >= C4_INPUT_VERB_COUNT) {
+        return;
+    }
+    verbStates[verb].isDown = false;
+    verbStates[verb].isRepeating = false;
+    verbStates[verb].timer = 0.f;
+}
+
 C4_InputEvent C4_GetInput(SDL_Event* event) {
     C4_InputEvent input = {
         .verb = C4_INPUT_VERB_NONE,
@@ -175,12 +184,11 @@ C4_InputEvent C4_GetInput(SDL_Event* event) {
         if (!verbStates[input.verb].isDown) {
             verbStates[input.verb].isDown = true;
             verbStates[input.verb].isRepeating = false;
+            verbStates[input.verb].timer = 0.f;
         }
     } else {
-        verbStates[input.verb].isDown = false;
-        verbStates[input.verb].isRepeating = false;
+        C4_Input_ResetVerbState(input.verb);
     }
-    verbStates[input.verb].timer = 0.f;
     return input;
 }
 

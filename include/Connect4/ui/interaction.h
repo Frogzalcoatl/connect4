@@ -18,6 +18,7 @@ typedef struct {
     void (*WhilePressed)(void* context);
     void (*OnPress)(void* context);
     void (*OnRelease)(void* context);
+    void (*OnCancel)(void* context);
     void* context;
 
     C4_UI_Interaction_WhilePressedTiming timing;

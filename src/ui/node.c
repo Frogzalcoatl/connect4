@@ -97,7 +97,7 @@ bool C4_UI_Node_HandleAction(C4_UI_Node* node, C4_InputEvent event) {
 
     C4_UI_Node* child = node->firstChild;
     while (child) {
-        if (C4_UI_Interaction_HandleAction(&node->input, event)) {
+        if (C4_UI_Node_HandleAction(child, event)) { 
             return true;
         }
         child = child->nextSibling;
@@ -241,6 +241,7 @@ C4_UI_Node* C4_UI_Node_Create(C4_UI_Node_Config* config, float UIScale) {
         .WhilePressed = NULL,
         .OnPress = NULL,
         .OnRelease = NULL,
+        .OnCancel = NULL,
         .context = NULL,
         .timing = (C4_UI_Interaction_WhilePressedTiming){
             .delay = 0.5f,

@@ -36,29 +36,29 @@ void C4_UI_Interaction_Update(C4_UI_Interaction* input, float deltaTime) {
 }
 
 bool C4_UI_Interaction_HandleAction(C4_UI_Interaction* input, C4_InputEvent event) {
+    if (event.verb == C4_INPUT_VERB_CANCEL) {
+        if (event.state == C4_INPUT_STATE_PRESSED && input->OnCancel) {
+            input->OnCancel(input->context);
+            return true;
+        }
+        return false;
+    }
     if (!input->isActive || !input->isFocusable) {
         return false;
     }
-    switch (event.verb) {
-        case C4_INPUT_VERB_CONFIRM: {
-            if (event.state == C4_INPUT_STATE_PRESSED) {
-                input->isPressed = true;
-                if (input->OnPress) input->OnPress(input->context);
-                return true;
-            } 
-            else if (event.state == C4_INPUT_STATE_RELEASED) {
-                if (input->isPressed) {
-                    input->isPressed = false;
-                    if (input->OnRelease) input->OnRelease(input->context);
-                }
-                return true;
-            }
-        } break;
-        case C4_INPUT_VERB_CANCEL: {
-            // idk maybe add something here
-            return true;
-        } break;
-        default: return false;
+    if (event.verb != C4_INPUT_VERB_CONFIRM) {
+        return false;
+    }
+    if (event.state == C4_INPUT_STATE_PRESSED) {
+        input->isPressed = true;
+        if (input->OnPress) input->OnPress(input->context);
+        return true;
+    } else if (event.state == C4_INPUT_STATE_RELEASED) {
+        if (input->isPressed) {
+            input->isPressed = false;
+            if (input->OnRelease) input->OnRelease(input->context);
+        }
+        return true;
     }
     return false;
 }

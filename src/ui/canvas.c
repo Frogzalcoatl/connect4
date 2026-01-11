@@ -62,11 +62,12 @@ static void C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event)
     }
 
     C4_UI_Node* current = canvas->focusedNode;
-    if (current) {
-        if (C4_UI_Node_HandleAction(current, event)) {
+    
+    while (current) {
+        if (C4_UI_Interaction_HandleAction(&current->input, event)) {
             return;
         }
-        current = current->nextSibling;
+        current = current->parent;
     }
 
     if (event.state != C4_INPUT_STATE_PRESSED) {
@@ -79,6 +80,12 @@ static void C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event)
             C4_UI_Node* result = C4_UI_Node_FindFocusable(current);
             if (result) {
                 C4_UI_Canvas_SetFocus(canvas, result);
+                if (
+                    event.verb == C4_INPUT_VERB_CANCEL &&
+                    event.state == C4_INPUT_STATE_PRESSED
+                ) {
+                    C4_UI_Canvas_HandleAction(canvas, event);
+                }
                 return;
             }
             current = current->nextSibling;

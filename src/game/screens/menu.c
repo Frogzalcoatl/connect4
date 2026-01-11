@@ -57,6 +57,11 @@ static void UpdateControllerText(C4_UI_Node* controllerList, C4_UI_Node* activeC
     C4_UI_Node_SetTextString(activeControllerText, displayText);
 }
 
+static void C4_MenuScreen_ExitGame(void* context) {
+    (void)context;
+    C4_PushEvent_CloseWindow();
+}
+
 static void C4_MenuScreen_HandleEvent(C4_UI_Screen* screen, SDL_Event* event, float UIScale) {
     if (!screen || !event) {
         return;
@@ -169,6 +174,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
         .rotationDegrees = 0,
         .type = C4_UI_Shape_Rectangle
     };
+    buttons->input.OnCancel = C4_MenuScreen_ExitGame;
     C4_UI_CenterInWindow(buttons, C4_UI_Axis_XY, game->presentationWidth, game->presentationHeight, game->UIScale);
     C4_UI_Node_AlignChildren(buttons, C4_UI_Axis_X);
     C4_UI_Canvas_AddNode(canvas, buttons);
