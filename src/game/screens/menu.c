@@ -1,6 +1,7 @@
 #include "Connect4/game/screens/menu.h"
 #include "Connect4/game/events.h"
 #include "Connect4/constants.h"
+#include "Connect4/ui/element/button.h"
 
 typedef struct {
     C4_Game* game;
@@ -79,78 +80,21 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
 
     data->game = game;
 
-    C4_UI_Node* testNode = C4_UI_Node_Create(
-        &(C4_UI_Node_Config){
-            .type = C4_UI_Type_Shape,
+    C4_UI_Node* singlePlayerButton = C4_UI_Button_Create(
+        &(C4_UI_Button_Config){
             .style = &C4_UI_THEME_DEFAULT.style,
-            .rect = (SDL_FRect){100.f, 100.f, 400.f, 100.f},
-            .shape = (C4_UI_Data_Shape_Config){
-                .type = C4_UI_Shape_Rectangle,
-                .borderWidth = C4_UI_THEME_DEFAULT.borderWidth
-            }
+            .rect = (SDL_FRect){100.f, 200.f, 800.f, 100.f},
+            .shapeType = C4_UI_Shape_Rectangle,
+            .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
+            .text = "Singleplayer",
+            .font = game->monocraftBold,
+            .textEngine = game->textEngine
         }, game->UIScale
     );
 
-    testNode->shape.rotationDegrees = 0;
-    testNode->input.isFocusable = true;
-    testNode->input.isActive = true;
-    testNode->input.OnRelease = ButtonClick;
-    testNode->input.OnHover = ButtonHover;
-
-    C4_UI_Node* testChild = C4_UI_Node_Create(
-        &(C4_UI_Node_Config){
-            .type = C4_UI_Type_Text,
-            .style = &C4_UI_THEME_DEFAULT.style,
-            .rect = (SDL_FRect){0.f, 0.f, 0.f, 0.f},
-            .text = (C4_UI_Data_Text_Config){
-                .font = game->miracodeBold,
-                .text = "Test",
-                .textEngine = game->textEngine
-            }
-        }, game->UIScale
-    );
-    testChild->inheritState = true;
-
-    C4_UI_Canvas_AddNode(canvas, testNode);
-    C4_UI_Node_AttachChild(testNode, testChild);
-
-    C4_UI_Node* testNode2 = C4_UI_Node_Create(
-        &(C4_UI_Node_Config){
-            .type = C4_UI_Type_Shape,
-            .style = &C4_UI_THEME_DEFAULT.style,
-            .rect = (SDL_FRect){100.f, 225.f, 400.f, 100.f},
-            .shape = (C4_UI_Data_Shape_Config){
-                .type = C4_UI_Shape_Rectangle,
-                .borderWidth = C4_UI_THEME_DEFAULT.borderWidth
-            }
-        }, game->UIScale
-    );
-
-    testNode2->shape.rotationDegrees = 0;
-    testNode2->input.isFocusable = true;
-    testNode2->input.isActive = true;
-    testNode2->input.OnRelease = ButtonClick;
-    testNode2->input.OnHover = ButtonHover;
-
-    C4_UI_Node* testChild2 = C4_UI_Node_Create(
-        &(C4_UI_Node_Config){
-            .type = C4_UI_Type_Text,
-            .style = &C4_UI_THEME_DEFAULT.style,
-            .rect = (SDL_FRect){0.f, 0.f, 0.f, 0.f},
-            .text = (C4_UI_Data_Text_Config){
-                .font = game->miracodeBold,
-                .text = "Test2",
-                .textEngine = game->textEngine
-            }
-        }, game->UIScale
-    );
-    testChild2->inheritState = true;
-
-    C4_UI_Canvas_AddNode(canvas, testNode2);
-    C4_UI_Node_AttachChild(testNode2, testChild2);
-
-    testNode->navDown = testNode2;
-    testNode2->navUp = testNode;
+    C4_UI_Canvas_AddNode(canvas, singlePlayerButton);
+    singlePlayerButton->input.OnHover = ButtonHover;
+    singlePlayerButton->input.OnRelease = ButtonClick;
 
     screen->HandleWindowResize(screen, game->currentLayout);
     

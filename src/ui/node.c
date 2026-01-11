@@ -207,6 +207,7 @@ C4_UI_Node* C4_UI_Node_Create(C4_UI_Node_Config* config, float UIScale) {
     }
 
     node->type = config->type;
+    node->rect = config->rect;
 
     if (node->type == C4_UI_Type_Shape) {
         node->shape.type = config->shape.type;
@@ -245,8 +246,6 @@ C4_UI_Node* C4_UI_Node_Create(C4_UI_Node_Config* config, float UIScale) {
 
     node->style = *config->style;
     node->inheritState = false;
-    node->rect = config->rect;
-    C4_UI_Node_CalculateAbsoluteRect(node, UIScale, 0.f, 0.f);
     node->padding = 0;
     node->spacing = 0;
     node->direction = C4_UI_Direction_Vertical;
@@ -258,4 +257,59 @@ C4_UI_Node* C4_UI_Node_Create(C4_UI_Node_Config* config, float UIScale) {
     node->navRight = NULL;
 
     return node;
+}
+
+void C4_UI_Node_AlignChildren(C4_UI_Node* node, C4_UI_Align align) {
+    if (!node) {
+        return;
+    }
+    float minChildX = node->padding;
+    float minChildY = node->padding;
+    float maxChildX = node->rect.w - node->padding;
+    float maxChildY = node->rect.h - node->padding;
+    
+    float parentCenterX = node->rect.w / 2.f;
+    float parentCenterY = node->rect.h / 2.f;
+
+    C4_UI_Node* current = node->firstChild;
+    while (current) {
+        switch (align) {
+            case C4_UI_Align_TopLeft: {
+                current->rect.x = minChildX;
+                current->rect.y = minChildY;
+            }; break;
+            case C4_UI_Align_Top: {
+                current->rect.x = parentCenterX - current->rect.w / 2.f;
+                current->rect.y = minChildY;
+            }; break;
+            case C4_UI_Align_TopRight: {
+                current->rect.x = maxChildX - current->rect.w;
+                current->rect.y = minChildY;
+            }; break;
+            case C4_UI_Align_CenterLeft: {
+                current->rect.x = minChildX;
+                current->rect.y = parentCenterY - current->rect.h / 2.f;
+            }; break;
+            case C4_UI_Align_Center: {
+                current->rect.x = parentCenterX - current->rect.w / 2.f;
+                current->rect.y = parentCenterY - current->rect.h / 2.f;
+            }; break;
+            case C4_UI_Align_CenterRight: {
+                current->rect.x = maxChildX - current->rect.w;
+                current->rect.y = parentCenterY - current->rect.h / 2.f;
+            }; break;
+            case C4_UI_Align_BottomLeft: {
+                current->rect.x = minChildX;
+                current->rect.y = maxChildY - current->rect.h;
+            }; break;
+            case C4_UI_Align_Bottom: {
+                current->rect.x = parentCenterX - current->rect.w / 2.f;
+                current->rect.y = maxChildY - current->rect.h;
+            } case C4_UI_Align_BottomRight: {
+                current->rect.x = maxChildX - current->rect.w;
+                current->rect.y = maxChildY - current->rect.h;
+            }
+        }
+        current = current->nextSibling;
+    }
 }

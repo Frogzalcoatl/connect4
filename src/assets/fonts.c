@@ -25,7 +25,6 @@ TTF_Font* C4_GetFont(C4_FontType type) {
         return fontCache[type];
     }
     const int ASSET_INDEX = type / 2;
-    SDL_Log("Asset Index: %d", ASSET_INDEX);
     SDL_IOStream* io = SDL_IOFromConstMem(FONT_ASSETS[ASSET_INDEX].data, FONT_ASSETS[ASSET_INDEX].size);
     if (!io) {
         SDL_Log("Unable to open font IOStream. Asset index: %i", ASSET_INDEX);
