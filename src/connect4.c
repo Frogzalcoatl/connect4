@@ -214,8 +214,10 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
     }
 
     game->board = C4_Board_Create(boardWidth, boardHeight, amountToWin);
-    game->fontRegular = C4_GetFont(C4_FontType_Regular, 64.f);
-    game->fontBold = C4_GetFont(C4_FontType_Bold, 64.f);
+    game->monocraftRegular = C4_GetFont(C4_FontType_Monocraft_Regular);
+    game->monocraftBold = C4_GetFont(C4_FontType_Monocraft_Bold);
+    game->miracodeRegular = C4_GetFont(C4_FontType_Miracode_Regular);
+    game->miracodeBold = C4_GetFont(C4_FontType_Miracode_Bold);
 
     // C4_Game_TouchModeSetup();
 

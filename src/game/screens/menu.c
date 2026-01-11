@@ -103,7 +103,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
             .style = &C4_UI_THEME_DEFAULT.style,
             .rect = (SDL_FRect){0.f, 0.f, 0.f, 0.f},
             .text = (C4_UI_Data_Text_Config){
-                .font = game->fontBold,
+                .font = game->miracodeBold,
                 .text = "Test",
                 .textEngine = game->textEngine
             }
@@ -138,7 +138,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
             .style = &C4_UI_THEME_DEFAULT.style,
             .rect = (SDL_FRect){0.f, 0.f, 0.f, 0.f},
             .text = (C4_UI_Data_Text_Config){
-                .font = game->fontBold,
+                .font = game->miracodeBold,
                 .text = "Test2",
                 .textEngine = game->textEngine
             }

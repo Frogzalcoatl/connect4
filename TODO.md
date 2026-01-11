@@ -2,6 +2,7 @@
 
 * Honestly just look through all the code and find any bs. I feel like its kinda turning into spaghetti or however you spell that word.
     * Go through the code and add error logs in the process ^
+* Set up some kind of text formatting thing similar to minecrafts color codes
 * Drawing Circles
 * Proper mouse detection for different shapes/rotations
 * Button UIElement
