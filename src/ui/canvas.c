@@ -137,6 +137,7 @@ void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float scal
     if (inputEvent.verb != C4_INPUT_NONE) {
         if (SDL_CursorVisible()) {
             SDL_HideCursor();
+            C4_UI_Canvas_ResetInteractions(canvas);
         }
         C4_UI_Canvas_HandleAction(canvas, inputEvent);
         return;
@@ -147,6 +148,7 @@ void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float scal
     ) {
         if (!SDL_CursorVisible()) {
             SDL_ShowCursor();
+            C4_UI_Canvas_ResetInteractions(canvas);
         }
 
         // So theres not two nodes focused at the same time from controller and mouse
