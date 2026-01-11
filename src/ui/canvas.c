@@ -170,6 +170,17 @@ void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime) {
     if (deltaTime <= 0.f) {
         deltaTime = 0.0001f;
     }
+
+    C4_InputEvent repeatEvent;
+    while (C4_Input_CheckRepeat(deltaTime, &repeatEvent)) {
+        C4_UI_Canvas_HandleAction(canvas, repeatEvent);
+    }
+
+    C4_UI_Node* current = canvas->root;
+    while (current) {
+        C4_UI_Node_Update(current, deltaTime);
+        current = current->nextSibling;
+    }
 }
 
 static void C4_UI_Node_Reset(C4_UI_Node* node) {

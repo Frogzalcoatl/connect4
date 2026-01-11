@@ -12,6 +12,16 @@ static bool onlyAcceptInputFromActiveGamepad = true;
 
 static SDL_Scancode scancodeToInputVerb[C4_INPUT_VERB_COUNT] = {0};
 
+typedef struct {
+    bool isDown;
+    bool isRepeating;
+    float timer;
+} C4_InputVerb_State;
+static C4_InputVerb_State verbStates[C4_INPUT_VERB_COUNT] = {0};
+
+static const float INPUT_REPEAT_DELAY = 0.5f;
+static const float INPUT_REPEAT_INTERVAL = 0.1f;
+
 void C4_Input_Init(void) {
     scancodeToInputVerb[C4_INPUT_VERB_CANCEL] = SDL_SCANCODE_ESCAPE;
 }
@@ -132,11 +142,11 @@ C4_InputEvent C4_GetInput(SDL_Event* event) {
             }
             input.verb = C4_MapScancodeToVerb(event->key.scancode);
             input.state = C4_INPUT_STATE_PRESSED;
-        }; return input;
+        }; break;
         case SDL_EVENT_KEY_UP: {
             input.verb = C4_MapScancodeToVerb(event->key.scancode);
             input.state = C4_INPUT_STATE_RELEASED;
-        }; return input;
+        }; break;
     }
 
     if (
@@ -158,7 +168,41 @@ C4_InputEvent C4_GetInput(SDL_Event* event) {
         }; break;
         default: break;
     }
+    if (input.verb == C4_INPUT_VERB_NONE) {
+        return input;
+    }
+    if (input.state == C4_INPUT_STATE_PRESSED) {
+        if (!verbStates[input.verb].isDown) {
+            verbStates[input.verb].isDown = true;
+            verbStates[input.verb].isRepeating = false;
+        }
+    } else {
+        verbStates[input.verb].isDown = false;
+        verbStates[input.verb].isRepeating = false;
+    }
+    verbStates[input.verb].timer = 0.f;
     return input;
+}
+
+bool C4_Input_CheckRepeat(float deltaTime, C4_InputEvent* outEvent) {
+    for (int i = 1; i < C4_INPUT_VERB_COUNT; i++) {
+        if (!verbStates[i].isDown) continue;
+
+        verbStates[i].timer += deltaTime;
+
+        float threshold = verbStates[i].isRepeating ? INPUT_REPEAT_INTERVAL : INPUT_REPEAT_DELAY;
+
+        if (verbStates[i].timer >= threshold) {
+            verbStates[i].timer -= threshold;
+            verbStates[i].isRepeating = true;
+            if (outEvent) {
+                outEvent->verb = (C4_InputVerb)i;
+                outEvent->state = C4_INPUT_STATE_PRESSED;
+            }
+            return true; 
+        }
+    }
+    return false;
 }
 
 void C4_Gamepad_GetNames(char** returnValue, size_t returnValueSize) {

@@ -32,3 +32,4 @@ void C4_Gamepad_GetNames(char** returnValue, size_t returnValueSize);
 void C4_Gamepad_GetActiveName(char* returnValue, size_t returnValueSize);
 void C4_Gamepad_OnlyAcceptInputFromActiveGamepad(bool value);
 void C4_Input_SetVerbScancode(C4_InputVerb inputVerb, SDL_Scancode scancode);
+bool C4_Input_CheckRepeat(float deltaTime, C4_InputEvent* outEvent);
