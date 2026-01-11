@@ -60,6 +60,19 @@ jobs:
         if: matrix.platform.name != 'Android'
         run: cmake --build build --config Release
 
+      - name: Decode Keystore
+        if: matrix.platform.name == 'Android'
+        env:
+          ANDROID_DEBUG_KEYSTORE_BASE64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
+        run: |
+          cd android/app
+          if [ -n "$ANDROID_DEBUG_KEYSTORE_BASE64" ]; then
+            echo "Decoding custom debug keystore..."
+            echo "$ANDROID_DEBUG_KEYSTORE_BASE64" | base64 --decode > debug.keystore
+          else
+            echo "Secret is empty (likely a fork). Using default Android debug keystore."
+          fi
+
       # --- ANDROID GRADLE BUILD ---
       - name: Build Android APK
         if: matrix.platform.name == 'Android'
