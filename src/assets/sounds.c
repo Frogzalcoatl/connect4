@@ -6,7 +6,7 @@
 #include "assets_sounds_Player1Place_wav.h"
 #include "assets_sounds_Player2Place_wav.h"
 
-static const C4_HeaderAsset SOUND_ASSETS[C4_SoundEffect_ListSize] = {
+static const C4_HeaderAsset SOUND_ASSETS[C4_SoundEffect_Count] = {
     {assets_sounds_ButtonClick_wav_data, assets_sounds_ButtonClick_wav_size},
     {assets_sounds_ButtonHover_wav_data, assets_sounds_ButtonHover_wav_size},
     {assets_sounds_Player1Place_wav_data, assets_sounds_Player1Place_wav_size},
@@ -14,9 +14,9 @@ static const C4_HeaderAsset SOUND_ASSETS[C4_SoundEffect_ListSize] = {
 };
 static SDL_AudioDeviceID deviceID;
 
-static SDL_AudioSpec specs[C4_SoundEffect_ListSize];
-static Uint8* buffers[C4_SoundEffect_ListSize];
-static Uint32 lengths[C4_SoundEffect_ListSize];
+static SDL_AudioSpec specs[C4_SoundEffect_Count];
+static Uint8* buffers[C4_SoundEffect_Count];
+static Uint32 lengths[C4_SoundEffect_Count];
 
 #define MAX_STREAMS 8
 static SDL_AudioStream* streams[MAX_STREAMS];
@@ -28,7 +28,7 @@ bool C4_InitAudio(void) {
         SDL_Log("Failed to get audio deviceID");
         return false;
     }
-    for (size_t i = 0; i < C4_SoundEffect_ListSize; i++) {
+    for (size_t i = 0; i < C4_SoundEffect_Count; i++) {
         SDL_IOStream* io = SDL_IOFromConstMem(SOUND_ASSETS[i].data, SOUND_ASSETS[i].size);
         if (!io) {
             SDL_Log("Failed to create IO for sound index: %zu", i);
@@ -55,7 +55,7 @@ bool C4_InitAudio(void) {
 }
 
 void C4_QuitAudio(void) {
-    for (size_t i = 0; i < C4_SoundEffect_ListSize; i++) {
+    for (size_t i = 0; i < C4_SoundEffect_Count; i++) {
         if (buffers[i]) {
             SDL_free(buffers[i]);
             buffers[i] = NULL;
@@ -73,7 +73,7 @@ void C4_QuitAudio(void) {
 }
 
 void C4_PlaySound(C4_SoundEffect soundID) {
-    if (soundID < 0 || soundID >= C4_SoundEffect_ListSize || deviceID == 0) {
+    if (soundID <= C4_SoundEffect_None || soundID >= C4_SoundEffect_Count || deviceID == 0) {
         return;
     }
     SDL_AudioStream* streamToUse = NULL;

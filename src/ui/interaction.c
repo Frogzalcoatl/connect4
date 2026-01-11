@@ -22,6 +22,7 @@ void C4_UI_Interaction_Update(C4_UI_Interaction* input, float deltaTime) {
             if (input->WhilePressed) {
                 input->WhilePressed(input->context);
             }
+            C4_PlaySound(input->sounds.whilePressed);
             input->timing.pressTimer = 0.f;
             input->isRepeating = true;
         }
@@ -30,6 +31,7 @@ void C4_UI_Interaction_Update(C4_UI_Interaction* input, float deltaTime) {
             if (input->WhilePressed) {
                 input->WhilePressed(input->context);
             }
+            C4_PlaySound(input->sounds.whilePressed);
             input->timing.pressTimer = 0.f;
         }
     }
@@ -39,6 +41,7 @@ bool C4_UI_Interaction_HandleAction(C4_UI_Interaction* input, C4_InputEvent even
     if (event.verb == C4_INPUT_VERB_CANCEL) {
         if (event.state == C4_INPUT_STATE_PRESSED && input->OnCancel) {
             input->OnCancel(input->context);
+            C4_PlaySound(input->sounds.onCancel);
             return true;
         }
         return false;
@@ -51,12 +54,18 @@ bool C4_UI_Interaction_HandleAction(C4_UI_Interaction* input, C4_InputEvent even
     }
     if (event.state == C4_INPUT_STATE_PRESSED) {
         input->isPressed = true;
-        if (input->OnPress) input->OnPress(input->context);
+        if (input->OnPress) {
+            input->OnPress(input->context);
+        }
+        C4_PlaySound(input->sounds.onPress);
         return true;
     } else if (event.state == C4_INPUT_STATE_RELEASED) {
         if (input->isPressed) {
             input->isPressed = false;
-            if (input->OnRelease) input->OnRelease(input->context);
+            if (input->OnRelease) {
+                input->OnRelease(input->context);
+            }
+            C4_PlaySound(input->sounds.onRelease);
         }
         return true;
     }
@@ -86,6 +95,7 @@ bool C4_UI_Interaction_HandleMouseEvents(SDL_FRect absoluteRect, C4_UI_Interacti
                 if (input->OnHover) {
                     input->OnHover(input->context);
                 }
+                C4_PlaySound(input->sounds.onHover);
                 return true;
             }
         }
@@ -95,9 +105,11 @@ bool C4_UI_Interaction_HandleMouseEvents(SDL_FRect absoluteRect, C4_UI_Interacti
             if (input->OnPress) {
                 input->OnPress(input->context);
             }
+            C4_PlaySound(input->sounds.onPress);
             if (input->WhilePressed) {
                 input->WhilePressed(input->context);
             }
+            C4_PlaySound(input->sounds.whilePressed);
             return true;
         }
     } else if (event->type == SDL_EVENT_MOUSE_BUTTON_UP || event->type == SDL_EVENT_FINGER_UP) {
@@ -111,6 +123,7 @@ bool C4_UI_Interaction_HandleMouseEvents(SDL_FRect absoluteRect, C4_UI_Interacti
                 if (input->OnRelease) {
                     input->OnRelease(input->context);
                 }
+                C4_PlaySound(input->sounds.onRelease);
                 return true;
             }
         }

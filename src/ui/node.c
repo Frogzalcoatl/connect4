@@ -243,6 +243,13 @@ C4_UI_Node* C4_UI_Node_Create(C4_UI_Node_Config* config, float UIScale) {
         .OnRelease = NULL,
         .OnCancel = NULL,
         .context = NULL,
+        .sounds = (C4_UI_Interaction_Sounds){
+          .onHover = C4_SoundEffect_None,
+          .whilePressed = C4_SoundEffect_None,
+          .onPress = C4_SoundEffect_None,
+          .onRelease = C4_SoundEffect_None,
+          .onCancel = C4_SoundEffect_None
+        },
         .timing = (C4_UI_Interaction_WhilePressedTiming){
             .delay = 0.5f,
             .interval = 0.1f,

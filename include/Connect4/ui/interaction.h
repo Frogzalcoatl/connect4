@@ -1,11 +1,20 @@
 #pragma once
 #include "Connect4/game/input/input.h"
+#include "Connect4/assets/sounds.h"
 
 typedef struct {
     float delay;
     float interval;
     float pressTimer;
 } C4_UI_Interaction_WhilePressedTiming;
+
+typedef struct {
+    C4_SoundEffect onHover;
+    C4_SoundEffect whilePressed;
+    C4_SoundEffect onPress;
+    C4_SoundEffect onRelease;
+    C4_SoundEffect onCancel;
+} C4_UI_Interaction_Sounds;
 
 typedef struct {
     bool isHovered;
@@ -20,6 +29,8 @@ typedef struct {
     void (*OnRelease)(void* context);
     void (*OnCancel)(void* context);
     void* context;
+
+    C4_UI_Interaction_Sounds sounds;
 
     C4_UI_Interaction_WhilePressedTiming timing;
 } C4_UI_Interaction;
