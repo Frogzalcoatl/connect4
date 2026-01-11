@@ -82,7 +82,7 @@ jobs:
 
       # --- IOS PACKAGING ---
       - name: Create iOS IPA
-        if: matrix.platform.name == 'iOS'
+        if: matrix.platform.name == 'IOS'
         run: |
           mkdir -p Payload
           APP_PATH=$(find build -name "*.app" -type d | head -n 1)
@@ -96,23 +96,32 @@ jobs:
         run: |
           mkdir -p staging
 
-          # Windows
-          find build -name "*.exe" -exec cp {} staging/ \; 2>/dev/null || true
-          find build -name "*.dll" -exec cp {} staging/ \; 2>/dev/null || true
+          # --- WINDOWS: Specific EXE only ---
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+             # Find Connect4.exe explicitly (ignores CompilerId executables)
+             find build -name "Connect4.exe" -exec cp {} staging/ \; 
+             # Grab DLLs if they exist
+             find build -name "*.dll" -exec cp {} staging/ \; 
+          fi
 
-          # Linux/Mac Binaries
-          # We look for the file 'Connect4' specifically to avoid copying intermediate object files
-          if [ -f "build/bin/Connect4" ]; then cp "build/bin/Connect4" staging/; fi
+          # --- LINUX: Binary only (Excluding Android) ---
+          if [[ "${{ runner.os }}" == "Linux" && "${{ matrix.platform.name }}" != "Android" ]]; then
+             find build -name "Connect4" -type f -exec cp {} staging/ \;
+          fi
 
-          # Android APK
-          find android -name "*.apk" -exec cp {} staging/ \; 2>/dev/null || true
+          # --- MAC: App Bundle ---
+          if [[ "${{ matrix.platform.name }}" == "MacOS" ]]; then
+             find build -name "Connect4.app" -type d -exec cp -r {} staging/ \;
+          fi
 
-          # iOS IPA
-          find . -name "*.ipa" -exec cp {} staging/ \; 2>/dev/null || true
+          # --- ANDROID ---
+          if [[ "${{ matrix.platform.name }}" == "Android" ]]; then
+             find android -name "*.apk" -exec cp {} staging/ \;
+          fi
 
-          # Mac .app bundles (Zipping them first is best practice for artifacts)
-          if [ -d "build/bin/Connect4.app" ]; then 
-             cp -r "build/bin/Connect4.app" staging/
+          # --- IOS ---
+          if [[ "${{ matrix.platform.name }}" == "IOS" ]]; then
+             find . -name "*.ipa" -exec cp {} staging/ \;
           fi
 
       # --- ARTIFACT UPLOAD ---
