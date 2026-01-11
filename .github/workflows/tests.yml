@@ -81,7 +81,7 @@ jobs:
           ./gradlew assembleDebug --no-daemon
 
       # --- IOS PACKAGING ---
-      - name: Create iOS IPA
+      - name: Create IOS IPA
         if: matrix.platform.name == 'IOS'
         run: |
           mkdir -p Payload

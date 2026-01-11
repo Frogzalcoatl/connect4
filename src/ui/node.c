@@ -39,12 +39,14 @@ void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer, float scale, floa
     }
 
     C4_UI_StyleState* currentStyle = &node->style.normal;
-    if (activeInput->isPressed) {
-        currentStyle = &node->style.pressed;
-    } else if (activeInput->isHovered) {
-        currentStyle = &node->style.hovered;
-    } else if (!activeInput->isActive) {
-        currentStyle = &node->style.inactive;
+    if (node->input.isFocusable) {
+        if (activeInput->isPressed) {
+            currentStyle = &node->style.pressed;
+        } else if (activeInput->isHovered) {
+            currentStyle = &node->style.hovered;
+        } else if (!activeInput->isActive) {
+            currentStyle = &node->style.inactive;
+        }
     }
 
     C4_UI_Node_CalculateAbsoluteRect(node, scale, parentX, parentY);

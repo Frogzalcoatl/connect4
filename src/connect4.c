@@ -194,7 +194,7 @@ static void C4_Game_SetScreen(C4_Game* game, C4_ScreenType type) {
     if (game->currentScreenType == C4_ScreenType_Menu) {
         C4_Discord_UpdateStatus("In the Menus", NULL);
     } else if (game->currentScreenType == C4_ScreenType_Game) {
-        C4_Discord_UpdateStatus("In MultiPlayer", NULL);
+        C4_Discord_UpdateStatus("In Multiplayer", NULL);
     }
 }
 

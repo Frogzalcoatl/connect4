@@ -2,17 +2,13 @@
 #include "Connect4/game/events.h"
 #include "Connect4/constants.h"
 #include "Connect4/ui/element/button.h"
+#include "Connect4/ui/utils.h"
 
 typedef struct {
     C4_Game* game;
+    C4_UI_Node* controllerList;
+    C4_UI_Node* activeControllerText;
 } C4_MenuScreenData;
-
-static void C4_MenuScreen_OnEnter(C4_UI_Screen* screen) {
-    if (!screen || !screen->data) {
-        return;
-    }
-    C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
-}
 
 static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutType layout) {
     if (!screen || !screen->data) {
@@ -34,6 +30,57 @@ static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutT
 // Forward declaration just for the purpose of organization
 static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game);
 
+static void UpdateControllerText(C4_UI_Node* controllerList, C4_UI_Node* activeControllerText) {
+    char* controllerArr[C4_MAX_GAMEPADS];
+    C4_Gamepad_GetNames(controllerArr, C4_MAX_GAMEPADS);
+
+    char* controllerText = C4_JoinStrings(controllerArr, C4_MAX_GAMEPADS, "\n");
+    
+    char header[2048] = "Controllers:\n";
+    if (controllerText && *controllerText != '\0') {
+        strcat(header, controllerText);
+    } else {
+        strcat(header, "None");
+    }
+
+    if (controllerText) {
+        free(controllerText);
+    }
+    
+    C4_UI_Node_SetTextString(controllerList, header);
+
+    char activeController[128];
+    C4_Gamepad_GetActiveName(activeController, sizeof(activeController));
+    char displayText[256] = "Active: ";
+    strcat(displayText, activeController);
+
+    C4_UI_Node_SetTextString(activeControllerText, displayText);
+}
+
+static void C4_MenuScreen_HandleEvent(C4_UI_Screen* screen, SDL_Event* event, float UIScale) {
+    if (!screen || !event) {
+        return;
+    }
+    C4_MenuScreenData* menuData = (C4_MenuScreenData*)screen->data;
+
+    C4_UI_Screen_HandleEvent_Default(screen, event, UIScale);
+
+    if (
+        event->type == SDL_EVENT_GAMEPAD_ADDED ||
+        event->type == SDL_EVENT_GAMEPAD_REMOVED
+    ) {
+        UpdateControllerText(menuData->controllerList, menuData->activeControllerText);
+    }
+}
+
+static void C4_MenuScreen_OnEnter(C4_UI_Screen* screen) {
+    if (!screen) {
+        return;
+    }
+    C4_MenuScreenData* menuData = (C4_MenuScreenData*)screen->data;
+    UpdateControllerText(menuData->controllerList, menuData->activeControllerText);
+}
+
 C4_UI_Screen* C4_MenuScreen_Create(C4_Game* game) {
     if (!game) {
         return NULL;
@@ -50,6 +97,7 @@ C4_UI_Screen* C4_MenuScreen_Create(C4_Game* game) {
     }
 
     screen->HandleWindowResize = C4_MenuScreen_HandleWindowResize;
+    screen->HandleEvent = C4_MenuScreen_HandleEvent;
     screen->OnEnter = C4_MenuScreen_OnEnter;
 
     if (!C4_MenuScreen_Init(screen, game)) {
@@ -81,22 +129,6 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     data->game = game;
 
     const SDL_FRect DEFAULT_BUTTON_SIZE =  (SDL_FRect){0.f, 0.f, 800.f, 100.f};
-
-    C4_UI_Node* randomButton = C4_UI_Button_Create(
-        &(C4_UI_Button_Config){
-            .style = &C4_UI_THEME_DEFAULT.style,
-            .rect = DEFAULT_BUTTON_SIZE,
-            .shapeType = C4_UI_Shape_Rectangle,
-            .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
-            .text = "Random",
-            .font = game->monocraftBold,
-            .textEngine = game->textEngine
-        }, game->UIScale
-    );
-
-    C4_UI_Canvas_AddNode(canvas, randomButton);
-    randomButton->input.OnHover = ButtonHover;
-    randomButton->input.OnRelease = ButtonClick;
 
     #define BUTTON_COUNT 4
     char* BUTTON_STRINGS[BUTTON_COUNT] = {
@@ -141,8 +173,37 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     C4_UI_Node_AlignChildren(buttons, C4_UI_Axis_X);
     C4_UI_Canvas_AddNode(canvas, buttons);
 
-    randomButton->navDown = buttons->firstChild;
-    buttons->firstChild->navUp = randomButton;
+    data->controllerList = C4_UI_Node_Create(
+        &(C4_UI_Node_Config){
+            .type = C4_UI_Type_Text,
+            .style = &C4_UI_THEME_DEFAULT.style,
+            .text = (C4_UI_Data_Text_Config){
+                .posX = 0.f,
+                .posY = 0.f,
+                .text = "",
+                .font = game->monocraftRegular,
+                .textEngine = game->textEngine
+            }
+        }, game->UIScale
+    );
+    C4_UI_Canvas_AddNode(canvas, data->controllerList);
+
+    data->activeControllerText = C4_UI_Node_Create(
+        &(C4_UI_Node_Config){
+            .type = C4_UI_Type_Text,
+            .style = &C4_UI_THEME_DEFAULT.style,
+            .text = (C4_UI_Data_Text_Config){
+                .posX = 0.f,
+                .posY = 1000.f,
+                .text = "",
+                .font = game->monocraftRegular,
+                .textEngine = game->textEngine
+            }
+        }, game->UIScale
+    );
+    C4_UI_Canvas_AddNode(canvas, data->activeControllerText);
+    
+    UpdateControllerText(data->controllerList, data->activeControllerText);
 
     screen->HandleWindowResize(screen, game->currentLayout);
     

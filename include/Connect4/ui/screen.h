@@ -26,3 +26,8 @@ struct C4_UI_Screen {
 };
 
 C4_UI_Screen* C4_Screen_Create(SDL_Renderer* renderer, TTF_TextEngine* textEngine);
+
+void C4_Screen_Update_Default(C4_UI_Screen* screen, float deltaTime);
+void C4_Screen_Draw_Default(C4_UI_Screen* screen, float UIScale);
+void C4_UI_Screen_HandleEvent_Default(C4_UI_Screen* screen, SDL_Event* event, float UIScale);
+void C4_UI_Screen_Destroy_Default(C4_UI_Screen* screen);

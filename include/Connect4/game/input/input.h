@@ -1,6 +1,8 @@
 #pragma once
 #include <SDL3/SDL.h>
 
+#define C4_MAX_GAMEPADS 8
+
 typedef enum {
     C4_INPUT_NONE,
     C4_INPUT_NAV_UP,
@@ -23,3 +25,7 @@ typedef struct {
 
 void C4_Input_Shutdown(void);
 C4_InputEvent C4_GetInput(SDL_Event* event);
+void C4_Gamepad_SetActiveIndex(int index);
+void C4_Gamepad_GetNames(char** returnValue, size_t returnValueSize);
+void C4_Gamepad_GetActiveName(char* returnValue, size_t returnValueSize);
+void C4_Gamepad_OnlyAcceptInputFromActiveGamepad(bool value);

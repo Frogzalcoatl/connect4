@@ -1,27 +1,27 @@
 #include "Connect4/ui/screen.h"
 
-static void C4_Screen_Update_Default(C4_UI_Screen* screen, float deltaTime) {
+void C4_Screen_Update_Default(C4_UI_Screen* screen, float deltaTime) {
     if (!screen) {
         return;
     }
     C4_UI_Canvas_Update(&screen->canvas, deltaTime);
 }
 
-static void C4_Screen_Draw_Default(C4_UI_Screen* screen, float UIScale) {
+void C4_Screen_Draw_Default(C4_UI_Screen* screen, float UIScale) {
     if (!screen) {
         return;
     }
     C4_UI_Canvas_Draw(&screen->canvas, UIScale);
 }
 
-static void C4_UI_Screen_HandleEvent_Default(C4_UI_Screen* screen, SDL_Event* event, float UIScale) {
+void C4_UI_Screen_HandleEvent_Default(C4_UI_Screen* screen, SDL_Event* event, float UIScale) {
     if (!screen || !event) {
         return;
     }
     C4_UI_Canvas_HandleEvent(&screen->canvas, event, UIScale);
 }
 
-static void C4_UI_Screen_Destroy_Default(C4_UI_Screen* screen) {
+void C4_UI_Screen_Destroy_Default(C4_UI_Screen* screen) {
     if (!screen) {
         return;
     }
