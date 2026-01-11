@@ -1,6 +1,7 @@
 #include "Connect4/ui/node.h"
 #include "Connect4/ui/draw/shapes.h"
 #include "Connect4/ui/draw/text.h"
+#include "Connect4/ui/utils.h"
 #include <stdlib.h>
 
 void C4_UI_Node_Destroy(C4_UI_Node* node) {
@@ -207,12 +208,12 @@ C4_UI_Node* C4_UI_Node_Create(C4_UI_Node_Config* config, float UIScale) {
     }
 
     node->type = config->type;
-    node->rect = config->rect;
 
     if (node->type == C4_UI_Type_Shape) {
         node->shape.type = config->shape.type;
         node->shape.rotationDegrees = 0.0f;
         node->shape.borderWidth = config->shape.borderWidth;
+        node->rect = config->shape.rect;
     } else if (node->type == C4_UI_Type_Text) {
         C4_UI_Data_Text_Config* text = &config->text;
         node->text.font = text->font;
@@ -220,6 +221,8 @@ C4_UI_Node* C4_UI_Node_Create(C4_UI_Node_Config* config, float UIScale) {
         SDL_Color color = config->style->inactive.text;
         TTF_SetTextColor(node->text.textObject, color.r, color.g, color.b, color.a);
         C4_UI_UpdateTextRect(node);
+        node->rect.x = config->text.posX;
+        node->rect.y = config->text.posY;
     }
 
     node->parent = NULL;
@@ -249,7 +252,7 @@ C4_UI_Node* C4_UI_Node_Create(C4_UI_Node_Config* config, float UIScale) {
     node->padding = 0;
     node->spacing = 0;
     node->direction = C4_UI_Direction_Vertical;
-    node->fitContent = true;
+    node->childrenAlign = C4_UI_Align_TopLeft;
 
     node->navUp = NULL;
     node->navDown = NULL;
@@ -259,7 +262,7 @@ C4_UI_Node* C4_UI_Node_Create(C4_UI_Node_Config* config, float UIScale) {
     return node;
 }
 
-void C4_UI_Node_AlignChildren(C4_UI_Node* node, C4_UI_Align align) {
+void C4_UI_Node_AlignChildren(C4_UI_Node* node, C4_UI_Axis axis) {
     if (!node) {
         return;
     }
@@ -271,45 +274,133 @@ void C4_UI_Node_AlignChildren(C4_UI_Node* node, C4_UI_Align align) {
     float parentCenterX = node->rect.w / 2.f;
     float parentCenterY = node->rect.h / 2.f;
 
+    bool alignX = axis == C4_UI_Axis_X || axis == C4_UI_Axis_XY;
+    bool alignY = axis == C4_UI_Axis_Y || axis == C4_UI_Axis_XY;
+
     C4_UI_Node* current = node->firstChild;
     while (current) {
-        switch (align) {
+        SDL_FPoint newPos;
+        switch (node->childrenAlign) {
             case C4_UI_Align_TopLeft: {
-                current->rect.x = minChildX;
-                current->rect.y = minChildY;
+                newPos.x = minChildX;
+                newPos.y = minChildY;
             }; break;
             case C4_UI_Align_Top: {
-                current->rect.x = parentCenterX - current->rect.w / 2.f;
-                current->rect.y = minChildY;
+                newPos.x = parentCenterX - current->rect.w / 2.f;
+                newPos.y = minChildY;
             }; break;
             case C4_UI_Align_TopRight: {
-                current->rect.x = maxChildX - current->rect.w;
-                current->rect.y = minChildY;
+                newPos.x = maxChildX - current->rect.w;
+                newPos.y = minChildY;
             }; break;
             case C4_UI_Align_CenterLeft: {
-                current->rect.x = minChildX;
-                current->rect.y = parentCenterY - current->rect.h / 2.f;
+                newPos.x = minChildX;
+                newPos.y = parentCenterY - current->rect.h / 2.f;
             }; break;
             case C4_UI_Align_Center: {
-                current->rect.x = parentCenterX - current->rect.w / 2.f;
-                current->rect.y = parentCenterY - current->rect.h / 2.f;
+                newPos.x = parentCenterX - current->rect.w / 2.f;
+                newPos.y = parentCenterY - current->rect.h / 2.f;
             }; break;
             case C4_UI_Align_CenterRight: {
-                current->rect.x = maxChildX - current->rect.w;
-                current->rect.y = parentCenterY - current->rect.h / 2.f;
+                newPos.x = maxChildX - current->rect.w;
+                newPos.y = parentCenterY - current->rect.h / 2.f;
             }; break;
             case C4_UI_Align_BottomLeft: {
-                current->rect.x = minChildX;
-                current->rect.y = maxChildY - current->rect.h;
+                newPos.x = minChildX;
+                newPos.y = maxChildY - current->rect.h;
             }; break;
             case C4_UI_Align_Bottom: {
-                current->rect.x = parentCenterX - current->rect.w / 2.f;
-                current->rect.y = maxChildY - current->rect.h;
+                newPos.x = parentCenterX - current->rect.w / 2.f;
+                newPos.y = maxChildY - current->rect.h;
             } case C4_UI_Align_BottomRight: {
-                current->rect.x = maxChildX - current->rect.w;
-                current->rect.y = maxChildY - current->rect.h;
+                newPos.x = maxChildX - current->rect.w;
+                newPos.y = maxChildY - current->rect.h;
             }
+        }
+        if (alignX) {
+            current->rect.x = newPos.x;
+        }
+        if (alignY) {
+            current->rect.y = newPos.y;
         }
         current = current->nextSibling;
     }
+}
+
+void C4_UI_Node_ApplyChildSpacing(C4_UI_Node* parent) {
+    if (!parent) {
+        return;
+    }
+
+    parent->rect.w = parent->padding;
+    parent->rect.h = parent->padding;
+    if (parent->direction == C4_UI_Direction_Horizontal) {
+        parent->rect.w *= 2.f;
+    } else {
+        parent->rect.h *= 2.f;
+    }
+    C4_UI_Node* current = parent->firstChild;
+    while (current) {
+        if (parent->direction == C4_UI_Direction_Horizontal) {
+            current->rect.x = parent->rect.w - parent->padding;
+            current->rect.y = parent->padding;
+            parent->rect.w += current->rect.w + parent->spacing;
+            parent->rect.h = C4_FMax(parent->rect.h, current->rect.h + parent->padding * 2.f);
+        } else {
+            current->rect.x = parent->padding;
+            current->rect.y = parent->rect.h - parent->padding;
+            parent->rect.w = C4_FMax(parent->rect.w, current->rect.w + parent->padding * 2.f);
+            parent->rect.h += current->rect.h + parent->spacing;
+        }
+        current = current->nextSibling;
+    }
+    if (parent->direction == C4_UI_Direction_Horizontal) {
+        parent->rect.w -= parent->spacing;
+    } else {
+        parent->rect.h -= parent->spacing;
+    }
+}
+
+void C4_UI_Node_ClampToWindow(C4_UI_Node* node, unsigned int windowWidth, unsigned int windowHeight, float UIScale) {
+    if (!node) {
+        return;
+    }
+
+    SDL_FRect* rect = &node->rect;
+
+    float visualWidth = rect->w * UIScale;
+    float visualHeight = rect->h * UIScale;
+
+    float scaledRightEdge = (rect->x * UIScale) + visualWidth;
+    if (scaledRightEdge > (float)windowWidth) {
+        rect->x = ((float)windowWidth / UIScale) - rect->w;
+    }
+    if (rect->x < 0.f) {
+        rect->x = 0.f;
+    }
+
+    float scaledBottomEdge = (rect->y * UIScale) + visualHeight;
+    if (scaledBottomEdge > (float)windowHeight) {
+        rect->y = ((float)windowHeight / UIScale) - rect->h;
+    }
+    if (rect->y < 0.f) {
+        rect->y = 0.f;
+    }
+}
+
+void C4_UI_CenterInWindow(C4_UI_Node* node, C4_UI_Axis axis, unsigned int windowWidth, unsigned int windowHeight, float UIScale) {
+    if (!node) {
+        return;
+    }
+    SDL_FRect* rect = &node->rect;
+
+    if (axis == C4_UI_Axis_X || axis == C4_UI_Axis_XY) {
+        rect->x = (windowWidth / 2.f) - (rect->w * UIScale / 2.f);
+    }
+
+    if (axis == C4_UI_Axis_Y || axis == C4_UI_Axis_XY) {
+        rect->y = (windowHeight / 2.f) - (rect->h * UIScale / 2.f);
+    }
+
+    C4_UI_Node_ClampToWindow(node, windowWidth, windowHeight, UIScale);
 }

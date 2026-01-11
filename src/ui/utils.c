@@ -8,3 +8,11 @@ int C4_Max(int a, int b) {
 int C4_Min(int a, int b) {
     return a < b ? a : b;
 }
+
+float C4_FMax(float a, float b) {
+    return a > b ? a : b;
+}
+
+float C4_FMin(float a, float b) {
+    return a < b ? a : b;
+}

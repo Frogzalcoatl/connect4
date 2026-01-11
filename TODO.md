@@ -5,7 +5,6 @@
 * Set up some kind of text formatting thing similar to minecrafts color codes
 * Drawing Circles
 * Proper mouse detection for different shapes/rotations
-* Button UIElement
 * Slider UIElement
 * Dropdown ui element
 * Use the new ui logic to remake the ui

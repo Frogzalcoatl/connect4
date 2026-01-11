@@ -80,21 +80,69 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
 
     data->game = game;
 
-    C4_UI_Node* singlePlayerButton = C4_UI_Button_Create(
+    const SDL_FRect DEFAULT_BUTTON_SIZE =  (SDL_FRect){0.f, 0.f, 800.f, 100.f};
+
+    C4_UI_Node* randomButton = C4_UI_Button_Create(
         &(C4_UI_Button_Config){
             .style = &C4_UI_THEME_DEFAULT.style,
-            .rect = (SDL_FRect){100.f, 200.f, 800.f, 100.f},
+            .rect = DEFAULT_BUTTON_SIZE,
             .shapeType = C4_UI_Shape_Rectangle,
             .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
-            .text = "Singleplayer",
+            .text = "Random",
             .font = game->monocraftBold,
             .textEngine = game->textEngine
         }, game->UIScale
     );
 
-    C4_UI_Canvas_AddNode(canvas, singlePlayerButton);
-    singlePlayerButton->input.OnHover = ButtonHover;
-    singlePlayerButton->input.OnRelease = ButtonClick;
+    C4_UI_Canvas_AddNode(canvas, randomButton);
+    randomButton->input.OnHover = ButtonHover;
+    randomButton->input.OnRelease = ButtonClick;
+
+    #define BUTTON_COUNT 4
+    char* BUTTON_STRINGS[BUTTON_COUNT] = {
+        "Singleplayer",
+        "Multiplayer",
+        "Settings",
+        "Quit"
+    };
+
+
+    C4_UI_Button_Config buttonConfigs[BUTTON_COUNT];
+    C4_UI_Buttons_CreateConfigArr(
+        &(C4_UI_Button_Config){
+            .style = &C4_UI_THEME_DEFAULT.style,
+            .rect = DEFAULT_BUTTON_SIZE,
+            .shapeType = C4_UI_Shape_Rectangle,
+            .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
+            .text = "",
+            .font = game->monocraftBold,
+            .textEngine = game->textEngine
+        },
+        BUTTON_STRINGS, BUTTON_COUNT, buttonConfigs
+    );
+
+    C4_UI_Node* buttons = C4_UI_Buttons_Create(
+        &(C4_UI_Buttons_Config){
+            .posX = 0.f,
+            .posY = 0.f,
+            .direction = C4_UI_Direction_Vertical,
+            .spacing = 25.f,
+            .padding = 25.f,
+            .buttonsArr = buttonConfigs,
+            .buttonsArrSize = BUTTON_COUNT
+        }, game->UIScale
+    );
+    buttons->shape = (C4_UI_Data_Shape){
+        .borderWidth = 3,
+        .rotationDegrees = 0,
+        .type = C4_UI_Shape_Rectangle
+    };
+    C4_UI_CenterInWindow(buttons, C4_UI_Axis_XY, game->presentationWidth, game->presentationHeight, game->UIScale);
+    C4_UI_Node_AlignChildren(buttons, C4_UI_Axis_X);
+    C4_UI_Canvas_AddNode(canvas, buttons);
+
+    randomButton->navDown = buttons->firstChild;
+    buttons->firstChild->navUp = randomButton;
 
     screen->HandleWindowResize(screen, game->currentLayout);
     

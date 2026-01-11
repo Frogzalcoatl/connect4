@@ -56,7 +56,7 @@ typedef struct C4_UI_Node {
     float padding;
     float spacing;
     C4_UI_Direction direction;
-    bool fitContent; // If true, rect expands to fit children
+    enum C4_UI_Align childrenAlign;
 
     struct C4_UI_Node* navUp;
     struct C4_UI_Node* navDown;
@@ -65,11 +65,14 @@ typedef struct C4_UI_Node {
 } C4_UI_Node;
 
 typedef struct {
+    SDL_FRect rect;
     C4_UI_ShapeType type;
     unsigned int borderWidth;
 } C4_UI_Data_Shape_Config;
 
 typedef struct {
+    float posX;
+    float posY;
     char* text;
     TTF_Font* font;
     TTF_TextEngine* textEngine;
@@ -78,7 +81,6 @@ typedef struct {
 typedef struct C4_UI_Node_Config {
     C4_UI_Type type;
     C4_UI_Style* style;
-    SDL_FRect rect;
     union {
         C4_UI_Data_Shape_Config shape;
         C4_UI_Data_Text_Config text;
@@ -98,7 +100,7 @@ void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString);
 void C4_UI_Node_ChangeFont(C4_UI_Node* node, TTF_Font* newFont);
 void C4_UI_Node_SetTextWrap(C4_UI_Node* node, int widthInPixels);
 
-typedef enum {
+typedef enum C4_UI_Align {
     C4_UI_Align_TopLeft,
     C4_UI_Align_Top,
     C4_UI_Align_TopRight,
@@ -109,4 +111,14 @@ typedef enum {
     C4_UI_Align_Bottom,
     C4_UI_Align_BottomRight
 } C4_UI_Align;
-void C4_UI_Node_AlignChildren(C4_UI_Node* node, C4_UI_Align align);
+
+typedef enum {
+    C4_UI_Axis_X,
+    C4_UI_Axis_Y,
+    C4_UI_Axis_XY
+} C4_UI_Axis;
+
+void C4_UI_Node_AlignChildren(C4_UI_Node* node, C4_UI_Axis axis);
+void C4_UI_Node_ApplyChildSpacing(C4_UI_Node* parent);
+void C4_UI_Node_ClampToWindow(C4_UI_Node* node, unsigned int windowWidth, unsigned int windowHeight, float UIScale);
+void C4_UI_CenterInWindow(C4_UI_Node* node, C4_UI_Axis axis, unsigned int windowWidth, unsigned int windowHeight, float UIScale);
