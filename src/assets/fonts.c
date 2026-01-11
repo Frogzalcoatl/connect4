@@ -14,7 +14,7 @@ static const C4_HeaderAsset FONT_ASSETS[C4_FONT_COUNT] = {
     {assets_fonts_Monocraft_Bold_ttf_data, assets_fonts_Monocraft_Bold_ttf_size}
 };
 
-TTF_Font* C4_GetFont(C4_FontType type) {
+TTF_Font* C4_GetFont(C4_FontType type, float ptSize) {
     if (type < 0 || type >= C4_FONT_COUNT) {
         SDL_Log("Tried to access invalid C4_FontType");
         return NULL;
@@ -27,13 +27,13 @@ TTF_Font* C4_GetFont(C4_FontType type) {
         SDL_Log("Unable to open font IOStream. Type index: %i", type);
         return NULL;
     }
-    TTF_Font* newFont = TTF_OpenFontIO(io, true, 32.f);
+    TTF_Font* newFont = TTF_OpenFontIO(io, true, ptSize);
     if (newFont) {
         fontCache[type] = newFont;
         return newFont;
     }
     if (type != C4_FontType_Regular) {
-        return C4_GetFont(C4_FontType_Regular);
+        return C4_GetFont(C4_FontType_Regular, ptSize);
     }
     SDL_Log("Unable to get font. Type index: %i", type);
     return NULL;

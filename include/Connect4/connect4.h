@@ -12,6 +12,7 @@ void Connect4_Quit_Dependencies(void);
 typedef struct {
     SDL_Window* window;
     SDL_Renderer* renderer;
+    TTF_TextEngine* textEngine;
     C4_Board* board;
     C4_UI_Screen* screens[C4_ScreenType_ScreenCount];
     C4_UI_Screen* currentScreen;

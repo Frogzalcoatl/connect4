@@ -3,6 +3,14 @@
 #include "Connect4/ui/canvas.h"
 #include <stdlib.h>
 
+typedef enum {
+    C4_UI_LayoutType_None,
+    C4_UI_LayoutType_Wide,
+    C4_UI_LayoutType_Tall
+} C4_UI_LayoutType;
+
+C4_UI_LayoutType C4_UI_GetCurrentLayout(unsigned int windowWidth, unsigned int windowHeight);
+
 // Forward declaration so it can be inside the struct
 typedef struct C4_UI_Screen C4_UI_Screen;
 
@@ -17,4 +25,4 @@ struct C4_UI_Screen {
     C4_UI_Canvas canvas;
 };
 
-C4_UI_Screen* C4_Screen_Create(SDL_Renderer* renderer);
+C4_UI_Screen* C4_Screen_Create(SDL_Renderer* renderer, TTF_TextEngine* textEngine);

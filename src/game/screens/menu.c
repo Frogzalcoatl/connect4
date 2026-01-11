@@ -4,10 +4,6 @@
 
 typedef struct {
     C4_Game* game;
-    C4_UI_Popup* inDevelopment;
-    C4_UI_Popup* exitGame;
-    C4_UI_Text* title;
-    C4_UI_ButtonGroup* buttonGroup;
 } C4_MenuScreenData;
 
 static void C4_MenuScreen_OnEnter(C4_UI_Screen* screen) {
@@ -15,8 +11,6 @@ static void C4_MenuScreen_OnEnter(C4_UI_Screen* screen) {
         return;
     }
     C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
-    data->exitGame->isShowing = false;
-    data->inDevelopment->isShowing = false;
 }
 
 static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutType layout) {
@@ -24,99 +18,16 @@ static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutT
         return;
     }
     C4_MenuScreenData* menuData = (C4_MenuScreenData*)screen->data;
-    C4_Game* game = menuData->game;
-    SDL_Renderer* renderer = game->renderer;
 
     switch (layout) {
         case C4_UI_LayoutType_Wide: {
-            C4_Screen_UpdatePopup(
-                menuData->inDevelopment, 
-                &(C4_Screen_UpdatePopup_Config){
-                    .buttonGroupHeight = 100.f,
-                    .direction = C4_UI_ButtonGroup_Direction_Horizontal,
-                    .buttonGroupPtSize = C4_UI_THEME_DEFAULT.defaultPtSize,
-                    .messagePtSize = C4_UI_THEME_DEFAULT.defaultPtSize,
-                    .destination = (SDL_FRect){0.f, 0.f, 800.f, 400.f},
-                    .renderer = renderer,
-                }
-            );
-
-            C4_Screen_UpdatePopup(
-                menuData->exitGame, 
-                &(C4_Screen_UpdatePopup_Config){
-                    .buttonGroupHeight = 100.f,
-                    .direction = C4_UI_ButtonGroup_Direction_Horizontal,
-                    .buttonGroupPtSize = C4_UI_THEME_DEFAULT.defaultPtSize,
-                    .messagePtSize = C4_UI_THEME_DEFAULT.defaultPtSize,
-                    .destination = (SDL_FRect){0.f, 0.f, 800.f, 400.f},
-                    .renderer = renderer,
-                }
-            );
-
-            C4_UI_ButtonGroup_ChangeDestination(
-                menuData->buttonGroup,
-                (SDL_FRect){0.f, game->presentationHeight / 3.25f, 700.f, 500.f}
-            );
-            C4_UI_ButtonGroup_ChangePtSize(menuData->buttonGroup, 32.f, renderer);
+            
         }; break;
         case C4_UI_LayoutType_Tall: {
-            C4_Screen_UpdatePopup(
-                menuData->inDevelopment, 
-                &(C4_Screen_UpdatePopup_Config){
-                    .buttonGroupHeight = 150.f,
-                    .direction = C4_UI_ButtonGroup_Direction_Horizontal,
-                    .buttonGroupPtSize = C4_UI_THEME_DEFAULT.defaultPtSize,
-                    .messagePtSize = C4_UI_THEME_DEFAULT.defaultPtSize,
-                    .destination = (SDL_FRect){0.f, 0.f, 900.f, 500.f},
-                    .renderer = renderer,
-                }
-            );
-
-            C4_Screen_UpdatePopup(
-                menuData->exitGame, 
-                &(C4_Screen_UpdatePopup_Config){
-                    .buttonGroupHeight = 320.f,
-                    .direction = C4_UI_ButtonGroup_Direction_Vertical,
-                    .buttonGroupPtSize = C4_UI_THEME_DEFAULT.defaultPtSize,
-                    .messagePtSize = C4_UI_THEME_DEFAULT.defaultPtSize,
-                    .destination = (SDL_FRect){0.f, 0.f, 900.f, 600.f},
-                    .renderer = renderer,
-                }
-            );
-
-            C4_UI_ButtonGroup_ChangeDestination(
-                menuData->buttonGroup,
-                (SDL_FRect){0.f, game->presentationHeight / 3.25f, 800.f, 660.f}
-            );
-            C4_UI_ButtonGroup_ChangePtSize(menuData->buttonGroup, C4_UI_THEME_DEFAULT.defaultPtSize, renderer);
+            
         }; break;
         default: break;
     }
-
-    // Functions that are the same between both layouts
-    C4_UI_Popup_CenterInWindow(
-        menuData->inDevelopment, renderer,
-        game->presentationWidth, game->presentationHeight,
-        game->UIScale
-    );
-
-    C4_UI_Popup_CenterInWindow(
-        menuData->exitGame, renderer,
-        game->presentationWidth, game->presentationHeight,
-        game->UIScale
-    );
-
-    C4_UI_ButtonGroup_CenterInWindow(
-        menuData->buttonGroup, C4_Axis_X, 
-        game->presentationWidth, game->presentationHeight,
-        game->UIScale
-    );
-
-    C4_UI_CenterInWindow(
-        &menuData->title->destination, C4_Axis_X,
-        game->presentationWidth, game->presentationHeight,
-        game->UIScale
-    );
 }
 
 // Forward declaration just for the purpose of organization
@@ -126,7 +37,7 @@ C4_UI_Screen* C4_MenuScreen_Create(C4_Game* game) {
     if (!game) {
         return NULL;
     }
-    C4_UI_Screen* screen = C4_Screen_Create(game->renderer);
+    C4_UI_Screen* screen = C4_Screen_Create(game->renderer, game->textEngine);
     if (!screen) {
         return NULL;
     }
@@ -148,33 +59,14 @@ C4_UI_Screen* C4_MenuScreen_Create(C4_Game* game) {
     return screen;
 }
 
-static void ButtonGroup_SinglePlayer_OnRelease(void* context) {
-    C4_UI_Popup* popup = (C4_UI_Popup*)context;
-    popup->isShowing = true;
-}
-static void ButtonGroup_MultiPlayer_OnRelease(void* context) {
+static void ButtonClick(void* context) {
     (void)context;
-    C4_PushEvent_ScreenChange(C4_ScreenType_Game);
+    C4_PlaySound(C4_SoundEffect_ButtonClick);
 }
-static void ButtonGroup_Settings_OnRelease(void* context) {
+
+static void ButtonHover(void* context) {
     (void)context;
-    C4_PushEvent_ScreenChange(C4_ScreenType_Settings);
-}
-static void ButtonGroup_Quit_OnRelease(void* context) {
-    C4_UI_Popup* popup = (C4_UI_Popup*)context;
-    popup->isShowing = true;
-}
-static void ExitPopup_Ok_OnRelease(void* context) {
-    (void)context;
-    C4_PushEvent_CloseWindow();
-}
-static void ExitPopup_Cancel_OnRelease(void* context) {
-    C4_UI_Popup* popup = (C4_UI_Popup*)context;
-    popup->isShowing = false;
-}
-static void InDevelopmentPopup_Ok_OnRelease(void* context) {
-    C4_UI_Popup* popup = (C4_UI_Popup*)context;
-    popup->isShowing = false;
+    C4_PlaySound(C4_SoundEffect_ButtonHover);
 }
 
 static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
@@ -187,97 +79,78 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
 
     data->game = game;
 
-    data->title = C4_UI_Canvas_Add_Text(
-        canvas, &(C4_UI_Text_Config){
-            .str = "Connect4",
-            .font = game->fontBold,
-            .color = C4_UI_THEME_DEFAULT.textColor,
-            .ptSize = 200.f,
-            .destinationX = 0.f,
-            .destinationY = 0.f,
-            .wrapWidth = 0
-        }
+    C4_UI_Node* testNode = C4_UI_Node_Create(
+        &(C4_UI_Node_Config){
+            .type = C4_UI_Type_Shape,
+            .style = &C4_UI_THEME_DEFAULT.style,
+            .rect = (SDL_FRect){100.f, 100.f, 400.f, 100.f},
+            .shape = (C4_UI_Data_Shape_Config){
+                .type = C4_UI_Shape_Rectangle,
+                .borderWidth = C4_UI_THEME_DEFAULT.borderWidth
+            }
+        }, game->UIScale
     );
-    if (!data->title) {
-        return false;
-    }
 
-    data->inDevelopment = C4_UI_Canvas_Add_Popup(
-        canvas, &(C4_UI_Popup_Config){
-            .destination = C4_EMPTY_SDL_FRECT,
-            .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
-            .buttonCount = 1,
-            .buttonGroupHeight = 100.f,
-            .message = "This is still in development!",
-            .messageFont = game->fontRegular,
-            .buttonFont = game->fontBold,
-            .theme = &C4_UI_THEME_DEFAULT
-        }
+    testNode->shape.rotationDegrees = 0;
+    testNode->input.isFocusable = true;
+    testNode->input.isActive = true;
+    testNode->input.OnRelease = ButtonClick;
+    testNode->input.OnHover = ButtonHover;
+
+    C4_UI_Node* testChild = C4_UI_Node_Create(
+        &(C4_UI_Node_Config){
+            .type = C4_UI_Type_Text,
+            .style = &C4_UI_THEME_DEFAULT.style,
+            .rect = (SDL_FRect){0.f, 0.f, 0.f, 0.f},
+            .text = (C4_UI_Data_Text_Config){
+                .font = game->fontBold,
+                .text = "Test",
+                .textEngine = game->textEngine
+            }
+        }, game->UIScale
     );
-    if (!data->inDevelopment) {
-        return false;
-    }
-    C4_UI_Button* InDevelopmentPopup_Ok = &data->inDevelopment->buttonGroup.buttons[0];
-    C4_UI_Text_UpdateStr(&InDevelopmentPopup_Ok->text, "Ok", renderer);
-    InDevelopmentPopup_Ok->OnReleaseCallback = InDevelopmentPopup_Ok_OnRelease;
-    InDevelopmentPopup_Ok->OnReleaseContext = data->inDevelopment;
+    testChild->inheritState = true;
 
-    data->exitGame = C4_UI_Canvas_Add_Popup(
-        canvas, &(C4_UI_Popup_Config){
-            .destination = C4_EMPTY_SDL_FRECT,
-            .buttonDirection = C4_UI_ButtonGroup_Direction_Horizontal,
-            .buttonCount = 2,
-            .buttonGroupHeight = 100.f,
-            .message = "Do you want to exit Connect4?",
-            .messageFont = game->fontRegular,
-            .buttonFont = game->fontBold,
-            .theme = &C4_UI_THEME_DEFAULT
-        }
+    C4_UI_Canvas_AddNode(canvas, testNode);
+    C4_UI_Node_AttachChild(testNode, testChild);
+
+    C4_UI_Node* testNode2 = C4_UI_Node_Create(
+        &(C4_UI_Node_Config){
+            .type = C4_UI_Type_Shape,
+            .style = &C4_UI_THEME_DEFAULT.style,
+            .rect = (SDL_FRect){100.f, 225.f, 400.f, 100.f},
+            .shape = (C4_UI_Data_Shape_Config){
+                .type = C4_UI_Shape_Rectangle,
+                .borderWidth = C4_UI_THEME_DEFAULT.borderWidth
+            }
+        }, game->UIScale
     );
-    if (!data->exitGame) {
-        return false;
-    }
 
-    C4_UI_Button* ExitPopup_Ok = &data->exitGame->buttonGroup.buttons[0];
-    ExitPopup_Ok->OnReleaseCallback = ExitPopup_Ok_OnRelease;
-    C4_UI_Text_UpdateStr(&ExitPopup_Ok->text, "Ok", renderer);
-    
-    C4_UI_Button* ExitPopup_Cancel = &data->exitGame->buttonGroup.buttons[1];
-    ExitPopup_Cancel->OnReleaseCallback = ExitPopup_Cancel_OnRelease;
-    ExitPopup_Cancel->OnReleaseContext = data->exitGame;
-    C4_UI_Text_UpdateStr(&ExitPopup_Cancel->text, "Cancel", renderer);
+    testNode2->shape.rotationDegrees = 0;
+    testNode2->input.isFocusable = true;
+    testNode2->input.isActive = true;
+    testNode2->input.OnRelease = ButtonClick;
+    testNode2->input.OnHover = ButtonHover;
 
-    data->buttonGroup = C4_UI_Canvas_Add_ButtonGroup(
-        canvas, &(C4_UI_ButtonGroup_Config){
-            .destination = C4_EMPTY_SDL_FRECT,
-            .count = 4,
-            .buttonDirection = C4_UI_ButtonGroup_Direction_Vertical,
-            .margin = 15,
-            .font = game->fontBold,
-            .theme = &C4_UI_THEME_DEFAULT
-        }
+    C4_UI_Node* testChild2 = C4_UI_Node_Create(
+        &(C4_UI_Node_Config){
+            .type = C4_UI_Type_Text,
+            .style = &C4_UI_THEME_DEFAULT.style,
+            .rect = (SDL_FRect){0.f, 0.f, 0.f, 0.f},
+            .text = (C4_UI_Data_Text_Config){
+                .font = game->fontBold,
+                .text = "Test2",
+                .textEngine = game->textEngine
+            }
+        }, game->UIScale
     );
-    if (!data->buttonGroup) {
-        return false;
-    }
+    testChild2->inheritState = true;
 
-    C4_UI_Button* ButtonGroup_SinglePlayer = &data->buttonGroup->buttons[0];
-    C4_UI_Text_UpdateStr(&ButtonGroup_SinglePlayer->text, "SinglePlayer", renderer);
-    ButtonGroup_SinglePlayer->OnReleaseCallback = ButtonGroup_SinglePlayer_OnRelease;
-    ButtonGroup_SinglePlayer->OnReleaseContext = data->inDevelopment;
+    C4_UI_Canvas_AddNode(canvas, testNode2);
+    C4_UI_Node_AttachChild(testNode2, testChild2);
 
-    C4_UI_Button* ButtonGroup_MultiPlayer = &data->buttonGroup->buttons[1];
-    C4_UI_Text_UpdateStr(&ButtonGroup_MultiPlayer->text, "MultiPlayer", renderer);
-    ButtonGroup_MultiPlayer->OnReleaseCallback = ButtonGroup_MultiPlayer_OnRelease;
-
-    C4_UI_Button* ButtonGroup_Settings = &data->buttonGroup->buttons[2];
-    C4_UI_Text_UpdateStr(&ButtonGroup_Settings->text, "Settings", renderer);
-    ButtonGroup_Settings->OnReleaseCallback = ButtonGroup_Settings_OnRelease;
-
-    C4_UI_Button* ButtonGroup_Quit = &data->buttonGroup->buttons[3];
-    C4_UI_Text_UpdateStr(&ButtonGroup_Quit->text, "Quit", renderer);
-    ButtonGroup_Quit->OnReleaseCallback = ButtonGroup_Quit_OnRelease;
-    ButtonGroup_Quit->OnReleaseContext = data->exitGame;
+    testNode->navDown = testNode2;
+    testNode2->navUp = testNode;
 
     screen->HandleWindowResize(screen, game->currentLayout);
     

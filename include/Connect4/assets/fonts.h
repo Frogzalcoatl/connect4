@@ -6,5 +6,5 @@ typedef enum {
     C4_FontType_Bold
 } C4_FontType;
 
-TTF_Font* C4_GetFont(C4_FontType type);
+TTF_Font* C4_GetFont(C4_FontType type, float ptSize);
 void C4_CloseAllFonts(void);

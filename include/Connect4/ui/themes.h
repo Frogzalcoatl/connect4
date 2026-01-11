@@ -4,15 +4,18 @@
 typedef struct {
     SDL_Color background;
     SDL_Color text;
-    SDL_Color borders;
-    SDL_Color symbol;
-} C4_UI_Button_ColorInfo;
+    SDL_Color border;
+} C4_UI_StyleState;
 
 typedef struct {
-    C4_UI_Button_ColorInfo buttonDefault;
-    C4_UI_Button_ColorInfo buttonHovered;
-    C4_UI_Button_ColorInfo buttonPressed;
-    C4_UI_Button_ColorInfo buttonInactive;
+    C4_UI_StyleState normal;
+    C4_UI_StyleState hovered;
+    C4_UI_StyleState pressed;
+    C4_UI_StyleState inactive;
+} C4_UI_Style;
+
+typedef struct {
+    C4_UI_Style style;
     float defaultPtSize;
     unsigned int borderWidth;
     SDL_Color textColor;

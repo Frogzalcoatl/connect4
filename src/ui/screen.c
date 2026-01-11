@@ -25,14 +25,14 @@ static void C4_UI_Screen_Destroy_Default(C4_UI_Screen* screen) {
     if (!screen) {
         return;
     }
-    C4_UI_Canvas_Clear(&screen->canvas);
+    C4_UI_Canvas_Destroy(&screen->canvas);
     if (screen->data) {
         free(screen->data);
     }
     free(screen);
 }
 
-C4_UI_Screen* C4_Screen_Create(SDL_Renderer* renderer) {
+C4_UI_Screen* C4_Screen_Create(SDL_Renderer* renderer, TTF_TextEngine* textEngine) {
     if (!renderer) {
         return NULL;
     }
@@ -42,7 +42,7 @@ C4_UI_Screen* C4_Screen_Create(SDL_Renderer* renderer) {
         return NULL;
     }
 
-    C4_UI_Canvas_Init(&screen->canvas, renderer, 0.f, 0.f);
+    C4_UI_Canvas_Init(&screen->canvas, renderer, textEngine, 0.f, 0.f);
 
     screen->Update = C4_Screen_Update_Default;
     screen->Draw = C4_Screen_Draw_Default;
@@ -55,4 +55,12 @@ C4_UI_Screen* C4_Screen_Create(SDL_Renderer* renderer) {
     screen->data = NULL;
 
     return screen;
+}
+
+C4_UI_LayoutType C4_UI_GetCurrentLayout(unsigned int windowWidth, unsigned int windowHeight) {
+    if (windowWidth >= windowHeight) {
+        return C4_UI_LayoutType_Wide;
+    } else {
+        return C4_UI_LayoutType_Tall;
+    }
 }
