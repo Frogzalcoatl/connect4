@@ -59,10 +59,11 @@ C4_InputEvent C4_GetInput(SDL_Event* event) {
     };
     switch (event->type) {
         case SDL_EVENT_KEY_DOWN: {
-            if (!event->key.repeat) {
-                input.verb = C4_MapScancodeToVerb(event->key.scancode);
-                input.state = C4_INPUT_STATE_PRESSED;
+            if (event->key.repeat) {
+                break;
             }
+            input.verb = C4_MapScancodeToVerb(event->key.scancode);
+            input.state = C4_INPUT_STATE_PRESSED;
         }; break;
         case SDL_EVENT_KEY_UP: {
             input.verb = C4_MapScancodeToVerb(event->key.scancode);

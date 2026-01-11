@@ -1,5 +1,9 @@
 # TODO
 
+* Make it so that while input verbs are held down, it ticks similar to buttons whilepressed callback.
+* separate isHovered and isFocused to give isFocused for input a heavier border style.
+* Add input cancel callbacks
+* determine whether post callbacks are still needed.
 * Honestly just look through all the code and find any bs. I feel like its kinda turning into spaghetti or however you spell that word.
     * Go through the code and add error logs in the process ^
 * Set up some kind of text formatting thing similar to minecrafts color codes

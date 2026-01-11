@@ -273,10 +273,9 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
         if (eventSDL->type == SDL_EVENT_QUIT) {
             game->running = false;
         } else if (eventSDL->type == SDL_EVENT_KEY_DOWN) {
-            if (eventSDL->key.repeat) {
-                continue;
+            if (!eventSDL->key.repeat) {
+                C4_Game_HandleKeyboardInput(game, eventSDL->key.scancode);
             }
-            C4_Game_HandleKeyboardInput(game, eventSDL->key.scancode);
         } else if (eventSDL->type == SDL_EVENT_WINDOW_RESIZED) {
             unsigned int windowWidth = eventSDL->window.data1;
             unsigned int windowHeight = eventSDL->window.data2;
