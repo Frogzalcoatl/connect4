@@ -34,7 +34,7 @@ static void UpdateControllerText(C4_UI_Node* controllerList, C4_UI_Node* activeC
     char* controllerArr[C4_MAX_GAMEPADS];
     C4_Gamepad_GetNames(controllerArr, C4_MAX_GAMEPADS);
 
-    char* controllerText = C4_JoinStrings(controllerArr, C4_MAX_GAMEPADS, "\n");
+    char* controllerText = C4_JoinStrings((const char**)controllerArr, C4_MAX_GAMEPADS, "\n");
     
     char header[2048] = "Controllers:\n";
     if (controllerText && *controllerText != '\0') {
