@@ -100,10 +100,13 @@ bool C4_UI_Interaction_HandleMouseEvents(SDL_FRect absoluteRect, C4_UI_Interacti
             }
             return true;
         }
-    } else if (event->type == SDL_EVENT_MOUSE_BUTTON_UP) {
+    } else if (event->type == SDL_EVENT_MOUSE_BUTTON_UP || event->type == SDL_EVENT_FINGER_UP) {
         if (mouseButton == SDL_BUTTON_LEFT) {
             bool wasReleased = input->isPressed && input->isHovered;
             input->isPressed = false;
+            if (event->type == SDL_EVENT_FINGER_UP) {
+                input->isHovered = false;
+            }
             if (wasReleased) {
                 if (input->OnRelease) {
                     input->OnRelease(input->context);

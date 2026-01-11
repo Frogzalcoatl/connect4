@@ -78,8 +78,10 @@ static bool C4_Game_WindowSetup(C4_Game* game) {
     SDL_WindowFlags windowFlags;
     #if SDL_PLATFORM_ANDROID || SDL_PLATFORM_IOS
         windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN;
+        game->isFullscreen = true;
     #else
         windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED;
+        game->isFullscreen = false;
     #endif
 
     const SDL_DisplayMode* mode = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
@@ -223,7 +225,6 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
 
     game->UIScale = 1.f;
     game->running = false;
-    game->isFullscreen = false;
 
     if (!C4_Game_CreateScreens(game)) {
         C4_Game_Destroy(game);

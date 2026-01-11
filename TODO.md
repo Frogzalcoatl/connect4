@@ -1,5 +1,11 @@
 # TODO
 
+* Figure out why the android apk uploaded on github doesnt update on your phone properly
+    * determine whether its just the apk from github actions or the apk build setup in general
+* Fix interactables to work properly with touch input
+    * isHovered isnt being properly reset.
+* Improve controller connection and disconnection tracking in situations where multiple controllers are connected at once.
+    * Maybe add a way to select a specific controller
 * Make it so that while input verbs are held down, it ticks similar to buttons whilepressed callback.
 * separate isHovered and isFocused to give isFocused for input a heavier border style.
 * Add input cancel callbacks
@@ -20,6 +26,8 @@
 * Look in to using SDL mixer (for audio) and SDL image (For better symbols. Maybe an image ui element)
 * Improve win check efficiency (see WINCHECKCRITIQUE.md)
 * Improve UI cleanliness once code is done
+* Computer player with different difficulty levels
 * Animated background (1:1 aspect ratio, aligned to center)
 * Background music
 * Improve sound design
+* Online Multiplayer?

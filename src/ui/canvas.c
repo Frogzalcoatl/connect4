@@ -79,7 +79,6 @@ static void C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event)
             C4_UI_Node* result = C4_UI_Node_FindFocusable(current);
             if (result) {
                 C4_UI_Canvas_SetFocus(canvas, result);
-                SDL_Log("Found a focusable node");
                 return;
             }
             current = current->nextSibling;
@@ -144,7 +143,8 @@ void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float scal
     } else if (
         event->type == SDL_EVENT_MOUSE_MOTION ||
         event->type == SDL_EVENT_MOUSE_BUTTON_DOWN || 
-        event->type == SDL_EVENT_MOUSE_BUTTON_UP
+        event->type == SDL_EVENT_MOUSE_BUTTON_UP ||
+        event->type == SDL_EVENT_FINGER_UP // To properly reset isHovered on touch
     ) {
         if (!SDL_CursorVisible()) {
             SDL_ShowCursor();
