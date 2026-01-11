@@ -1,7 +1,6 @@
 #include "Connect4/assets/index.h"
 #include "Connect4/assets/fonts.h"
 #include "assets_fonts_Monocraft_ttf.h"
-#include "assets_fonts_Monocraft_Bold_ttf.h"
 #include "assets_fonts_Miracode_ttf.h"
 #include "Connect4/constants.h"
 #include <stdio.h>
