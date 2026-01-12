@@ -3,6 +3,7 @@
 #include "Connect4/constants.h"
 #include "Connect4/ui/element/button.h"
 #include "Connect4/ui/utils.h"
+#include "Connect4/assets/fonts.h"
 
 typedef struct {
     C4_Game* game;
@@ -143,7 +144,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
             .shapeType = C4_UI_Shape_Rectangle,
             .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
             .text = "",
-            .font = game->monocraftBold,
+            .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 48.f, TTF_STYLE_BOLD),
             .textEngine = game->textEngine
         },
         BUTTON_STRINGS, BUTTON_COUNT, buttonConfigs
@@ -178,7 +179,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
                 .posX = 0.f,
                 .posY = 0.f,
                 .text = "",
-                .font = game->monocraftRegular,
+                .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f, TTF_STYLE_NORMAL),
                 .textEngine = game->textEngine
             }
         }
@@ -191,9 +192,9 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
             .style = &C4_UI_THEME_DEFAULT.style,
             .text = (C4_UI_Data_Text_Config){
                 .posX = 0.f,
-                .posY = 1000.f,
+                .posY = 1040.f,
                 .text = "",
-                .font = game->monocraftRegular,
+                .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f, TTF_STYLE_NORMAL),
                 .textEngine = game->textEngine
             }
         }

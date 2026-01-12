@@ -5,51 +5,81 @@
 #include "Connect4/constants.h"
 #include <stdio.h>
 
-#define C4_TTF_COUNT 2
-#define C4_FONT_COUNT C4_TTF_COUNT * 2
+#define C4_FONT_ASSET_COUNT 2
 
-static TTF_Font* fontCache[C4_FONT_COUNT] = {0};
-
-static const C4_HeaderAsset FONT_ASSETS[C4_TTF_COUNT] = {
+static const C4_HeaderAsset FONT_ASSETS[C4_FONT_ASSET_COUNT] = {
     {assets_fonts_Monocraft_ttf_data, assets_fonts_Monocraft_ttf_size},
     {assets_fonts_Miracode_ttf_data, assets_fonts_Miracode_ttf_size}
 };
 
-TTF_Font* C4_GetFont(C4_FontType type) {
-    if (type < 0 || type >= C4_FONT_COUNT) {
-        SDL_Log("Tried to access invalid C4_FontType");
-        return NULL;
-    }
-    if (fontCache[type] != NULL) {
-        return fontCache[type];
-    }
-    const int ASSET_INDEX = type / 2;
-    SDL_IOStream* io = SDL_IOFromConstMem(FONT_ASSETS[ASSET_INDEX].data, FONT_ASSETS[ASSET_INDEX].size);
-    if (!io) {
-        SDL_Log("Unable to open font IOStream. Asset index: %i", ASSET_INDEX);
-        return NULL;
-    }
-    TTF_Font* newFont = TTF_OpenFontIO(io, true, 64.f);
-    if (type % 2 == 1) {
-        TTF_SetFontStyle(newFont, TTF_STYLE_BOLD);
-    }
-    if (newFont) {
-        fontCache[type] = newFont;
-        return newFont;
-    }
-    if (type != C4_FontType_Monocraft_Regular) {
-        return C4_GetFont(C4_FontType_Monocraft_Regular);
-    }
-    SDL_Log("Unable to get font. Type index: %i", type);
+typedef struct {
+    C4_FontAsset assetID;
+    float size;
+    TTF_FontStyleFlags style;
+    TTF_Font* font;
+} C4_CachedFont;
 
-    return NULL;
+#define MAX_FONT_CACHE 64
+static C4_CachedFont fontCache[MAX_FONT_CACHE];
+static int cacheCount = 0; 
+
+TTF_Font* C4_GetFont(C4_FontAsset assetID, float ptSize, TTF_FontStyleFlags style) {
+    if (assetID < 0 || assetID >= C4_FONT_ASSET_COUNT) {
+        SDL_Log("Invalid Font Asset ID requested");
+        return NULL;
+    }
+
+    if (ptSize <= 0.f) {
+        ptSize = 12.f;
+    }
+
+    for (int i = 0; i < cacheCount; i++) {
+        if (
+            fontCache[i].assetID == assetID &&
+            fontCache[i].size == ptSize &&
+            fontCache[i].style == style
+        ) {
+            return fontCache[i].font;
+        }
+    }
+
+    if (cacheCount >= MAX_FONT_CACHE) {
+        SDL_Log("Font cache full. Increase MAX_FONT_CACHE");
+        return fontCache[0].font;
+    }
+
+    const C4_HeaderAsset* asset = &FONT_ASSETS[assetID];
+    SDL_IOStream* io = SDL_IOFromConstMem(asset->data, asset->size);
+
+    if (!io) {
+        SDL_Log("Failed to create IO for font asset %d", assetID);
+        return NULL;
+    }
+
+    TTF_Font* newFont = TTF_OpenFontIO(io, true, ptSize);
+    if (!newFont) {
+        SDL_Log("Failed to get font asset %d: %s", assetID, SDL_GetError());
+        return NULL;
+    }
+
+    TTF_SetFontStyle(newFont, style);
+
+    fontCache[cacheCount].assetID = assetID;
+    fontCache[cacheCount].size = ptSize;
+    fontCache[cacheCount].style = style;
+    fontCache[cacheCount].font = newFont;
+
+    cacheCount++;
+    
+    return newFont;
 }
 
 void C4_CloseAllFonts(void) {
-    for (size_t i = 0; i < C4_FONT_COUNT; i++) {
-        if (fontCache[i]) {
-            TTF_CloseFont(fontCache[i]);
-            fontCache[i] = NULL;
+    for (size_t i = 0; i < MAX_FONT_CACHE; i++) {
+        if (fontCache[i].font) {
+            TTF_CloseFont(fontCache[i].font);
         }
     }
+    cacheCount = 0;
+    memset(fontCache, 0, sizeof(fontCache));
 }

@@ -18,10 +18,6 @@ typedef struct {
     C4_ScreenType currentScreenType;
     bool running;
     bool isFullscreen;
-    TTF_Font* monocraftRegular;
-    TTF_Font* monocraftBold;
-    TTF_Font* miracodeRegular;
-    TTF_Font* miracodeBold;
     float UIScale;
     C4_UI_LayoutType currentLayout;
     unsigned int presentationWidth;
