@@ -1,5 +1,5 @@
 #pragma once
-#include "Connect4/ui/interaction.h"
+#include "Connect4/input/interaction.h"
 #include "Connect4/ui/themes.h"
 #include "SDL3/SDL.h"
 #include "SDL3_ttf/SDL_ttf.h"

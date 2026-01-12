@@ -1,5 +1,5 @@
 #pragma once
-#include "Connect4/game/input/input.h"
+#include "Connect4/input/gamepad.h"
 #include "Connect4/assets/sounds.h"
 
 typedef struct {

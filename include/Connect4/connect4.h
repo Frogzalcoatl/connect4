@@ -3,8 +3,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include "Connect4/game/board.h"
 #include "Connect4/ui/canvas.h"
-#include "Connect4/game/screens/index.h"
-#include "Connect4/ui/screen.h"
+#include "Connect4/ui/screens/screen.h"
 
 bool Connect4_Init_Dependencies(void);
 void Connect4_Quit_Dependencies(void);

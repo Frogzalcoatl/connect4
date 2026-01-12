@@ -1,4 +1,4 @@
-#include "Connect4/ui/screen.h"
+#include "Connect4/ui/screens/screen.h"
 
 void C4_Screen_Update_Default(C4_UI_Screen* screen, float deltaTime) {
     if (!screen) {

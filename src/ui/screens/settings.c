@@ -1,4 +1,4 @@
-#include "Connect4/game/screens/settings.h"
+#include "Connect4/ui/screens/settings.h"
 #include "Connect4/game/events.h"
 #include "Connect4/constants.h"
 #include <stdio.h>

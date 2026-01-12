@@ -5,6 +5,8 @@
 * Set up some kind of text formatting thing similar to minecrafts color codes
 * Drawing Circles
 * Proper mouse detection for different shapes/rotations
+* Notification ui element
+* Popup ui element
 * Slider UIElement
 * Dropdown ui element
 * Look in to using SDL mixer (for audio) and SDL image (For better symbols. Maybe an image ui element)

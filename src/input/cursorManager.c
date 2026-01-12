@@ -1,4 +1,4 @@
-#include "Connect4/ui/cursorManager.h"
+#include "Connect4/input/cursorManager.h"
 #include <stddef.h>
 
 // cursorCache's memory is guaranteed to be filled with zeros before main even runs

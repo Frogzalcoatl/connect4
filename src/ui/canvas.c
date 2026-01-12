@@ -1,5 +1,5 @@
 #include "Connect4/ui/canvas.h"
-#include "Connect4/ui/cursorManager.h"
+#include "Connect4/input/cursorManager.h"
 #include <stdlib.h>
 
 void C4_UI_Canvas_Init(C4_UI_Canvas* canvas, SDL_Renderer* renderer, TTF_TextEngine* textEngine, float offsetX, float offsetY) {

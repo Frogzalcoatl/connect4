@@ -1,4 +1,4 @@
-#include "Connect4/game/input/input.h"
+#include "Connect4/input/gamepad.h"
 #include "Connect4/ui/utils.h"
 #include <stdio.h>
 #include <string.h>
