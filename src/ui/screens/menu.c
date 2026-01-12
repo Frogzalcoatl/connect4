@@ -60,7 +60,7 @@ static void UpdateControllerText(C4_UI_Node* controllerList, C4_UI_Node* activeC
 
 static void C4_MenuScreen_ExitGame(void* context) {
     (void)context;
-    C4_PushEvent_CloseWindow();
+    C4_PushEvent_CloseWindow(false);
 }
 
 static void C4_MenuScreen_HandleEvent(C4_UI_Screen* screen, SDL_Event* event, float UIScale) {

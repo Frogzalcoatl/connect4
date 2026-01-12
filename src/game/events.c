@@ -32,9 +32,10 @@ bool C4_PollEvent(C4_Event* event) {
     return true;
 }
 
-void C4_PushEvent_CloseWindow(void) {
+void C4_PushEvent_CloseWindow(bool androidRemoveTask) {
     C4_Event event;
     event.type = C4_EVENT_CLOSE_WINDOW;
+    event.closeWindow.androidRemoveTask = androidRemoveTask;
     C4_PushEvent(event);
 }
 

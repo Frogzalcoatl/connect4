@@ -1,11 +1,13 @@
 # TODO
 
-* Look in to android compiler warnings (the ones relatinv to java stuff)
+* Look in to android compiler warnings (the ones relating to java stuff)
+* Separate layout calculation from drawing
 * Set up some kind of text formatting thing similar to minecrafts color codes
     * Determine whether you should still use SDL_ttf considering that warning you always get when you compile the project
 * Drawing Circles
 * Proper mouse detection for different shapes/rotations
 * Notification ui element
+    * Do this one first bc the whole timed fade in / slide animation thing might require some new stuff that can be applied to other ui elements.
 * Popup ui element
 * Slider UIElement
 * Dropdown ui element
@@ -18,6 +20,7 @@
 * Turn time limits
 * Improve win check efficiency (see WINCHECKCRITIQUE.md)
 * Improve UI cleanliness once code is done
+    * Maybe read that ui book xsku sent you
 * Computer player with different difficulty levels
 * Animated background (1:1 aspect ratio, aligned to center)
 * Background music

@@ -3,6 +3,8 @@
 
 #define C4_MAX_GAMEPADS 8
 
+#define C4_INPUT_MAX_SCANCODE_MAPPINGS 4
+
 typedef enum {
     C4_INPUT_VERB_NONE,
     C4_INPUT_VERB_NAV_UP,
@@ -31,6 +33,7 @@ void C4_Gamepad_SetActiveIndex(int index);
 void C4_Gamepad_GetNames(char** returnValue, size_t returnValueSize);
 void C4_Gamepad_GetActiveName(char* returnValue, size_t returnValueSize);
 void C4_Gamepad_OnlyAcceptInputFromActiveGamepad(bool value);
-void C4_Input_SetVerbScancode(C4_InputVerb inputVerb, SDL_Scancode scancode);
+void C4_Input_ConnectScancodeToVerb(C4_InputVerb inputVerb, SDL_Scancode scancode);
+void C4_Input_DisconnectScancodeFromVerb(C4_InputVerb inputVerb, SDL_Scancode scancode);
 bool C4_Input_CheckRepeat(float deltaTime, C4_InputEvent* outEvent);
 void C4_Input_ResetVerbState(C4_InputVerb verb);

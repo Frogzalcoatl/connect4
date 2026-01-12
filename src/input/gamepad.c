@@ -10,7 +10,7 @@ static SDL_Gamepad* activeGamepad = NULL;
 
 static bool onlyAcceptInputFromActiveGamepad = true;
 
-static SDL_Scancode scancodeToInputVerb[C4_INPUT_VERB_COUNT] = {0};
+static SDL_Scancode scancodeToInputVerb[C4_INPUT_VERB_COUNT][C4_INPUT_MAX_SCANCODE_MAPPINGS] = {0};
 
 typedef struct {
     bool isDown;
@@ -22,16 +22,46 @@ static C4_InputVerb_State verbStates[C4_INPUT_VERB_COUNT] = {0};
 static const float INPUT_REPEAT_DELAY = 0.5f;
 static const float INPUT_REPEAT_INTERVAL = 0.1f;
 
-void C4_Input_Init(void) {
-    scancodeToInputVerb[C4_INPUT_VERB_CANCEL] = SDL_SCANCODE_ESCAPE;
+void C4_Input_ConnectScancodeToVerb(C4_InputVerb inputVerb, SDL_Scancode scancode) {
+    if (inputVerb <= 0 || inputVerb >= C4_INPUT_VERB_COUNT) {
+        SDL_Log("Unable to connect verb scancode. Inputverb index %d is outside of bounds.", inputVerb);
+        return;
+    }
+    if (scancode >= SDL_SCANCODE_COUNT || scancode <= SDL_SCANCODE_UNKNOWN) {
+        SDL_Log("Unable to connect verb scancode. Scancode index %d is outside of bounds", scancode);
+        return;
+    }
+    for (int i = 0; i < C4_INPUT_MAX_SCANCODE_MAPPINGS; i++) {
+        if (scancodeToInputVerb[inputVerb][i] == 0) {
+            scancodeToInputVerb[inputVerb][i] = scancode;
+            return;
+        }
+    }
+    SDL_Log(
+        "Unable to connect verb index %d to scancode index %d. Verb already has %d mappings. Consider increasing the max in gamepad.h.",
+        inputVerb, scancode, C4_INPUT_MAX_SCANCODE_MAPPINGS
+    );
 }
 
-void C4_Input_SetVerbScancode(C4_InputVerb inputVerb, SDL_Scancode scancode) {
+void C4_Input_DisconnectScancodeFromVerb(C4_InputVerb inputVerb, SDL_Scancode scancode) {
     if (inputVerb <= 0 || inputVerb >= C4_INPUT_VERB_COUNT) {
         SDL_Log("Unable to set verb scancode. Inputverb index %d is outside of bounds.", inputVerb);
         return;
     }
-    scancodeToInputVerb[inputVerb] = scancode;
+    if (scancode >= SDL_SCANCODE_COUNT || scancode <= SDL_SCANCODE_UNKNOWN) {
+        SDL_Log("Unable to set verb scancode. Scancode index %d is outside of bounds", scancode);
+        return;
+    }
+    for (int i = 0; i < C4_INPUT_MAX_SCANCODE_MAPPINGS; i++) {
+        if (scancodeToInputVerb[inputVerb][i] == scancode) {
+            scancodeToInputVerb[inputVerb][i] = 0;
+            return;
+        }
+    }
+}
+
+void C4_Input_Init(void) {
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_CANCEL, SDL_SCANCODE_ESCAPE);
 }
 
 void C4_Gamepad_OnlyAcceptInputFromActiveGamepad(bool value) {
@@ -40,8 +70,10 @@ void C4_Gamepad_OnlyAcceptInputFromActiveGamepad(bool value) {
 
 static C4_InputVerb C4_MapScancodeToVerb(SDL_Scancode scancode) {
     for (C4_InputVerb inputVerb = 1; inputVerb < C4_INPUT_VERB_COUNT; inputVerb++) {
-        if (scancode == scancodeToInputVerb[inputVerb]) {
-            return inputVerb;
+        for (int i = 0; i < C4_INPUT_MAX_SCANCODE_MAPPINGS; i++) {
+            if (scancode == scancodeToInputVerb[inputVerb][i]) {
+                return inputVerb;
+            }
         }
     } 
     return C4_INPUT_VERB_NONE;

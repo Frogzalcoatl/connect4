@@ -1,5 +1,5 @@
 #include "SDL3/SDL.h"
-#include "Connect4/assets/index.h"
+#include "Connect4/assets/header.h"
 #include "Connect4/assets/sounds.h"
 #include "assets_sounds_ButtonClick_wav.h"
 #include "assets_sounds_ButtonHover_wav.h"

@@ -1,5 +1,5 @@
-#include "Connect4/connect4.h"
-#include "Connect4/input/cursorManager.h"
+#include "Connect4/game/connect4.h"
+#include "Connect4/ui/cursorStyle.h"
 #include "Connect4/assets/fonts.h"
 #include "Connect4/constants.h"
 #include "Connect4/ui/screens/menu.h"
@@ -15,13 +15,26 @@
 #include <stdlib.h>
 #include <time.h>
 
-void Connect4_SetKeyboardInputVerbs(void) {
-    C4_Input_SetVerbScancode(C4_INPUT_VERB_NAV_UP, SDL_SCANCODE_UP);
-    C4_Input_SetVerbScancode(C4_INPUT_VERB_NAV_DOWN, SDL_SCANCODE_DOWN);
-    C4_Input_SetVerbScancode(C4_INPUT_VERB_NAV_RIGHT, SDL_SCANCODE_RIGHT);
-    C4_Input_SetVerbScancode(C4_INPUT_VERB_NAV_LEFT, SDL_SCANCODE_LEFT);
-    C4_Input_SetVerbScancode(C4_INPUT_VERB_CONFIRM, SDL_SCANCODE_RETURN);
+void Connect4_ConnectScancodesToInputVerbs(void) {
+    // Keyboard
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_NAV_UP, SDL_SCANCODE_UP);
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_NAV_UP, SDL_SCANCODE_W);
+
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_NAV_DOWN, SDL_SCANCODE_DOWN);
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_NAV_DOWN, SDL_SCANCODE_S);
+
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_NAV_RIGHT, SDL_SCANCODE_RIGHT);
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_NAV_RIGHT, SDL_SCANCODE_D);
+
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_NAV_LEFT, SDL_SCANCODE_LEFT);
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_NAV_LEFT, SDL_SCANCODE_A);
+
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_CONFIRM, SDL_SCANCODE_RETURN);
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_CONFIRM, SDL_SCANCODE_KP_ENTER);
     // Cancel is set to escape by default dont need to set it here.
+
+    //Android
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_CANCEL, SDL_SCANCODE_AC_BACK);
 }
 
 bool Connect4_Init_Dependencies(void) {
@@ -53,7 +66,7 @@ bool Connect4_Init_Dependencies(void) {
     }
 
     C4_Input_Init();
-    Connect4_SetKeyboardInputVerbs();
+    Connect4_ConnectScancodesToInputVerbs();
 
     C4_Discord_Init();
 
@@ -305,7 +318,9 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
             case C4_EVENT_CLOSE_WINDOW: {
                 game->running = false;
                 #ifdef SDL_PLATFORM_ANDROID
-                    Android_QuitAndRemoveTask();
+                    if (eventC4->closeWindow.androidRemoveTask) {
+                        Android_QuitAndRemoveTask();
+                    }
                 #endif
             }; break;
             case C4_EVENT_SCREEN_CHANGE: {

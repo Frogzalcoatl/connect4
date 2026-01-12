@@ -1,5 +1,5 @@
 #include "Connect4/ui/canvas.h"
-#include "Connect4/input/cursorManager.h"
+#include "Connect4/ui/cursorStyle.h"
 #include <stdlib.h>
 
 void C4_UI_Canvas_Init(C4_UI_Canvas* canvas, SDL_Renderer* renderer, TTF_TextEngine* textEngine, float offsetX, float offsetY) {
@@ -65,23 +65,23 @@ static void C4_UI_Canvas_SetFocus(C4_UI_Canvas* canvas, C4_UI_Node* newNode) {
     canvas->focusedNode = newNode;
 }
 
-static void C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event) {
+static bool C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event) {
     if (!canvas) {
         SDL_Log("Unable to handle actions through canvas. Canvas is NULL");
-        return;
+        return false;
     }
 
     C4_UI_Node* current = canvas->focusedNode;
     
     while (current) {
         if (C4_UI_Interaction_HandleAction(&current->input, event)) {
-            return;
+            return true;
         }
         current = current->parent;
     }
 
     if (event.state != C4_INPUT_STATE_PRESSED) {
-        return;
+        return false;
     }
 
     if (!canvas->focusedNode) {
@@ -94,13 +94,15 @@ static void C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event)
                     event.verb == C4_INPUT_VERB_CANCEL &&
                     event.state == C4_INPUT_STATE_PRESSED
                 ) {
-                    C4_UI_Canvas_HandleAction(canvas, event);
+                    if (C4_UI_Canvas_HandleAction(canvas, event)) {
+                        return true;
+                    }
                 }
-                return;
+                return false;
             }
             current = current->nextSibling;
         }
-        return;
+        return false;
     }
 
     C4_UI_Node* focusedNode = canvas->focusedNode;
@@ -108,31 +110,49 @@ static void C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event)
         case C4_INPUT_VERB_NAV_UP: {
             if (focusedNode->navUp) {
                 C4_UI_Canvas_SetFocus(canvas, focusedNode->navUp);
+                return true;
             }
         }; break;
         case C4_INPUT_VERB_NAV_DOWN: {
             if (focusedNode->navDown) {
                 C4_UI_Canvas_SetFocus(canvas, focusedNode->navDown);
+                return true;
             }
         }; break;
         case C4_INPUT_VERB_NAV_RIGHT: {
             if (focusedNode->navRight) {
                 C4_UI_Canvas_SetFocus(canvas, focusedNode->navRight);
+                return true;
             }
         }; break;
         case C4_INPUT_VERB_NAV_LEFT: {
             if (focusedNode->navLeft) {
                 C4_UI_Canvas_SetFocus(canvas, focusedNode->navLeft);
+                return true;
             }
         }; break;
         default: break;
     }
+    return false;
 }
 
 static void C4_UI_Canvas_HandleMouseEvents(C4_UI_Canvas* canvas, SDL_Event* event) {
     if (!canvas || !event) {
         SDL_Log("Unable to handle mouse events in canvas. One or more required pointers are NULL");
         return;
+    }
+
+    if (
+        event->type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
+        event->button.button == SDL_BUTTON_X1
+    ) {
+        C4_InputEvent inputEvent = (C4_InputEvent){
+            .verb = C4_INPUT_VERB_CANCEL,
+            .state = C4_INPUT_STATE_PRESSED
+        };
+        if (C4_UI_Canvas_HandleAction(canvas, inputEvent)) {
+            
+        }
     }
     
     C4_UI_Node* current = canvas->root;

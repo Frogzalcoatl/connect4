@@ -15,11 +15,12 @@ typedef struct {
     union {
         // If i were to add more events in the future
         struct { C4_ScreenType type; } screenChange;
+        struct { bool androidRemoveTask; } closeWindow;
     };
 } C4_Event;
 
 void C4_InitEvents(void);
 void C4_PushEvent(C4_Event event);
 bool C4_PollEvent(C4_Event* event);
-void C4_PushEvent_CloseWindow(void);
+void C4_PushEvent_CloseWindow(bool androidRemoveTask);
 void C4_PushEvent_ScreenChange(C4_ScreenType screenType);

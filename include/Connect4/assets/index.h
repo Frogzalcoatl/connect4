@@ -1,7 +1,3 @@
 #pragma once
-#include <stddef.h>
-
-typedef struct {
-    const unsigned char* data;
-    const size_t size;
-} C4_HeaderAsset;
+#include "Connect4/assets/fonts.h"
+#include "Connect4/assets/sounds.h"

@@ -1,4 +1,4 @@
-#include "Connect4/connect4.h"
+#include "Connect4/game/connect4.h"
 #include "SDL3/SDL_main.h"
 #include <stdio.h>
 

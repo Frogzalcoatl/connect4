@@ -1,5 +1,5 @@
 #include "Connect4/input/interaction.h"
-#include "Connect4/input/cursorManager.h"
+#include "Connect4/ui/cursorStyle.h"
 
 void C4_UI_Interaction_Update(C4_UI_Interaction* input, float deltaTime) {
     if (!input) {

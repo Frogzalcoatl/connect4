@@ -157,7 +157,7 @@ char C4_Board_GetCharForState(C4_SlotState state) {
         default: return '?';
     }
 }
-
+/*
 static void C4_Board_PrintCellCheckBuffer(C4_Board* board) {
     if (!board) {
         SDL_Log("Unable to print cell check buffer. Board is NULL");
@@ -178,7 +178,7 @@ static void C4_Board_PrintCellCheckBuffer(C4_Board* board) {
     SDL_Log("%s", str);
     free(str);
 }
-
+*/
 static void C4_Board_UpdateCellCheckBuffer(C4_Board* board, C4_Board_RowAxis axis, size_t atIndex) {
     if (!board) {
         SDL_Log("Unable to update cellcheck buffer. Board is NULL");
