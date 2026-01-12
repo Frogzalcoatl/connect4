@@ -151,7 +151,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     );
 
     C4_UI_Node* buttons = C4_UI_Buttons_Create(
-        &(C4_UI_Buttons_Config){
+        &canvas->arena, &(C4_UI_Buttons_Config){
             .posX = 0.f,
             .posY = 0.f,
             .direction = C4_UI_Direction_Vertical,
@@ -172,6 +172,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     C4_UI_Canvas_AddNode(canvas, buttons);
 
     data->controllerList = C4_UI_Node_Create(
+        &canvas->arena,
         &(C4_UI_Node_Config){
             .type = C4_UI_Type_Text,
             .style = &C4_UI_THEME_DEFAULT.style,
@@ -187,6 +188,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     C4_UI_Canvas_AddNode(canvas, data->controllerList);
 
     data->activeControllerText = C4_UI_Node_Create(
+        &canvas->arena,
         &(C4_UI_Node_Config){
             .type = C4_UI_Type_Text,
             .style = &C4_UI_THEME_DEFAULT.style,

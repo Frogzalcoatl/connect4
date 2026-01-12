@@ -1,6 +1,5 @@
 # TODO
 
-* Look in to android compiler warnings (the ones relating to java stuff)
 * Separate layout calculation from drawing
 * Drawing Circles
 * Proper mouse detection for different shapes/rotations

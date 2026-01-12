@@ -1,14 +1,15 @@
 #pragma once
+#include "Connect4/ui/memoryArena.h"
 #include "Connect4/ui/node.h"
 #include "SDL3/SDL.h"
 
 typedef struct {
     SDL_Renderer* renderer;
-
     TTF_TextEngine* textEngine;
-
     C4_UI_Node* root;
     C4_UI_Node* focusedNode;
+
+    C4_MemoryArena arena;
 
     float offsetX;
     float offsetY;

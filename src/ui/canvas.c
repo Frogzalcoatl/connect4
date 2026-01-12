@@ -19,16 +19,49 @@ void C4_UI_Canvas_Init(C4_UI_Canvas* canvas, SDL_Renderer* renderer, TTF_TextEng
 
     canvas->offsetX = offsetX;
     canvas->offsetY = offsetY;
+
+    // Using an arena to prevent memory fragmentation
+    // Also runs faster this way
+    // Also easier memory management
+    // Also clearing the canvas is much more efficient (just setting offset to 0)
+    size_t arenaSize = 1024 * 1024; // 1 MB
+    canvas->arena.memory = malloc(arenaSize);
+    canvas->arena.capacity = arenaSize;
+    canvas->arena.offset = 0;
+}
+
+static void C4_UI_Canvas_CleanupResources(C4_UI_Canvas* canvas) {
+    if (!canvas) {
+        SDL_Log("Unable to cleanup canvas resources. Canvas is NULL");
+        return;
+    }
+
+    C4_UI_Node* current = canvas->root;
+    while (current) {
+        C4_UI_Node_CleanupResources(current);
+        current = current->nextSibling;
+    }
+}
+
+void C4_UI_Canvas_Clear(C4_UI_Canvas* canvas) {
+    if (!canvas) {
+        SDL_Log("Unable to clear canvas. Canvas is NULL");
+        return;
+    }
+    C4_UI_Canvas_CleanupResources(canvas);
+    canvas->arena.offset = 0;
+    canvas->root = NULL;
+    canvas->focusedNode = NULL;
 }
 
 void C4_UI_Canvas_Destroy(C4_UI_Canvas* canvas) {
     if (!canvas) {
         return;
     }
-    C4_UI_Node_Destroy(canvas->root);
-    canvas->root = NULL;
-    canvas->focusedNode = NULL;
-    free(canvas);
+    C4_UI_Canvas_CleanupResources(canvas);
+    if (canvas->arena.memory) {
+        free(canvas->arena.memory);
+    }
 }
 
 void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float scale) {
@@ -151,7 +184,7 @@ static void C4_UI_Canvas_HandleMouseEvents(C4_UI_Canvas* canvas, SDL_Event* even
             .state = C4_INPUT_STATE_PRESSED
         };
         if (C4_UI_Canvas_HandleAction(canvas, inputEvent)) {
-            
+            return;
         }
     }
     

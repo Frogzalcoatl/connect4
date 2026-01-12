@@ -2,27 +2,28 @@
 #include "Connect4/ui/draw/shapes.h"
 #include "Connect4/ui/draw/text.h"
 #include "Connect4/ui/utils.h"
+#include "Connect4/ui/memoryArena.h"
 #include <stdlib.h>
 
-void C4_UI_Node_Destroy(C4_UI_Node* node) {
+void C4_UI_Node_CleanupResources(C4_UI_Node* node) {
     if (!node) {
+        SDL_Log("Unable to cleanup node resources. Node is NULL");
         return;
     }
+
+    if (
+        node->type == C4_UI_Type_Text &&
+        node->text.textObject
+    ) {
+        TTF_DestroyText(node->text.textObject);
+        node->text.textObject = NULL;
+    }
+
     C4_UI_Node* child = node->firstChild;
     while (child) {
-        C4_UI_Node* next = child->nextSibling;
-        C4_UI_Node_Destroy(child);
-        child = next;
+        C4_UI_Node_CleanupResources(child);
+        child = child->nextSibling;
     }
-    if (node->type == C4_UI_Type_Text && node->text.textObject) {
-        if (node->text.textObject) {
-            TTF_DestroyText(node->text.textObject);
-        }
-        if (node->text.storage) {
-            free(node->text.storage);
-        }
-    }
-    free(node);
 }
 
 static void C4_UI_Node_CalculateAbsoluteRect(C4_UI_Node* node, float scale, float parentX, float parentY) {
@@ -237,12 +238,12 @@ void C4_UI_Node_SetTextWrap(C4_UI_Node* node, int widthInPixels) {
     C4_UI_UpdateTextRect(node);
 }
 
-C4_UI_Node* C4_UI_Node_Create(C4_UI_Node_Config* config) {
-    if (!config) {
-        SDL_Log("Unable to create node. Config is NULL");
+C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) {
+    if (!arena || !config) {
+        SDL_Log("Unable to create node. One or more required pointers are NULL");
         return NULL;
     }
-    C4_UI_Node* node = calloc(1, sizeof(C4_UI_Node));
+    C4_UI_Node* node = C4_Arena_Alloc(arena, sizeof(C4_UI_Node));
     if (!node) {
         SDL_Log("Unable to allocate memory for UI node");
         return NULL;
@@ -255,13 +256,20 @@ C4_UI_Node* C4_UI_Node_Create(C4_UI_Node_Config* config) {
         node->shape.rotationDegrees = 0.0f;
         node->shape.borderWidth = config->shape.borderWidth;
         node->rect = config->shape.rect;
+        
     } else if (node->type == C4_UI_Type_Text) {
         C4_UI_Data_Text_Config* text = &config->text;
         node->text.font = text->font;
-        node->text.storage = SDL_strdup(config->text.text);
+
+        size_t strLen = strlen(config->text.text) + 1;
+        node->text.storage = C4_Arena_Alloc(arena, strLen);
+        strcpy(node->text.storage, config->text.text);
+
         node->text.textObject = TTF_CreateText(text->textEngine, text->font, node->text.storage, 0);
+
         SDL_Color color = config->style->inactive.text;
         TTF_SetTextColor(node->text.textObject, color.r, color.g, color.b, color.a);
+
         C4_UI_UpdateTextRect(node);
         node->rect.x = config->text.posX;
         node->rect.y = config->text.posY;

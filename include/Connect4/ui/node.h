@@ -1,6 +1,7 @@
 #pragma once
 #include "Connect4/input/interaction.h"
 #include "Connect4/ui/themes.h"
+#include "Connect4/ui/memoryArena.h"
 #include "SDL3/SDL.h"
 #include "SDL3_ttf/SDL_ttf.h"
 
@@ -106,7 +107,6 @@ typedef struct C4_UI_Node_Config {
     };
 } C4_UI_Node_Config;
 
-void C4_UI_Node_Destroy(C4_UI_Node* node);
 void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer, float scale, float parentX, float parentY);
 C4_UI_Node* C4_UI_Node_FindFocusable(C4_UI_Node* node);
 bool C4_UI_Node_HandleAction(C4_UI_Node* node, C4_InputEvent event);
@@ -115,7 +115,8 @@ void C4_UI_Node_Update(C4_UI_Node* node, float deltaTime);
 void C4_UI_Node_AttachChild(C4_UI_Node* parent, C4_UI_Node* child);
 void C4_UI_Node_PushNode(C4_UI_Node* head, C4_UI_Node* newNode);
 void C4_UI_Node_Reset(C4_UI_Node* node);
-C4_UI_Node* C4_UI_Node_Create(C4_UI_Node_Config* config);
+void C4_UI_Node_CleanupResources(C4_UI_Node* node);
+C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config);
 void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString);
 void C4_UI_Node_ChangeFont(C4_UI_Node* node, TTF_Font* newFont);
 void C4_UI_Node_SetTextWrap(C4_UI_Node* node, int widthInPixels);
