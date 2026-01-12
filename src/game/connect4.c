@@ -16,7 +16,6 @@
 #include <time.h>
 
 void Connect4_ConnectScancodesToInputVerbs(void) {
-    // Keyboard
     C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_NAV_UP, SDL_SCANCODE_UP);
     C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_NAV_UP, SDL_SCANCODE_W);
 
@@ -32,9 +31,6 @@ void Connect4_ConnectScancodesToInputVerbs(void) {
     C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_CONFIRM, SDL_SCANCODE_RETURN);
     C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_CONFIRM, SDL_SCANCODE_KP_ENTER);
     // Cancel is set to escape by default dont need to set it here.
-
-    //Android
-    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_CANCEL, SDL_SCANCODE_AC_BACK);
 }
 
 bool Connect4_Init_Dependencies(void) {

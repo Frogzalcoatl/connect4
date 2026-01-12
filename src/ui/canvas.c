@@ -169,6 +169,35 @@ static bool C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event)
     return false;
 }
 
+void C4_UI_Canvas_RunBackButton(C4_UI_Canvas* canvas) {
+    if (!canvas) {
+        SDL_Log("Unable to run back button. Canvas is NULL");
+        return;
+    }
+    
+    C4_UI_Node* current = canvas->focusedNode;
+    if (!current) {
+        current = C4_UI_Node_FindFocusable(canvas->root);
+    }
+
+    if (!current) {
+        current = canvas->root;
+    }
+
+    if (!current) {
+        return;
+    }
+
+    while (current) {
+        if (current->input.OnCancel) {
+            current->input.OnCancel(current->input.context);
+            C4_PlaySound(current->input.sounds.onCancel);
+            return;
+        }
+        current = current->parent;
+    }
+}
+
 static void C4_UI_Canvas_HandleMouseEvents(C4_UI_Canvas* canvas, SDL_Event* event) {
     if (!canvas || !event) {
         SDL_Log("Unable to handle mouse events in canvas. One or more required pointers are NULL");
@@ -179,13 +208,8 @@ static void C4_UI_Canvas_HandleMouseEvents(C4_UI_Canvas* canvas, SDL_Event* even
         event->type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
         event->button.button == SDL_BUTTON_X1
     ) {
-        C4_InputEvent inputEvent = (C4_InputEvent){
-            .verb = C4_INPUT_VERB_CANCEL,
-            .state = C4_INPUT_STATE_PRESSED
-        };
-        if (C4_UI_Canvas_HandleAction(canvas, inputEvent)) {
-            return;
-        }
+        C4_UI_Canvas_RunBackButton(canvas);
+        return;
     }
     
     C4_UI_Node* current = canvas->root;
@@ -202,6 +226,15 @@ void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float scal
         SDL_Log("Unable to handle events in canvas. One or more required pointers are NULL");
         return;
     }
+
+    if (
+        event->type == SDL_EVENT_KEY_DOWN &&
+        event->key.scancode == SDL_SCANCODE_AC_BACK
+    ) {
+        C4_UI_Canvas_RunBackButton(canvas);
+        return;
+    }
+
     (void)scale;
     C4_InputEvent inputEvent = C4_GetInput(event);
 
