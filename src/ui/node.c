@@ -15,7 +15,12 @@ void C4_UI_Node_Destroy(C4_UI_Node* node) {
         child = next;
     }
     if (node->type == C4_UI_Type_Text && node->text.textObject) {
-        TTF_DestroyText(node->text.textObject);
+        if (node->text.textObject) {
+            TTF_DestroyText(node->text.textObject);
+        }
+        if (node->text.storage) {
+            free(node->text.storage);
+        }
     }
     free(node);
 }
@@ -189,8 +194,10 @@ void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString) {
         SDL_Log("Unable to set text string. This isnt a text node?");
         return;
     }
-    
-    TTF_SetTextString(node->text.textObject, newString, 0);
+
+    node->text.storage = SDL_strdup(newString);
+
+    TTF_SetTextString(node->text.textObject, node->text.storage, 0);
     C4_UI_UpdateTextRect(node);
 }
 
@@ -251,7 +258,8 @@ C4_UI_Node* C4_UI_Node_Create(C4_UI_Node_Config* config) {
     } else if (node->type == C4_UI_Type_Text) {
         C4_UI_Data_Text_Config* text = &config->text;
         node->text.font = text->font;
-        node->text.textObject = TTF_CreateText(text->textEngine, text->font, text->text, 0);
+        node->text.storage = SDL_strdup(config->text.text);
+        node->text.textObject = TTF_CreateText(text->textEngine, text->font, node->text.storage, 0);
         SDL_Color color = config->style->inactive.text;
         TTF_SetTextColor(node->text.textObject, color.r, color.g, color.b, color.a);
         C4_UI_UpdateTextRect(node);

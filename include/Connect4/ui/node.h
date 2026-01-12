@@ -37,6 +37,7 @@ typedef enum {
 typedef struct {
     TTF_Font* font;
     TTF_Text* textObject;
+    char* storage;
 } C4_UI_Data_Text;
 
 typedef struct {
