@@ -64,17 +64,20 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     private static final int SDL_MICRO_VERSION = 0;
 
     // Added by meh
-    public static void quitAndRemoveTask() {
+    public static void quitAndRemoveTask(boolean removeTask) {
         if (mSingleton != null) {
             final Activity activity = mSingleton;
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (Build.VERSION.SDK_INT >= 21) {
-                        activity.finishAndRemoveTask();
-                    } else {
-                        activity.finish();
+                    if (removeTask) {
+                        if (Build.VERSION.SDK_INT >= 21) {
+                            activity.finishAndRemoveTask();
+                            System.exit(0); 
+                            return;
+                        } 
                     }
+                    activity.finish();
                     // Ensure the process dies to prevent "App isn't responding"
                     System.exit(0); 
                 }

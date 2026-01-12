@@ -1,2 +1,2 @@
 #pragma once
-void Android_QuitAndRemoveTask(void);
+void Android_QuitAndRemoveTask(bool removeTask);

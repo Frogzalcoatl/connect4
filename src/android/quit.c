@@ -1,12 +1,12 @@
 #include "Connect4/android/quit.h"
 #include <SDL3/SDL.h>
 
-#ifdef SDL_PLATFORM_ANDROID
+#if SDL_PLATFORM_ANDROID
     #include <jni.h>
 #endif
 
-void Android_QuitAndRemoveTask(void) {
-#ifdef SDL_PLATFORM_ANDROID
+void Android_QuitAndRemoveTask(bool removeTask) {
+#if SDL_PLATFORM_ANDROID
     JNIEnv *env = (JNIEnv *)SDL_GetAndroidJNIEnv();
     
     jobject activity = (jobject)SDL_GetAndroidActivity();
@@ -16,10 +16,10 @@ void Android_QuitAndRemoveTask(void) {
 
     jclass cls = (*env)->GetObjectClass(env, activity);
 
-    jmethodID mid = (*env)->GetStaticMethodID(env, cls, "quitAndRemoveTask", "()V");
+    jmethodID mid = (*env)->GetStaticMethodID(env, cls, "quitAndRemoveTask", "(Z)V");
 
     if (mid) {
-        (*env)->CallStaticVoidMethod(env, cls, mid);
+        (*env)->CallStaticVoidMethod(env, cls, mid, (jboolean)removeTask);
     }
 
     // Clean up local reference to class

@@ -314,9 +314,7 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
             case C4_EVENT_CLOSE_WINDOW: {
                 game->running = false;
                 #ifdef SDL_PLATFORM_ANDROID
-                    if (eventC4->closeWindow.androidRemoveTask) {
-                        Android_QuitAndRemoveTask();
-                    }
+                    Android_QuitAndRemoveTask(eventC4->closeWindow.androidRemoveTask);
                 #endif
             }; break;
             case C4_EVENT_SCREEN_CHANGE: {
