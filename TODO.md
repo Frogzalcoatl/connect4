@@ -2,8 +2,6 @@
 
 * Look in to android compiler warnings (the ones relating to java stuff)
 * Separate layout calculation from drawing
-* Set up some kind of text formatting thing similar to minecrafts color codes
-    * Determine whether you should still use SDL_ttf considering that warning you always get when you compile the project
 * Drawing Circles
 * Proper mouse detection for different shapes/rotations
 * Notification ui element
