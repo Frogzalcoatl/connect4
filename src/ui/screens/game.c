@@ -16,9 +16,9 @@ void C4_GameScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutType lay
     if (!screen || !screen->data) {
         return;
     }
-    C4_GameScreenData* gameData = (C4_GameScreenData*)screen->data;
-    C4_Game* game = gameData->game;
-    SDL_Renderer* renderer = game->renderer;
+    //C4_GameScreenData* gameData = (C4_GameScreenData*)screen->data;
+    //C4_Game* game = gameData->game;
+    //SDL_Renderer* renderer = game->renderer;
 
     switch (layout) {
         case C4_UI_LayoutType_Wide: {
@@ -31,9 +31,9 @@ void C4_GameScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutType lay
     }
 }
 
-static void C4_GameScreen_ResetGame(C4_GameScreenData* gameData) {
-    C4_Board_Reset(gameData->game->board);
-}
+//static void C4_GameScreen_ResetGame(C4_GameScreenData* gameData) {
+//    C4_Board_Reset(gameData->game->board);
+//}
 
 static bool C4_GameScreen_Init(C4_UI_Screen* screen, C4_Game* game);
 
@@ -67,9 +67,9 @@ bool C4_GameScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     if (!screen || !game || !screen->data || !game->renderer) {
         return false;
     }
-    C4_UI_Canvas* canvas = &screen->canvas;
+    //C4_UI_Canvas* canvas = &screen->canvas;
     C4_GameScreenData* data = (C4_GameScreenData*)screen->data;
-    SDL_Renderer* renderer = game->renderer;
+    //SDL_Renderer* renderer = game->renderer;
 
     data->game = game;
 

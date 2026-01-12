@@ -181,14 +181,15 @@ static bool C4_Game_CreateScreens(C4_Game* game) {
 
 static void C4_Game_SetScreen(C4_Game* game, C4_ScreenType type) {
     if (!game) {
-        SDL_Log("Unable to change game screen. Game is NULL");
+        SDL_Log("Unable to set screen. C4_Game is NULL");
         return;
     }
     if (type < 0 || type >= C4_ScreenType_ScreenCount) {
-        SDL_Log("Unable to change game screen. Type is Invalid");
+        SDL_Log("Unable to set screen. Type is Invalid");
         return;
     }
     if (game->screens[type] == NULL) {
+        SDL_Log("Unable to set screen. Screen is NULL");
         return;
     }
     game->currentScreenType = type;

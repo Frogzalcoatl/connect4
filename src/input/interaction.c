@@ -3,6 +3,7 @@
 
 void C4_UI_Interaction_Update(C4_UI_Interaction* input, float deltaTime) {
     if (!input) {
+        SDL_Log("Unable to update interaction. Pointer is NULL");
         return;
     }
     if (!input->isActive) {
@@ -38,6 +39,10 @@ void C4_UI_Interaction_Update(C4_UI_Interaction* input, float deltaTime) {
 }
 
 bool C4_UI_Interaction_HandleAction(C4_UI_Interaction* input, C4_InputEvent event) {
+    if (!input) {
+        SDL_Log("Unable to handle interaction action. Interaction pointer is NULL");
+        return false;
+    }
     if (event.verb == C4_INPUT_VERB_CANCEL) {
         if (event.state == C4_INPUT_STATE_PRESSED && input->OnCancel) {
             input->OnCancel(input->context);

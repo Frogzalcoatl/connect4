@@ -1,7 +1,8 @@
 #include "Connect4/ui/element/button.h"
 
-C4_UI_Node* C4_UI_Button_Create(C4_UI_Button_Config* config, float UIScale) {
+C4_UI_Node* C4_UI_Button_Create(C4_UI_Button_Config* config) {
     if (!config) {
+        SDL_Log("Unable to create button. Config is NULL");
         return NULL;
     }
     C4_UI_Node* background = C4_UI_Node_Create(
@@ -13,7 +14,7 @@ C4_UI_Node* C4_UI_Button_Create(C4_UI_Button_Config* config, float UIScale) {
                 .type = config->shapeType,
                 .borderWidth = config->borderWidth
             }
-        }, UIScale
+        }
     );
     background->input.isFocusable = true;
     background->input.isActive = true;
@@ -32,7 +33,7 @@ C4_UI_Node* C4_UI_Button_Create(C4_UI_Button_Config* config, float UIScale) {
                 .text = config->text,
                 .textEngine = config->textEngine
             }
-        }, UIScale
+        }
     );
     text->inheritState = true;
 
@@ -43,8 +44,9 @@ C4_UI_Node* C4_UI_Button_Create(C4_UI_Button_Config* config, float UIScale) {
     return background; 
 }
 
-C4_UI_Node* C4_UI_Buttons_Create(C4_UI_Buttons_Config* config, float UIScale) {
+C4_UI_Node* C4_UI_Buttons_Create(C4_UI_Buttons_Config* config) {
     if (!config || !config->buttonsArr || config->buttonsArrSize == 0) {
+        SDL_Log("Unable to create buttons. One or more required values are NULL or 0");
         return NULL;
     }
 
@@ -52,7 +54,7 @@ C4_UI_Node* C4_UI_Buttons_Create(C4_UI_Buttons_Config* config, float UIScale) {
         &(C4_UI_Node_Config){
             .type = C4_UI_Type_Shape,
             .style = config->buttonsArr[0].style
-        }, UIScale
+        }
     );
     container->direction = config->direction;
     container->spacing = config->spacing;
@@ -61,7 +63,7 @@ C4_UI_Node* C4_UI_Buttons_Create(C4_UI_Buttons_Config* config, float UIScale) {
     container->childrenAlign = C4_UI_Align_Center;
 
     for (size_t i = 0; i < config->buttonsArrSize; i++) {
-        C4_UI_Node* btn = C4_UI_Button_Create(&config->buttonsArr[i], UIScale);
+        C4_UI_Node* btn = C4_UI_Button_Create(&config->buttonsArr[i]);
         C4_UI_Node_AttachChild(container, btn);
         if (container->direction == C4_UI_Direction_Horizontal) {
             if (btn->prevSibling) {
@@ -83,6 +85,7 @@ C4_UI_Node* C4_UI_Buttons_Create(C4_UI_Buttons_Config* config, float UIScale) {
 
 void C4_UI_Buttons_CreateConfigArr(C4_UI_Button_Config* defaultConfig, char* buttonStrings[], size_t buttonCount, C4_UI_Button_Config returnValue[]) {
     if (!defaultConfig || !buttonStrings) {
+        SDL_Log("Unable to create config arr. One or more required pointers are NULL.");
         return;
     }
     for (size_t i = 0; i < buttonCount; i++) {

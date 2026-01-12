@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
         C4_Game_Run(connect4);
         C4_Game_Destroy(connect4);
     } else {
+        SDL_Log("An error occured while trying to start Connect4");
         Connect4_Quit_Dependencies();
         return 1;
     }

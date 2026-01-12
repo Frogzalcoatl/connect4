@@ -2,6 +2,7 @@
 
 void C4_Screen_Update_Default(C4_UI_Screen* screen, float deltaTime) {
     if (!screen) {
+        SDL_Log("Unable to run default screen update. Screen is NULL");
         return;
     }
     C4_UI_Canvas_Update(&screen->canvas, deltaTime);
@@ -9,6 +10,7 @@ void C4_Screen_Update_Default(C4_UI_Screen* screen, float deltaTime) {
 
 void C4_Screen_Draw_Default(C4_UI_Screen* screen, float UIScale) {
     if (!screen) {
+        SDL_Log("Unable to run default screen draw func. Screen is NULL");
         return;
     }
     C4_UI_Canvas_Draw(&screen->canvas, UIScale);
@@ -16,6 +18,7 @@ void C4_Screen_Draw_Default(C4_UI_Screen* screen, float UIScale) {
 
 void C4_UI_Screen_HandleEvent_Default(C4_UI_Screen* screen, SDL_Event* event, float UIScale) {
     if (!screen || !event) {
+        SDL_Log("Unable to run default screen event handler. Screen is NULL");
         return;
     }
     C4_UI_Canvas_HandleEvent(&screen->canvas, event, UIScale);
@@ -34,6 +37,7 @@ void C4_UI_Screen_Destroy_Default(C4_UI_Screen* screen) {
 
 C4_UI_Screen* C4_Screen_Create(SDL_Renderer* renderer, TTF_TextEngine* textEngine) {
     if (!renderer) {
+        SDL_Log("Unable to create screen. renderer is NULL");
         return NULL;
     }
     C4_UI_Screen* screen = calloc(1, sizeof(C4_UI_Screen));

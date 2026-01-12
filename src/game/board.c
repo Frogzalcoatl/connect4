@@ -5,27 +5,28 @@
 #include <stdlib.h>
 #include <string.h>
 
-bool C4_Board_ChangeSize(C4_Board* board, uint8_t width, uint8_t height) {
+bool C4_Board_SetSize(C4_Board* board, uint8_t width, uint8_t height) {
     if (!board) {
+        SDL_Log("Unable to set board size.");
         return false;
     }
     if (width == 0) {
-        SDL_Log("Board width must be greater than 0");
+        SDL_Log("Unable to set board size. Width must be greater than 0");
         return false;
     }
     if (height == 0) {
-        SDL_Log("Board height must be greater than 0");
+        SDL_Log("Unable to set board size. Height must be greater than 0");
         return false;
     }
     C4_SlotState* newCells = calloc(width * height, sizeof(C4_SlotState));
     if (!newCells) {
-        SDL_Log("Unable to allocate memory for board cells");
+        SDL_Log("Unable to set board size. Unable to allocate memory for board cells");
         return false;
     }
     size_t newBufferSize = (size_t)C4_Max((int)width, (int)height);
     C4_SlotState* newCellCheckBuffer = calloc(newBufferSize, sizeof(C4_SlotState));
     if (!newCellCheckBuffer) {
-        SDL_Log("Unable to allocate memory for board cell check buffer");
+        SDL_Log("Unable to set board size. Unable to allocate memory for board cell check buffer");
         free(newCells);
         return false;
     }
@@ -42,14 +43,14 @@ bool C4_Board_ChangeSize(C4_Board* board, uint8_t width, uint8_t height) {
 
 C4_Board* C4_Board_Create(uint8_t width, uint8_t height, uint8_t amountToWin) {
     if (amountToWin <= 1) {
-        SDL_Log("amount to win cannot be less than 1");
+        SDL_Log("Unable to create board. Amount to win cannot be less than 1");
         return NULL;
     }
     C4_Board* newBoard = calloc(1, sizeof(C4_Board));
     // Put cells on the heap to support any width/height
     // If cells were on the stack, I would have to set a max array size
     // Would be wasteful if i set the max to 100x100 for example but only used 6x7.
-    if (!C4_Board_ChangeSize(newBoard, width, height)) {
+    if (!C4_Board_SetSize(newBoard, width, height)) {
         C4_Board_Destroy(newBoard);
         return NULL;
     }
@@ -78,6 +79,7 @@ void C4_Board_Destroy(C4_Board* board) {
 
 void C4_Board_Reset(C4_Board* board) {
     if (!board) {
+        SDL_Log("Tried to reset NULL board.");
         return;
     }
     for (size_t i = 0; i < board->width * board->height; i++) {
@@ -88,11 +90,11 @@ void C4_Board_Reset(C4_Board* board) {
 
 C4_SlotState C4_Board_GetSlot(C4_Board* board, uint8_t x, uint8_t y) {
     if (!board) {
-        SDL_Log("Board is NULL");
+        SDL_Log("Tried to get slot of NULL board");
         return C4_SlotState_Empty;
     }
     if (x >= board->width || y >= board->height) {
-        SDL_Log("Tried to access slot outside of bounds");
+        SDL_Log("Tried to access board slot outside of bounds");
         return C4_SlotState_Empty;
     }
     return board->cells[board->width * y + x];
@@ -100,11 +102,11 @@ C4_SlotState C4_Board_GetSlot(C4_Board* board, uint8_t x, uint8_t y) {
 
 bool C4_Board_SetSlot(C4_Board* board, uint8_t x, uint8_t y, C4_SlotState state) {
     if (!board) {
-        SDL_Log("Board is NULL");
+        SDL_Log("Tried to set slot of NULL board");
         return false;
     }
     if (x >= board->width || y >= board->height) {
-        SDL_Log("Tried to access slot outside of bounds");
+        SDL_Log("Tried to access board slot outside of bounds");
         return false;
     }
     board->cells[board->width * y + x] = state;
@@ -113,7 +115,7 @@ bool C4_Board_SetSlot(C4_Board* board, uint8_t x, uint8_t y, C4_SlotState state)
 
 static void C4_Board_SwapCurrentPlayer(C4_Board* board) {
     if (!board) {
-        SDL_Log("Board is NULL");
+        SDL_Log("Unable to swap current player. Board is NULL");
         return;
     }
     if (board->currentPlayer == C4_SlotState_Player1) {
@@ -126,7 +128,7 @@ static void C4_Board_SwapCurrentPlayer(C4_Board* board) {
 // Returns index of move. -1 if move is invalid.
 int C4_Board_DoMove(C4_Board* board, uint8_t inColumn) {
     if (!board) {
-        SDL_Log("Board is NULL");
+        SDL_Log("Unable to do move. Board is NULL");
         return -1;
     }
     // If column is full returns -1. Also more conditions where a move shouldnt be competed
@@ -158,7 +160,7 @@ char C4_Board_GetCharForState(C4_SlotState state) {
 
 static void C4_Board_PrintCellCheckBuffer(C4_Board* board) {
     if (!board) {
-        SDL_Log("Board is NULL");
+        SDL_Log("Unable to print cell check buffer. Board is NULL");
         return;
     }
     const size_t strSize = board->cellCheckCount * 2 + 1;
@@ -179,7 +181,7 @@ static void C4_Board_PrintCellCheckBuffer(C4_Board* board) {
 
 static void C4_Board_UpdateCellCheckBuffer(C4_Board* board, C4_Board_RowAxis axis, size_t atIndex) {
     if (!board) {
-        SDL_Log("Board is NULL");
+        SDL_Log("Unable to update cellcheck buffer. Board is NULL");
         return;
     }
     // Sets all values of cellCheckBuffer to zero.
@@ -264,7 +266,7 @@ static void C4_Board_UpdateCellCheckBuffer(C4_Board* board, C4_Board_RowAxis axi
 
 static C4_SlotState C4_Board_TestCellCheckBuffer(C4_Board* board) {
     if (!board) {
-        SDL_Log("Board is NULL");
+        SDL_Log("Unable to test cell check buffer. Board is NULL");
         return C4_SlotState_Empty;
     }
     C4_SlotState previousState = C4_SlotState_Empty;
@@ -285,7 +287,7 @@ static C4_SlotState C4_Board_TestCellCheckBuffer(C4_Board* board) {
 
 C4_SlotState C4_Board_GetWinner(C4_Board* board, size_t mostRecentMoveIndex) {
     if (!board) {
-        SDL_Log("Board is NULL");
+        SDL_Log("Unable to get winner. Board is NULL");
         return C4_SlotState_Empty;
     }
     C4_SlotState bufferTestResult = C4_SlotState_Empty;
@@ -316,12 +318,12 @@ C4_SlotState C4_Board_GetWinner(C4_Board* board, size_t mostRecentMoveIndex) {
 
 void C4_Board_UpdateTestStr(C4_Board* board, char* strToUpdate, size_t strSize) {
     if (!board) {
-        SDL_Log("Board is NULL");
+        SDL_Log("Unable to update test str. Board is NULL");
         return;
     }
     size_t amountNeeded = board->width * board->height + board->height + 1;
     if (amountNeeded > strSize) {
-        SDL_Log("Amount needed for testStr exceeds its size");
+        SDL_Log("Unable to update test str. Amount needed for testStr exceeds its size");
         return;
     }
     size_t i = 0;
@@ -342,7 +344,7 @@ bool C4_Board_IsEmpty(C4_Board* board) {
     if (!board) {
         return false;
     }
-    for (size_t i = 0; i < (int)board->width * (int)board->height; i++) {
+    for (size_t i = 0; i < (size_t)board->width * (size_t)board->height; i++) {
         if (board->cells[i] != C4_SlotState_Empty) {
             return false;
         }
@@ -354,7 +356,7 @@ bool C4_Board_IsFull(C4_Board* board) {
     if (!board) {
         return false;
     }
-    for (size_t i = 0; i < (int)board->width * (int)board->height; i++) {
+    for (size_t i = 0; i < (size_t)board->width * (size_t)board->height; i++) {
         if (board->cells[i] == C4_SlotState_Empty) {
             return false;
         }

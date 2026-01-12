@@ -12,9 +12,10 @@ typedef struct {
 
 static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutType layout) {
     if (!screen || !screen->data) {
+        SDL_Log("Unable to resize menu ui. One or more required pointers are NULL.");
         return;
     }
-    C4_MenuScreenData* menuData = (C4_MenuScreenData*)screen->data;
+    //C4_MenuScreenData* menuData = (C4_MenuScreenData*)screen->data;
 
     switch (layout) {
         case C4_UI_LayoutType_Wide: {
@@ -113,23 +114,13 @@ C4_UI_Screen* C4_MenuScreen_Create(C4_Game* game) {
     return screen;
 }
 
-static void ButtonClick(void* context) {
-    (void)context;
-    C4_PlaySound(C4_SoundEffect_ButtonClick);
-}
-
-static void ButtonHover(void* context) {
-    (void)context;
-    C4_PlaySound(C4_SoundEffect_ButtonHover);
-}
-
 static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     if (!screen || !game || !screen->data || !game->renderer) {
         return false;
     }
     C4_UI_Canvas* canvas = &screen->canvas;
     C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
-    SDL_Renderer* renderer = game->renderer;
+    //SDL_Renderer* renderer = game->renderer;
 
     data->game = game;
 
@@ -167,7 +158,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
             .padding = 25.f,
             .buttonsArr = buttonConfigs,
             .buttonsArrSize = BUTTON_COUNT
-        }, game->UIScale
+        }
     );
     buttons->shape = (C4_UI_Data_Shape){
         .borderWidth = 3,
@@ -190,7 +181,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
                 .font = game->monocraftRegular,
                 .textEngine = game->textEngine
             }
-        }, game->UIScale
+        }
     );
     C4_UI_Canvas_AddNode(canvas, data->controllerList);
 
@@ -205,7 +196,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
                 .font = game->monocraftRegular,
                 .textEngine = game->textEngine
             }
-        }, game->UIScale
+        }
     );
     C4_UI_Canvas_AddNode(canvas, data->activeControllerText);
     

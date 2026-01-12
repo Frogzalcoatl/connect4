@@ -4,6 +4,7 @@
 
 static void C4_UI_DrawRectangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer) {
     if (!shape || !styleState || !renderer) {
+        SDL_Log("Unable to draw rectangle. One or more required pointers are NULL");
         return;
     }
 
@@ -32,7 +33,12 @@ static void C4_UI_DrawRectangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_S
 }
 
 static void C4_UI_DrawRectangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer, float UIScale) {
-    if (!shape || !styleState || !renderer || shape->borderWidth == 0) {
+    if (!shape || !styleState || !renderer) {
+        SDL_Log("Unable to draw rectangle borders. One or more required pointers are NULL");
+        return;
+    }
+
+    if (shape->borderWidth == 0) {
         return;
     }
 
@@ -90,6 +96,7 @@ static void C4_UI_DrawRectangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, 
 
 static void C4_UI_DrawTriangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer) {
     if (!shape || !styleState || !renderer) {
+        SDL_Log("Unable to draw triangle. One or more required pointers are NULL");
         return;
     }
 
@@ -114,7 +121,12 @@ static void C4_UI_DrawTriangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_St
 }
 
 static void C4_UI_DrawTriangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer, float UIScale) {
-    if (!shape || !styleState || !renderer || shape->borderWidth == 0) {
+    if (!shape || !styleState || !renderer) {
+        SDL_Log("Unable to draw triangle borders. One or more required pointers are NULL");
+        return;
+    }
+
+    if (shape->borderWidth == 0) {
         return;
     }
 
@@ -165,6 +177,7 @@ static void C4_UI_DrawTriangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C
 
 void C4_UI_DrawShape(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer, float UIScale) {
     if (!shape || !styleState || !renderer) {
+        SDL_Log("Unable to draw shape. One or more required pointers are NULL");
         return;
     }
     switch (shape->type) {

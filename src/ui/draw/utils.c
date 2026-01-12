@@ -25,6 +25,7 @@ void C4_ColorToFColor(SDL_Color* color, SDL_FColor* fColor) {
 
 void C4_InitVertices(SDL_Vertex* vertices, size_t vertexCount, SDL_FColor fColor) {
     if (!vertices) {
+        SDL_Log("Unable init shape vertices. Vertices pointer is NULL");
         return;
     }
     for (size_t i = 0; i < vertexCount; i++) {

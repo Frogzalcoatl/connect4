@@ -11,14 +11,14 @@ static void C4_SettingsScreen_OnEnter(C4_UI_Screen* screen) {
     if (!screen || !screen->data) {
         return;
     }
-    C4_SettingsScreenData* data = (C4_SettingsScreenData*)screen->data;
+    //C4_SettingsScreenData* data = (C4_SettingsScreenData*)screen->data;
 }
 
 static void C4_SettingsScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutType layout) {
     if (!screen || !screen->data) {
         return;
     }
-    C4_SettingsScreenData* data = (C4_SettingsScreenData*)screen->data;
+    //C4_SettingsScreenData* data = (C4_SettingsScreenData*)screen->data;
 
     switch (layout) {
         case C4_UI_LayoutType_Wide: {
@@ -64,9 +64,9 @@ static bool C4_SettingsScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     if (!screen || !game || !screen->data || !game->renderer) {
         return false;
     }
-    C4_UI_Canvas* canvas = &screen->canvas;
+    //C4_UI_Canvas* canvas = &screen->canvas;
     C4_SettingsScreenData* data = (C4_SettingsScreenData*)screen->data;
-    SDL_Renderer* renderer = game->renderer;
+    //SDL_Renderer* renderer = game->renderer;
 
     data->game = game;
 

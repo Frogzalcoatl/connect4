@@ -4,6 +4,7 @@
 
 void C4_UI_Canvas_Init(C4_UI_Canvas* canvas, SDL_Renderer* renderer, TTF_TextEngine* textEngine, float offsetX, float offsetY) {
     if (!canvas || !textEngine) {
+        SDL_Log("Unable to init canvas. One or more required pointers are NULL");
         return;
     }
     if (!renderer) {
@@ -32,6 +33,7 @@ void C4_UI_Canvas_Destroy(C4_UI_Canvas* canvas) {
 
 void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float scale) {
     if (!canvas || !canvas->renderer) {
+        SDL_Log("Unable to draw canvas. One or more required pointers are NULL");
         return;
     }
     
@@ -44,6 +46,7 @@ void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float scale) {
 
 static void C4_UI_Canvas_SetFocus(C4_UI_Canvas* canvas, C4_UI_Node* newNode) {
     if (!canvas) {
+        SDL_Log("Unable to set canvas focus. Canvas is NULL");
         return;
     }
     if (canvas->focusedNode) {
@@ -64,6 +67,7 @@ static void C4_UI_Canvas_SetFocus(C4_UI_Canvas* canvas, C4_UI_Node* newNode) {
 
 static void C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event) {
     if (!canvas) {
+        SDL_Log("Unable to handle actions through canvas. Canvas is NULL");
         return;
     }
 
@@ -127,6 +131,7 @@ static void C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event)
 
 static void C4_UI_Canvas_HandleMouseEvents(C4_UI_Canvas* canvas, SDL_Event* event) {
     if (!canvas || !event) {
+        SDL_Log("Unable to handle mouse events in canvas. One or more required pointers are NULL");
         return;
     }
     
@@ -141,6 +146,7 @@ static void C4_UI_Canvas_HandleMouseEvents(C4_UI_Canvas* canvas, SDL_Event* even
 
 void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float scale) {
     if (!canvas || !event) {
+        SDL_Log("Unable to handle events in canvas. One or more required pointers are NULL");
         return;
     }
     (void)scale;
@@ -178,6 +184,7 @@ void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float scal
 
 void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime) {
     if (!canvas) {
+        SDL_Log("Unable to update canvas. One or more required pointers are NULL");
         return;
     }
     if (deltaTime <= 0.f) {
@@ -196,22 +203,9 @@ void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime) {
     }
 }
 
-static void C4_UI_Node_Reset(C4_UI_Node* node) {
-    if (!node) {
-        return;
-    }
-
-    C4_UI_Interaction_Reset(&node->input);
-
-    C4_UI_Node* child = node->firstChild;
-    while (child) {
-        C4_UI_Node_Reset(child);
-        child = child->nextSibling;
-    }
-}
-
 void C4_UI_Canvas_ResetInteractions(C4_UI_Canvas* canvas) {
     if (!canvas) {
+        SDL_Log("Unable to reset canvas interactions. Canvas is NULL");
         return;
     }
     C4_UI_Node* current = canvas->root;
@@ -222,7 +216,8 @@ void C4_UI_Canvas_ResetInteractions(C4_UI_Canvas* canvas) {
 }
 
 void C4_UI_Canvas_AddNode(C4_UI_Canvas* canvas, C4_UI_Node* node) {
-    if (!canvas) {
+    if (!canvas || !node) {
+        SDL_Log("Unable to add node to canvas. One or more required pointers are NULL");
         return;
     }
     if (!canvas->root) {

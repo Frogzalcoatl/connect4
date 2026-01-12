@@ -28,6 +28,7 @@ void C4_Input_Init(void) {
 
 void C4_Input_SetVerbScancode(C4_InputVerb inputVerb, SDL_Scancode scancode) {
     if (inputVerb <= 0 || inputVerb >= C4_INPUT_VERB_COUNT) {
+        SDL_Log("Unable to set verb scancode. Inputverb index %d is outside of bounds.", inputVerb);
         return;
     }
     scancodeToInputVerb[inputVerb] = scancode;
@@ -73,7 +74,6 @@ static void C4_RefreshActiveGamepad(void) {
     for (int i = 0; i < C4_MAX_GAMEPADS; i++) {
         if (connectedGamepads[i] != NULL) {
             activeGamepad = connectedGamepads[i];
-            SDL_Log("Active Gamepad automatically set to index %d", i);
             return;
         }
     }
@@ -82,7 +82,6 @@ static void C4_RefreshActiveGamepad(void) {
 void C4_Gamepad_SetActiveIndex(int index) {
     if (index >= 0 && index < C4_MAX_GAMEPADS && connectedGamepads[index] != NULL) {
         activeGamepad = connectedGamepads[index];
-        SDL_Log("Active Gamepad manually set to index %d", index);
     }
 }
 
@@ -124,7 +123,6 @@ C4_InputEvent C4_GetInput(SDL_Event* event) {
             SDL_Gamepad* newPad = SDL_OpenGamepad(event->gdevice.which);
             if (newPad) {
                 connectedGamepads[slot] = newPad;
-                SDL_Log("Gamepad Added at index %d", slot);
                 C4_RefreshActiveGamepad();
             }
         }; return input;
@@ -136,7 +134,6 @@ C4_InputEvent C4_GetInput(SDL_Event* event) {
                 ) {
                     if (connectedGamepads[i] == activeGamepad) {
                         activeGamepad = NULL;
-                        SDL_Log("Gamepad Disconnected at index %d", i);
                     }
                     SDL_CloseGamepad(connectedGamepads[i]);
                     connectedGamepads[i] = NULL;
@@ -194,7 +191,9 @@ C4_InputEvent C4_GetInput(SDL_Event* event) {
 
 bool C4_Input_CheckRepeat(float deltaTime, C4_InputEvent* outEvent) {
     for (int i = 1; i < C4_INPUT_VERB_COUNT; i++) {
-        if (!verbStates[i].isDown) continue;
+        if (!verbStates[i].isDown) {
+            continue;
+        }
 
         verbStates[i].timer += deltaTime;
 
@@ -228,7 +227,9 @@ void C4_Gamepad_GetNames(char** returnValue, size_t returnValueSize) {
         }
 
         const char* rawName = SDL_GetGamepadName(currentPad);
-        if (!rawName) rawName = "Unknown Controller";
+        if (!rawName) {
+            rawName = "Unknown Controller";
+        }
 
         int totalMatches = 0;
         int myInstanceIndex = 1;

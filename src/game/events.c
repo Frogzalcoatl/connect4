@@ -24,6 +24,7 @@ void C4_PushEvent(C4_Event event) {
 
 bool C4_PollEvent(C4_Event* event) {
     if (head == tail) {
+        // Event queue is empty
         return false;
     }
     *event = eventQueue[tail];

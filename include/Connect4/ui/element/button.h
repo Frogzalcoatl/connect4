@@ -11,7 +11,7 @@ typedef struct {
     TTF_TextEngine* textEngine;
 } C4_UI_Button_Config;
 
-C4_UI_Node* C4_UI_Button_Create(C4_UI_Button_Config* config, float UIScale);
+C4_UI_Node* C4_UI_Button_Create(C4_UI_Button_Config* config);
 
 typedef struct {
     float posX;
@@ -22,5 +22,5 @@ typedef struct {
     C4_UI_Button_Config* buttonsArr;
     size_t buttonsArrSize;
 } C4_UI_Buttons_Config;
-C4_UI_Node* C4_UI_Buttons_Create(C4_UI_Buttons_Config* config, float UIScale);
+C4_UI_Node* C4_UI_Buttons_Create(C4_UI_Buttons_Config* config);
 void C4_UI_Buttons_CreateConfigArr(C4_UI_Button_Config* defaultConfig, char* buttonStrings[], size_t buttonCount, C4_UI_Button_Config returnValue[]);
