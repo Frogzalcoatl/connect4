@@ -55,8 +55,14 @@ void C4_Arena_SDL_Log_HighestOffset(C4_MemoryArena* arena) {
         return;
     }
     float MB = 1024.f * 1024.f;
-    float highestRecordedOffsetKB = arena->highestRecordedOffset / MB;
-    float capacityKB = arena->capacity / MB;
+    float highestRecordedOffsetMB = arena->highestRecordedOffset / MB;
+    float capacityMB = arena->capacity / MB;
 
-    SDL_Log("Highest Arena Offset: %.3fMB / %.3fMB", highestRecordedOffsetKB, capacityKB);
+    if (highestRecordedOffsetMB == 0.f) {
+        SDL_Log("Highest Arena Offset: 0MB / %.3fMB", highestRecordedOffsetMB, capacityMB); 
+    } else if (highestRecordedOffsetMB < 0.001f) {
+        SDL_Log("Highest Arena Offset: < 0.001MB / %.3fMB", highestRecordedOffsetMB, capacityMB);   
+    } else {
+        SDL_Log("Highest Arena Offset: %.3fMB / %.3fMB", highestRecordedOffsetMB, capacityMB); 
+    }
 }
