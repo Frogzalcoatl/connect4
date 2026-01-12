@@ -5,7 +5,7 @@
     #include <jni.h>
 #endif
 
-void Android_QuitAndRemoveTask(bool removeTask) {
+void Android_QuitTask(bool removeTask) {
 #if SDL_PLATFORM_ANDROID
     JNIEnv *env = (JNIEnv *)SDL_GetAndroidJNIEnv();
     
@@ -16,7 +16,7 @@ void Android_QuitAndRemoveTask(bool removeTask) {
 
     jclass cls = (*env)->GetObjectClass(env, activity);
 
-    jmethodID mid = (*env)->GetStaticMethodID(env, cls, "quitAndRemoveTask", "(Z)V");
+    jmethodID mid = (*env)->GetStaticMethodID(env, cls, "quitTask", "(Z)V");
 
     if (mid) {
         (*env)->CallStaticVoidMethod(env, cls, mid, (jboolean)removeTask);
