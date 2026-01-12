@@ -50,10 +50,16 @@ static void C4_UI_Canvas_SetFocus(C4_UI_Canvas* canvas, C4_UI_Node* newNode) {
         C4_UI_Interaction_Reset(&canvas->focusedNode->input);
     }
 
-    if (newNode && newNode->input.isFocusable) {
-        canvas->focusedNode = newNode;
-        canvas->focusedNode->input.isHovered = true;
+    if (!newNode || !newNode->input.isFocusable) {
+        return;
     }
+
+    newNode->input.isHovered = true;
+    if (newNode->input.OnHover) {
+        newNode->input.OnHover(newNode->input.context);
+    }
+    C4_PlaySound(newNode->input.sounds.onHover);
+    canvas->focusedNode = newNode;
 }
 
 static void C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event) {

@@ -18,6 +18,8 @@ C4_UI_Node* C4_UI_Button_Create(C4_UI_Button_Config* config, float UIScale) {
     background->input.isFocusable = true;
     background->input.isActive = true;
     background->childrenAlign = C4_UI_Align_Center;
+    background->input.sounds.onHover = C4_SoundEffect_ButtonHover;
+    background->input.sounds.onPress = C4_SoundEffect_ButtonClick;
 
     C4_UI_Node* text = C4_UI_Node_Create(
         &(C4_UI_Node_Config){
@@ -60,8 +62,6 @@ C4_UI_Node* C4_UI_Buttons_Create(C4_UI_Buttons_Config* config, float UIScale) {
 
     for (size_t i = 0; i < config->buttonsArrSize; i++) {
         C4_UI_Node* btn = C4_UI_Button_Create(&config->buttonsArr[i], UIScale);
-        btn->input.sounds.onHover = C4_SoundEffect_ButtonHover;
-        btn->input.sounds.onPress = C4_SoundEffect_ButtonClick;
         C4_UI_Node_AttachChild(container, btn);
         if (container->direction == C4_UI_Direction_Horizontal) {
             if (btn->prevSibling) {
