@@ -1,5 +1,6 @@
 #include "Connect4/input/interaction.h"
 #include "Connect4/ui/cursorStyle.h"
+#include "Connect4/physics/intersection.h"
 
 void C4_UI_Interaction_Update(C4_UI_Interaction* input, float deltaTime) {
     if (!input) {
@@ -77,7 +78,13 @@ bool C4_UI_Interaction_HandleAction(C4_UI_Interaction* input, C4_InputEvent even
     return false;
 }
 
-bool C4_UI_Interaction_HandleMouseEvents(SDL_FRect absoluteRect, C4_UI_Interaction* input, SDL_Event* event) {
+bool C4_UI_Interaction_HandleMouseEvents(
+    C4_UI_Interaction* input,
+    SDL_Event* event,
+    C4_UI_ShapeType shape,
+    SDL_FRect absoluteRect,
+    float rotationDegrees
+) {
     if (!input->isActive) {
         return false;
     }
@@ -87,12 +94,7 @@ bool C4_UI_Interaction_HandleMouseEvents(SDL_FRect absoluteRect, C4_UI_Interacti
     Uint8 mouseButton = event->button.button;
 
     if (event->type == SDL_EVENT_MOUSE_MOTION) {
-        bool currentlyHovered = (
-            motion->x >= rect->x &&
-            motion->x <= rect->x + rect->w &&
-            motion->y >= rect->y &&
-            motion->y <= rect->y + rect->h
-        );
+        bool currentlyHovered = C4_IsPointInsideShape(shape, (SDL_FPoint){motion->x, motion->y}, *rect, rotationDegrees);
         if (currentlyHovered != input->isHovered) {
             input->isHovered = currentlyHovered;
             SDL_SetCursor(C4_GetSystemCursor(currentlyHovered ? SDL_SYSTEM_CURSOR_POINTER : SDL_SYSTEM_CURSOR_DEFAULT));

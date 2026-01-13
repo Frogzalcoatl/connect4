@@ -138,7 +138,12 @@ bool C4_UI_Node_HandleMouseEvents(C4_UI_Node* node, SDL_Event* event) {
         child = child->prevSibling;
     }
 
-    return C4_UI_Interaction_HandleMouseEvents(node->absoluteRect, &node->input, event);
+    C4_UI_ShapeType shapeType = node->type == C4_UI_Type_Shape ? node->shape.type : C4_UI_Shape_Rectangle;
+
+    // TODO: Maybe add rotation to text. The textures probably can be rotated pretty easily
+    float rotationDegrees = node->type == C4_UI_Type_Shape ? node->shape.rotationDegrees : 0.f;
+
+    return C4_UI_Interaction_HandleMouseEvents(&node->input, event, shapeType, node->absoluteRect, rotationDegrees);
 }
 
 void C4_UI_Node_Update(C4_UI_Node* node, float deltaTime) {

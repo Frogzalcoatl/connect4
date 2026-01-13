@@ -1,6 +1,7 @@
 #pragma once
 #include "Connect4/input/gamepad.h"
 #include "Connect4/assets/sounds.h"
+#include "Connect4/ui/types.h"
 
 typedef struct {
     float delay;
@@ -37,5 +38,11 @@ typedef struct {
 
 void C4_UI_Interaction_Update(C4_UI_Interaction* input, float deltaTime);
 bool C4_UI_Interaction_HandleAction(C4_UI_Interaction* input, C4_InputEvent event);
-bool C4_UI_Interaction_HandleMouseEvents(SDL_FRect absoluteRect, C4_UI_Interaction* input, SDL_Event* event);
+bool C4_UI_Interaction_HandleMouseEvents(
+    C4_UI_Interaction* input,
+    SDL_Event* event,
+    C4_UI_ShapeType shape,
+    SDL_FRect absoluteRect,
+    float rotationDegrees
+);
 void C4_UI_Interaction_Reset(C4_UI_Interaction* input);

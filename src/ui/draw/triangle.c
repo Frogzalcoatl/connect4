@@ -14,7 +14,7 @@ void C4_UI_DrawTriangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleStat
     C4_InitVertices(vertices, 3, fColor);
 
     SDL_FPoint rawPoints[3];
-    rawPoints[0] = (SDL_FPoint){rect.x + rect.w / 2.f, rect.y};
+    rawPoints[0] = (SDL_FPoint){rect.x, rect.y};
     rawPoints[1] = (SDL_FPoint){rect.x, rect.y + rect.h};
     rawPoints[2] = (SDL_FPoint){rect.x + rect.w, rect.y + rect.h};
 
@@ -37,8 +37,8 @@ void C4_UI_DrawTriangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_St
         return;
     }
 
-    int scaledBorderWidth = (int)(shape->borderWidth * UIScale);
-    if (scaledBorderWidth < 0) {
+    float bw = ceilf(shape->borderWidth * UIScale);
+    if (bw <= 0) {
         return;
     }
 
@@ -49,13 +49,12 @@ void C4_UI_DrawTriangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_St
     C4_InitVertices(vertices, 6, fColor);
 
     SDL_FPoint rawPoints[6];
-    float bw = (float)scaledBorderWidth;
     // Outer Points
-    rawPoints[0] = (SDL_FPoint){rect.x + rect.w / 2.f, rect.y};
+    rawPoints[0] = (SDL_FPoint){rect.x, rect.y};
     rawPoints[1] = (SDL_FPoint){rect.x, rect.y + rect.h};
     rawPoints[2] = (SDL_FPoint){rect.x + rect.w, rect.y + rect.h};
     // Inner Points
-    rawPoints[3] = (SDL_FPoint){rawPoints[0].x, rawPoints[0].y + bw};
+    rawPoints[3] = (SDL_FPoint){rawPoints[0].x + bw, rawPoints[0].y + bw};
     rawPoints[4] = (SDL_FPoint){rawPoints[1].x + bw, rawPoints[1].y - bw};
     rawPoints[5] = (SDL_FPoint){rawPoints[2].x - bw, rawPoints[2].y - bw};
 

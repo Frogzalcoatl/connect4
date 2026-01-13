@@ -205,19 +205,45 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     
     UpdateControllerText(data->controllerList, data->activeControllerText);
 
-    C4_UI_Node* testCircle = C4_UI_Node_Create(
-        &canvas->arena,
-        &(C4_UI_Node_Config){
-            .type = C4_UI_Type_Shape,
+    C4_UI_Node* testEllipse = C4_UI_Button_Create(
+        &canvas->arena, &(C4_UI_Button_Config){
             .style = &C4_UI_THEME_DEFAULT.style,
-            .shape = (C4_UI_Data_Shape_Config){
-                .rect = (SDL_FRect){900.f, 900.f, 200.f, 100.f},
-                .type = C4_UI_Shape_Circle,
-                .borderWidth = C4_UI_THEME_DEFAULT.borderWidth
-            }
+            .rect = (SDL_FRect){900.f, 900.f, 200.f, 100.f},
+            .shapeType = C4_UI_Shape_Ellipse,
+            .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
+            .text = "Ellipse Test",
+            .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f, TTF_STYLE_NORMAL),
+            .textEngine = game->textEngine
         }
     );
-    C4_UI_Canvas_AddNode(canvas, testCircle);
+    C4_UI_Canvas_AddNode(canvas, testEllipse);
+
+    C4_UI_Node* testDiamond = C4_UI_Button_Create(
+        &canvas->arena, &(C4_UI_Button_Config){
+            .style = &C4_UI_THEME_DEFAULT.style,
+            .rect = (SDL_FRect){1400.f, 800.f, 200.f, 200.f},
+            .shapeType = C4_UI_Shape_Rectangle,
+            .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
+            .text = "Rotation Test",
+            .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f, TTF_STYLE_NORMAL),
+            .textEngine = game->textEngine
+        }
+    );
+    testDiamond->shape.rotationDegrees = 45;
+    C4_UI_Canvas_AddNode(canvas, testDiamond);
+
+    C4_UI_Node* testTriangle = C4_UI_Button_Create(
+        &canvas->arena, &(C4_UI_Button_Config){
+            .style = &C4_UI_THEME_DEFAULT.style,
+            .rect = (SDL_FRect){300.f, 800.f, 200.f, 100.f},
+            .shapeType = C4_UI_Shape_Triangle,
+            .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
+            .text = "Triangle Test",
+            .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f, TTF_STYLE_NORMAL),
+            .textEngine = game->textEngine
+        }
+    );
+    C4_UI_Canvas_AddNode(canvas, testTriangle);
 
     screen->HandleWindowResize(screen, game->currentLayout);
     

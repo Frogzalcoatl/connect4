@@ -2,7 +2,7 @@
 #include "Connect4/ui/draw/utils.h"
 #include "Connect4/ui/draw/rectangle.h"
 #include "Connect4/ui/draw/triangle.h"
-#include "Connect4/ui/draw/circle.h"
+#include "Connect4/ui/draw/ellipse.h"
 
 void C4_UI_DrawShape(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer, float UIScale) {
     if (!shape || !styleState || !renderer) {
@@ -18,9 +18,9 @@ void C4_UI_DrawShape(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* 
             C4_UI_DrawTriangle(rect, shape, styleState, renderer);
             C4_UI_DrawTriangleBorders(rect, shape, styleState, renderer, UIScale);
         }; break;
-        case C4_UI_Shape_Circle: {
-            C4_UI_DrawCircle(rect, shape, styleState, renderer);
-            C4_UI_DrawCircleBorders(rect, shape, styleState, renderer);
+        case C4_UI_Shape_Ellipse: {
+            C4_UI_DrawEllipse(rect, shape, styleState, renderer);
+            C4_UI_DrawEllipseBorders(rect, shape, styleState, renderer);
         }; break;
     }
 }

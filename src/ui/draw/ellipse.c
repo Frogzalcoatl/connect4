@@ -1,15 +1,15 @@
-#include "Connect4/ui/draw/circle.h"
+#include "Connect4/ui/draw/ellipse.h"
 #include "Connect4/ui/draw/utils.h"
 
 // Im ngl this entire file is vibecoded. I was NOT in the mood to figure out the math for drawing circles myself.
 // It doesnt look like it wouldve been too difficult but idk. I wanna move on to actually working on this game.
 
-static int GetCircleSegments(float radiusX, float radiusY) {
+static int GetEllipseSegments(float radiusX, float radiusY) {
     float maxRadius = fmaxf(radiusX, radiusY);
     return (int)fmaxf(24.0f, fminf(512.0f, maxRadius * 2.0f));
 }
 
-void C4_UI_DrawCircle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer) {
+void C4_UI_DrawEllipse(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer) {
     if (!shape || !renderer) {
         return;
     }
@@ -19,7 +19,7 @@ void C4_UI_DrawCircle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState*
     float centerX = rect.x + radiusX;
     float centerY = rect.y + radiusY;
 
-    int segments = GetCircleSegments(radiusX, radiusY);
+    int segments = GetEllipseSegments(radiusX, radiusY);
 
     int vertexCount = segments + 1;
     int indexCount = segments * 3;
@@ -72,7 +72,7 @@ void C4_UI_DrawCircle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState*
     return;
 }
 
-void C4_UI_DrawCircleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer) {
+void C4_UI_DrawEllipseBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer) {
     if (!renderer || !shape || shape->borderWidth <= 0.0f) {
         return;
     }
@@ -83,7 +83,7 @@ void C4_UI_DrawCircleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_Styl
     float centerY = rect.y + radiusY;
     float halfWidth = shape->borderWidth / 2.0f;
 
-    int segments = GetCircleSegments(radiusX, radiusY);
+    int segments = GetEllipseSegments(radiusX, radiusY);
     
     int vertexCount = (segments + 1) * 2; 
     int indexCount = segments * 6;

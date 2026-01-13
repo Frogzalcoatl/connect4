@@ -1,6 +1,5 @@
 # TODO
 
-* Proper mouse detection for different shapes/rotations
 * Notification ui element
     * Do this one first bc the whole timed fade in / slide animation thing might require some new stuff that can be applied to other ui elements.
 * Popup ui element
