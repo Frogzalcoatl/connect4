@@ -107,7 +107,8 @@ typedef struct C4_UI_Node_Config {
     };
 } C4_UI_Node_Config;
 
-void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer, float scale, float parentX, float parentY);
+void C4_UI_Node_CalculateLayout(C4_UI_Node* node, float scale, float parentX, float parentY);
+void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer);
 C4_UI_Node* C4_UI_Node_FindFocusable(C4_UI_Node* node);
 bool C4_UI_Node_HandleAction(C4_UI_Node* node, C4_InputEvent event);
 bool C4_UI_Node_HandleMouseEvents(C4_UI_Node* node, SDL_Event* event);

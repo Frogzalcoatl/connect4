@@ -64,7 +64,7 @@ void C4_UI_Canvas_Destroy(C4_UI_Canvas* canvas) {
     }
 }
 
-void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float scale) {
+void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas) {
     if (!canvas || !canvas->renderer) {
         SDL_Log("Unable to draw canvas. One or more required pointers are NULL");
         return;
@@ -72,7 +72,7 @@ void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float scale) {
     
     C4_UI_Node* current = canvas->root;
     while (current) {
-        C4_UI_Node_Draw(current, canvas->renderer, scale, canvas->offsetX, canvas->offsetY);
+        C4_UI_Node_Draw(current, canvas->renderer);
         current = current->nextSibling;
     }
 }
@@ -268,7 +268,7 @@ void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float scal
     }
 }
 
-void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime) {
+void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime, float UIScale) {
     if (!canvas) {
         SDL_Log("Unable to update canvas. One or more required pointers are NULL");
         return;
@@ -285,6 +285,12 @@ void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime) {
     C4_UI_Node* current = canvas->root;
     while (current) {
         C4_UI_Node_Update(current, deltaTime);
+        current = current->nextSibling;
+    }
+    
+    current = canvas->root;
+    while (current) {
+        C4_UI_Node_CalculateLayout(current, UIScale, canvas->offsetX, canvas->offsetY);
         current = current->nextSibling;
     }
 }

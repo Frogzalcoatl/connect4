@@ -1,6 +1,5 @@
 # TODO
 
-* Separate layout calculation from drawing
 * Drawing Circles
 * Proper mouse detection for different shapes/rotations
 * Notification ui element
@@ -8,11 +7,13 @@
 * Popup ui element
 * Slider UIElement
 * Dropdown ui element
-* Look in to using SDL mixer (for audio) and SDL image (For better symbols. Maybe an image ui element)
 * Use the new ui logic to remake the ui
     * Separate desktop and touch ui layouts. Can switch between them in settings via UI Profile or smth (Similar to mc bedrock)
+* Properly implement ui scale
+* Stop using SDL logical presentation
 * Improve asset bundling. Maybe automatically assign data to arrays with the array name being their folder name or smth autmatically generate an enum as well.
     * (ex: C4_Assets_Images[C4_Assets_Images_Icon_png])
+* Look in to using SDL mixer (for audio) and SDL image (For better symbols. Maybe an image ui element)
 * Board UI
 * Turn time limits
 * Improve win check efficiency (see WINCHECKCRITIQUE.md)

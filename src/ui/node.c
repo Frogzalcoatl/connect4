@@ -26,14 +26,25 @@ void C4_UI_Node_CleanupResources(C4_UI_Node* node) {
     }
 }
 
-static void C4_UI_Node_CalculateAbsoluteRect(C4_UI_Node* node, float scale, float parentX, float parentY) {
+void C4_UI_Node_CalculateLayout(C4_UI_Node* node, float scale, float parentX, float parentY) {
+    if (!node) {
+        SDL_Log("Unable to calculate node layout. Node is NULL");
+        return;
+    }
+
     node->absoluteRect.x = parentX + (node->rect.x * scale);
     node->absoluteRect.y = parentY + (node->rect.y * scale);
     node->absoluteRect.w = node->rect.w * scale;
     node->absoluteRect.h = node->rect.h * scale;
+
+    C4_UI_Node* child = node->firstChild;
+    while (child) {
+        C4_UI_Node_CalculateLayout(child, scale, node->absoluteRect.x, node->absoluteRect.y);
+        child = child->nextSibling;
+    }
 }
 
-void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer, float scale, float parentX, float parentY) {
+void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer) {
     if (!node) {
         SDL_Log("Unable to draw node. Node is NULL");
         return;
@@ -56,11 +67,9 @@ void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer, float scale, floa
         }
     }
 
-    C4_UI_Node_CalculateAbsoluteRect(node, scale, parentX, parentY);
-
     switch (node->type) {
         case C4_UI_Type_Shape: {
-            C4_UI_DrawShape(node->absoluteRect, &node->shape, currentStyle, renderer, scale);
+            C4_UI_DrawShape(node->absoluteRect, &node->shape, currentStyle, renderer, 1.f);
         }; break;
         case C4_UI_Type_Text: {
             C4_UI_DrawText(node->absoluteRect, &node->text, currentStyle);
@@ -70,7 +79,7 @@ void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer, float scale, floa
 
     C4_UI_Node* child = node->firstChild;
     while (child) {
-        C4_UI_Node_Draw(child, renderer, scale, node->absoluteRect.x, node->absoluteRect.y);
+        C4_UI_Node_Draw(child, renderer);
         child = child->nextSibling;
     }
 }
