@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(Connect4 LANGUAGES C CXX)
+project(Connect4 LANGUAGES C)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -194,6 +194,7 @@ if((WIN32 OR UNIX OR APPLE) AND NOT IS_MOBILE)
 endif()
 
 if(USE_DISCORD)
+    enable_language(CXX)
     set(DISCORD_RPC_DIR "${CMAKE_SOURCE_DIR}/deps/discord-rpc")
 
     target_include_directories(${EXE_NAME} PRIVATE
