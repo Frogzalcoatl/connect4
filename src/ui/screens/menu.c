@@ -205,6 +205,20 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     
     UpdateControllerText(data->controllerList, data->activeControllerText);
 
+    C4_UI_Node* testCircle = C4_UI_Node_Create(
+        &canvas->arena,
+        &(C4_UI_Node_Config){
+            .type = C4_UI_Type_Shape,
+            .style = &C4_UI_THEME_DEFAULT.style,
+            .shape = (C4_UI_Data_Shape_Config){
+                .rect = (SDL_FRect){900.f, 900.f, 100.f, 100.f},
+                .type = C4_UI_Shape_Circle,
+                .borderWidth = C4_UI_THEME_DEFAULT.borderWidth
+            }
+        }
+    );
+    C4_UI_Canvas_AddNode(canvas, testCircle);
+
     screen->HandleWindowResize(screen, game->currentLayout);
     
     return true;
