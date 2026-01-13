@@ -1,6 +1,5 @@
 # TODO
 
-* Investigate the fact that the first button is highlighted when pressing the side mouse button
 * Separate layout calculation from drawing
 * Drawing Circles
 * Proper mouse detection for different shapes/rotations

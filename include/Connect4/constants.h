@@ -9,32 +9,34 @@
 #define C4_TALL_LAYOUT_BASE_WINDOW_HEIGHT C4_WIDE_LAYOUT_BASE_WINDOW_WIDTH
 
 //Theme
+#define C4_WINDOW_BG_COLOR (SDL_Color){15, 20, 30, 255}
+
 #define C4_UI_THEME_DEFAULT (C4_UI_Theme){\
     .style = (C4_UI_Style){\
         .normal = (C4_UI_StyleState){\
-            .background = (SDL_Color){45, 45, 48, 255},\
-            .text       = (SDL_Color){230, 230, 230, 255},\
-            .border     = (SDL_Color){80, 80, 80, 255}\
+            .background = (SDL_Color){30, 41, 59, 255},\
+            .text       = (SDL_Color){226, 232, 240, 255},\
+            .border     = (SDL_Color){71, 85, 105, 255}\
         },\
         .hovered = (C4_UI_StyleState){\
-            .background = (SDL_Color){70, 70, 75, 255},\
+            .background = (SDL_Color){51, 65, 85, 255},\
             .text       = (SDL_Color){255, 255, 255, 255},\
-            .border     = (SDL_Color){120, 120, 120, 255}\
+            .border     = (SDL_Color){148, 163, 184, 255}\
         },\
         .pressed = (C4_UI_StyleState){\
-            .background = (SDL_Color){240, 240, 240, 255},\
-            .text       = (SDL_Color){20, 20, 20, 255},\
-            .border     = (SDL_Color){0, 0, 0, 255}\
+            .background = (SDL_Color){191, 219, 254, 255},\
+            .text       = (SDL_Color){23, 37, 84, 255},\
+            .border     = (SDL_Color){219, 234, 254, 255}\
         },\
         .inactive = (C4_UI_StyleState){\
-            .background = (SDL_Color){40, 40, 40, 255},\
-            .text       = (SDL_Color){110, 110, 110, 255},\
-            .border     = (SDL_Color){60, 60, 60, 255}\
+            .background = (SDL_Color){15, 23, 42, 255},\
+            .text       = (SDL_Color){100, 116, 139, 255},\
+            .border     = (SDL_Color){30, 41, 59, 255}\
         }\
     },\
-    .defaultPtSize = 50.f,\
+    .defaultPtSize = 32.f,\
     .borderWidth   = 3,\
-    .textColor     = (SDL_Color){230, 230, 230, 255}\
+    .textColor     = (SDL_Color){226, 232, 240, 255}\
 }
 
 // other

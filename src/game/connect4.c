@@ -336,7 +336,7 @@ void C4_Game_Run(C4_Game* game) {
             game->currentScreen->Update(game->currentScreen, deltaTime);
         }
 
-        SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(game->renderer, C4_WINDOW_BG_COLOR.r, C4_WINDOW_BG_COLOR.g, C4_WINDOW_BG_COLOR.b, C4_WINDOW_BG_COLOR.a);
         SDL_RenderClear(game->renderer);
 
         if (game->currentScreen->Draw) {

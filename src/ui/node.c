@@ -46,7 +46,7 @@ void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer, float scale, floa
     }
 
     C4_UI_StyleState* currentStyle = &node->style.normal;
-    if (node->input.isFocusable) {
+    if (node->input.isFocusable || node->inheritState) {
         if (activeInput->isPressed) {
             currentStyle = &node->style.pressed;
         } else if (activeInput->isHovered) {
