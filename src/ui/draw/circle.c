@@ -55,6 +55,8 @@ void C4_UI_DrawCircle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState*
             .tex_coord = {0.0f, 0.0f}
         };
 
+        vertices[i + 1].position = C4_UI_RotatePoint(vertices[i + 1].position, (SDL_FPoint){centerX, centerY}, (float)shape->rotationDegrees);
+
         int current = i + 1;
         int next = (i + 1) % segments + 1;
         
@@ -124,6 +126,17 @@ void C4_UI_DrawCircleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_Styl
             .position = {pointX - normalX * halfWidth, pointY - normalY * halfWidth},
             .color = color
         };
+
+        vertices[i * 2 + 0].position = C4_UI_RotatePoint(
+            vertices[i * 2 + 0].position, 
+            (SDL_FPoint){centerX, centerY}, 
+            (float)shape->rotationDegrees
+        );
+        vertices[i * 2 + 1].position = C4_UI_RotatePoint(
+            vertices[i * 2 + 1].position, 
+            (SDL_FPoint){centerX, centerY}, 
+            (float)shape->rotationDegrees
+        );
 
         if (i < segments) {
             int base = i * 2;

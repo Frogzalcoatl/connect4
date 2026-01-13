@@ -211,7 +211,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
             .type = C4_UI_Type_Shape,
             .style = &C4_UI_THEME_DEFAULT.style,
             .shape = (C4_UI_Data_Shape_Config){
-                .rect = (SDL_FRect){900.f, 900.f, 100.f, 100.f},
+                .rect = (SDL_FRect){900.f, 900.f, 200.f, 100.f},
                 .type = C4_UI_Shape_Circle,
                 .borderWidth = C4_UI_THEME_DEFAULT.borderWidth
             }
