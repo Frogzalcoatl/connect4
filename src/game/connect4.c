@@ -135,39 +135,6 @@ static bool C4_Game_RendererSetup(C4_Game* game) {
     return true;
 }
 
-//static void C4_Game_HoverSound(void* context) {
-//    (void)context;
-//    C4_PlaySound(C4_SoundEffect_ButtonHover);
-//}
-//
-//static void C4_Game_ClickSound(void* context) {
-//    (void)context;
-//    C4_PlaySound(C4_SoundEffect_ButtonClick);
-//}
-//
-// static void C4_Game_ButtonSounds_SetTouchMode(bool value) {
-//     // Touch screens dont need hover sounds
-//     // Would be annoying if you swiped your finger across the screen and heard a million button sounds lol
-//     if (value) {
-//         C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnHover, NULL, NULL);
-//         C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnRelease, C4_Game_ClickSound, NULL);
-//     } else {
-//         C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnHover, C4_Game_HoverSound, NULL);
-//         C4_UI_Button_SetPostCallback(C4_UI_Button_CallbackType_OnRelease, C4_Game_ClickSound, NULL);
-//     }
-// }
-// 
-// static void C4_Game_TouchModeSetup(void) {
-//     #if SDL_PLATFORM_ANDROID || SDL_PLATFORM_IOS
-//         C4_Game_ButtonSounds_SetTouchMode(true);
-//     #else
-//         C4_Game_ButtonSounds_SetTouchMode(false);
-//     #endif
-//     if (SDL_GetHintBoolean(SDL_HINT_MOUSE_TOUCH_EVENTS, false)) {
-//         C4_Game_ButtonSounds_SetTouchMode(true);
-//     }
-// }
-
 static C4_UI_Screen* (*C4_ScreenCreationArray[C4_ScreenType_ScreenCount])(C4_Game* game) = {
     C4_MenuScreen_Create,
     C4_GameScreen_Create,
