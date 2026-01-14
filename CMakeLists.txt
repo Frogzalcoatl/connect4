@@ -78,6 +78,91 @@ if(NOT SDL3_ttf_FOUND)
     endif()
 endif()
 
+# --- SDL3_image SETUP ---
+set(SDLIMAGE_SHARED ${SDL_SHARED_MODE} CACHE BOOL "Build shared libraries" FORCE)
+set(SDLIMAGE_STATIC ${SDL_STATIC_MODE} CACHE BOOL "Build static libraries" FORCE)
+set(SDLIMAGE_TESTS OFF CACHE BOOL "Build tests" FORCE)
+set(SDLIMAGE_VENDORED ON CACHE BOOL "Use vendored libraries" FORCE)
+
+# DISABLE complex formats that require external tools (like NASM)
+set(SDLIMAGE_AVIF OFF CACHE BOOL "Disable AVIF to avoid NASM dependency" FORCE)
+
+# Disable heavy formats (slow build)
+set(SDLIMAGE_JXL  OFF CACHE BOOL "Disable JXL to speed up build" FORCE)
+set(SDLIMAGE_WEBP OFF CACHE BOOL "Disable WEBP to speed up build" FORCE)
+set(SDLIMAGE_TIF  OFF CACHE BOOL "Disable TIFF to speed up build" FORCE)
+
+# Disable other uneeded formats
+set(SDLIMAGE_BMP  OFF CACHE BOOL "Disable BMP"  FORCE)
+set(SDLIMAGE_GIF  OFF CACHE BOOL "Disable GIF"  FORCE)
+set(SDLIMAGE_JPG  OFF CACHE BOOL "Disable JPG"  FORCE)
+set(SDLIMAGE_LBM  OFF CACHE BOOL "Disable LBM"  FORCE)
+set(SDLIMAGE_PCX  OFF CACHE BOOL "Disable PCX"  FORCE)
+set(SDLIMAGE_PNM  OFF CACHE BOOL "Disable PNM"  FORCE)
+set(SDLIMAGE_QOI  OFF CACHE BOOL "Disable QOI"  FORCE)
+set(SDLIMAGE_TGA  OFF CACHE BOOL "Disable TGA"  FORCE)
+set(SDLIMAGE_XCF  OFF CACHE BOOL "Disable XCF"  FORCE)
+set(SDLIMAGE_XPM  OFF CACHE BOOL "Disable XPM"  FORCE)
+set(SDLIMAGE_XV   OFF CACHE BOOL "Disable XV"   FORCE)
+
+# Enabled formats
+set(SDLIMAGE_PNG ON CACHE BOOL "Enable PNG" FORCE)
+set(SDLIMAGE_SVG ON CACHE BOOL "Enable SVG" FORCE)
+
+find_package(SDL3_image CONFIG QUIET)
+
+if(NOT SDL3_image_FOUND)
+    message(STATUS "SDL3_image not found, fetching from GitHub...")
+    include(FetchContent)
+    FetchContent_Declare(SDL3_image
+        GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+        GIT_TAG release-3.2.0
+        GIT_SHALLOW OFF
+        SYSTEM
+    )
+    FetchContent_MakeAvailable(SDL3_image)
+
+    if(NOT TARGET SDL3_image::SDL3_image)
+        if(TARGET SDL3_image)
+            add_library(SDL3_image::SDL3_image ALIAS SDL3_image)
+        elseif(TARGET SDL3_image-shared)
+            add_library(SDL3_image::SDL3_image ALIAS SDL3_image-shared)
+        elseif(TARGET SDL3_image-static)
+            add_library(SDL3_image::SDL3_image ALIAS SDL3_image-static)
+        endif()
+    endif()
+endif()
+
+# --- SDL3_mixer SETUP ---
+set(SDLMIXER_SHARED ${SDL_SHARED_MODE} CACHE BOOL "Build shared libraries" FORCE)
+set(SDLMIXER_STATIC ${SDL_STATIC_MODE} CACHE BOOL "Build static libraries" FORCE)
+set(SDLMIXER_SAMPLES OFF CACHE BOOL "Build samples" FORCE)
+set(SDLMIXER_VENDORED ON CACHE BOOL "Use vendored libraries" FORCE)
+
+find_package(SDL3_mixer CONFIG QUIET)
+
+if(NOT SDL3_mixer_FOUND)
+    message(STATUS "SDL3_mixer not found, fetching from GitHub...")
+    include(FetchContent)
+    FetchContent_Declare(SDL3_mixer
+        GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
+        GIT_TAG main 
+        GIT_SHALLOW OFF
+        SYSTEM
+    )
+    FetchContent_MakeAvailable(SDL3_mixer)
+
+    if(NOT TARGET SDL3_mixer::SDL3_mixer)
+        if(TARGET SDL3_mixer)
+            add_library(SDL3_mixer::SDL3_mixer ALIAS SDL3_mixer)
+        elseif(TARGET SDL3_mixer-shared)
+            add_library(SDL3_mixer::SDL3_mixer ALIAS SDL3_mixer-shared)
+        elseif(TARGET SDL3_mixer-static)
+            add_library(SDL3_mixer::SDL3_mixer ALIAS SDL3_mixer-static)
+        endif()
+    endif()
+endif()
+
 # --- ASSETS ---
 function(embed_resource input_file output_c output_h c_name)
     file(READ ${input_file} hex_content HEX)
@@ -145,7 +230,12 @@ else()
 endif()
 
 # --- LINKING ---
-target_link_libraries(${EXE_NAME} PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
+target_link_libraries(${EXE_NAME} PRIVATE 
+    SDL3::SDL3 
+    SDL3_ttf::SDL3_ttf
+    SDL3_image::SDL3_image 
+    SDL3_mixer::SDL3_mixer
+)
 
 if(ANDROID)
     target_link_libraries(${EXE_NAME} PRIVATE m)
