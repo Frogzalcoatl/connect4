@@ -103,7 +103,10 @@ bool C4_UI_Interaction_HandleMouseEvents(
                 if (input->OnHover) {
                     input->OnHover(input->context);
                 }
-                C4_PlaySound(input->sounds.onHover);
+                bool isTouch = (event->motion.which == SDL_TOUCH_MOUSEID);
+                if (!isTouch) {
+                    C4_PlaySound(input->sounds.onHover);
+                }
                 return true;
             }
         }
