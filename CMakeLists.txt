@@ -17,6 +17,19 @@ else()
     set(SDL_STATIC_MODE ON)
 endif()
 
+# Helper macro to silence warnings for a specific target
+function(disable_target_warnings target)
+    if(TARGET ${target})
+        if(MSVC)
+            # /W0 = Disable all warnings
+            target_compile_options(${target} PRIVATE /W0) 
+        else()
+            # -w = Disable all warnings
+            target_compile_options(${target} PRIVATE -w) 
+        endif()
+    endif()
+endfunction()
+
 # --- SDL3 SETUP ---
 set(SDL_SHARED ${SDL_SHARED_MODE} CACHE BOOL "Build shared libraries" FORCE)
 set(SDL_STATIC ${SDL_STATIC_MODE} CACHE BOOL "Build static libraries" FORCE)
@@ -36,6 +49,9 @@ if(NOT SDL3_FOUND)
         OVERRIDE_FIND_PACKAGE
     )
     FetchContent_MakeAvailable(SDL3)
+    disable_target_warnings(SDL3)
+    disable_target_warnings(SDL3-shared)
+    disable_target_warnings(SDL3-static)
 
     if(NOT TARGET SDL3::SDL3)
         if(TARGET SDL3)
@@ -66,6 +82,9 @@ if(NOT SDL3_ttf_FOUND)
         SYSTEM
     )
     FetchContent_MakeAvailable(SDL3_ttf)
+    disable_target_warnings(SDL3_ttf)
+    disable_target_warnings(SDL3_ttf-shared) 
+    disable_target_warnings(SDL3_ttf-static)
 
     if(NOT TARGET SDL3_ttf::SDL3_ttf)
         if(TARGET SDL3_ttf)
@@ -122,6 +141,9 @@ if(NOT SDL3_image_FOUND)
         SYSTEM
     )
     FetchContent_MakeAvailable(SDL3_image)
+    disable_target_warnings(SDL3_image)
+    disable_target_warnings(SDL3_image-shared)
+    disable_target_warnings(SDL3_image-static)
 
     if(NOT TARGET SDL3_image::SDL3_image)
         if(TARGET SDL3_image)
@@ -149,6 +171,9 @@ else()
     set(SDLMIXER_MP3_MINIMP3 ON  CACHE BOOL "Enable minimp3" FORCE)
 endif()
 
+# This is a library used for retro consoles. Not needed
+set(SDLMIXER_GME OFF CACHE BOOL "Disable Game Music Emu (Fixes Android build)" FORCE)
+
 # Disabled formats (explicitly disable libflac to avoid YASM check)
 set(SDLMIXER_FLAC_LIBFLAC OFF CACHE BOOL "Disable libflac" FORCE)
 set(SDLMIXER_FLAC OFF CACHE BOOL "Disable FLAC" FORCE)
@@ -173,19 +198,18 @@ if(NOT SDL3_mixer_FOUND)
         SYSTEM
     )
 
-    # Save previous settings
-    set(OLD_WARN_DEP ${CMAKE_WARN_DEPRECATED})
-    set(OLD_SUPPRESS_DEV ${CMAKE_SUPPRESS_DEVELOPER_WARNINGS})
-
-    # We must use CACHE FORCE to push this setting into the sub-project scopes (ogg/vorbis)
+    # For CMake version warnings
     set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "Silence Deprecation Warnings" FORCE)
     set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS ON CACHE BOOL "Silence Dev Warnings" FORCE)
     
     FetchContent_MakeAvailable(SDL3_mixer)
-    
-    # Restore warnings for the rest of your project
+
     set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "Silence Deprecation Warnings" FORCE)
     set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS OFF CACHE BOOL "Silence Dev Warnings" FORCE)
+
+    disable_target_warnings(SDL3_mixer)
+    disable_target_warnings(SDL3_mixer-shared) 
+    disable_target_warnings(SDL3_mixer-static)
 
     if(NOT TARGET SDL3_mixer::SDL3_mixer)
         if(TARGET SDL3_mixer)
