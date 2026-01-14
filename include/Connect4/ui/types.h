@@ -49,8 +49,8 @@ typedef enum {
 } C4_UI_Direction;
 
 typedef enum {
-    C4_UI_Mirroring_None,
-    C4_UI_Mirroring_X,
-    C4_UI_Mirroring_Y,
-    C4_UI_Mirroring_XY
-} C4_UI_Mirroring;
+    C4_UI_Mirror_None,
+    C4_UI_Mirror_X,
+    C4_UI_Mirror_Y,
+    C4_UI_Mirror_XY
+} C4_UI_Mirror;

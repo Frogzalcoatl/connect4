@@ -15,16 +15,16 @@ SDL_FPoint C4_UI_RotatePoint(SDL_FPoint point, SDL_FPoint center, float degrees)
     return (SDL_FPoint){rotatedX + center.x, rotatedY + center.y}; 
 }
 
-SDL_FPoint C4_UI_MirrorPoint(SDL_FPoint point, SDL_FPoint center, C4_UI_Mirroring mirror) {
-    if (mirror == C4_UI_Mirroring_None) return point;
+SDL_FPoint C4_UI_MirrorPoint(SDL_FPoint point, SDL_FPoint center, C4_UI_Mirror mirror) {
+    if (mirror == C4_UI_Mirror_None) return point;
 
     float localX = point.x - center.x;
     float localY = point.y - center.y;
 
-    if (mirror == C4_UI_Mirroring_X || mirror == C4_UI_Mirroring_XY) {
+    if (mirror == C4_UI_Mirror_X || mirror == C4_UI_Mirror_XY) {
         localX = -localX;
     }
-    if (mirror == C4_UI_Mirroring_Y || mirror == C4_UI_Mirroring_XY) {
+    if (mirror == C4_UI_Mirror_Y || mirror == C4_UI_Mirror_XY) {
         localY = -localY;
     }
 
@@ -54,8 +54,8 @@ SDL_FPoint C4_GetRectCenter(SDL_FRect rect) {
     return (SDL_FPoint){rect.x + rect.w / 2.f, rect.y + rect.h / 2.f};
 }
 
-float C4_UI_GetMirroredRotation(float degrees, C4_UI_Mirroring mirror) {
-    if (mirror == C4_UI_Mirroring_X || mirror == C4_UI_Mirroring_Y) {
+float C4_UI_GetMirroredRotation(float degrees, C4_UI_Mirror mirror) {
+    if (mirror == C4_UI_Mirror_X || mirror == C4_UI_Mirror_Y) {
         return -degrees;
     }
     return degrees;

@@ -230,7 +230,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
         }
     );
     testDiamond->shape.rotationDegrees = 45;
-    testDiamond->mirror = C4_UI_Mirroring_X;
+    testDiamond->mirror = C4_UI_Mirror_X;
     C4_UI_Canvas_AddNode(canvas, testDiamond);
 
     C4_UI_Node* testTriangle = C4_UI_Button_Create(
@@ -245,7 +245,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
         }
     );
     C4_UI_Canvas_AddNode(canvas, testTriangle);
-    testTriangle->mirror = C4_UI_Mirroring_XY;
+    testTriangle->mirror = C4_UI_Mirror_XY;
 
     C4_UI_Node* mirroredText = C4_UI_Node_Create(
         &canvas->arena, &(C4_UI_Node_Config){
@@ -260,7 +260,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
             }
         }
     );
-    mirroredText->mirror = C4_UI_Mirroring_X;
+    mirroredText->mirror = C4_UI_Mirror_X;
     C4_UI_CenterInWindow(mirroredText, C4_UI_Axis_X, game->presentationWidth, game->presentationHeight, game->UIScale);
     C4_UI_Canvas_AddNode(canvas, mirroredText);
 

@@ -84,7 +84,7 @@ bool C4_UI_Interaction_HandleMouseEvents(
     C4_UI_ShapeType shape,
     SDL_FRect absoluteRect,
     float rotationDegrees,
-    C4_UI_Mirroring mirror
+    C4_UI_Mirror mirror
 ) {
     if (!input->isActive) {
         return false;

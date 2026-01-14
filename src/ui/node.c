@@ -324,7 +324,7 @@ C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) 
     node->spacing = 0;
     node->direction = C4_UI_Direction_Vertical;
     node->childrenAlign = C4_UI_Align_TopLeft;
-    node->mirror = C4_UI_Mirroring_None;
+    node->mirror = C4_UI_Mirror_None;
 
     node->navUp = NULL;
     node->navDown = NULL;
