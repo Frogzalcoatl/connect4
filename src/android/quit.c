@@ -8,13 +8,11 @@
 void Android_QuitTask(bool removeTask) {
 #if SDL_PLATFORM_ANDROID
     JNIEnv *env = (JNIEnv *)SDL_GetAndroidJNIEnv();
-    
-    jobject activity = (jobject)SDL_GetAndroidActivity();
-    if (!env || !activity) {
+    if (!env) {
         return;
     }
 
-    jclass cls = (*env)->GetObjectClass(env, activity);
+    jclass cls = (*env)->FindClass(env, "org/libsdl/app/MyGameActivity");
 
     jmethodID mid = (*env)->GetStaticMethodID(env, cls, "quitTask", "(Z)V");
 
