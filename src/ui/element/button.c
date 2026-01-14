@@ -29,6 +29,7 @@ C4_UI_Node* C4_UI_Button_Create(C4_MemoryArena* arena, C4_UI_Button_Config* conf
             .text = (C4_UI_Data_Text_Config){
                 .posX = 0.f,
                 .posY = 0.f,
+                .UIScale = config->UIScale,
                 .font = config->font,
                 .text = config->text,
                 .textEngine = config->textEngine
@@ -63,7 +64,9 @@ C4_UI_Node* C4_UI_Buttons_Create(C4_MemoryArena* arena, C4_UI_Buttons_Config* co
     container->childrenAlign = C4_UI_Align_Center;
 
     for (size_t i = 0; i < config->buttonsArrSize; i++) {
+        config->buttonsArr[i].UIScale = config->UIScale; 
         C4_UI_Node* btn = C4_UI_Button_Create(arena, &config->buttonsArr[i]);
+        
         C4_UI_Node_AttachChild(container, btn);
         if (container->direction == C4_UI_Direction_Horizontal) {
             if (btn->prevSibling) {

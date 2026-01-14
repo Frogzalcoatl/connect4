@@ -39,6 +39,8 @@
     .textColor     = (SDL_Color){226, 232, 240, 255}\
 }
 
+#define DEFAULT_BUTTON_SIZE (SDL_FRect){0.f, 0.f, 800.f, 100.f}
+
 // other
 #define C4_EMPTY_SDL_FRECT (SDL_FRect){0.f, 0.f, 1.f, 1.f}
 #define C4_DEFAULT_PT_SIZE_TALL_LAYOUT 75.f

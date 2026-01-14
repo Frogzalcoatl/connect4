@@ -15,22 +15,21 @@ void C4_UI_DrawText(SDL_FRect rect, C4_UI_Data_Text* text, C4_UI_StyleState* sty
     float oldScaleX, oldScaleY;
     SDL_GetRenderScale(renderer, &oldScaleX, &oldScaleY);
 
-    if (mirror == C4_UI_Mirror_None) {
-        SDL_SetRenderScale(renderer, oldScaleX * UIScale, oldScaleY * UIScale);
+    SDL_SetRenderScale(renderer, 1.0f, 1.0f);
 
-        TTF_DrawRendererText(text->textObject, roundf(rect.x / UIScale), roundf(rect.y / UIScale));
-        
-        SDL_SetRenderScale(renderer, oldScaleX, oldScaleY);
-        return;
-    }
+    int texW, texH;
+    TTF_GetTextSize(text->textObject, &texW, &texH);
+
+    float scaleX = (texW > 0) ? rect.w / (float)texW : 1.0f;
+    float scaleY = (texH > 0) ? rect.h / (float)texH : 1.0f;
 
     float flipX = (mirror == C4_UI_Mirror_X || mirror == C4_UI_Mirror_XY) ? -1.0f : 1.0f;
     float flipY = (mirror == C4_UI_Mirror_Y || mirror == C4_UI_Mirror_XY) ? -1.0f : 1.0f;
     
-    float drawX = rect.x / UIScale;
-    float drawY = rect.y / UIScale;
-    float drawW = rect.w / UIScale;
-    float drawH = rect.h / UIScale;
+    float drawX = rect.x / scaleX;
+    float drawY = rect.y / scaleY;
+    float drawW = rect.w / scaleX;
+    float drawH = rect.h / scaleY;
 
     if (flipX < 0) {
         drawX = -drawX - drawW;
@@ -40,7 +39,7 @@ void C4_UI_DrawText(SDL_FRect rect, C4_UI_Data_Text* text, C4_UI_StyleState* sty
         drawY = -drawY - drawH;
     }
 
-    SDL_SetRenderScale(renderer, oldScaleX * flipX * UIScale, oldScaleY * flipY * UIScale);
+    SDL_SetRenderScale(renderer, scaleX * flipX, scaleY * flipY);
 
     TTF_DrawRendererText(text->textObject, roundf(drawX), roundf(drawY));
 

@@ -8,7 +8,7 @@
 * Slider UIElement
 * Dropdown ui element
 * Improve asset bundling. Maybe automatically assign data to arrays with the array name being their folder name or smth autmatically generate an enum as well.
-    * (ex: C4_Assets_Images[C4_Assets_Images_Icon_png])
+    * (ex: C4_Assets_Images_Data[C4_Assets_Images_Icon_png] and C4_Assets_Images_Size[C4_Assets_Images_Icon_png])
 * Board UI
 * Turn time limits
 * Improve win check efficiency (see WINCHECKCRITIQUE.md)

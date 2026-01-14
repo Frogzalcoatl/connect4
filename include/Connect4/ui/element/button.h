@@ -4,6 +4,7 @@
 typedef struct {
     C4_UI_Style* style;
     SDL_FRect rect;
+    float UIScale;
     C4_UI_ShapeType shapeType;
     unsigned int borderWidth;
     char* text;
@@ -16,6 +17,7 @@ C4_UI_Node* C4_UI_Button_Create(C4_MemoryArena* arena, C4_UI_Button_Config* conf
 typedef struct {
     float posX;
     float posY;
+    float UIScale;
     C4_UI_Direction direction;
     float spacing;
     float padding;

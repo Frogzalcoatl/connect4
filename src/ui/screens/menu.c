@@ -7,8 +7,10 @@
 
 typedef struct {
     C4_Game* game;
+    C4_UI_Node* buttons;
     C4_UI_Node* controllerList;
     C4_UI_Node* activeControllerText;
+    C4_UI_Node* title;
 } C4_MenuScreenData;
 
 static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutType layout) {
@@ -16,7 +18,8 @@ static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutT
         SDL_Log("Unable to resize menu ui. One or more required pointers are NULL.");
         return;
     }
-    //C4_MenuScreenData* menuData = (C4_MenuScreenData*)screen->data;
+    C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
+    C4_Game* game = data->game;
 
     switch (layout) {
         case C4_UI_LayoutType_Wide: {
@@ -27,12 +30,19 @@ static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutT
         }; break;
         default: break;
     }
+
+    SDL_FPoint refWindowDim = C4_GetReferenceWindowDimensions(game->windowWidth, game->windowHeight, game->UIScale);
+
+    data->activeControllerText->rect.y = refWindowDim.y - 40.f;
+
+    C4_UI_CenterInWindow(data->buttons, C4_UI_Axis_XY, (unsigned int)refWindowDim.x, (unsigned int)refWindowDim.y);
+    C4_UI_Node_AlignChildren(data->buttons, C4_UI_Axis_X);
 }
 
 // Forward declaration just for the purpose of organization
 static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game);
 
-static void UpdateControllerText(C4_UI_Node* controllerList, C4_UI_Node* activeControllerText) {
+static void UpdateControllerText(C4_UI_Node* controllerList, C4_UI_Node* activeControllerText, float UIScale) {
     char* controllerArr[C4_MAX_GAMEPADS];
     C4_Gamepad_GetNames(controllerArr, C4_MAX_GAMEPADS);
 
@@ -49,14 +59,14 @@ static void UpdateControllerText(C4_UI_Node* controllerList, C4_UI_Node* activeC
         free(controllerText);
     }
     
-    C4_UI_Node_SetTextString(controllerList, header);
+    C4_UI_Node_SetTextString(controllerList, header, UIScale);
 
     char activeController[128];
     C4_Gamepad_GetActiveName(activeController, sizeof(activeController));
     char displayText[256] = "Active: ";
     strcat(displayText, activeController);
 
-    C4_UI_Node_SetTextString(activeControllerText, displayText);
+    C4_UI_Node_SetTextString(activeControllerText, displayText, UIScale);
 }
 
 static void C4_MenuScreen_ExitGame(void* context) {
@@ -68,7 +78,7 @@ static void C4_MenuScreen_HandleEvent(C4_UI_Screen* screen, SDL_Event* event, fl
     if (!screen || !event) {
         return;
     }
-    C4_MenuScreenData* menuData = (C4_MenuScreenData*)screen->data;
+    C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
 
     C4_UI_Screen_HandleEvent_Default(screen, event, UIScale);
 
@@ -76,7 +86,7 @@ static void C4_MenuScreen_HandleEvent(C4_UI_Screen* screen, SDL_Event* event, fl
         event->type == SDL_EVENT_GAMEPAD_ADDED ||
         event->type == SDL_EVENT_GAMEPAD_REMOVED
     ) {
-        UpdateControllerText(menuData->controllerList, menuData->activeControllerText);
+        UpdateControllerText(data->controllerList, data->activeControllerText, data->game->UIScale);
     }
 }
 
@@ -84,8 +94,8 @@ static void C4_MenuScreen_OnEnter(C4_UI_Screen* screen) {
     if (!screen) {
         return;
     }
-    C4_MenuScreenData* menuData = (C4_MenuScreenData*)screen->data;
-    UpdateControllerText(menuData->controllerList, menuData->activeControllerText);
+    C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
+    UpdateControllerText(data->controllerList, data->activeControllerText, data->game->UIScale);
 }
 
 C4_UI_Screen* C4_MenuScreen_Create(C4_Game* game) {
@@ -124,8 +134,22 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     //SDL_Renderer* renderer = game->renderer;
 
     data->game = game;
+    float UIScale = game->UIScale;
 
-    const SDL_FRect DEFAULT_BUTTON_SIZE =  (SDL_FRect){0.f, 0.f, 800.f, 100.f};
+    data->title = C4_UI_Node_Create(
+        &canvas->arena, &(C4_UI_Node_Config){
+            .type = C4_UI_Type_Text,
+            .style = &C4_UI_THEME_DEFAULT.style,
+            .text = (C4_UI_Data_Text_Config) {
+                .posX = 0.f,
+                .posY = 0.f,
+                .UIScale = UIScale,
+                .text = "Connect4",
+                .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 100.f * UIScale, TTF_STYLE_BOLD),
+                .textEngine = game->textEngine
+            }
+        }
+    ); 
 
     #define BUTTON_COUNT 4
     char* BUTTON_STRINGS[BUTTON_COUNT] = {
@@ -141,19 +165,21 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
         &(C4_UI_Button_Config){
             .style = &C4_UI_THEME_DEFAULT.style,
             .rect = DEFAULT_BUTTON_SIZE,
+            .UIScale = UIScale,
             .shapeType = C4_UI_Shape_Rectangle,
             .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
             .text = "",
-            .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 48.f, TTF_STYLE_BOLD),
+            .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 48.f * UIScale, TTF_STYLE_BOLD),
             .textEngine = game->textEngine
         },
         BUTTON_STRINGS, BUTTON_COUNT, buttonConfigs
     );
 
-    C4_UI_Node* buttons = C4_UI_Buttons_Create(
+    data->buttons = C4_UI_Buttons_Create(
         &canvas->arena, &(C4_UI_Buttons_Config){
             .posX = 0.f,
             .posY = 0.f,
+            .UIScale = UIScale,
             .direction = C4_UI_Direction_Vertical,
             .spacing = 25.f,
             .padding = 25.f,
@@ -161,15 +187,13 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
             .buttonsArrSize = BUTTON_COUNT
         }
     );
-    buttons->shape = (C4_UI_Data_Shape){
+    data->buttons->shape = (C4_UI_Data_Shape){
         .borderWidth = 3,
         .rotationDegrees = 0,
         .type = C4_UI_Shape_Rectangle
     };
-    buttons->input.OnCancel = C4_MenuScreen_ExitGame;
-    C4_UI_CenterInWindow(buttons, C4_UI_Axis_XY, game->windowWidth, game->windowHeight, game->UIScale);
-    C4_UI_Node_AlignChildren(buttons, C4_UI_Axis_X);
-    C4_UI_Canvas_AddNode(canvas, buttons);
+    data->buttons->input.OnCancel = C4_MenuScreen_ExitGame;
+    C4_UI_Canvas_AddNode(canvas, data->buttons);
 
     data->controllerList = C4_UI_Node_Create(
         &canvas->arena,
@@ -180,7 +204,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
                 .posX = 0.f,
                 .posY = 0.f,
                 .text = "",
-                .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f, TTF_STYLE_NORMAL),
+                .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f * UIScale, TTF_STYLE_NORMAL),
                 .textEngine = game->textEngine
             }
         }
@@ -194,77 +218,16 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
             .style = &C4_UI_THEME_DEFAULT.style,
             .text = (C4_UI_Data_Text_Config){
                 .posX = 0.f,
-                .posY = 1040.f,
+                .posY = 0.f,
                 .text = "",
-                .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f, TTF_STYLE_NORMAL),
+                .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f * UIScale, TTF_STYLE_NORMAL),
                 .textEngine = game->textEngine
             }
         }
     );
     C4_UI_Canvas_AddNode(canvas, data->activeControllerText);
     
-    UpdateControllerText(data->controllerList, data->activeControllerText);
-
-    C4_UI_Node* testEllipse = C4_UI_Button_Create(
-        &canvas->arena, &(C4_UI_Button_Config){
-            .style = &C4_UI_THEME_DEFAULT.style,
-            .rect = (SDL_FRect){900.f, 900.f, 200.f, 100.f},
-            .shapeType = C4_UI_Shape_Ellipse,
-            .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
-            .text = "Ellipse Test",
-            .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f, TTF_STYLE_NORMAL),
-            .textEngine = game->textEngine
-        }
-    );
-    C4_UI_Canvas_AddNode(canvas, testEllipse);
-
-    C4_UI_Node* testDiamond = C4_UI_Button_Create(
-        &canvas->arena, &(C4_UI_Button_Config){
-            .style = &C4_UI_THEME_DEFAULT.style,
-            .rect = (SDL_FRect){1400.f, 800.f, 400.f, 200.f},
-            .shapeType = C4_UI_Shape_Rectangle,
-            .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
-            .text = "Rotation Test",
-            .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f, TTF_STYLE_NORMAL),
-            .textEngine = game->textEngine
-        }
-    );
-    testDiamond->shape.rotationDegrees = 45;
-    testDiamond->mirror = C4_UI_Mirror_X;
-    C4_UI_Canvas_AddNode(canvas, testDiamond);
-
-    C4_UI_Node* testTriangle = C4_UI_Button_Create(
-        &canvas->arena, &(C4_UI_Button_Config){
-            .style = &C4_UI_THEME_DEFAULT.style,
-            .rect = (SDL_FRect){300.f, 800.f, 200.f, 100.f},
-            .shapeType = C4_UI_Shape_Triangle,
-            .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
-            .text = "Triangle Test",
-            .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f, TTF_STYLE_NORMAL),
-            .textEngine = game->textEngine
-        }
-    );
-    C4_UI_Canvas_AddNode(canvas, testTriangle);
-    testTriangle->mirror = C4_UI_Mirror_XY;
-
-    C4_UI_Node* mirroredText = C4_UI_Node_Create(
-        &canvas->arena, &(C4_UI_Node_Config){
-            .type = C4_UI_Type_Text,
-            .style = &C4_UI_THEME_DEFAULT.style,
-            .text = (C4_UI_Data_Text_Config){
-                .posX = 100.f,
-                .posY = 0.f,
-                .text = "Mirrored Text",
-                .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f, TTF_STYLE_NORMAL),
-                .textEngine = game->textEngine
-            }
-        }
-    );
-    mirroredText->mirror = C4_UI_Mirror_X;
-    C4_UI_CenterInWindow(mirroredText, C4_UI_Axis_X, game->windowWidth, game->windowHeight, game->UIScale);
-    C4_UI_Canvas_AddNode(canvas, mirroredText);
-
-    screen->HandleWindowResize(screen, game->currentLayout);
+    UpdateControllerText(data->controllerList, data->activeControllerText, game->UIScale);
     
     return true;
 }

@@ -79,15 +79,46 @@ void Connect4_Quit_Dependencies(void) {
     SDL_Quit();
 }
 
-static void C4_Game_UpdateWindowProperties(C4_Game* game, unsigned int windowWidth, unsigned int windowHeight) {
-    game->currentLayout = C4_UI_GetCurrentLayout(windowWidth, windowHeight);
-    
+static void C4_Game_RecalculateScale(C4_Game* game) {
+    if (!game){
+        return;
+    }
     const float REFERENCE_HEIGHT = 1080.0f;
-    game->UIScale = (float)windowHeight / REFERENCE_HEIGHT * game->userScalePreference;
-    if (game->UIScale <= 0.001f) game->UIScale = 1.0f;
+    game->UIScale = (float)game->windowHeight / REFERENCE_HEIGHT * game->userScalePreference;
 
+    if (game->UIScale < 0.1f) {
+        game->UIScale = 0.1f;
+    }
+}
+
+static void C4_Game_SetUserScale(C4_Game* game, float newScale) {
+    if (!game) {
+        return;
+    }
+    game->userScalePreference = newScale;
+    
+    C4_Game_RecalculateScale(game);
+
+    if (game->currentScreen && game->currentScreen->HandleWindowResize) {
+        game->currentScreen->HandleWindowResize(game->currentScreen, game->currentLayout);
+    }
+}
+
+SDL_FPoint C4_GetReferenceWindowDimensions(unsigned int w, unsigned int h, float UIScale) {
+    float width = w / UIScale;
+    float height = h / UIScale;
+    return (SDL_FPoint){width, height};
+}
+
+static void C4_Game_UpdateWindowProperties(C4_Game* game, unsigned int windowWidth, unsigned int windowHeight) {
+    if (!game) {
+        return;
+    }
+    game->currentLayout = C4_UI_GetCurrentLayout(windowWidth, windowHeight);
     game->windowWidth = windowWidth;
     game->windowHeight = windowHeight;
+    
+    C4_Game_RecalculateScale(game);
 }
 
 static bool C4_Game_WindowSetup(C4_Game* game) {
@@ -189,6 +220,8 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
         return NULL;
     }
 
+    game->userScalePreference = 1.f;
+
     if (!C4_Game_WindowSetup(game)) {
         C4_Game_Destroy(game);
         return NULL;
@@ -200,8 +233,6 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
     }
 
     game->board = C4_Board_Create(boardWidth, boardHeight, amountToWin);
-
-    game->userScalePreference = 1.f;
     game->running = false;
 
     if (!C4_Game_CreateScreens(game)) {
@@ -259,7 +290,9 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
             unsigned int windowWidth = eventSDL->window.data1;
             unsigned int windowHeight = eventSDL->window.data2;
             C4_Game_UpdateWindowProperties(game, windowWidth, windowHeight);
-            game->currentScreen->HandleWindowResize(game->currentScreen, game->currentLayout);
+            if (game->currentScreen->HandleWindowResize) {
+                game->currentScreen->HandleWindowResize(game->currentScreen, game->currentLayout);
+            }
         }
         SDL_ConvertEventToRenderCoordinates(game->renderer, eventSDL);
         if (game->currentScreen->HandleEvent) {

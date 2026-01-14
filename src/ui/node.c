@@ -180,7 +180,7 @@ void C4_UI_Node_PushNode(C4_UI_Node* head, C4_UI_Node* newNode) {
     newNode->prevSibling = current;
 }
 
-static void C4_UI_UpdateTextRect(C4_UI_Node* node) {
+static void C4_UI_UpdateTextRect(C4_UI_Node* node, float UIScale) {
     if (!node || !node->text.textObject) {
         SDL_Log("Unable to update text rect. One or more required pointers are NULL");
         return;
@@ -193,12 +193,12 @@ static void C4_UI_UpdateTextRect(C4_UI_Node* node) {
 
     int w, h;
     if (TTF_GetTextSize(node->text.textObject, &w, &h)) {
-        node->rect.w = (float)w;
-        node->rect.h = (float)h;
+        node->rect.w = (float)w / UIScale;
+        node->rect.h = (float)h / UIScale;
     }
 }
 
-void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString) {
+void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString, float UIScale) {
     if (!node || !node->text.textObject) {
         SDL_Log("Unable to set text string. One or more required pointers are NULL");
         return;
@@ -212,10 +212,10 @@ void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString) {
     node->text.storage = SDL_strdup(newString);
 
     TTF_SetTextString(node->text.textObject, node->text.storage, 0);
-    C4_UI_UpdateTextRect(node);
+    C4_UI_UpdateTextRect(node, UIScale);
 }
 
-void C4_UI_Node_ChangeFont(C4_UI_Node* node, TTF_Font* newFont) {
+void C4_UI_Node_ChangeFont(C4_UI_Node* node, TTF_Font* newFont, float UIScale) {
     if (!node || !node->text.textObject) {
         SDL_Log("Unable to change node font. One or more required pointers are NULL");
         return;
@@ -231,10 +231,10 @@ void C4_UI_Node_ChangeFont(C4_UI_Node* node, TTF_Font* newFont) {
     } else {
         node->text.font = newFont;
     }
-    C4_UI_UpdateTextRect(node);
+    C4_UI_UpdateTextRect(node, UIScale);
 }
 
-void C4_UI_Node_SetTextWrap(C4_UI_Node* node, int widthInPixels) {
+void C4_UI_Node_SetTextWrap(C4_UI_Node* node, int widthInPixels, float UIScale) {
     if (!node || !node->text.textObject) {
         SDL_Log("Unable to set text wrap. One or more required pointers are NULL");
         return;
@@ -248,7 +248,7 @@ void C4_UI_Node_SetTextWrap(C4_UI_Node* node, int widthInPixels) {
     if (!TTF_SetTextWrapWidth(node->text.textObject, widthInPixels)) {
         SDL_Log("Failed to set wrap width: %s", SDL_GetError());
     }
-    C4_UI_UpdateTextRect(node);
+    C4_UI_UpdateTextRect(node, UIScale);
 }
 
 C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) {
@@ -283,7 +283,11 @@ C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) 
         SDL_Color color = config->style->inactive.text;
         TTF_SetTextColor(node->text.textObject, color.r, color.g, color.b, color.a);
 
-        C4_UI_UpdateTextRect(node);
+        if (config->text.UIScale <= 0.1f) {
+            config->text.UIScale = 0.1f;
+        }
+
+        C4_UI_UpdateTextRect(node, config->text.UIScale);
         node->rect.x = config->text.posX;
         node->rect.y = config->text.posY;
     }
@@ -439,7 +443,7 @@ void C4_UI_Node_ApplyChildSpacing(C4_UI_Node* parent) {
     }
 }
 
-void C4_UI_Node_ClampToWindow(C4_UI_Node* node, unsigned int windowWidth, unsigned int windowHeight, float UIScale) {
+void C4_UI_Node_ClampToWindow(C4_UI_Node* node, unsigned int windowWidth, unsigned int windowHeight) {
     if (!node) {
         SDL_Log("Unable to clamp node to window. Node is NULL");
         return;
@@ -447,27 +451,24 @@ void C4_UI_Node_ClampToWindow(C4_UI_Node* node, unsigned int windowWidth, unsign
 
     SDL_FRect* rect = &node->rect;
 
-    float visualWidth = rect->w * UIScale;
-    float visualHeight = rect->h * UIScale;
-
-    float scaledRightEdge = (rect->x * UIScale) + visualWidth;
-    if (scaledRightEdge > (float)windowWidth) {
-        rect->x = ((float)windowWidth / UIScale) - rect->w;
+    float rightEdge = rect->x + rect->w;
+    if (rightEdge > (float)windowWidth) {
+        rect->x = (float)windowWidth - rect->w;
     }
     if (rect->x < 0.f) {
         rect->x = 0.f;
     }
 
-    float scaledBottomEdge = (rect->y * UIScale) + visualHeight;
-    if (scaledBottomEdge > (float)windowHeight) {
-        rect->y = ((float)windowHeight / UIScale) - rect->h;
+    float bottomEdge = rect->y + rect->h;
+    if (bottomEdge > (float)windowHeight) {
+        rect->y = (float)windowHeight - rect->h;
     }
     if (rect->y < 0.f) {
         rect->y = 0.f;
     }
 }
 
-void C4_UI_CenterInWindow(C4_UI_Node* node, C4_UI_Axis axis, unsigned int windowWidth, unsigned int windowHeight, float UIScale) {
+void C4_UI_CenterInWindow(C4_UI_Node* node, C4_UI_Axis axis, unsigned int windowWidth, unsigned int windowHeight) {
     if (!node) {
         SDL_Log("Unable to center node in window. Node is NULL");
         return;
@@ -475,14 +476,14 @@ void C4_UI_CenterInWindow(C4_UI_Node* node, C4_UI_Axis axis, unsigned int window
     SDL_FRect* rect = &node->rect;
 
     if (axis == C4_UI_Axis_X || axis == C4_UI_Axis_XY) {
-        rect->x = (windowWidth / 2.f) - (rect->w * UIScale / 2.f);
+        rect->x = (windowWidth / 2.f) - (rect->w / 2.f);
     }
 
     if (axis == C4_UI_Axis_Y || axis == C4_UI_Axis_XY) {
-        rect->y = (windowHeight / 2.f) - (rect->h * UIScale / 2.f);
+        rect->y = (windowHeight / 2.f) - (rect->h / 2.f);
     }
 
-    C4_UI_Node_ClampToWindow(node, windowWidth, windowHeight, UIScale);
+    C4_UI_Node_ClampToWindow(node, windowWidth, windowHeight);
 }
 
 void C4_UI_Node_Reset(C4_UI_Node* node) {

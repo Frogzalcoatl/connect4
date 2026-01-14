@@ -28,3 +28,5 @@ typedef struct {
 C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountToWin);
 void C4_Game_Destroy(C4_Game* game);
 void C4_Game_Run(C4_Game* game);
+
+SDL_FPoint C4_GetReferenceWindowDimensions(unsigned int w, unsigned int h, float UIScale);
