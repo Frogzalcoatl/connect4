@@ -19,11 +19,12 @@ jobs:
           - { name: Linux GCC, os: ubuntu-latest }
           - { name: MacOS, os: macos-latest }
           - { name: Android, os: ubuntu-latest }
-          - {
-              name: IOS,
-              os: macos-latest,
-              flags: "-G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64",
-            }
+          - { name: IOS, os: macos-latest, flags: "-G Xcode
+                -DCMAKE_SYSTEM_NAME=iOS
+                -DCMAKE_OSX_ARCHITECTURES=arm64
+                -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO
+                -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED=NO
+                -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY=''" }
 
     steps:
       - name: Checkout
