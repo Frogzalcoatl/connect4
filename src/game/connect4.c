@@ -340,7 +340,7 @@ void C4_Game_Run(C4_Game* game) {
         SDL_RenderClear(game->renderer);
 
         if (game->currentScreen->Draw) {
-            game->currentScreen->Draw(game->currentScreen);
+            game->currentScreen->Draw(game->currentScreen, game->UIScale);
         }
 
         SDL_RenderPresent(game->renderer);

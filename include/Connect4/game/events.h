@@ -13,7 +13,6 @@ typedef enum {
 typedef struct {
     C4_EventType type;
     union {
-        // If i were to add more events in the future
         struct { C4_ScreenType type; } screenChange;
         struct { bool androidRemoveTask; } closeWindow;
     };

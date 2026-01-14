@@ -8,12 +8,12 @@ void C4_Screen_Update_Default(C4_UI_Screen* screen, float deltaTime, float UISca
     C4_UI_Canvas_Update(&screen->canvas, deltaTime, UIScale);
 }
 
-void C4_Screen_Draw_Default(C4_UI_Screen* screen) {
+void C4_Screen_Draw_Default(C4_UI_Screen* screen, float UIScale) {
     if (!screen) {
         SDL_Log("Unable to run default screen draw func. Screen is NULL");
         return;
     }
-    C4_UI_Canvas_Draw(&screen->canvas);
+    C4_UI_Canvas_Draw(&screen->canvas, UIScale);
 }
 
 void C4_UI_Screen_HandleEvent_Default(C4_UI_Screen* screen, SDL_Event* event, float UIScale) {

@@ -17,8 +17,8 @@ typedef struct {
 
 void C4_UI_Canvas_Init(C4_UI_Canvas* canvas, SDL_Renderer* renderer, TTF_TextEngine* textEngine, float offsetX, float offsetY);
 void C4_UI_Canvas_Destroy(C4_UI_Canvas* canvas);
-void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas);
-void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float scale);
+void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float UIScale);
+void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float UIScale);
 void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime, float UIScale);
 void C4_UI_Canvas_ResetInteractions(C4_UI_Canvas* canvas);
 void C4_UI_Canvas_AddNode(C4_UI_Canvas* canvas, C4_UI_Node* node);

@@ -44,7 +44,7 @@ void C4_UI_Node_CalculateLayout(C4_UI_Node* node, float scale, float parentX, fl
     }
 }
 
-void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer) {
+void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer, float UIScale) {
     if (!node) {
         SDL_Log("Unable to draw node. Node is NULL");
         return;
@@ -69,17 +69,17 @@ void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer) {
 
     switch (node->type) {
         case C4_UI_Type_Shape: {
-            C4_UI_DrawShape(node->absoluteRect, &node->shape, currentStyle, node->mirror, renderer);
+            C4_UI_DrawShape(node->absoluteRect, &node->shape, currentStyle, node->mirror, renderer, UIScale);
         }; break;
         case C4_UI_Type_Text: {
-            C4_UI_DrawText(node->absoluteRect, &node->text, currentStyle, node->mirror, renderer);
+            C4_UI_DrawText(node->absoluteRect, &node->text, currentStyle, node->mirror, renderer, UIScale);
         }; break;
         default: break;
     }
 
     C4_UI_Node* child = node->firstChild;
     while (child) {
-        C4_UI_Node_Draw(child, renderer);
+        C4_UI_Node_Draw(child, renderer, UIScale);
         child = child->nextSibling;
     }
 }

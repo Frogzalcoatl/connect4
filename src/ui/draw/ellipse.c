@@ -78,16 +78,21 @@ void C4_UI_DrawEllipse(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState
     return;
 }
 
-void C4_UI_DrawEllipseBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirror mirror, SDL_Renderer* renderer) {
+void C4_UI_DrawEllipseBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirror mirror, SDL_Renderer* renderer, float UIScale) {
     if (!renderer || !shape || shape->borderWidth <= 0.0f) {
         return;
+    }
+
+    int scaledBorderWidth = (int)(shape->borderWidth * UIScale);
+    if (scaledBorderWidth <= 0) {
+        scaledBorderWidth = 1; 
     }
 
     float radiusX = rect.w / 2.0f;
     float radiusY = rect.h / 2.0f;
     float centerX = rect.x + radiusX;
     float centerY = rect.y + radiusY;
-    float halfWidth = shape->borderWidth / 2.0f;
+    float halfWidth = scaledBorderWidth / 2.0f;
 
     int segments = GetEllipseSegments(radiusX, radiusY);
     

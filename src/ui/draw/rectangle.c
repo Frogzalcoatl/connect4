@@ -32,7 +32,7 @@ void C4_UI_DrawRectangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleSta
     SDL_RenderGeometry(renderer, NULL, vertices, 4, indices, 6);
 }
 
-void C4_UI_DrawRectangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirror mirror, SDL_Renderer* renderer) {
+void C4_UI_DrawRectangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirror mirror, SDL_Renderer* renderer, float UIScale) {
     if (!shape || !styleState || !renderer) {
         SDL_Log("Unable to draw rectangle borders. One or more required pointers are NULL");
         return;
@@ -42,9 +42,9 @@ void C4_UI_DrawRectangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_S
         return;
     }
 
-    int scaledBorderWidth = (int)(shape->borderWidth * 1.f);
-    if (scaledBorderWidth < 0) {
-        return;
+    int scaledBorderWidth = (int)(shape->borderWidth * UIScale);
+    if (scaledBorderWidth <= 0) {
+        scaledBorderWidth = 1; 
     }
 
     SDL_FColor fColor;

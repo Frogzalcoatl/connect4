@@ -29,7 +29,7 @@ void C4_UI_DrawTriangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleStat
     SDL_RenderGeometry(renderer, NULL, vertices, 3, NULL, 0);
 }
 
-void C4_UI_DrawTriangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirror mirror, SDL_Renderer* renderer) {
+void C4_UI_DrawTriangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirror mirror, SDL_Renderer* renderer, float UIScale) {
     if (!shape || !styleState || !renderer) {
         SDL_Log("Unable to draw triangle borders. One or more required pointers are NULL");
         return;
@@ -39,9 +39,9 @@ void C4_UI_DrawTriangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_St
         return;
     }
 
-    float bw = ceilf(shape->borderWidth * 1.f);
+    float bw = ceilf(shape->borderWidth * UIScale);
     if (bw <= 0) {
-        return;
+        bw = 1;
     }
 
     SDL_FColor fColor;

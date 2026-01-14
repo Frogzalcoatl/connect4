@@ -64,7 +64,7 @@ void C4_UI_Canvas_Destroy(C4_UI_Canvas* canvas) {
     }
 }
 
-void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas) {
+void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float UIScale) {
     if (!canvas || !canvas->renderer) {
         SDL_Log("Unable to draw canvas. One or more required pointers are NULL");
         return;
@@ -72,7 +72,7 @@ void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas) {
     
     C4_UI_Node* current = canvas->root;
     while (current) {
-        C4_UI_Node_Draw(current, canvas->renderer);
+        C4_UI_Node_Draw(current, canvas->renderer, UIScale);
         current = current->nextSibling;
     }
 }
@@ -221,7 +221,7 @@ static void C4_UI_Canvas_HandleMouseEvents(C4_UI_Canvas* canvas, SDL_Event* even
     }
 }
 
-void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float scale) {
+void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float UIScale) {
     if (!canvas || !event) {
         SDL_Log("Unable to handle events in canvas. One or more required pointers are NULL");
         return;
@@ -235,7 +235,7 @@ void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float scal
         return;
     }
 
-    (void)scale;
+    (void)UIScale;
     C4_InputEvent inputEvent = C4_GetInput(event);
 
     if (inputEvent.verb != C4_INPUT_VERB_NONE) {
