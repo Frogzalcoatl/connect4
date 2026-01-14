@@ -26,3 +26,4 @@ typedef struct {
 } C4_UI_Buttons_Config;
 C4_UI_Node* C4_UI_Buttons_Create(C4_MemoryArena* arena, C4_UI_Buttons_Config* config);
 void C4_UI_Buttons_CreateConfigArr(C4_UI_Button_Config* defaultConfig, char* buttonStrings[], size_t buttonCount, C4_UI_Button_Config returnValue[]);
+void C4_UI_Buttons_SetChildrenButtonSizes(C4_UI_Node* node, float width, float height);

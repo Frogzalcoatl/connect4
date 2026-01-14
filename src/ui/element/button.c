@@ -86,6 +86,20 @@ C4_UI_Node* C4_UI_Buttons_Create(C4_MemoryArena* arena, C4_UI_Buttons_Config* co
     return container;
 }
 
+void C4_UI_Buttons_SetChildrenButtonSizes(C4_UI_Node* node, float width, float height) {
+    if (!node) {
+        return;
+    }
+    C4_UI_Node* current = node->firstChild;
+    while (current) {
+        current->rect.w = width;
+        current->rect.h = height;
+        C4_UI_Node_AlignChildren(current, C4_UI_Axis_XY);
+        current = current->nextSibling;
+    }
+    C4_UI_Node_ApplyChildSpacing(node);
+}
+
 void C4_UI_Buttons_CreateConfigArr(C4_UI_Button_Config* defaultConfig, char* buttonStrings[], size_t buttonCount, C4_UI_Button_Config returnValue[]) {
     if (!defaultConfig || !buttonStrings) {
         SDL_Log("Unable to create config arr. One or more required pointers are NULL.");

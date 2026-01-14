@@ -26,12 +26,14 @@ static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutT
             
         }; break;
         case C4_UI_LayoutType_Tall: {
-            
+
         }; break;
         default: break;
     }
 
     SDL_FPoint refWindowDim = C4_GetReferenceWindowDimensions(game->windowWidth, game->windowHeight, game->UIScale);
+
+    C4_UI_Buttons_SetChildrenButtonSizes(data->buttons, C4_FMin(refWindowDim.x - 60, 800.f), 100.f);
 
     data->activeControllerText->rect.y = refWindowDim.y - 40.f;
 
@@ -164,7 +166,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     C4_UI_Buttons_CreateConfigArr(
         &(C4_UI_Button_Config){
             .style = &C4_UI_THEME_DEFAULT.style,
-            .rect = DEFAULT_BUTTON_SIZE,
+            .rect = (SDL_FRect){0.f, 0.f, 0.f, 0.f},
             .UIScale = UIScale,
             .shapeType = C4_UI_Shape_Rectangle,
             .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
@@ -193,6 +195,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
         .type = C4_UI_Shape_Rectangle
     };
     data->buttons->input.OnCancel = C4_MenuScreen_ExitGame;
+    data->buttons->lastChild->input.OnPress = C4_MenuScreen_ExitGame;
     C4_UI_Canvas_AddNode(canvas, data->buttons);
 
     data->controllerList = C4_UI_Node_Create(
