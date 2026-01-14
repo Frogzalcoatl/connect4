@@ -31,6 +31,7 @@ typedef struct C4_UI_Node {
     float spacing;
     C4_UI_Direction direction;
     C4_UI_Align childrenAlign;
+    C4_UI_Mirroring mirror;
 
     struct C4_UI_Node* navUp;
     struct C4_UI_Node* navDown;

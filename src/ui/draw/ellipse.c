@@ -9,7 +9,7 @@ static int GetEllipseSegments(float radiusX, float radiusY) {
     return (int)fmaxf(24.0f, fminf(512.0f, maxRadius * 2.0f));
 }
 
-void C4_UI_DrawEllipse(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer) {
+void C4_UI_DrawEllipse(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirroring mirror, SDL_Renderer* renderer) {
     if (!shape || !renderer) {
         return;
     }
@@ -36,6 +36,8 @@ void C4_UI_DrawEllipse(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState
     SDL_FColor color;
     C4_ColorToFColor(&styleState->background, &color);
 
+    float effectiveRotation = C4_UI_GetMirroredRotation((float)shape->rotationDegrees, mirror);
+
     // Center Vertex
     vertices[0] = (SDL_Vertex){
         .position = {centerX, centerY},
@@ -55,7 +57,11 @@ void C4_UI_DrawEllipse(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState
             .tex_coord = {0.0f, 0.0f}
         };
 
-        vertices[i + 1].position = C4_UI_RotatePoint(vertices[i + 1].position, (SDL_FPoint){centerX, centerY}, (float)shape->rotationDegrees);
+        vertices[i + 1].position = C4_UI_RotatePoint(
+            vertices[i + 1].position,
+            (SDL_FPoint){centerX, centerY},
+            effectiveRotation
+        );
 
         int current = i + 1;
         int next = (i + 1) % segments + 1;
@@ -72,7 +78,7 @@ void C4_UI_DrawEllipse(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState
     return;
 }
 
-void C4_UI_DrawEllipseBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer) {
+void C4_UI_DrawEllipseBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirroring mirror, SDL_Renderer* renderer) {
     if (!renderer || !shape || shape->borderWidth <= 0.0f) {
         return;
     }
@@ -99,6 +105,8 @@ void C4_UI_DrawEllipseBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_Sty
 
     SDL_FColor color;
     C4_ColorToFColor(&styleState->border, &color);
+
+    float effectiveRotation = C4_UI_GetMirroredRotation((float)shape->rotationDegrees, mirror);
 
     for (int i = 0; i <= segments; i++) {
         float angle = (float)(i % segments) / (float)segments * 2.0f * (float)M_PI;
@@ -128,14 +136,15 @@ void C4_UI_DrawEllipseBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_Sty
         };
 
         vertices[i * 2 + 0].position = C4_UI_RotatePoint(
-            vertices[i * 2 + 0].position, 
-            (SDL_FPoint){centerX, centerY}, 
-            (float)shape->rotationDegrees
+            vertices[i * 2 + 0].position,
+            (SDL_FPoint){centerX, centerY},
+            effectiveRotation
         );
+
         vertices[i * 2 + 1].position = C4_UI_RotatePoint(
-            vertices[i * 2 + 1].position, 
-            (SDL_FPoint){centerX, centerY}, 
-            (float)shape->rotationDegrees
+            vertices[i * 2 + 1].position,
+            (SDL_FPoint){centerX, centerY},
+            effectiveRotation
         );
 
         if (i < segments) {

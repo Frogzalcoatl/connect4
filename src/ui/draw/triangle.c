@@ -1,7 +1,7 @@
 #include "Connect4/ui/draw/triangle.h"
 #include "Connect4/ui/draw/utils.h"
 
-void C4_UI_DrawTriangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer) {
+void C4_UI_DrawTriangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirroring mirror, SDL_Renderer* renderer) {
     if (!shape || !styleState || !renderer) {
         SDL_Log("Unable to draw triangle. One or more required pointers are NULL");
         return;
@@ -18,16 +18,18 @@ void C4_UI_DrawTriangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleStat
     rawPoints[1] = (SDL_FPoint){rect.x, rect.y + rect.h};
     rawPoints[2] = (SDL_FPoint){rect.x + rect.w, rect.y + rect.h};
 
+    float effectiveRotation = C4_UI_GetMirroredRotation((float)shape->rotationDegrees, mirror);
     SDL_FPoint center = C4_GetRectCenter(rect);
 
     for (int i = 0; i < 3; i++) {
-        vertices[i].position = C4_UI_RotatePoint(rawPoints[i], center, (float)shape->rotationDegrees);
+        SDL_FPoint point = C4_UI_MirrorPoint(rawPoints[i], center, mirror);
+        vertices[i].position = C4_UI_RotatePoint(point, center, effectiveRotation);
     }
 
     SDL_RenderGeometry(renderer, NULL, vertices, 3, NULL, 0);
 }
 
-void C4_UI_DrawTriangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer, float UIScale) {
+void C4_UI_DrawTriangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirroring mirror, SDL_Renderer* renderer) {
     if (!shape || !styleState || !renderer) {
         SDL_Log("Unable to draw triangle borders. One or more required pointers are NULL");
         return;
@@ -37,7 +39,7 @@ void C4_UI_DrawTriangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_St
         return;
     }
 
-    float bw = ceilf(shape->borderWidth * UIScale);
+    float bw = ceilf(shape->borderWidth * 1.f);
     if (bw <= 0) {
         return;
     }
@@ -58,10 +60,12 @@ void C4_UI_DrawTriangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_St
     rawPoints[4] = (SDL_FPoint){rawPoints[1].x + bw, rawPoints[1].y - bw};
     rawPoints[5] = (SDL_FPoint){rawPoints[2].x - bw, rawPoints[2].y - bw};
 
+    float effectiveRotation = C4_UI_GetMirroredRotation((float)shape->rotationDegrees, mirror);
     SDL_FPoint center = C4_GetRectCenter(rect);
     
     for (int i = 0; i < 6; i++) {
-        vertices[i].position = C4_UI_RotatePoint(rawPoints[i], center, (float)shape->rotationDegrees);
+        SDL_FPoint point = C4_UI_MirrorPoint(rawPoints[i], center, mirror);
+        vertices[i].position = C4_UI_RotatePoint(point, center, effectiveRotation);
     }
 
     int indices[] = {

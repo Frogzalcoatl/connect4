@@ -43,6 +43,7 @@ bool C4_UI_Interaction_HandleMouseEvents(
     SDL_Event* event,
     C4_UI_ShapeType shape,
     SDL_FRect absoluteRect,
-    float rotationDegrees
+    float rotationDegrees,
+    C4_UI_Mirroring mirror
 );
 void C4_UI_Interaction_Reset(C4_UI_Interaction* input);

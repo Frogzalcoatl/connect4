@@ -83,7 +83,8 @@ bool C4_UI_Interaction_HandleMouseEvents(
     SDL_Event* event,
     C4_UI_ShapeType shape,
     SDL_FRect absoluteRect,
-    float rotationDegrees
+    float rotationDegrees,
+    C4_UI_Mirroring mirror
 ) {
     if (!input->isActive) {
         return false;
@@ -94,7 +95,7 @@ bool C4_UI_Interaction_HandleMouseEvents(
     Uint8 mouseButton = event->button.button;
 
     if (event->type == SDL_EVENT_MOUSE_MOTION) {
-        bool currentlyHovered = C4_IsPointInsideShape(shape, (SDL_FPoint){motion->x, motion->y}, *rect, rotationDegrees);
+        bool currentlyHovered = C4_IsPointInsideShape(shape, (SDL_FPoint){motion->x, motion->y}, *rect, rotationDegrees, mirror);
         if (currentlyHovered != input->isHovered) {
             input->isHovered = currentlyHovered;
             SDL_SetCursor(C4_GetSystemCursor(currentlyHovered ? SDL_SYSTEM_CURSOR_POINTER : SDL_SYSTEM_CURSOR_DEFAULT));

@@ -221,7 +221,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     C4_UI_Node* testDiamond = C4_UI_Button_Create(
         &canvas->arena, &(C4_UI_Button_Config){
             .style = &C4_UI_THEME_DEFAULT.style,
-            .rect = (SDL_FRect){1400.f, 800.f, 200.f, 200.f},
+            .rect = (SDL_FRect){1400.f, 800.f, 400.f, 200.f},
             .shapeType = C4_UI_Shape_Rectangle,
             .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
             .text = "Rotation Test",
@@ -230,6 +230,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
         }
     );
     testDiamond->shape.rotationDegrees = 45;
+    testDiamond->mirror = C4_UI_Mirroring_X;
     C4_UI_Canvas_AddNode(canvas, testDiamond);
 
     C4_UI_Node* testTriangle = C4_UI_Button_Create(
@@ -244,6 +245,24 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
         }
     );
     C4_UI_Canvas_AddNode(canvas, testTriangle);
+    testTriangle->mirror = C4_UI_Mirroring_XY;
+
+    C4_UI_Node* mirroredText = C4_UI_Node_Create(
+        &canvas->arena, &(C4_UI_Node_Config){
+            .type = C4_UI_Type_Text,
+            .style = &C4_UI_THEME_DEFAULT.style,
+            .text = (C4_UI_Data_Text_Config){
+                .posX = 100.f,
+                .posY = 0.f,
+                .text = "Mirrored Text",
+                .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f, TTF_STYLE_NORMAL),
+                .textEngine = game->textEngine
+            }
+        }
+    );
+    mirroredText->mirror = C4_UI_Mirroring_X;
+    C4_UI_CenterInWindow(mirroredText, C4_UI_Axis_X, game->presentationWidth, game->presentationHeight, game->UIScale);
+    C4_UI_Canvas_AddNode(canvas, mirroredText);
 
     screen->HandleWindowResize(screen, game->currentLayout);
     

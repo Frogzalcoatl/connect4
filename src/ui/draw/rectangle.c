@@ -1,7 +1,7 @@
 #include "Connect4/ui/draw/rectangle.h"
 #include "Connect4/ui/draw/utils.h"
 
-void C4_UI_DrawRectangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer) {
+void C4_UI_DrawRectangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirroring mirror, SDL_Renderer* renderer) {
     if (!shape || !styleState || !renderer) {
         SDL_Log("Unable to draw rectangle. One or more required pointers are NULL");
         return;
@@ -19,10 +19,11 @@ void C4_UI_DrawRectangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleSta
     rawPoints[2] = (SDL_FPoint){rect.x + rect.w, rect.y + rect.h};
     rawPoints[3] = (SDL_FPoint){rect.x, rect.y + rect.h};
 
+    float effectiveRotation = C4_UI_GetMirroredRotation((float)shape->rotationDegrees, mirror);
     SDL_FPoint center = C4_GetRectCenter(rect);
 
     for (int i = 0; i < 4; i++) {
-        vertices[i].position = C4_UI_RotatePoint(rawPoints[i], center, (float)shape->rotationDegrees);
+        vertices[i].position = C4_UI_RotatePoint(rawPoints[i], center, effectiveRotation);
     }
 
     // The order in which itll draw the indices. Basically this makes two triangles to form a rectangle
@@ -31,7 +32,7 @@ void C4_UI_DrawRectangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleSta
     SDL_RenderGeometry(renderer, NULL, vertices, 4, indices, 6);
 }
 
-void C4_UI_DrawRectangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer, float UIScale) {
+void C4_UI_DrawRectangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirroring mirror, SDL_Renderer* renderer) {
     if (!shape || !styleState || !renderer) {
         SDL_Log("Unable to draw rectangle borders. One or more required pointers are NULL");
         return;
@@ -41,7 +42,7 @@ void C4_UI_DrawRectangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_S
         return;
     }
 
-    int scaledBorderWidth = (int)(shape->borderWidth * UIScale);
+    int scaledBorderWidth = (int)(shape->borderWidth * 1.f);
     if (scaledBorderWidth < 0) {
         return;
     }
@@ -65,10 +66,11 @@ void C4_UI_DrawRectangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_S
     rawPoints[6] = (SDL_FPoint){rect.x + rect.w - borderWidth, rect.y + rect.h - borderWidth};
     rawPoints[7] = (SDL_FPoint){rect.x + borderWidth, rect.y + rect.h - borderWidth};
 
+    float effectiveRotation = C4_UI_GetMirroredRotation((float)shape->rotationDegrees, mirror);
     SDL_FPoint center = C4_GetRectCenter(rect);
 
     for (int i = 0; i < 8; i++) {
-        vertices[i].position = C4_UI_RotatePoint(rawPoints[i], center, (float)shape->rotationDegrees);
+        vertices[i].position = C4_UI_RotatePoint(rawPoints[i], center, effectiveRotation);
     }
 
     // The order in which itll draw the indices. Basically this makes a bunch of triangles to form the borders

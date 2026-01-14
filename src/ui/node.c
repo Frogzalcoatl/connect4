@@ -69,10 +69,10 @@ void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer) {
 
     switch (node->type) {
         case C4_UI_Type_Shape: {
-            C4_UI_DrawShape(node->absoluteRect, &node->shape, currentStyle, renderer, 1.f);
+            C4_UI_DrawShape(node->absoluteRect, &node->shape, currentStyle, node->mirror, renderer);
         }; break;
         case C4_UI_Type_Text: {
-            C4_UI_DrawText(node->absoluteRect, &node->text, currentStyle);
+            C4_UI_DrawText(node->absoluteRect, &node->text, currentStyle, node->mirror, renderer);
         }; break;
         default: break;
     }
@@ -140,10 +140,9 @@ bool C4_UI_Node_HandleMouseEvents(C4_UI_Node* node, SDL_Event* event) {
 
     C4_UI_ShapeType shapeType = node->type == C4_UI_Type_Shape ? node->shape.type : C4_UI_Shape_Rectangle;
 
-    // TODO: Maybe add rotation to text. The textures probably can be rotated pretty easily
     float rotationDegrees = node->type == C4_UI_Type_Shape ? node->shape.rotationDegrees : 0.f;
 
-    return C4_UI_Interaction_HandleMouseEvents(&node->input, event, shapeType, node->absoluteRect, rotationDegrees);
+    return C4_UI_Interaction_HandleMouseEvents(&node->input, event, shapeType, node->absoluteRect, rotationDegrees, node->mirror);
 }
 
 void C4_UI_Node_Update(C4_UI_Node* node, float deltaTime) {
@@ -325,6 +324,7 @@ C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) 
     node->spacing = 0;
     node->direction = C4_UI_Direction_Vertical;
     node->childrenAlign = C4_UI_Align_TopLeft;
+    node->mirror = C4_UI_Mirroring_None;
 
     node->navUp = NULL;
     node->navDown = NULL;

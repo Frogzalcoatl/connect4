@@ -2,4 +2,4 @@
 #include "SDL3/SDL.h"
 #include "Connect4/ui/node.h"
 
-void C4_UI_DrawShape(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, SDL_Renderer* renderer, float UIScale);
+void C4_UI_DrawShape(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirroring mirror, SDL_Renderer* renderer);
