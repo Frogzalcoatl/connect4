@@ -100,6 +100,7 @@ set(SDLIMAGE_LBM  OFF CACHE BOOL "Disable LBM"  FORCE)
 set(SDLIMAGE_PCX  OFF CACHE BOOL "Disable PCX"  FORCE)
 set(SDLIMAGE_PNM  OFF CACHE BOOL "Disable PNM"  FORCE)
 set(SDLIMAGE_QOI  OFF CACHE BOOL "Disable QOI"  FORCE)
+set(SDLIMAGE_STB  OFF CACHE BOOL "Disable STB"  FORCE)
 set(SDLIMAGE_TGA  OFF CACHE BOOL "Disable TGA"  FORCE)
 set(SDLIMAGE_XCF  OFF CACHE BOOL "Disable XCF"  FORCE)
 set(SDLIMAGE_XPM  OFF CACHE BOOL "Disable XPM"  FORCE)
@@ -139,6 +140,27 @@ set(SDLMIXER_STATIC ${SDL_STATIC_MODE} CACHE BOOL "Build static libraries" FORCE
 set(SDLMIXER_SAMPLES OFF CACHE BOOL "Build samples" FORCE)
 set(SDLMIXER_VENDORED ON CACHE BOOL "Use vendored libraries" FORCE)
 
+option(USE_ASSEMBLY_OPTIMIZATIONS "Enable YASM assembly optimizations" OFF)
+if(USE_ASSEMBLY_OPTIMIZATIONS)
+    set(SDLMIXER_MP3_MPG123 ON CACHE BOOL "Enable mpg123" FORCE)
+    set(SDLMIXER_MP3_MINIMP3 OFF CACHE BOOL "Disable minimp3" FORCE)
+else()
+    set(SDLMIXER_MP3_MPG123 OFF CACHE BOOL "Disable mpg123" FORCE)
+    set(SDLMIXER_MP3_MINIMP3 ON  CACHE BOOL "Enable minimp3" FORCE)
+endif()
+
+# Disabled formats (explicitly disable libflac to avoid YASM check)
+set(SDLMIXER_FLAC_LIBFLAC OFF CACHE BOOL "Disable libflac" FORCE)
+set(SDLMIXER_FLAC OFF CACHE BOOL "Disable FLAC" FORCE)
+set(SDLMIXER_MIDI OFF CACHE BOOL "Disable MIDI" FORCE)
+set(SDLMIXER_MOD OFF CACHE BOOL "Disable MOD"  FORCE)
+set(SDLMIXER_OPUS OFF CACHE BOOL "Disable OPUS" FORCE)
+set(SDLMIXER_WAVPACK OFF CACHE BOOL "Disable WavPack" FORCE)
+
+# Enabled formats
+set(SDLMIXER_OGG ON CACHE BOOL "Enable OGG" FORCE)
+set(SDLMIXER_MP3 ON CACHE BOOL "Enable MP3" FORCE)
+
 find_package(SDL3_mixer CONFIG QUIET)
 
 if(NOT SDL3_mixer_FOUND)
@@ -150,7 +172,20 @@ if(NOT SDL3_mixer_FOUND)
         GIT_SHALLOW OFF
         SYSTEM
     )
+
+    # Save previous settings
+    set(OLD_WARN_DEP ${CMAKE_WARN_DEPRECATED})
+    set(OLD_SUPPRESS_DEV ${CMAKE_SUPPRESS_DEVELOPER_WARNINGS})
+
+    # We must use CACHE FORCE to push this setting into the sub-project scopes (ogg/vorbis)
+    set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "Silence Deprecation Warnings" FORCE)
+    set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS ON CACHE BOOL "Silence Dev Warnings" FORCE)
+    
     FetchContent_MakeAvailable(SDL3_mixer)
+    
+    # Restore warnings for the rest of your project
+    set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "Silence Deprecation Warnings" FORCE)
+    set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS OFF CACHE BOOL "Silence Dev Warnings" FORCE)
 
     if(NOT TARGET SDL3_mixer::SDL3_mixer)
         if(TARGET SDL3_mixer)
