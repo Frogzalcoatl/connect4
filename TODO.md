@@ -1,7 +1,5 @@
 # TODO
 
-* Properly implement ui scale
-* Stop using SDL logical presentation
 * Look in to using SDL mixer (for audio) and SDL image (For better symbols. Maybe an image ui element)
 * Notification ui element
     * Do this one first bc the whole timed fade in / slide animation thing might require some new stuff that can be applied to other ui elements.

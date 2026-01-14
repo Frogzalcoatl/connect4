@@ -167,7 +167,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
         .type = C4_UI_Shape_Rectangle
     };
     buttons->input.OnCancel = C4_MenuScreen_ExitGame;
-    C4_UI_CenterInWindow(buttons, C4_UI_Axis_XY, game->presentationWidth, game->presentationHeight, game->UIScale);
+    C4_UI_CenterInWindow(buttons, C4_UI_Axis_XY, game->windowWidth, game->windowHeight, game->UIScale);
     C4_UI_Node_AlignChildren(buttons, C4_UI_Axis_X);
     C4_UI_Canvas_AddNode(canvas, buttons);
 
@@ -261,7 +261,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
         }
     );
     mirroredText->mirror = C4_UI_Mirror_X;
-    C4_UI_CenterInWindow(mirroredText, C4_UI_Axis_X, game->presentationWidth, game->presentationHeight, game->UIScale);
+    C4_UI_CenterInWindow(mirroredText, C4_UI_Axis_X, game->windowWidth, game->windowHeight, game->UIScale);
     C4_UI_Canvas_AddNode(canvas, mirroredText);
 
     screen->HandleWindowResize(screen, game->currentLayout);

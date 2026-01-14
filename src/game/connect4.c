@@ -79,19 +79,15 @@ void Connect4_Quit_Dependencies(void) {
     SDL_Quit();
 }
 
-static void C4_Game_UpdateWindowProperties(C4_Game* game, unsigned int actualWindowWidth, unsigned int actualWindowHeight) {
-    game->currentLayout = C4_UI_GetCurrentLayout(actualWindowWidth, actualWindowHeight);
-    if (game->currentLayout == C4_UI_LayoutType_Wide) {
-        game->presentationWidth = C4_WIDE_LAYOUT_BASE_WINDOW_WIDTH;
-        game->presentationHeight = C4_WIDE_LAYOUT_BASE_WINDOW_HEIGHT;
-    } else if (game->currentLayout == C4_UI_LayoutType_Tall) {
-        game->presentationWidth = C4_TALL_LAYOUT_BASE_WINDOW_WIDTH;
-        game->presentationHeight = C4_TALL_LAYOUT_BASE_WINDOW_HEIGHT;
-    } else {
-        game->presentationWidth = 0;
-        game->presentationHeight = 0;
-    }
-    SDL_SetRenderLogicalPresentation(game->renderer, game->presentationWidth, game->presentationHeight, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+static void C4_Game_UpdateWindowProperties(C4_Game* game, unsigned int windowWidth, unsigned int windowHeight) {
+    game->currentLayout = C4_UI_GetCurrentLayout(windowWidth, windowHeight);
+    
+    const float REFERENCE_HEIGHT = 1080.0f;
+    game->UIScale = (float)windowHeight / REFERENCE_HEIGHT * game->userScalePreference;
+    if (game->UIScale <= 0.001f) game->UIScale = 1.0f;
+
+    game->windowWidth = windowWidth;
+    game->windowHeight = windowHeight;
 }
 
 static bool C4_Game_WindowSetup(C4_Game* game) {
@@ -238,9 +234,7 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
 
     game->board = C4_Board_Create(boardWidth, boardHeight, amountToWin);
 
-    // C4_Game_TouchModeSetup();
-
-    game->UIScale = 1.f;
+    game->userScalePreference = 1.f;
     game->running = false;
 
     if (!C4_Game_CreateScreens(game)) {

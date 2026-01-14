@@ -18,10 +18,11 @@ typedef struct {
     C4_ScreenType currentScreenType;
     bool running;
     bool isFullscreen;
+    float userScalePreference;
     float UIScale;
     C4_UI_LayoutType currentLayout;
-    unsigned int presentationWidth;
-    unsigned int presentationHeight;
+    unsigned int windowWidth;
+    unsigned int windowHeight;
 } C4_Game;
 
 C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountToWin);
