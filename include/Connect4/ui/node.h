@@ -74,9 +74,9 @@ void C4_UI_Node_PushNode(C4_UI_Node* head, C4_UI_Node* newNode);
 void C4_UI_Node_Reset(C4_UI_Node* node);
 void C4_UI_Node_CleanupResources(C4_UI_Node* node);
 C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config);
-void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString, float UIScale);
-void C4_UI_Node_ChangeFont(C4_UI_Node* node, TTF_Font* newFont, float UIScale);
-void C4_UI_Node_SetTextWrap(C4_UI_Node* node, int widthInPixels, float UIScale);
+void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString);
+void C4_UI_Node_ChangeFont(C4_UI_Node* node, TTF_Font* newFont);
+void C4_UI_Node_SetTextWrap(C4_UI_Node* node, int widthInPixels);
 
 void C4_UI_Node_AlignChildren(C4_UI_Node* node, C4_UI_Axis axis);
 void C4_UI_Node_ApplyChildSpacing(C4_UI_Node* parent);

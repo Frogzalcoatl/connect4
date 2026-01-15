@@ -12,11 +12,16 @@ void C4_UI_Node_CleanupResources(C4_UI_Node* node) {
     }
 
     if (
-        node->type == C4_UI_Type_Text &&
-        node->text.textObject
+        node->type == C4_UI_Type_Text
     ) {
-        TTF_DestroyText(node->text.textObject);
-        node->text.textObject = NULL;
+        if (node->text.textObject) {
+            TTF_DestroyText(node->text.textObject);
+            node->text.textObject = NULL;
+        }
+        if (node->text.storage) {
+            free(node->text.storage);
+            node->text.storage = NULL;
+        }
     }
 
     C4_UI_Node* child = node->firstChild;
@@ -180,7 +185,7 @@ void C4_UI_Node_PushNode(C4_UI_Node* head, C4_UI_Node* newNode) {
     newNode->prevSibling = current;
 }
 
-static void C4_UI_UpdateTextRect(C4_UI_Node* node, float UIScale) {
+static void C4_UI_UpdateTextRect(C4_UI_Node* node) {
     if (!node || !node->text.textObject) {
         SDL_Log("Unable to update text rect. One or more required pointers are NULL");
         return;
@@ -193,12 +198,12 @@ static void C4_UI_UpdateTextRect(C4_UI_Node* node, float UIScale) {
 
     int w, h;
     if (TTF_GetTextSize(node->text.textObject, &w, &h)) {
-        node->rect.w = (float)w / UIScale;
-        node->rect.h = (float)h / UIScale;
+        node->rect.w = (float)w;
+        node->rect.h = (float)h;
     }
 }
 
-void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString, float UIScale) {
+void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString) {
     if (!node || !node->text.textObject) {
         SDL_Log("Unable to set text string. One or more required pointers are NULL");
         return;
@@ -209,13 +214,21 @@ void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString, float UIS
         return;
     }
 
+    if (node->text.storage && node->text.storage != newString) {
+        free(node->text.storage);
+    }
+
     node->text.storage = SDL_strdup(newString);
 
     TTF_SetTextString(node->text.textObject, node->text.storage, 0);
-    C4_UI_UpdateTextRect(node, UIScale);
+    C4_UI_UpdateTextRect(node);
+    
+    if (node->parent) {
+        C4_UI_Node_AlignChildren(node->parent, C4_UI_Axis_XY);
+    }
 }
 
-void C4_UI_Node_ChangeFont(C4_UI_Node* node, TTF_Font* newFont, float UIScale) {
+void C4_UI_Node_ChangeFont(C4_UI_Node* node, TTF_Font* newFont) {
     if (!node || !node->text.textObject) {
         SDL_Log("Unable to change node font. One or more required pointers are NULL");
         return;
@@ -231,10 +244,10 @@ void C4_UI_Node_ChangeFont(C4_UI_Node* node, TTF_Font* newFont, float UIScale) {
     } else {
         node->text.font = newFont;
     }
-    C4_UI_UpdateTextRect(node, UIScale);
+    C4_UI_UpdateTextRect(node);
 }
 
-void C4_UI_Node_SetTextWrap(C4_UI_Node* node, int widthInPixels, float UIScale) {
+void C4_UI_Node_SetTextWrap(C4_UI_Node* node, int widthInPixels) {
     if (!node || !node->text.textObject) {
         SDL_Log("Unable to set text wrap. One or more required pointers are NULL");
         return;
@@ -248,7 +261,7 @@ void C4_UI_Node_SetTextWrap(C4_UI_Node* node, int widthInPixels, float UIScale) 
     if (!TTF_SetTextWrapWidth(node->text.textObject, widthInPixels)) {
         SDL_Log("Failed to set wrap width: %s", SDL_GetError());
     }
-    C4_UI_UpdateTextRect(node, UIScale);
+    C4_UI_UpdateTextRect(node);
 }
 
 C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) {
@@ -275,7 +288,7 @@ C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) 
         node->text.font = text->font;
 
         size_t strLen = strlen(config->text.text) + 1;
-        node->text.storage = C4_Arena_Alloc(arena, strLen);
+        node->text.storage = calloc(1, strLen);
         strcpy(node->text.storage, config->text.text);
 
         node->text.textObject = TTF_CreateText(text->textEngine, text->font, node->text.storage, 0);
@@ -287,7 +300,7 @@ C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) 
             config->text.UIScale = 0.1f;
         }
 
-        C4_UI_UpdateTextRect(node, config->text.UIScale);
+        C4_UI_UpdateTextRect(node);
         node->rect.x = config->text.posX;
         node->rect.y = config->text.posY;
     }

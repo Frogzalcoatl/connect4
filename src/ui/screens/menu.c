@@ -44,7 +44,7 @@ static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutT
 // Forward declaration just for the purpose of organization
 static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game);
 
-static void UpdateControllerText(C4_UI_Node* controllerList, C4_UI_Node* activeControllerText, float UIScale) {
+static void UpdateControllerText(C4_UI_Node* controllerList, C4_UI_Node* activeControllerText) {
     char* controllerArr[C4_MAX_GAMEPADS];
     C4_Gamepad_GetNames(controllerArr, C4_MAX_GAMEPADS);
 
@@ -61,14 +61,14 @@ static void UpdateControllerText(C4_UI_Node* controllerList, C4_UI_Node* activeC
         free(controllerText);
     }
     
-    C4_UI_Node_SetTextString(controllerList, header, UIScale);
+    C4_UI_Node_SetTextString(controllerList, header);
 
     char activeController[128];
     C4_Gamepad_GetActiveName(activeController, sizeof(activeController));
     char displayText[256] = "Active: ";
     strcat(displayText, activeController);
 
-    C4_UI_Node_SetTextString(activeControllerText, displayText, UIScale);
+    C4_UI_Node_SetTextString(activeControllerText, displayText);
 }
 
 static void C4_MenuScreen_ExitGame(void* context) {
@@ -88,7 +88,7 @@ static void C4_MenuScreen_HandleEvent(C4_UI_Screen* screen, SDL_Event* event, fl
         event->type == SDL_EVENT_GAMEPAD_ADDED ||
         event->type == SDL_EVENT_GAMEPAD_REMOVED
     ) {
-        UpdateControllerText(data->controllerList, data->activeControllerText, data->game->UIScale);
+        UpdateControllerText(data->controllerList, data->activeControllerText);
     }
 }
 
@@ -97,7 +97,7 @@ static void C4_MenuScreen_OnEnter(C4_UI_Screen* screen) {
         return;
     }
     C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
-    UpdateControllerText(data->controllerList, data->activeControllerText, data->game->UIScale);
+    UpdateControllerText(data->controllerList, data->activeControllerText);
 }
 
 C4_UI_Screen* C4_MenuScreen_Create(C4_Game* game) {
@@ -230,7 +230,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     );
     C4_UI_Canvas_AddNode(canvas, data->activeControllerText);
     
-    UpdateControllerText(data->controllerList, data->activeControllerText, game->UIScale);
+    UpdateControllerText(data->controllerList, data->activeControllerText);
     
     return true;
 }
