@@ -1,7 +1,7 @@
 #pragma once
 #include "Connect4/ui/node.h"
 
-typedef struct {
+typedef struct C4_UI_Button_Config {
     C4_UI_Style* style;
     SDL_FRect rect;
     float UIScale;
@@ -14,7 +14,7 @@ typedef struct {
 
 C4_UI_Node* C4_UI_Button_Create(C4_MemoryArena* arena, C4_UI_Button_Config* config);
 
-typedef struct {
+typedef struct C4_UI_Buttons_Config {
     float posX;
     float posY;
     float UIScale;

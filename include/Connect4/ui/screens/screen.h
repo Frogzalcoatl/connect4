@@ -3,14 +3,14 @@
 #include "Connect4/ui/canvas.h"
 #include <stdlib.h>
 
-typedef enum {
+typedef enum C4_ScreenType {
     C4_ScreenType_Menu,
     C4_ScreenType_Game,
     C4_ScreenType_Settings,
     C4_ScreenType_ScreenCount
 } C4_ScreenType;
 
-typedef enum {
+typedef enum C4_UI_LayoutType {
     C4_UI_LayoutType_None,
     C4_UI_LayoutType_Wide,
     C4_UI_LayoutType_Tall

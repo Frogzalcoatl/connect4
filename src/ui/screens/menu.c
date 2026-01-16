@@ -73,9 +73,14 @@ static void UpdateControllerText(C4_MenuScreenData* data) {
     C4_UI_AlignInWindow(data->controllerInfo, C4_UI_Align_BottomLeft, (unsigned int)refWindowDim.x, (unsigned int)refWindowDim.y);
 }
 
-static void C4_MenuScreen_ExitGame(void* context) {
+static void C4_MenuScreen_CloseWindow(void* context) {
     (void)context;
     C4_PushEvent_CloseWindow(false);
+}
+
+static void C4_MenuScreen_CloseWindowAndTask(void* context) {
+    (void)context;
+    C4_PushEvent_CloseWindow(true);
 }
 
 static void C4_MenuScreen_HandleEvent(C4_UI_Screen* screen, SDL_Event* event, float UIScale) {
@@ -196,8 +201,8 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
         .rotationDegrees = 0,
         .type = C4_UI_Shape_Rectangle
     };
-    data->buttons->input.OnCancel = C4_MenuScreen_ExitGame;
-    data->buttons->lastChild->input.OnPress = C4_MenuScreen_ExitGame;
+    data->buttons->input.OnCancel = C4_MenuScreen_CloseWindow;
+    data->buttons->lastChild->input.OnPress = C4_MenuScreen_CloseWindowAndTask;
     C4_UI_Canvas_AddNode(canvas, data->buttons);
 
     data->controllerInfo = C4_UI_Node_Create(

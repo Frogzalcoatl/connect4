@@ -3,7 +3,7 @@
 #include "Connect4/ui/node.h"
 #include "SDL3/SDL.h"
 
-typedef struct {
+typedef struct C4_UI_Canvas {
     SDL_Renderer* renderer;
     TTF_TextEngine* textEngine;
     C4_UI_Node* root;

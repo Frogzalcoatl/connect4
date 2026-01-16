@@ -10,7 +10,7 @@ static SDL_Gamepad* activeGamepad = NULL;
 
 static bool onlyAcceptInputFromActiveGamepad = true;
 
-static SDL_Scancode scancodeToInputVerb[C4_INPUT_VERB_COUNT][C4_INPUT_MAX_SCANCODE_MAPPINGS] = {0};
+static C4_VerbMapping verbMappings[C4_INPUT_VERB_COUNT] = {0};
 
 typedef struct {
     bool isDown;
@@ -31,16 +31,29 @@ void C4_Input_ConnectScancodeToVerb(C4_InputVerb inputVerb, SDL_Scancode scancod
         SDL_Log("Unable to connect verb scancode. Scancode index %d is outside of bounds", scancode);
         return;
     }
-    for (int i = 0; i < C4_INPUT_MAX_SCANCODE_MAPPINGS; i++) {
-        if (scancodeToInputVerb[inputVerb][i] == 0) {
-            scancodeToInputVerb[inputVerb][i] = scancode;
+    C4_VerbMapping* map = &verbMappings[inputVerb];
+    for (int i = 0; i < map->count; i++) {
+        if (map->scancodes[i] == scancode) {
             return;
         }
     }
-    SDL_Log(
-        "Unable to connect verb index %d to scancode index %d. Verb already has %d mappings. Consider increasing the max in gamepad.h.",
-        inputVerb, scancode, C4_INPUT_MAX_SCANCODE_MAPPINGS
-    );
+    if (map->count == map->capacity) {
+        int newCapacity = (map->capacity == 0) ? 4 : map->capacity * 2;
+
+        // Realloc attemps to expand the memory block. If it cant, the data is moved to a new spot.
+        SDL_Scancode* newBlock = realloc(map->scancodes, newCapacity * sizeof(SDL_Scancode));
+
+        if (!newBlock) {
+            SDL_Log("Unable to add key mapping. Out of memory");
+            return;
+        }
+
+        map->scancodes = newBlock;
+        map->capacity = newCapacity;
+    }
+
+    map->scancodes[map->count] = scancode;
+    map->count++;
 }
 
 void C4_Input_DisconnectScancodeFromVerb(C4_InputVerb inputVerb, SDL_Scancode scancode) {
@@ -52,9 +65,16 @@ void C4_Input_DisconnectScancodeFromVerb(C4_InputVerb inputVerb, SDL_Scancode sc
         SDL_Log("Unable to set verb scancode. Scancode index %d is outside of bounds", scancode);
         return;
     }
-    for (int i = 0; i < C4_INPUT_MAX_SCANCODE_MAPPINGS; i++) {
-        if (scancodeToInputVerb[inputVerb][i] == scancode) {
-            scancodeToInputVerb[inputVerb][i] = 0;
+
+    C4_VerbMapping* map = &verbMappings[inputVerb];
+
+    for (int i = 0; i < map->count; i++) {
+        if (map->scancodes[i] == scancode) {
+            // Move the last item in the array to the removed scancode index
+            if (i != map->count - 1) {
+                map->scancodes[i] = map->scancodes[map->count - 1];
+            }
+            map->count--;
             return;
         }
     }
@@ -62,6 +82,12 @@ void C4_Input_DisconnectScancodeFromVerb(C4_InputVerb inputVerb, SDL_Scancode sc
 
 void C4_Input_Init(void) {
     C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_CANCEL, SDL_SCANCODE_ESCAPE);
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_NAV_UP, SDL_SCANCODE_UP);
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_NAV_DOWN, SDL_SCANCODE_DOWN);
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_NAV_RIGHT, SDL_SCANCODE_RIGHT);
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_NAV_LEFT, SDL_SCANCODE_LEFT);
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_CONFIRM, SDL_SCANCODE_RETURN);
+    C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_CONFIRM, SDL_SCANCODE_KP_ENTER);
 }
 
 void C4_Gamepad_OnlyAcceptInputFromActiveGamepad(bool value) {
@@ -69,10 +95,11 @@ void C4_Gamepad_OnlyAcceptInputFromActiveGamepad(bool value) {
 }
 
 static C4_InputVerb C4_MapScancodeToVerb(SDL_Scancode scancode) {
-    for (C4_InputVerb inputVerb = 1; inputVerb < C4_INPUT_VERB_COUNT; inputVerb++) {
-        for (int i = 0; i < C4_INPUT_MAX_SCANCODE_MAPPINGS; i++) {
-            if (scancode == scancodeToInputVerb[inputVerb][i]) {
-                return inputVerb;
+    for (int i = 1; i < C4_INPUT_VERB_COUNT; i++) {
+        C4_VerbMapping* map = &verbMappings[i];
+        for (int j = 0; j < map->count; j++) {
+            if (map->scancodes[j] == scancode) {
+                return (C4_InputVerb)i;
             }
         }
     } 
@@ -121,6 +148,15 @@ void C4_Input_Shutdown(void) {
     if (activeGamepad) {
         SDL_CloseGamepad(activeGamepad);
         activeGamepad = NULL;
+    }
+
+    for (int i = 0; i < C4_INPUT_VERB_COUNT; i++) {
+        if (verbMappings[i].scancodes) {
+            free(verbMappings[i].scancodes);
+            verbMappings[i].scancodes = NULL;
+        }
+        verbMappings[i].count = 0;
+        verbMappings[i].capacity = 0;
     }
 }
 

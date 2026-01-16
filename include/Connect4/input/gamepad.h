@@ -3,8 +3,6 @@
 
 #define C4_MAX_GAMEPADS 8
 
-#define C4_INPUT_MAX_SCANCODE_MAPPINGS 4
-
 typedef enum C4_InputVerb {
     C4_INPUT_VERB_NONE,
     C4_INPUT_VERB_NAV_UP,
@@ -15,6 +13,12 @@ typedef enum C4_InputVerb {
     C4_INPUT_VERB_CANCEL,
     C4_INPUT_VERB_COUNT
 } C4_InputVerb;
+
+typedef struct C4_VerbMapping {
+    SDL_Scancode* scancodes;
+    int count;
+    int capacity;
+} C4_VerbMapping;
 
 typedef enum C4_InputState {
     C4_INPUT_STATE_PRESSED,

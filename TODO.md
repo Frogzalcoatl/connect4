@@ -4,7 +4,6 @@
 * More UIScaling cleanup
     * Define a window resolution. Try to never even check windowWidth or height in menu.c.
     * Calculate the scale fastor once per frame in the main drawing loop of the canvas.
-* Use a linked list or dynamic array for scancode to verb mappings. Honestly leaning toward dynamic array. Just curious how to efficiently make one in C.
 * Stop embedding assets. Will become problematic once more are added
     * combine files into a .pak and use that instead.
 * Implement SDL_image
