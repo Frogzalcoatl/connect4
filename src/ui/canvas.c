@@ -118,7 +118,7 @@ static bool C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event)
     }
 
     if (!canvas->focusedNode) {
-        C4_UI_Node* current = canvas->root;
+        current = canvas->root;
         while (current) {
             C4_UI_Node* result = C4_UI_Node_FindFocusable(current);
             if (result) {

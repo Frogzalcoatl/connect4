@@ -8,8 +8,7 @@
 typedef struct {
     C4_Game* game;
     C4_UI_Node* buttons;
-    C4_UI_Node* controllerList;
-    C4_UI_Node* activeControllerText;
+    C4_UI_Node* controllerInfo;
     C4_UI_Node* title;
 } C4_MenuScreenData;
 
@@ -34,41 +33,44 @@ static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutT
     SDL_FPoint refWindowDim = C4_GetReferenceWindowDimensions(game->windowWidth, game->windowHeight, game->UIScale);
 
     C4_UI_Buttons_SetChildrenButtonSizes(data->buttons, C4_FMin(refWindowDim.x - 60, 800.f), 100.f);
-
-    data->activeControllerText->rect.y = refWindowDim.y - 40.f;
-
     C4_UI_CenterInWindow(data->buttons, C4_UI_Axis_XY, (unsigned int)refWindowDim.x, (unsigned int)refWindowDim.y);
     C4_UI_Node_AlignChildren(data->buttons, C4_UI_Axis_X);
+
+    C4_UI_AlignInWindow(data->controllerInfo, C4_UI_Align_BottomLeft, (unsigned int)refWindowDim.x, (unsigned int)refWindowDim.y);
+
+    // float bounceMultiplier = C4_GetBPMBounce(85);
+    C4_UI_CenterInWindow(data->title, C4_UI_Axis_X, (unsigned int)refWindowDim.x, (unsigned int)refWindowDim.y);
 }
 
 // Forward declaration just for the purpose of organization
 static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game);
 
-static void UpdateControllerText(C4_UI_Node* controllerList, C4_UI_Node* activeControllerText) {
+static void UpdateControllerText(C4_MenuScreenData* data) {
+    char displayText[2048] = "Controllers:\n";
+
     char* controllerArr[C4_MAX_GAMEPADS];
     C4_Gamepad_GetNames(controllerArr, C4_MAX_GAMEPADS);
-
     char* controllerText = C4_JoinStrings((const char**)controllerArr, C4_MAX_GAMEPADS, "\n");
     
-    char header[2048] = "Controllers:\n";
     if (controllerText && *controllerText != '\0') {
-        strcat(header, controllerText);
+        strcat(displayText, controllerText);
     } else {
-        strcat(header, "None");
+        strcat(displayText, "None");
     }
 
     if (controllerText) {
         free(controllerText);
     }
-    
-    C4_UI_Node_SetTextString(controllerList, header);
+
+    strcat(displayText, "\n\nCurrent: ");
 
     char activeController[128];
     C4_Gamepad_GetActiveName(activeController, sizeof(activeController));
-    char displayText[256] = "Active: ";
     strcat(displayText, activeController);
-
-    C4_UI_Node_SetTextString(activeControllerText, displayText);
+    
+    C4_UI_Node_SetTextString(data->controllerInfo, displayText);
+    SDL_FPoint refWindowDim = C4_GetReferenceWindowDimensions(data->game->windowWidth, data->game->windowHeight, data->game->UIScale);
+    C4_UI_AlignInWindow(data->controllerInfo, C4_UI_Align_BottomLeft, (unsigned int)refWindowDim.x, (unsigned int)refWindowDim.y);
 }
 
 static void C4_MenuScreen_ExitGame(void* context) {
@@ -88,7 +90,7 @@ static void C4_MenuScreen_HandleEvent(C4_UI_Screen* screen, SDL_Event* event, fl
         event->type == SDL_EVENT_GAMEPAD_ADDED ||
         event->type == SDL_EVENT_GAMEPAD_REMOVED
     ) {
-        UpdateControllerText(data->controllerList, data->activeControllerText);
+        UpdateControllerText(data);
     }
 }
 
@@ -97,7 +99,7 @@ static void C4_MenuScreen_OnEnter(C4_UI_Screen* screen) {
         return;
     }
     C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
-    UpdateControllerText(data->controllerList, data->activeControllerText);
+    UpdateControllerText(data);
 }
 
 C4_UI_Screen* C4_MenuScreen_Create(C4_Game* game) {
@@ -139,19 +141,20 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     float UIScale = game->UIScale;
 
     data->title = C4_UI_Node_Create(
-        &canvas->arena, &(C4_UI_Node_Config){
+        &canvas->arena, &(C4_UI_Node_Config) {
             .type = C4_UI_Type_Text,
             .style = &C4_UI_THEME_DEFAULT.style,
-            .text = (C4_UI_Data_Text_Config) {
+            .text = &(C4_UI_Data_Text_Config) {
                 .posX = 0.f,
                 .posY = 0.f,
                 .UIScale = UIScale,
                 .text = "Connect4",
-                .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 100.f * UIScale, TTF_STYLE_BOLD),
+                .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 200.f, TTF_STYLE_BOLD),
                 .textEngine = game->textEngine
             }
         }
-    ); 
+    );
+    C4_UI_Canvas_AddNode(canvas, data->title);
 
     #define BUTTON_COUNT 4
     char* BUTTON_STRINGS[BUTTON_COUNT] = {
@@ -160,7 +163,6 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
         "Settings",
         "Quit"
     };
-
 
     C4_UI_Button_Config buttonConfigs[BUTTON_COUNT];
     C4_UI_Buttons_CreateConfigArr(
@@ -171,7 +173,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
             .shapeType = C4_UI_Shape_Rectangle,
             .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
             .text = "",
-            .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 48.f * UIScale, TTF_STYLE_BOLD),
+            .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 48.f, TTF_STYLE_BOLD),
             .textEngine = game->textEngine
         },
         BUTTON_STRINGS, BUTTON_COUNT, buttonConfigs
@@ -198,39 +200,23 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     data->buttons->lastChild->input.OnPress = C4_MenuScreen_ExitGame;
     C4_UI_Canvas_AddNode(canvas, data->buttons);
 
-    data->controllerList = C4_UI_Node_Create(
+    data->controllerInfo = C4_UI_Node_Create(
         &canvas->arena,
         &(C4_UI_Node_Config){
             .type = C4_UI_Type_Text,
             .style = &C4_UI_THEME_DEFAULT.style,
-            .text = (C4_UI_Data_Text_Config){
+            .text = &(C4_UI_Data_Text_Config){
                 .posX = 0.f,
                 .posY = 0.f,
                 .text = "",
-                .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f * UIScale, TTF_STYLE_NORMAL),
+                .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f, TTF_STYLE_NORMAL),
                 .textEngine = game->textEngine
             }
         }
     );
-    C4_UI_Canvas_AddNode(canvas, data->controllerList);
-
-    data->activeControllerText = C4_UI_Node_Create(
-        &canvas->arena,
-        &(C4_UI_Node_Config){
-            .type = C4_UI_Type_Text,
-            .style = &C4_UI_THEME_DEFAULT.style,
-            .text = (C4_UI_Data_Text_Config){
-                .posX = 0.f,
-                .posY = 0.f,
-                .text = "",
-                .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 32.f * UIScale, TTF_STYLE_NORMAL),
-                .textEngine = game->textEngine
-            }
-        }
-    );
-    C4_UI_Canvas_AddNode(canvas, data->activeControllerText);
+    C4_UI_Canvas_AddNode(canvas, data->controllerInfo);
     
-    UpdateControllerText(data->controllerList, data->activeControllerText);
+    UpdateControllerText(data);
     
     return true;
 }

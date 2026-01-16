@@ -58,8 +58,8 @@ typedef struct C4_UI_Node_Config {
     C4_UI_Type type;
     C4_UI_Style* style;
     union {
-        C4_UI_Data_Shape_Config shape;
-        C4_UI_Data_Text_Config text;
+        C4_UI_Data_Shape_Config* shape;
+        C4_UI_Data_Text_Config* text;
     };
 } C4_UI_Node_Config;
 
@@ -82,3 +82,4 @@ void C4_UI_Node_AlignChildren(C4_UI_Node* node, C4_UI_Axis axis);
 void C4_UI_Node_ApplyChildSpacing(C4_UI_Node* parent);
 void C4_UI_Node_ClampToWindow(C4_UI_Node* node, unsigned int windowWidth, unsigned int windowHeight);
 void C4_UI_CenterInWindow(C4_UI_Node* node, C4_UI_Axis axis, unsigned int windowWidth, unsigned int windowHeight);
+void C4_UI_AlignInWindow(C4_UI_Node* node, C4_UI_Align align, unsigned int windowWidth, unsigned int windowHeight);

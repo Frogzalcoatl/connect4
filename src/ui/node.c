@@ -185,7 +185,7 @@ void C4_UI_Node_PushNode(C4_UI_Node* head, C4_UI_Node* newNode) {
     newNode->prevSibling = current;
 }
 
-static void C4_UI_UpdateTextRect(C4_UI_Node* node) {
+static void C4_UI_Node_UpdateTextRect(C4_UI_Node* node) {
     if (!node || !node->text.textObject) {
         SDL_Log("Unable to update text rect. One or more required pointers are NULL");
         return;
@@ -221,11 +221,11 @@ void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString) {
     node->text.storage = SDL_strdup(newString);
 
     TTF_SetTextString(node->text.textObject, node->text.storage, 0);
-    C4_UI_UpdateTextRect(node);
     
     if (node->parent) {
         C4_UI_Node_AlignChildren(node->parent, C4_UI_Axis_XY);
     }
+    C4_UI_Node_UpdateTextRect(node);
 }
 
 void C4_UI_Node_ChangeFont(C4_UI_Node* node, TTF_Font* newFont) {
@@ -244,7 +244,7 @@ void C4_UI_Node_ChangeFont(C4_UI_Node* node, TTF_Font* newFont) {
     } else {
         node->text.font = newFont;
     }
-    C4_UI_UpdateTextRect(node);
+    C4_UI_Node_UpdateTextRect(node);
 }
 
 void C4_UI_Node_SetTextWrap(C4_UI_Node* node, int widthInPixels) {
@@ -261,7 +261,7 @@ void C4_UI_Node_SetTextWrap(C4_UI_Node* node, int widthInPixels) {
     if (!TTF_SetTextWrapWidth(node->text.textObject, widthInPixels)) {
         SDL_Log("Failed to set wrap width: %s", SDL_GetError());
     }
-    C4_UI_UpdateTextRect(node);
+    C4_UI_Node_UpdateTextRect(node);
 }
 
 C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) {
@@ -278,31 +278,39 @@ C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) 
     node->type = config->type;
 
     if (node->type == C4_UI_Type_Shape) {
-        node->shape.type = config->shape.type;
+        if (!config->shape) {
+            SDL_Log("Tried to create node of type shape without matching config");
+            return NULL;
+        }
+        node->shape.type = config->shape->type;
         node->shape.rotationDegrees = 0.0f;
-        node->shape.borderWidth = config->shape.borderWidth;
-        node->rect = config->shape.rect;
+        node->shape.borderWidth = config->shape->borderWidth;
+        node->rect = config->shape->rect;
         
     } else if (node->type == C4_UI_Type_Text) {
-        C4_UI_Data_Text_Config* text = &config->text;
+        if (!config->text) {
+            SDL_Log("Tried to create node of type text without matching config");
+            return NULL;
+        }
+        C4_UI_Data_Text_Config* text = config->text;
         node->text.font = text->font;
 
-        size_t strLen = strlen(config->text.text) + 1;
+        size_t strLen = strlen(config->text->text) + 1;
         node->text.storage = calloc(1, strLen);
-        strcpy(node->text.storage, config->text.text);
+        strcpy(node->text.storage, config->text->text);
 
         node->text.textObject = TTF_CreateText(text->textEngine, text->font, node->text.storage, 0);
 
         SDL_Color color = config->style->inactive.text;
         TTF_SetTextColor(node->text.textObject, color.r, color.g, color.b, color.a);
 
-        if (config->text.UIScale <= 0.1f) {
-            config->text.UIScale = 0.1f;
+        if (config->text->UIScale <= 0.1f) {
+            config->text->UIScale = 0.1f;
         }
 
-        C4_UI_UpdateTextRect(node);
-        node->rect.x = config->text.posX;
-        node->rect.y = config->text.posY;
+        C4_UI_Node_UpdateTextRect(node);
+        node->rect.x = config->text->posX;
+        node->rect.y = config->text->posY;
     }
 
     node->parent = NULL;
@@ -351,6 +359,60 @@ C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) 
     return node;
 }
 
+static void C4_UI_AlignHelper(
+    SDL_FPoint* newPos,
+    SDL_FRect rect,
+    C4_UI_Align alignType,
+    float minChildX,
+    float minChildY,
+    float maxChildX,
+    float maxChildY,
+    float parentCenterX,
+    float parentCenterY
+) {
+    if (!newPos) {
+        SDL_Log("Unable to run ui align helper. newPos pointer is NULL");
+        return;
+    }
+    switch (alignType) {
+        case C4_UI_Align_TopLeft: {
+            newPos->x = minChildX;
+            newPos->y = minChildY;
+        }; break;
+        case C4_UI_Align_Top: {
+            newPos->x = parentCenterX - rect.w / 2.f;
+            newPos->y = minChildY;
+        }; break;
+        case C4_UI_Align_TopRight: {
+            newPos->x = maxChildX - rect.w;
+            newPos->y = minChildY;
+        }; break;
+        case C4_UI_Align_CenterLeft: {
+            newPos->x = minChildX;
+            newPos->y = parentCenterY - rect.h / 2.f;
+        }; break;
+        case C4_UI_Align_Center: {
+            newPos->x = parentCenterX - rect.w / 2.f;
+            newPos->y = parentCenterY - rect.h / 2.f;
+        }; break;
+        case C4_UI_Align_CenterRight: {
+            newPos->x = maxChildX - rect.w;
+            newPos->y = parentCenterY - rect.h / 2.f;
+        }; break;
+        case C4_UI_Align_BottomLeft: {
+            newPos->x = minChildX;
+            newPos->y = maxChildY - rect.h;
+        }; break;
+        case C4_UI_Align_Bottom: {
+            newPos->x = parentCenterX - rect.w / 2.f;
+            newPos->y = maxChildY - rect.h;
+        } case C4_UI_Align_BottomRight: {
+            newPos->x = maxChildX - rect.w;
+            newPos->y = maxChildY - rect.h;
+        }
+    }
+}
+
 void C4_UI_Node_AlignChildren(C4_UI_Node* node, C4_UI_Axis axis) {
     if (!node) {
         SDL_Log("Unable to align node children. Node is NULL");
@@ -374,43 +436,17 @@ void C4_UI_Node_AlignChildren(C4_UI_Node* node, C4_UI_Axis axis) {
     C4_UI_Node* current = node->firstChild;
     while (current) {
         SDL_FPoint newPos;
-        switch (node->childrenAlign) {
-            case C4_UI_Align_TopLeft: {
-                newPos.x = minChildX;
-                newPos.y = minChildY;
-            }; break;
-            case C4_UI_Align_Top: {
-                newPos.x = parentCenterX - current->rect.w / 2.f;
-                newPos.y = minChildY;
-            }; break;
-            case C4_UI_Align_TopRight: {
-                newPos.x = maxChildX - current->rect.w;
-                newPos.y = minChildY;
-            }; break;
-            case C4_UI_Align_CenterLeft: {
-                newPos.x = minChildX;
-                newPos.y = parentCenterY - current->rect.h / 2.f;
-            }; break;
-            case C4_UI_Align_Center: {
-                newPos.x = parentCenterX - current->rect.w / 2.f;
-                newPos.y = parentCenterY - current->rect.h / 2.f;
-            }; break;
-            case C4_UI_Align_CenterRight: {
-                newPos.x = maxChildX - current->rect.w;
-                newPos.y = parentCenterY - current->rect.h / 2.f;
-            }; break;
-            case C4_UI_Align_BottomLeft: {
-                newPos.x = minChildX;
-                newPos.y = maxChildY - current->rect.h;
-            }; break;
-            case C4_UI_Align_Bottom: {
-                newPos.x = parentCenterX - current->rect.w / 2.f;
-                newPos.y = maxChildY - current->rect.h;
-            } case C4_UI_Align_BottomRight: {
-                newPos.x = maxChildX - current->rect.w;
-                newPos.y = maxChildY - current->rect.h;
-            }
-        }
+        C4_UI_AlignHelper(
+            &newPos,
+            current->rect,
+            node->childrenAlign,
+            minChildX,
+            minChildY,
+            maxChildX,
+            maxChildY,
+            parentCenterX,
+            parentCenterY
+        );
         if (alignX) {
             current->rect.x = newPos.x;
         }
@@ -424,6 +460,11 @@ void C4_UI_Node_AlignChildren(C4_UI_Node* node, C4_UI_Axis axis) {
 void C4_UI_Node_ApplyChildSpacing(C4_UI_Node* parent) {
     if (!parent) {
         SDL_Log("Unable to apply child spacing. Parent is NULL");
+        return;
+    }
+
+    if (!parent->firstChild) {
+        SDL_Log("Unable to apply child spacing. Node does not have any children");
         return;
     }
 
@@ -497,6 +538,27 @@ void C4_UI_CenterInWindow(C4_UI_Node* node, C4_UI_Axis axis, unsigned int window
     }
 
     C4_UI_Node_ClampToWindow(node, windowWidth, windowHeight);
+}
+
+void C4_UI_AlignInWindow(C4_UI_Node* node, C4_UI_Align align, unsigned int windowWidth, unsigned int windowHeight) {
+    if (!node) {
+        SDL_Log("Unable to align node in window. Node is NULL");
+        return;
+    }
+    SDL_FPoint newPos;
+    C4_UI_AlignHelper(
+        &newPos,
+        node->rect,
+        align,
+        0.f,
+        0.f,
+        (float)windowWidth,
+        (float)windowHeight,
+        windowWidth / 2.f,
+        windowHeight / 2.f
+    );
+    node->rect.x = newPos.x;
+    node->rect.y = newPos.y;
 }
 
 void C4_UI_Node_Reset(C4_UI_Node* node) {

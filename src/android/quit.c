@@ -22,5 +22,7 @@ void Android_QuitTask(bool removeTask) {
 
     // Clean up local reference to class
     (*env)->DeleteLocalRef(env, cls);
+#else
+    (void)removeTask;
 #endif
 }

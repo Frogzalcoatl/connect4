@@ -242,6 +242,9 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
 
     C4_Game_SetScreen(game, C4_ScreenType_Menu);
 
+    C4_SetMusicVolume(0.3f);
+    C4_PlayMusic(C4_MusicTrack_Test);
+
     return game;
 }
 

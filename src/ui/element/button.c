@@ -9,7 +9,7 @@ C4_UI_Node* C4_UI_Button_Create(C4_MemoryArena* arena, C4_UI_Button_Config* conf
         arena, &(C4_UI_Node_Config){
             .type = C4_UI_Type_Shape,
             .style = config->style,
-            .shape = (C4_UI_Data_Shape_Config){
+            .shape = &(C4_UI_Data_Shape_Config){
                 .rect = config->rect,
                 .type = config->shapeType,
                 .borderWidth = config->borderWidth
@@ -26,7 +26,7 @@ C4_UI_Node* C4_UI_Button_Create(C4_MemoryArena* arena, C4_UI_Button_Config* conf
         arena, &(C4_UI_Node_Config){
             .type = C4_UI_Type_Text,
             .style = config->style,
-            .text = (C4_UI_Data_Text_Config){
+            .text = &(C4_UI_Data_Text_Config){
                 .posX = 0.f,
                 .posY = 0.f,
                 .UIScale = config->UIScale,
@@ -53,7 +53,7 @@ C4_UI_Node* C4_UI_Buttons_Create(C4_MemoryArena* arena, C4_UI_Buttons_Config* co
 
     C4_UI_Node* container = C4_UI_Node_Create(
         arena, &(C4_UI_Node_Config){
-            .type = C4_UI_Type_Shape,
+            .type = C4_UI_Type_Container,
             .style = config->buttonsArr[0].style
         }
     );
