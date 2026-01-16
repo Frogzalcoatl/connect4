@@ -20,14 +20,8 @@ void C4_UI_Canvas_Init(C4_UI_Canvas* canvas, SDL_Renderer* renderer, TTF_TextEng
     canvas->offsetX = offsetX;
     canvas->offsetY = offsetY;
 
-    // Using an arena to prevent memory fragmentation
-    // Also runs faster this way
-    // Also easier memory management
-    // Also clearing the canvas is much more efficient (just setting offset to 0)
-    size_t arenaSize = 1024 * 1024; // 1 MB
-    canvas->arena.memory = malloc(arenaSize);
-    canvas->arena.capacity = arenaSize;
-    canvas->arena.offset = 0;
+    // Using an arena to prevent memory fragmentation. Better for CPU
+    C4_Arena_Init(&canvas->arena, 1024 * 1024);
 }
 
 static void C4_UI_Canvas_CleanupResources(C4_UI_Canvas* canvas) {
@@ -49,7 +43,7 @@ void C4_UI_Canvas_Clear(C4_UI_Canvas* canvas) {
         return;
     }
     C4_UI_Canvas_CleanupResources(canvas);
-    canvas->arena.offset = 0;
+    C4_Arena_Destroy(&canvas->arena);
     canvas->root = NULL;
     canvas->focusedNode = NULL;
 }
@@ -59,9 +53,7 @@ void C4_UI_Canvas_Destroy(C4_UI_Canvas* canvas) {
         return;
     }
     C4_UI_Canvas_CleanupResources(canvas);
-    if (canvas->arena.memory) {
-        free(canvas->arena.memory);
-    }
+    C4_Arena_Destroy(&canvas->arena);
 }
 
 void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float UIScale) {

@@ -214,7 +214,7 @@ static void C4_Game_SetScreen(C4_Game* game, C4_ScreenType type) {
 }
 
 C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountToWin) {
-    C4_Game* game = calloc(1, sizeof(C4_Game));
+    C4_Game* game = SDL_calloc(1, sizeof(C4_Game));
     if (!game) {
         SDL_Log("Unable allocate memory for C4 Game");
         return NULL;
@@ -270,7 +270,7 @@ void C4_Game_Destroy(C4_Game* game) {
     if (game->window) {
         SDL_DestroyWindow(game->window);
     }
-    free(game);
+    SDL_free(game);
 }
 
 static void C4_Game_HandleKeyboardInput(C4_Game* game, int scancode) {

@@ -1,6 +1,12 @@
 # TODO
 
-* Implement SDL_mixer
+* Simplify ui element configs. Maybe even try to get the functions to only a few parameters and not even use config structs
+* More UIScaling cleanup
+    * Define a window resolution. Try to never even check windowWidth or height in menu.c.
+    * Calculate the scale fastor once per frame in the main drawing loop of the canvas.
+* Use a linked list or dynamic array for scancode to verb mappings. Honestly leaning toward dynamic array. Just curious how to efficiently make one in C.
+* Stop embedding assets. Will become problematic once more are added
+    * combine files into a .pak and use that instead.
 * Implement SDL_image
 * Should you still use sdl_ttf considering the warning shown in the console during compilation?
 * Notification ui element
@@ -8,8 +14,6 @@
 * Popup ui element
 * Slider UIElement
 * Dropdown ui element
-* Improve asset bundling. Maybe automatically assign data to arrays with the array name being their folder name or smth autmatically generate an enum as well.
-    * (ex: C4_Assets_Images_Data[C4_Assets_Images_Icon_png] and C4_Assets_Images_Size[C4_Assets_Images_Icon_png])
 * Board UI
 * Turn time limits
 * Improve win check efficiency (see WINCHECKCRITIQUE.md)

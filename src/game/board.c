@@ -18,20 +18,20 @@ bool C4_Board_SetSize(C4_Board* board, uint8_t width, uint8_t height) {
         SDL_Log("Unable to set board size. Height must be greater than 0");
         return false;
     }
-    C4_SlotState* newCells = calloc(width * height, sizeof(C4_SlotState));
+    C4_SlotState* newCells = SDL_calloc(width * height, sizeof(C4_SlotState));
     if (!newCells) {
         SDL_Log("Unable to set board size. Unable to allocate memory for board cells");
         return false;
     }
     size_t newBufferSize = (size_t)C4_Max((int)width, (int)height);
-    C4_SlotState* newCellCheckBuffer = calloc(newBufferSize, sizeof(C4_SlotState));
+    C4_SlotState* newCellCheckBuffer = SDL_calloc(newBufferSize, sizeof(C4_SlotState));
     if (!newCellCheckBuffer) {
         SDL_Log("Unable to set board size. Unable to allocate memory for board cell check buffer");
-        free(newCells);
+        SDL_free(newCells);
         return false;
     }
-    free(board->cells);
-    free(board->cellCheckBuffer);
+    SDL_free(board->cells);
+    SDL_free(board->cellCheckBuffer);
     board->cells = newCells;
     board->cellCheckBufferSize = newBufferSize;
     board->cellCheckBuffer = newCellCheckBuffer;
@@ -46,7 +46,7 @@ C4_Board* C4_Board_Create(uint8_t width, uint8_t height, uint8_t amountToWin) {
         SDL_Log("Unable to create board. Amount to win cannot be less than 1");
         return NULL;
     }
-    C4_Board* newBoard = calloc(1, sizeof(C4_Board));
+    C4_Board* newBoard = SDL_calloc(1, sizeof(C4_Board));
     // Put cells on the heap to support any width/height
     // If cells were on the stack, I would have to set a max array size
     // Would be wasteful if i set the max to 100x100 for example but only used 6x7.
@@ -69,12 +69,12 @@ void C4_Board_Destroy(C4_Board* board) {
     }
     if (board->cells) {
         // must free the cells directly since theyre on the heap
-        free(board->cells);
+        SDL_free(board->cells);
     }
     if (board->cellCheckBuffer) {
-        free(board->cellCheckBuffer);
+        SDL_free(board->cellCheckBuffer);
     }
-    free(board);
+    SDL_free(board);
 }
 
 void C4_Board_Reset(C4_Board* board) {
@@ -164,7 +164,7 @@ static void C4_Board_PrintCellCheckBuffer(C4_Board* board) {
         return;
     }
     const size_t strSize = board->cellCheckCount * 2 + 1;
-    char* str = malloc(strSize);
+    char* str = SDL_malloc(strSize);
     if (!str) {
         SDL_Log("Unable to allocate memory for cellCheckBuffer string");
         return;
@@ -176,7 +176,7 @@ static void C4_Board_PrintCellCheckBuffer(C4_Board* board) {
     }
     str[strSize - 1] = '\0';
     SDL_Log("%s", str);
-    free(str);
+    SDL_free(str);
 }
 */
 static void C4_Board_UpdateCellCheckBuffer(C4_Board* board, C4_Board_RowAxis axis, size_t atIndex) {

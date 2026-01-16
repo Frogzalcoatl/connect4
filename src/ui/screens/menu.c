@@ -59,7 +59,7 @@ static void UpdateControllerText(C4_MenuScreenData* data) {
     }
 
     if (controllerText) {
-        free(controllerText);
+        SDL_free(controllerText);
     }
 
     strcat(displayText, "\n\nCurrent: ");
@@ -111,7 +111,7 @@ C4_UI_Screen* C4_MenuScreen_Create(C4_Game* game) {
         return NULL;
     }
 
-    screen->data = calloc(1, sizeof(C4_MenuScreenData));
+    screen->data = SDL_calloc(1, sizeof(C4_MenuScreenData));
     if (!screen->data) {
         screen->Destroy(screen);
         return NULL;

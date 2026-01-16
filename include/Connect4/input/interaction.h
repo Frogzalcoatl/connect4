@@ -3,13 +3,13 @@
 #include "Connect4/assets/sounds.h"
 #include "Connect4/ui/types.h"
 
-typedef struct {
+typedef struct C4_UI_Interaction_WhilePressedTiming {
     float delay;
     float interval;
     float pressTimer;
 } C4_UI_Interaction_WhilePressedTiming;
 
-typedef struct {
+typedef struct C4_UI_Interaction_Sounds {
     C4_SoundEffect onHover;
     C4_SoundEffect whilePressed;
     C4_SoundEffect onPress;
@@ -17,7 +17,7 @@ typedef struct {
     C4_SoundEffect onCancel;
 } C4_UI_Interaction_Sounds;
 
-typedef struct {
+typedef struct C4_UI_Interaction {
     bool isHovered;
     bool isPressed;
     bool isFocusable;

@@ -30,9 +30,9 @@ void C4_UI_Screen_Destroy_Default(C4_UI_Screen* screen) {
     }
     C4_UI_Canvas_Destroy(&screen->canvas);
     if (screen->data) {
-        free(screen->data);
+        SDL_free(screen->data);
     }
-    free(screen);
+    SDL_free(screen);
 }
 
 C4_UI_Screen* C4_Screen_Create(SDL_Renderer* renderer, TTF_TextEngine* textEngine) {
@@ -40,7 +40,7 @@ C4_UI_Screen* C4_Screen_Create(SDL_Renderer* renderer, TTF_TextEngine* textEngin
         SDL_Log("Unable to create screen. renderer is NULL");
         return NULL;
     }
-    C4_UI_Screen* screen = calloc(1, sizeof(C4_UI_Screen));
+    C4_UI_Screen* screen = SDL_calloc(1, sizeof(C4_UI_Screen));
     if (!screen) {
         SDL_Log("Unable to allocate memory for menu screen.");
         return NULL;

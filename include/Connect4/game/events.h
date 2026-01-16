@@ -4,13 +4,13 @@
 #include "Connect4/assets/sounds.h"
 #include "Connect4/game/board.h"
 
-typedef enum {
+typedef enum C4_EventType {
     C4_EVENT_NONE,
     C4_EVENT_CLOSE_WINDOW,
     C4_EVENT_SCREEN_CHANGE
 } C4_EventType;
 
-typedef struct {
+typedef struct C4_Event {
     C4_EventType type;
     union {
         struct { C4_ScreenType type; } screenChange;

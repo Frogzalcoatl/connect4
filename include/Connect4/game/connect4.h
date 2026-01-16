@@ -8,7 +8,7 @@
 bool Connect4_Init_Dependencies(void);
 void Connect4_Quit_Dependencies(void);
 
-typedef struct {
+typedef struct C4_Game {
     SDL_Window* window;
     SDL_Renderer* renderer;
     TTF_TextEngine* textEngine;

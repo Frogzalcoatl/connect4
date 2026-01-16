@@ -1,7 +1,7 @@
 #pragma once
 #include <stdbool.h>
 
-typedef enum {
+typedef enum C4_SoundEffect {
     C4_SoundEffect_None = -1,
     C4_SoundEffect_ButtonClick,
     C4_SoundEffect_ButtonHover,
@@ -10,7 +10,7 @@ typedef enum {
     C4_SoundEffect_Count
 } C4_SoundEffect;
 
-typedef enum {
+typedef enum C4_MusicTrack {
     C4_MusicTrack_None = -1,
     C4_MusicTrack_Test,
     C4_MusicTrack_Count

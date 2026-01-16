@@ -1,4 +1,5 @@
 #include "Connect4/ui/utils.h"
+#include "SDL3/SDL.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
@@ -47,7 +48,7 @@ char* C4_JoinStrings(const char* strings[], size_t count, const char* separator)
     }
 
     if (validCount == 0) {
-        return calloc(1, 1);
+        return SDL_calloc(1, 1);
     }
 
     // Add length for separators (valid items - 1)
@@ -55,7 +56,7 @@ char* C4_JoinStrings(const char* strings[], size_t count, const char* separator)
         totalLength += separatorLength * (validCount - 1);
     }
 
-    char* newString = malloc(totalLength);
+    char* newString = SDL_malloc(totalLength);
     if (!newString) {
         return NULL;
     }

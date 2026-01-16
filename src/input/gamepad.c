@@ -280,13 +280,13 @@ void C4_Gamepad_GetNames(char** returnValue, size_t returnValueSize) {
         
         if (totalMatches > 1) {
             size_t neededLen = strlen(rawName) + 16; 
-            returnValue[i] = malloc(neededLen);
+            returnValue[i] = SDL_malloc(neededLen);
             if (returnValue[i]) {
                 snprintf(returnValue[i], neededLen, "%s (%d)", rawName, myInstanceIndex);
             }
         } else {
             size_t len = strlen(rawName);
-            returnValue[i] = malloc(len + 1);
+            returnValue[i] = SDL_malloc(len + 1);
             if (returnValue[i]) {
                 strcpy(returnValue[i], rawName);
             }

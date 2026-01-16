@@ -39,13 +39,13 @@ typedef struct C4_UI_Node {
     struct C4_UI_Node* navRight;
 } C4_UI_Node;
 
-typedef struct {
+typedef struct C4_UI_Data_Shape_Config {
     SDL_FRect rect;
     C4_UI_ShapeType type;
     unsigned int borderWidth;
 } C4_UI_Data_Shape_Config;
 
-typedef struct {
+typedef struct C4_UI_Data_Text_Config {
     float posX;
     float posY;
     float UIScale;

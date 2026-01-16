@@ -19,7 +19,7 @@ void C4_UI_Node_CleanupResources(C4_UI_Node* node) {
             node->text.textObject = NULL;
         }
         if (node->text.storage) {
-            free(node->text.storage);
+            SDL_free(node->text.storage);
             node->text.storage = NULL;
         }
     }
@@ -215,7 +215,7 @@ void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString) {
     }
 
     if (node->text.storage && node->text.storage != newString) {
-        free(node->text.storage);
+        SDL_free(node->text.storage);
     }
 
     node->text.storage = SDL_strdup(newString);
@@ -296,7 +296,7 @@ C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) 
         node->text.font = text->font;
 
         size_t strLen = strlen(config->text->text) + 1;
-        node->text.storage = calloc(1, strLen);
+        node->text.storage = SDL_calloc(1, strLen);
         strcpy(node->text.storage, config->text->text);
 
         node->text.textObject = TTF_CreateText(text->textEngine, text->font, node->text.storage, 0);

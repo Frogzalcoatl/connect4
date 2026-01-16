@@ -43,7 +43,7 @@ C4_UI_Screen* C4_SettingsScreen_Create(C4_Game* game) {
         return NULL;
     }
 
-    screen->data = calloc(1, sizeof(C4_SettingsScreenData));
+    screen->data = SDL_calloc(1, sizeof(C4_SettingsScreenData));
     if (!screen->data) {
         screen->Destroy(screen);
         return NULL;

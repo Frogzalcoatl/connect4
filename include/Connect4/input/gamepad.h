@@ -5,7 +5,7 @@
 
 #define C4_INPUT_MAX_SCANCODE_MAPPINGS 4
 
-typedef enum {
+typedef enum C4_InputVerb {
     C4_INPUT_VERB_NONE,
     C4_INPUT_VERB_NAV_UP,
     C4_INPUT_VERB_NAV_DOWN,
@@ -16,12 +16,12 @@ typedef enum {
     C4_INPUT_VERB_COUNT
 } C4_InputVerb;
 
-typedef enum {
+typedef enum C4_InputState {
     C4_INPUT_STATE_PRESSED,
     C4_INPUT_STATE_RELEASED
 } C4_InputState;
 
-typedef struct {
+typedef struct C4_InputEvent {
     C4_InputVerb verb;
     C4_InputState state;
 } C4_InputEvent;

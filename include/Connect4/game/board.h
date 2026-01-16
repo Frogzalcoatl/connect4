@@ -3,13 +3,13 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef enum {
+typedef enum C4_SlotState {
     C4_SlotState_Empty,
     C4_SlotState_Player1,
     C4_SlotState_Player2
 } C4_SlotState;
 
-typedef struct {
+typedef struct C4_Board {
     uint8_t width;
     uint8_t height;
     uint8_t amountToWin;
@@ -20,7 +20,7 @@ typedef struct {
     size_t cellCheckCount;
 } C4_Board;
 
-typedef enum {
+typedef enum C4_Board_RowAxis {
     C4_Board_RowAxis_NorthSouth,
     C4_Board_RowAxis_EastWest,
     C4_Board_RowAxis_NorthEastSouthWest,

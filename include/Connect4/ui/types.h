@@ -13,42 +13,42 @@ typedef enum C4_UI_Align {
     C4_UI_Align_BottomRight
 } C4_UI_Align;
 
-typedef enum {
+typedef enum C4_UI_Axis {
     C4_UI_Axis_X,
     C4_UI_Axis_Y,
     C4_UI_Axis_XY
 } C4_UI_Axis;
 
-typedef enum {
+typedef enum C4_UI_Type {
     C4_UI_Type_Container,
     C4_UI_Type_Text,
     C4_UI_Type_Shape
 } C4_UI_Type;
 
-typedef enum {
+typedef enum C4_UI_ShapeType {
     C4_UI_Shape_Rectangle = 1,
     C4_UI_Shape_Triangle,
     C4_UI_Shape_Ellipse
 } C4_UI_ShapeType;
 
-typedef struct {
+typedef struct C4_UI_Data_Text {
     TTF_Font* font;
     TTF_Text* textObject;
     char* storage;
 } C4_UI_Data_Text;
 
-typedef struct {
+typedef struct C4_UI_Data_Shape {
     C4_UI_ShapeType type;
     float rotationDegrees;
     unsigned int borderWidth;
 } C4_UI_Data_Shape;
 
-typedef enum {
+typedef enum C4_UI_Direction {
     C4_UI_Direction_Horizontal,
     C4_UI_Direction_Vertical
 } C4_UI_Direction;
 
-typedef enum {
+typedef enum C4_UI_Mirror {
     C4_UI_Mirror_None,
     C4_UI_Mirror_X,
     C4_UI_Mirror_Y,

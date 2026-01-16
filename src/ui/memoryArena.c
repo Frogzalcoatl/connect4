@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "SDL3/SDL.h"
+#include "Connect4/ui/utils.h"
 
 // CPU pointer size (8 bytes on 64-bit). 
 // Accessing memory at non-multiple addresses can cause CPU issues.
@@ -19,50 +20,117 @@
 // ceils x to the next multiple of C4_ALIGNMENT.
 #define C4_ALIGN_UP(x) (((x) + C4_ALIGN_MASK) & ~C4_ALIGN_MASK)
 
-static void C4_Arena_UpdateHighestRecordedOffset(C4_MemoryArena* arena) {
-    if (!arena) {
-        SDL_Log("Unable to update highest recorded arena offset. Arena is NULL");
-        return;
-    }
+void C4_Arena_Init(C4_MemoryArena* arena, size_t blockSize) {
+    arena->firstBlock = NULL;
+    arena->currentBlock = NULL;
+    arena->defaultBlockSize = blockSize;
+}
 
-    if (arena->offset > arena->highestRecordedOffset) {
-        arena->highestRecordedOffset = arena->offset;
-    }
+static C4_ArenaBlock* C4_Arena_CreateBlock(size_t size) {
+    C4_ArenaBlock* block = malloc(sizeof(C4_ArenaBlock) + size);
+    block->next = NULL;
+    block->capacity = size;
+    block->offset = 0;
+    return block;
 }
 
 void* C4_Arena_Alloc(C4_MemoryArena* arena, size_t size) {
     size_t alignedSize = C4_ALIGN_UP(size);
 
-    if (arena->offset + alignedSize > arena->capacity) {
-        SDL_Log("Arena out of memory");
-        return NULL;
+    if (
+        arena->currentBlock == NULL || 
+       (arena->currentBlock->offset + alignedSize) > arena->currentBlock->capacity
+    ) {
+        size_t newSize = C4_ULLMax(arena->defaultBlockSize, alignedSize);
+        
+        C4_ArenaBlock* newBlock = C4_Arena_CreateBlock(newSize);
+        
+        if (arena->currentBlock) {
+            arena->currentBlock->next = newBlock;
+        } else {
+            arena->firstBlock = newBlock;
+        }
+        arena->currentBlock = newBlock;
     }
 
-    void* ptr = arena->memory + arena->offset;
-
-    arena->offset += alignedSize;
-
+    void* ptr = arena->currentBlock->memory + arena->currentBlock->offset;
+    arena->currentBlock->offset += alignedSize;
+    
+    // Clear memory to zero
     memset(ptr, 0, alignedSize);
-
-    C4_Arena_UpdateHighestRecordedOffset(arena);
-
+    
     return ptr;
 }
 
-void C4_Arena_SDL_Log_HighestOffset(C4_MemoryArena* arena) {
+void C4_Arena_SDL_LogMemory(C4_MemoryArena* arena) {
     if (!arena) {
-        SDL_Log("Unable to log arena's highest recorded offset. Arena is NULL");
+        SDL_Log("Unable to log arena memory. Arena is NULL");
         return;
     }
-    float MB = 1024.f * 1024.f;
-    float highestRecordedOffsetMB = arena->highestRecordedOffset / MB;
-    float capacityMB = arena->capacity / MB;
 
-    if (highestRecordedOffsetMB == 0.f) {
-        SDL_Log("Highest Arena Offset: 0MB / %.3fMB", capacityMB); 
-    } else if (highestRecordedOffsetMB < 0.001f) {
-        SDL_Log("Highest Arena Offset: < 0.001MB / %.3fMB", capacityMB);   
+    size_t totalBytes = 0;
+    size_t totalCapacity = 0;
+    C4_ArenaBlock* current = arena->firstBlock;
+
+    while (current) {
+        totalBytes += current->offset;
+        totalCapacity += current->capacity;
+        current = current->next;
+    }
+
+    float MB = 1024.f * 1024.f;
+
+    double totalMB = totalBytes / MB;
+    double totalCapacityMB = totalCapacity / MB;
+
+    if (totalMB == 0.f) {
+        SDL_Log("Arena Memory: 0MB / %.3fMB", totalCapacityMB); 
+    } else if (totalMB < 0.001f) {
+        SDL_Log("Arena Memory: < 0.001MB / %.3fMB", totalCapacityMB);   
     } else {
-        SDL_Log("Highest Arena Offset: %.3fMB / %.3fMB", highestRecordedOffsetMB, capacityMB); 
+        SDL_Log("Arena Memory: %.3fMB / %.3fMB", totalMB, totalCapacityMB); 
+    }
+}
+
+void C4_Arena_Destroy(C4_MemoryArena* arena) {
+    if (!arena) {
+        SDL_Log("Unable to destroy arena. Pointer is NULL");
+        return;
+    }
+    C4_ArenaBlock* current = arena->firstBlock;
+    while (current) {
+        C4_ArenaBlock* next = current->next;
+        free(current);
+        current = next;
+    }
+    arena->firstBlock = NULL;
+    arena->currentBlock = NULL;
+}
+
+C4_ArenaTemp C4_Arena_BeginTemp(C4_MemoryArena* arena) {
+    if (!arena) {
+        SDL_Log("Unable to begin arena temp. Arena is NULL. Returning dummy temp");
+        return (C4_ArenaTemp){
+            .arena = NULL,
+            .block = NULL,
+            .offset = 0
+        };
+    }
+    return (C4_ArenaTemp){
+        .arena = arena,
+        .block = arena->currentBlock,
+        .offset = (arena->currentBlock ? arena->currentBlock->offset : 0)
+    };
+}
+
+void C4_Arena_EndTemp(C4_ArenaTemp* temp) {
+    if (!temp) {
+        SDL_Log("Unable to clear arena temp. Temp is NULL");
+        return;
+    }
+    temp->arena->currentBlock = temp->block;
+    
+    if (temp->arena->currentBlock) {
+        temp->arena->currentBlock->offset = temp->offset;
     }
 }

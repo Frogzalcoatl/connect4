@@ -1,7 +1,7 @@
 #pragma once
 #include <SDL3_ttf/SDL_ttf.h>
 
-typedef enum {
+typedef enum C4_FontAsset {
     C4_FONT_ASSET_MONOCRAFT,
     C4_FONT_ASSET_MIRACODE,
     C4_FONT_ASSET_COUNT
