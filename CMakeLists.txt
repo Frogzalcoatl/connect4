@@ -278,7 +278,7 @@ endif()
 
 # --- COMPILER SETTINGS ---
 if(MSVC)
-    target_compile_options(${EXE_NAME} PRIVATE /W3 /std:clatest)
+    target_compile_options(${EXE_NAME} PRIVATE /W4 /std:clatest)
     target_compile_definitions(${EXE_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
 else()
     target_compile_options(${EXE_NAME} PRIVATE -Wall -Wextra)
