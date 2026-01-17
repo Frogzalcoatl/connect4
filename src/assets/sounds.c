@@ -172,7 +172,7 @@ void C4_PlayMusic(C4_MusicTrack musicID) {
 
 void C4_SetMasterVolume(float volume) {
     if (mixerDevice) {
-        MIX_SetMasterGain(mixerDevice, volume);
+        MIX_SetMixerGain(mixerDevice, volume);
     }
 }
 

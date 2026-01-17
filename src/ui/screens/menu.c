@@ -76,11 +76,13 @@ static void UpdateControllerText(C4_MenuScreenData* data) {
 static void C4_MenuScreen_CloseWindow(void* context) {
     (void)context;
     C4_PushEvent_CloseWindow(false);
+    SDL_Log("Ran window close callback");
 }
 
 static void C4_MenuScreen_CloseWindowAndTask(void* context) {
     (void)context;
     C4_PushEvent_CloseWindow(true);
+    SDL_Log("Ran window close callback with android remove task");
 }
 
 static void C4_MenuScreen_HandleEvent(C4_UI_Screen* screen, SDL_Event* event, float UIScale) {

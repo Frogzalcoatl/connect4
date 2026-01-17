@@ -169,7 +169,14 @@ void C4_UI_Canvas_RunBackButton(C4_UI_Canvas* canvas) {
     
     C4_UI_Node* current = canvas->focusedNode;
     if (!current) {
-        current = C4_UI_Node_FindFocusable(canvas->root);
+        C4_UI_Node* search = canvas->root;
+        while (search) {
+            current = C4_UI_Node_FindFocusable(search);
+            if (current) {
+                break;
+            }
+            search = search->nextSibling;
+        }
     }
 
     if (!current) {

@@ -1,9 +1,9 @@
 # TODO
 
-* Simplify ui element configs. Maybe even try to get the functions to only a few parameters and not even use config structs
 * More UIScaling cleanup
     * Define a window resolution. Try to never even check windowWidth or height in menu.c.
     * Calculate the scale fastor once per frame in the main drawing loop of the canvas.
+* Simplify ui element configs. Maybe even try to get the functions to only a few parameters and not even use config structs
 * Stop embedding assets. Will become problematic once more are added
     * combine files into a .pak and use that instead.
 * Implement SDL_image
