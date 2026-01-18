@@ -4,11 +4,21 @@
 #include <stdio.h>
 
 #define C4_FONT_ASSET_COUNT 2
-
-static const char* FONT_ASSETS[C4_FONT_ASSET_COUNT] = {
+static const char* FONT_ASSET_PATHS[C4_FONT_ASSET_COUNT] = {
     "assets/fonts/Monocraft.ttf",
     "assets/fonts/Miracode.ttf"
 };
+typedef struct C4_FontData {
+    void* data;
+    size_t size;
+} C4_FontData;
+static C4_FontData fontFileBuffers[C4_FONT_ASSET_COUNT] = {0};
+
+static void C4_LoadFontData(C4_FontAsset id) {
+    if (!fontFileBuffers[id].data) {
+        fontFileBuffers[id].data = C4_VFS_ReadFile(FONT_ASSET_PATHS[id], &fontFileBuffers[id].size);
+    }
+}
 
 typedef struct {
     C4_FontAsset assetID;
@@ -47,12 +57,16 @@ TTF_Font* C4_GetFont(C4_FontAsset assetID, float ptSize, TTF_FontStyleFlags styl
         return fontCache[0].font;
     }
 
-    size_t len;
-    void* rawData = C4_VFS_ReadFile(FONT_ASSETS[assetID], &len);
+    if (!fontFileBuffers[assetID].data) {
+        C4_LoadFontData(assetID);
+    }
+
+    void* rawData = fontFileBuffers[assetID].data;
     if (!rawData) {
-        SDL_Log("Unable to open font %s", FONT_ASSETS[assetID]);
+        SDL_Log("Unable to access font file");
         return NULL;
     }
+    size_t len = fontFileBuffers[assetID].size;
     
     SDL_IOStream* io = SDL_IOFromMem(rawData, len);
 
