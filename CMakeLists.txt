@@ -254,6 +254,11 @@ else()
         set(ICON_RC resources/icon.rc)
         set(WIN_FLAGS WIN32)
     endif()
+    if(APPLE)
+        set(ICON_MACOS resources/icon.icns)
+        # This tells CMake to copy the file to Connect4.app/Contents/Resources/
+        set_source_files_properties(${ICON_MACOS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    endif()
     add_executable(${EXE_NAME} MACOSX_BUNDLE ${WIN_FLAGS} ${SOURCES} ${ICON_RC})
 endif()
 
@@ -295,10 +300,11 @@ if(APPLE)
     target_link_libraries(${EXE_NAME} PRIVATE "-framework Foundation" "-framework AppKit" "-framework QuartzCore")
     
     set_target_properties(${EXE_NAME} PROPERTIES
+        MACOSX_BUNDLE_ICON_FILE "icon.icns"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.yourname.${EXE_NAME}"
         XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO"
         XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO"
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
-        MACOSX_BUNDLE_GUI_IDENTIFIER "com.yourname.${EXE_NAME}"
     )
 endif()
 
