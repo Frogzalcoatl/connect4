@@ -1,6 +1,6 @@
 name: Tests
 
-on: [workflow_dispatch]
+on: [push, pull_request]
 
 env:
   PROJECT_NAME: Connect4
@@ -22,12 +22,6 @@ jobs:
           - { name: Linux GCC, os: ubuntu-latest }
           - { name: MacOS, os: macos-latest }
           - { name: Android, os: ubuntu-latest }
-          - { name: IOS, os: macos-latest, flags: "-G Xcode
-                -DCMAKE_SYSTEM_NAME=iOS
-                -DCMAKE_OSX_ARCHITECTURES=arm64
-                -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO
-                -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED=NO
-                -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY=''" }
 
     steps:
       - name: Checkout
@@ -84,17 +78,6 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
-      # --- IOS PACKAGING ---
-      - name: Create IOS IPA
-        if: matrix.platform.name == 'IOS'
-        run: |
-          mkdir -p Payload
-          APP_PATH=$(find build -name "*.app" -type d | head -n 1)
-          echo "Found app at: $APP_PATH"
-
-          cp -r "$APP_PATH" Payload/
-          zip -r "${PROJECT_NAME}.ipa" Payload
-
       # --- PREPARE ARTIFACTS (FLATTENING) ---
       - name: Prepare Artifacts
         run: |
@@ -122,11 +105,6 @@ jobs:
           # --- ANDROID ---
           if [[ "${{ matrix.platform.name }}" == "Android" ]]; then
              find android -name "*.apk" -exec cp {} staging/ \;
-          fi
-
-          # --- IOS ---
-          if [[ "${{ matrix.platform.name }}" == "IOS" ]]; then
-             find . -name "*.ipa" -exec cp {} staging/ \;
           fi
 
       # --- ARTIFACT UPLOAD ---

@@ -6,6 +6,9 @@
 #include "Connect4/tools/stringHash.h"
 #include "SDL3/SDL.h"
 
+// Using a .dat file makes it significantly easier to read files on android
+// Dont have to go through jni nightmare again
+
 typedef struct C4_VFS_State {
     SDL_IOStream* packFile;
     // For thread safety

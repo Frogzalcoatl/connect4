@@ -291,11 +291,9 @@ if(JNI_FOUND)
 endif()
 
 if(APPLE)
-    if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-        target_link_libraries(${EXE_NAME} PRIVATE "-framework Foundation" "-framework UIKit" "-framework QuartzCore" "-framework CoreGraphics")
-    else()
-        target_link_libraries(${EXE_NAME} PRIVATE "-framework Foundation" "-framework AppKit" "-framework QuartzCore")
-    endif()
+    # Standard macOS frameworks
+    target_link_libraries(${EXE_NAME} PRIVATE "-framework Foundation" "-framework AppKit" "-framework QuartzCore")
+    
     set_target_properties(${EXE_NAME} PROPERTIES
         XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO"
         XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO"
@@ -313,7 +311,7 @@ target_compile_definitions(${EXE_NAME} PRIVATE _USE_MATH_DEFINES)
 
 # --- DISCORD SDK ---
 set(IS_MOBILE FALSE)
-if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
+if(ANDROID)
     set(IS_MOBILE TRUE)
 endif()
 
@@ -391,9 +389,7 @@ if(CMAKE_CROSSCOMPILING)
         set(HOST_GENERATOR "Unix Makefiles")
         set(PACKER_TOOL "${HOST_BUILD_DIR}/packer")
         
-        # Fix for iOS "Killed: 9"
-        # On Apple Silicon hosts, we MUST sign the binary. 
-        # We hook this into the INSTALL_COMMAND so it happens immediately after build.
+        # Macos requires signing
         if(APPLE)
              set(PACKER_INSTALL_CMD sh -c "chmod +x ${PACKER_TOOL} && codesign --force --sign - ${PACKER_TOOL}")
         else()
