@@ -23,6 +23,7 @@ typedef struct C4_Game {
     C4_UI_LayoutType currentLayout;
     unsigned int windowWidth;
     unsigned int windowHeight;
+    C4_SoundSystem* soundSystem;
 } C4_Game;
 
 C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountToWin);

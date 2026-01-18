@@ -45,3 +45,32 @@ void C4_PushEvent_ScreenChange(C4_ScreenType screenType) {
     event.screenChange.type = screenType;
     C4_PushEvent(event);
 }
+
+void C4_PushEvent_SetCursor(SDL_SystemCursor type) {
+    C4_Event event;
+    event.type = C4_EVENT_SET_CURSOR;
+    event.setCursor.type = type;
+    C4_PushEvent(event);
+}
+
+void C4_PushEvent_PlaySound(C4_SoundEffect id) {
+    C4_Event event;
+    event.type = C4_EVENT_PLAY_SOUND;
+    event.playSound.id = id;
+    C4_PushEvent(event);
+}
+
+void C4_PushEvent_PlayMusic(C4_MusicTrack id) {
+    C4_Event event;
+    event.type = C4_EVENT_PLAY_MUSIC;
+    event.playMusic.id = id;
+    C4_PushEvent(event);
+}
+
+void C4_PushEvent_SetVolume(C4_AudioTrack track, float level) {
+    C4_Event event;
+    event.type = C4_EVENT_SET_VOLUME;
+    event.setVolume.track = track;
+    event.setVolume.level = level;
+    C4_PushEvent(event);
+}

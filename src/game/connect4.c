@@ -59,8 +59,8 @@ bool Connect4_Init_Dependencies(void) {
         return false;
     }
 
-    if (!C4_InitAudio()) {
-        SDL_Log("C4_InitAudio failed");
+    if (!MIX_Init()) {
+        SDL_Log("MIX_Init failedL %s", SDL_GetError());
         return false;
     }
 
@@ -77,7 +77,7 @@ void Connect4_Quit_Dependencies(void) {
     C4_Input_Shutdown();
     C4_CloseAllFonts();
     C4_DestroyAllCursors();
-    C4_QuitAudio();
+    MIX_Quit();
     C4_VFS_Quit();
     TTF_Quit();
     SDL_Quit();
@@ -236,6 +236,10 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
         return NULL;
     }
 
+    game->soundSystem = C4_SoundSystem_Create();
+    C4_SoundSystem_SetVolume(game->soundSystem, C4_AudioTrack_Music, 0.3f);
+    C4_SoundSystem_PlayMusic(game->soundSystem, C4_MusicTrack_Test);
+
     game->board = C4_Board_Create(boardWidth, boardHeight, amountToWin);
     game->running = false;
 
@@ -245,9 +249,6 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
     }
 
     C4_Game_SetScreen(game, C4_ScreenType_Menu);
-
-    C4_SetMusicVolume(0.3f);
-    C4_PlayMusic(C4_MusicTrack_Test);
 
     return game;
 }
@@ -265,6 +266,9 @@ void C4_Game_Destroy(C4_Game* game) {
     }
     game->currentScreen = NULL;
     C4_Board_Destroy(game->board);
+    if (game->soundSystem) {
+        C4_SoundSystem_Destroy(game->soundSystem);
+    }
     if (game->textEngine) {
         TTF_DestroyRendererTextEngine(game->textEngine);
     }
@@ -316,6 +320,18 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
             }; break;
             case C4_EVENT_SCREEN_CHANGE: {
                 C4_Game_SetScreen(game, eventC4->screenChange.type);
+            }; break;
+            case C4_EVENT_SET_CURSOR: {
+                SDL_SetCursor(C4_GetSystemCursor(eventC4->setCursor.type));
+            }; break;
+            case C4_EVENT_PLAY_SOUND: {
+                C4_SoundSystem_PlaySound(game->soundSystem, eventC4->playSound.id);
+            }; break;
+            case C4_EVENT_PLAY_MUSIC: {
+                C4_SoundSystem_PlayMusic(game->soundSystem, eventC4->playMusic.id);
+            }; break;
+            case C4_EVENT_SET_VOLUME: {
+                C4_SoundSystem_SetVolume(game->soundSystem, eventC4->setVolume.track, eventC4->setVolume.level);
             }; break;
             default: break;
         }

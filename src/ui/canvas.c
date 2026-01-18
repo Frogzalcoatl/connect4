@@ -1,5 +1,5 @@
 #include "Connect4/ui/canvas.h"
-#include "Connect4/ui/cursorStyle.h"
+#include "Connect4/game/events.h"
 #include <stdlib.h>
 
 void C4_UI_Canvas_Init(C4_UI_Canvas* canvas, SDL_Renderer* renderer, TTF_TextEngine* textEngine, float offsetX, float offsetY) {
@@ -86,7 +86,9 @@ static void C4_UI_Canvas_SetFocus(C4_UI_Canvas* canvas, C4_UI_Node* newNode) {
     if (newNode->input.OnHover) {
         newNode->input.OnHover(newNode->input.context);
     }
-    C4_PlaySound(newNode->input.sounds.onHover);
+    if (newNode->input.sounds.onHover != C4_SoundEffect_None) {
+        C4_PushEvent_PlaySound(newNode->input.sounds.onHover);
+    }
     canvas->focusedNode = newNode;
 }
 
@@ -190,7 +192,9 @@ void C4_UI_Canvas_RunBackButton(C4_UI_Canvas* canvas) {
     while (current) {
         if (current->input.OnCancel) {
             current->input.OnCancel(current->input.context);
-            C4_PlaySound(current->input.sounds.onCancel);
+            if (current->input.sounds.onCancel != C4_SoundEffect_None) {
+                C4_PushEvent_PlaySound(current->input.sounds.onCancel);
+            }
             return;
         }
         current = current->parent;
