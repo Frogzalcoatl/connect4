@@ -11,7 +11,8 @@
 #include "Connect4/android/quit.h"
 #include "Connect4/ui/utils.h"
 #include "Connect4/input/gamepad.h"
-#include "assets_gamecontrollerdb_txt.h"
+#include "Connect4/tools/virtualFileSystem.h"
+#include "Connect4/dat.h"
 #include <stdlib.h>
 #include <time.h>
 
@@ -35,12 +36,23 @@ bool Connect4_Init_Dependencies(void) {
         return false;
     }
 
-    SDL_IOStream* io = SDL_IOFromConstMem(assets_gamecontrollerdb_txt_data, assets_gamecontrollerdb_txt_size);
-    SDL_AddGamepadMappingsFromIO(io, true);
-    SDL_AddGamepadMapping(SAHARS_RETROLINK_CONTROLLER_MAPPING);
-
     // I like logs starting under the file path of the exe in my ide.
     SDL_Log("");
+
+    if (!C4_VFS_Init(MASTER_DAT_PATH)) {
+        SDL_Log("Virtual file system init failed");
+        return false;
+    }
+
+    size_t len;
+    void* rawData = C4_VFS_ReadFile("assets/gamecontrollerdb.txt", &len);
+    if (rawData) {
+        SDL_IOStream* io = SDL_IOFromConstMem(rawData, len);
+        SDL_AddGamepadMappingsFromIO(io, true);
+    } else {
+        SDL_Log("Unable to add gamepad mappings from file assets/gamecontrollerdb.txt");
+    }
+    SDL_AddGamepadMapping(SAHARS_RETROLINK_CONTROLLER_MAPPING);
     
     if (!TTF_Init()) {
         SDL_Log("TTF_Init failed: %s", SDL_GetError());
@@ -66,6 +78,7 @@ void Connect4_Quit_Dependencies(void) {
     C4_CloseAllFonts();
     C4_DestroyAllCursors();
     C4_QuitAudio();
+    C4_VFS_Quit();
     TTF_Quit();
     SDL_Quit();
 }

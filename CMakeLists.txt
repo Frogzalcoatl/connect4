@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.22)
 project(Connect4 LANGUAGES C)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 if(ANDROID)
     # Android needs Shared Libraries (.so)
@@ -162,6 +162,17 @@ set(SDLMIXER_STATIC ${SDL_STATIC_MODE} CACHE BOOL "Build static libraries" FORCE
 set(SDLMIXER_SAMPLES OFF CACHE BOOL "Build samples" FORCE)
 set(SDLMIXER_VENDORED ON CACHE BOOL "Use vendored libraries" FORCE)
 
+# Force internal dependencies to be static
+set(SDLMIXER_DEPS_SHARED OFF CACHE BOOL "Force mixer deps static" FORCE)
+set(SDLMIXER_MOD_XMP_SHARED OFF CACHE BOOL "Force XMP static" FORCE)
+set(SDLMIXER_VORBIS_SHARED OFF CACHE BOOL "Force Vorbis static" FORCE)
+set(SDLMIXER_OPUS_SHARED OFF CACHE BOOL "Force Opus static" FORCE)
+set(SDLMIXER_FLAC_SHARED OFF CACHE BOOL "Force FLAC static" FORCE)
+set(SDLMIXER_MIDI_TIMIDITY_SHARED OFF CACHE BOOL "Force Timidity static" FORCE)
+set(LIBXMP_SHARED OFF CACHE BOOL "Force LibXMP static" FORCE)
+set(OGG_SHARED OFF CACHE BOOL "Force OGG static" FORCE)
+set(VORBIS_SHARED OFF CACHE BOOL "Force Vorbis static" FORCE)
+
 option(USE_ASSEMBLY_OPTIMIZATIONS "Enable YASM assembly optimizations" OFF)
 if(USE_ASSEMBLY_OPTIMIZATIONS)
     set(SDLMIXER_MP3_MPG123 ON CACHE BOOL "Enable mpg123" FORCE)
@@ -180,11 +191,16 @@ set(SDLMIXER_FLAC OFF CACHE BOOL "Disable FLAC" FORCE)
 set(SDLMIXER_MIDI OFF CACHE BOOL "Disable MIDI" FORCE)
 set(SDLMIXER_MOD OFF CACHE BOOL "Disable MOD"  FORCE)
 set(SDLMIXER_OPUS OFF CACHE BOOL "Disable OPUS" FORCE)
+set(SDLMIXER_XMP OFF CACHE BOOL "Disable XMP" FORCE)
 set(SDLMIXER_WAVPACK OFF CACHE BOOL "Disable WavPack" FORCE)
 
 # Enabled formats
 set(SDLMIXER_OGG ON CACHE BOOL "Enable OGG" FORCE)
 set(SDLMIXER_MP3 ON CACHE BOOL "Enable MP3" FORCE)
+
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Force static libs" FORCE)
+set(OGG_SHARED OFF CACHE BOOL "Disable Ogg Shared" FORCE)
+set(VORBIS_SHARED OFF CACHE BOOL "Disable Vorbis Shared" FORCE)
 
 find_package(SDL3_mixer CONFIG QUIET)
 
@@ -222,58 +238,21 @@ if(NOT SDL3_mixer_FOUND)
     endif()
 endif()
 
-# --- ASSETS ---
-function(embed_resource input_file output_c output_h c_name)
-    file(READ ${input_file} hex_content HEX)
-    string(LENGTH "${hex_content}" hex_len)
-    math(EXPR file_size "${hex_len} / 2")
-    if(hex_len EQUAL 0)
-        set(array_values "0x00")
-        set(file_size 0) 
-    else()
-        string(REGEX REPLACE "(..)" "0x\\1, " array_values "${hex_content}")
-        string(REGEX REPLACE ", $" "" array_values "${array_values}")
-    endif()
-    set(header_content "#pragma once
-#include <stddef.h>
-extern const unsigned char ${c_name}_data[];
-#define ${c_name}_size ${file_size}")
-    file(WRITE ${output_h} "${header_content}")
-    set(source_content "#include \"${c_name}.h\"
-const unsigned char ${c_name}_data[] = { ${array_values} };")
-    file(WRITE ${output_c} "${source_content}")
-endfunction()
-
-file(GLOB_RECURSE ASSET_FILES "${CMAKE_SOURCE_DIR}/assets/*")
-set(GENERATED_SOURCES "")
-
-foreach(file_path ${ASSET_FILES})
-    file(RELATIVE_PATH rel_path "${CMAKE_SOURCE_DIR}/assets" "${file_path}")
-    string(REPLACE "/" "_" safe_name "${rel_path}")
-    string(REPLACE "\\" "_" safe_name "${safe_name}")
-    string(REPLACE "." "_" safe_name "${safe_name}")
-    string(REPLACE "-" "_" safe_name "${safe_name}")
-    set(safe_name "assets_${safe_name}")
-    set(out_c "${CMAKE_BINARY_DIR}/generated/${safe_name}.c")
-    set(out_h "${CMAKE_BINARY_DIR}/generated/${safe_name}.h")
-    embed_resource("${file_path}" "${out_c}" "${out_h}" "${safe_name}")
-    list(APPEND GENERATED_SOURCES "${out_c}")
-endforeach()
-
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.c")
+list(FILTER SOURCES EXCLUDE REGEX ".*packer.c$")
 
 # --- MAIN TARGET ---
 if(ANDROID)
     set(EXE_NAME main)
     # Android uses a Shared Library that Java loads
-    add_library(${EXE_NAME} SHARED ${SOURCES} ${GENERATED_SOURCES})
+    add_library(${EXE_NAME} SHARED ${SOURCES})
 else()
     set(EXE_NAME ${PROJECT_NAME})
     if(WIN32)
         set(ICON_RC resources/icon.rc)
         set(WIN_FLAGS WIN32)
     endif()
-    add_executable(${EXE_NAME} MACOSX_BUNDLE ${WIN_FLAGS} ${SOURCES} ${GENERATED_SOURCES} ${ICON_RC})
+    add_executable(${EXE_NAME} MACOSX_BUNDLE ${WIN_FLAGS} ${SOURCES} ${ICON_RC})
 endif()
 
 # --- COMPILER SETTINGS ---
@@ -297,7 +276,7 @@ target_link_libraries(${EXE_NAME} PRIVATE
 )
 
 if(ANDROID)
-    target_link_libraries(${EXE_NAME} PRIVATE m)
+    target_link_libraries(${EXE_NAME} PRIVATE m log)
 endif()
 
 # Attempt to find JNI on the host machine (Windows/Mac/Linux)
@@ -381,4 +360,111 @@ if(USE_DISCORD)
     target_sources(${EXE_NAME} PRIVATE ${DISCORD_SRC})
     target_compile_definitions(${EXE_NAME} PRIVATE USE_DISCORD)
     message(STATUS "discord-rpc enabled")
+endif()
+
+# --- ASSET LIST GENERATION ---
+file(GLOB_RECURSE RAW_ASSETS "${CMAKE_SOURCE_DIR}/assets/*")
+set(ASSET_LIST_TEXT "")
+foreach(entry ${RAW_ASSETS})
+    if(NOT IS_DIRECTORY ${entry})
+        file(RELATIVE_PATH rel_path "${CMAKE_SOURCE_DIR}" "${entry}")
+        string(APPEND ASSET_LIST_TEXT "${rel_path}\n")
+    endif()
+endforeach()
+set(LIST_FILE_PATH "${CMAKE_BINARY_DIR}/assets_list.txt")
+file(WRITE "${LIST_FILE_PATH}" "${ASSET_LIST_TEXT}")
+
+
+# --- PACKER TOOL SETUP ---
+set(PACKER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src/tools")
+
+if(CMAKE_CROSSCOMPILING)
+    include(ExternalProject)
+    
+    set(HOST_BUILD_DIR "${CMAKE_BINARY_DIR}/host_packer_build")
+    
+    if(CMAKE_HOST_WIN32)
+        set(PACKER_TOOL "${HOST_BUILD_DIR}/packer.exe")
+    else()
+        set(PACKER_TOOL "${HOST_BUILD_DIR}/packer")
+    endif()
+
+    set(HOST_CMAKE_ARGS 
+        "-G" "Ninja"
+        "-DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}" 
+        "-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${HOST_BUILD_DIR}"
+    )
+    
+    if(DEFINED CMAKE_C_COMPILER)
+        list(APPEND HOST_CMAKE_ARGS "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
+        list(APPEND HOST_CMAKE_ARGS "-DCMAKE_C_FLAGS=") 
+        list(APPEND HOST_CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE=")
+    endif()
+
+    ExternalProject_Add(host_packer_project
+        SOURCE_DIR ${PACKER_SOURCE_DIR}
+        BINARY_DIR ${HOST_BUILD_DIR}
+        PREFIX ${HOST_BUILD_DIR}
+        CMAKE_ARGS ${HOST_CMAKE_ARGS}
+        INSTALL_COMMAND ""
+        BUILD_ALWAYS 1
+    )
+    
+    set(PACKER_DEPENDS host_packer_project)
+
+else()
+    # Normal build (Desktop)
+    add_subdirectory(src/tools)
+    set_target_properties(packer PROPERTIES 
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tools"
+    )
+    
+    set(PACKER_TOOL $<TARGET_FILE:packer>)
+    set(PACKER_DEPENDS packer)
+endif()
+
+set(MASTER_DAT_NAME ${CMAKE_PROJECT_NAME})
+set(MASTER_DAT_PATH "${CMAKE_BINARY_DIR}/${MASTER_DAT_NAME}.dat")
+
+set(GENERATED_HEADER_PATH "${CMAKE_BINARY_DIR}/generated/${CMAKE_PROJECT_NAME}/dat.h")
+file(WRITE "${GENERATED_HEADER_PATH}" 
+"// Automatically generated by CMake. Do not edit.
+#pragma once
+
+#define MASTER_DAT_PATH \"${MASTER_DAT_NAME}.dat\""
+)
+
+add_custom_command(
+    OUTPUT "${MASTER_DAT_PATH}"
+    COMMAND ${PACKER_TOOL} "${LIST_FILE_PATH}" "${MASTER_DAT_PATH}"
+    DEPENDS ${PACKER_DEPENDS} "${LIST_FILE_PATH}"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Packing Assets using ${PACKER_TOOL}..."
+)
+
+add_custom_target(PackAssets ALL DEPENDS "${MASTER_DAT_PATH}")
+add_dependencies(${EXE_NAME} PackAssets)
+
+
+# --- COPY TO OUTPUT ---
+if(ANDROID)
+    # Copy to the specific folder Gradle expects assets in
+    set(ANDROID_ASSETS_DIR "${CMAKE_SOURCE_DIR}/android/app/src/main/assets")
+    file(MAKE_DIRECTORY "${ANDROID_ASSETS_DIR}")
+
+    add_custom_command(TARGET ${EXE_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${MASTER_DAT_PATH}"
+        "${ANDROID_ASSETS_DIR}/${MASTER_DAT_NAME}.dat"
+    )
+else()    
+    add_custom_target(EnsureGameDat ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${MASTER_DAT_PATH}"
+        "$<TARGET_FILE_DIR:${EXE_NAME}>/${MASTER_DAT_NAME}.dat"
+        COMMENT "Verifying assets in output directory..."
+    )
+
+    # Ensure this runs after the EXE is linked (so the bin folder exists)
+    add_dependencies(EnsureGameDat ${EXE_NAME})
 endif()

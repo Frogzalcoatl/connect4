@@ -1,24 +1,21 @@
 #include "SDL3/SDL.h"
 #include "SDL3_mixer/SDL_mixer.h"
-#include "Connect4/assets/header.h"
 #include "Connect4/assets/sounds.h"
-
-#include "assets_sounds_ButtonClick_wav.h"
-#include "assets_sounds_ButtonHover_wav.h"
-#include "assets_sounds_Player1Place_wav.h"
-#include "assets_sounds_Player2Place_wav.h"
-#include "assets_music_test_mp3.h"
-
+#include "Connect4/tools/virtualFileSystem.h"
 #include <math.h>
 
 // The max amount of sounds that can play at once
 #define SFX_POOL_SIZE 8
 
-static const C4_HeaderAsset SOUND_ASSETS[C4_SoundEffect_Count] = {
-    {assets_sounds_ButtonClick_wav_data, assets_sounds_ButtonClick_wav_size},
-    {assets_sounds_ButtonHover_wav_data, assets_sounds_ButtonHover_wav_size},
-    {assets_sounds_Player1Place_wav_data, assets_sounds_Player1Place_wav_size},
-    {assets_sounds_Player2Place_wav_data, assets_sounds_Player2Place_wav_size}
+static const char* SOUND_ASSETS[C4_SoundEffect_Count] = {
+    "assets/sounds/ButtonClick.wav",
+    "assets/sounds/ButtonHover.wav",
+    "assets/sounds/Player1Place.wav",
+    "assets/sounds/Player2Place.wav"
+};
+
+static const char* MUSIC_ASSETS[C4_MusicTrack_Count] = {
+    "assets/music/test.mp3"
 };
 
 static MIX_Mixer* mixerDevice = NULL;
@@ -34,11 +31,7 @@ static MIX_Track* sfxTracks[SFX_POOL_SIZE] = {0};
 static Uint64 musicStartTime = 0;
 static bool isMusicPlaying = false;
 
-bool C4_InitAudio(void) {
-    if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0) {
-        return false;
-    }
-    
+bool C4_InitAudio(void) {   
     MIX_Init(); 
 
     mixerDevice = MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, NULL);
@@ -47,13 +40,22 @@ bool C4_InitAudio(void) {
         return false;
     }
 
+    size_t currentLen;
+
     for (size_t i = 0; i < C4_SoundEffect_Count; i++) {
-        SDL_IOStream* io = SDL_IOFromConstMem(SOUND_ASSETS[i].data, SOUND_ASSETS[i].size);
+        void* rawData = C4_VFS_ReadFile(SOUND_ASSETS[i], &currentLen);
+        if (!rawData) {
+            SDL_Log("Unable to open sound %s", SOUND_ASSETS[i]);
+            continue;
+        }
+        SDL_IOStream* io = SDL_IOFromMem(rawData, currentLen);
         if (!io) {
+            C4_VFS_FreeFile(rawData);
             C4_QuitAudio();
             return false;
         }
         loadedSounds[i] = MIX_LoadAudio_IO(mixerDevice, io, true, true);
+        C4_VFS_FreeFile(rawData);
     }
 
     musicTrack = MIX_CreateTrack(mixerDevice);
@@ -142,15 +144,23 @@ void C4_PlayMusic(C4_MusicTrack musicID) {
         return;
     }
 
-    SDL_IOStream* io = SDL_IOFromConstMem(assets_music_test_mp3_data, assets_music_test_mp3_size);
+    size_t len;
+    void* rawData = C4_VFS_ReadFile(MUSIC_ASSETS[musicID], &len);
+    if (!rawData) {
+        SDL_Log("Unable to open music %s", MUSIC_ASSETS[musicID]);
+        return;
+    }
+    SDL_IOStream* io = SDL_IOFromMem(rawData, len);
     if (!io) {
-        SDL_Log("Failed to create IO for music ID %d", musicID);
+        SDL_Log("Failed to create IO for music %s", MUSIC_ASSETS[musicID]);
         return;
     }
 
     // Keep the mp3 compressed in RAM to save memory.
     // It will decompress in chunks during playback instead.
     currentMusic = MIX_LoadAudio_IO(mixerDevice, io, false, true);
+
+    C4_VFS_FreeFile(rawData);
     
     if (currentMusic) {
         currentMusicID = musicID;

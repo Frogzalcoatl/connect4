@@ -1,15 +1,13 @@
-#include "Connect4/assets/header.h"
 #include "Connect4/assets/fonts.h"
-#include "assets_fonts_Monocraft_ttf.h"
-#include "assets_fonts_Miracode_ttf.h"
 #include "Connect4/constants.h"
+#include "Connect4/tools/virtualFileSystem.h"
 #include <stdio.h>
 
 #define C4_FONT_ASSET_COUNT 2
 
-static const C4_HeaderAsset FONT_ASSETS[C4_FONT_ASSET_COUNT] = {
-    {assets_fonts_Monocraft_ttf_data, assets_fonts_Monocraft_ttf_size},
-    {assets_fonts_Miracode_ttf_data, assets_fonts_Miracode_ttf_size}
+static const char* FONT_ASSETS[C4_FONT_ASSET_COUNT] = {
+    "assets/fonts/Monocraft.ttf",
+    "assets/fonts/Miracode.ttf"
 };
 
 typedef struct {
@@ -17,6 +15,7 @@ typedef struct {
     float size;
     TTF_FontStyleFlags style;
     TTF_Font* font;
+    void* rawData;
 } C4_CachedFont;
 
 #define MAX_FONT_CACHE 64
@@ -48,17 +47,25 @@ TTF_Font* C4_GetFont(C4_FontAsset assetID, float ptSize, TTF_FontStyleFlags styl
         return fontCache[0].font;
     }
 
-    const C4_HeaderAsset* asset = &FONT_ASSETS[assetID];
-    SDL_IOStream* io = SDL_IOFromConstMem(asset->data, asset->size);
+    size_t len;
+    void* rawData = C4_VFS_ReadFile(FONT_ASSETS[assetID], &len);
+    if (!rawData) {
+        SDL_Log("Unable to open font %s", FONT_ASSETS[assetID]);
+        return NULL;
+    }
+    
+    SDL_IOStream* io = SDL_IOFromMem(rawData, len);
 
     if (!io) {
         SDL_Log("Failed to create IO for font asset %d", assetID);
+        C4_VFS_FreeFile(rawData);
         return NULL;
     }
 
     TTF_Font* newFont = TTF_OpenFontIO(io, true, ptSize);
     if (!newFont) {
         SDL_Log("Failed to get font asset %d: %s", assetID, SDL_GetError());
+        C4_VFS_FreeFile(rawData);
         return NULL;
     }
 
@@ -68,6 +75,7 @@ TTF_Font* C4_GetFont(C4_FontAsset assetID, float ptSize, TTF_FontStyleFlags styl
     fontCache[cacheCount].size = ptSize;
     fontCache[cacheCount].style = style;
     fontCache[cacheCount].font = newFont;
+    fontCache[cacheCount].rawData = rawData;
 
     cacheCount++;
     
@@ -78,6 +86,9 @@ void C4_CloseAllFonts(void) {
     for (size_t i = 0; i < MAX_FONT_CACHE; i++) {
         if (fontCache[i].font) {
             TTF_CloseFont(fontCache[i].font);
+        }
+        if (fontCache[i].rawData) {
+            C4_VFS_FreeFile(fontCache[i].rawData);
         }
     }
     cacheCount = 0;

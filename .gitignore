@@ -31,3 +31,4 @@ Thumbs.db
 captures/
 *.hprof
 android/.vscode/
+android/app/src/main/assets/

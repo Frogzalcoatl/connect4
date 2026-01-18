@@ -17,7 +17,7 @@ void C4_UI_DrawText(SDL_FRect rect, C4_UI_Data_Text* text, C4_UI_StyleState* sty
 
     SDL_SetRenderScale(renderer, 1.0f, 1.0f);
 
-    int texW, texH;
+    int texW = 0, texH = 0;
     TTF_GetTextSize(text->textObject, &texW, &texH);
 
     float scaleX = (texW > 0) ? rect.w / (float)texW : 1.0f;
