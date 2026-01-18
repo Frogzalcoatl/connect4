@@ -380,29 +380,27 @@ set(PACKER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src/tools")
 
 if(CMAKE_CROSSCOMPILING)
     include(ExternalProject)
-    
     set(HOST_BUILD_DIR "${CMAKE_BINARY_DIR}/host_packer_build")
     
     if(CMAKE_HOST_WIN32)
         set(PACKER_TOOL "${HOST_BUILD_DIR}/packer.exe")
+        set(HOST_GENERATOR "MinGW Makefiles")
     else()
         set(PACKER_TOOL "${HOST_BUILD_DIR}/packer")
+        # IMPORTANT: Force "Unix Makefiles" to avoid Xcode.
+        set(HOST_GENERATOR "Unix Makefiles")
     endif()
 
     set(HOST_CMAKE_ARGS 
-        "-G" "Ninja"
+        "-G" "${HOST_GENERATOR}"
         "-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${HOST_BUILD_DIR}"
+        "-DCMAKE_BUILD_TYPE=Release"
     )
-
-    if(CMAKE_GENERATOR MATCHES "Ninja")
-        list(APPEND HOST_CMAKE_ARGS "-DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}")
-    endif()
     
-    if(DEFINED CMAKE_C_COMPILER)
-        list(APPEND HOST_CMAKE_ARGS "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
-        list(APPEND HOST_CMAKE_ARGS "-DCMAKE_C_FLAGS=") 
-        list(APPEND HOST_CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE=")
-    endif()
+    list(APPEND HOST_CMAKE_ARGS "-DCMAKE_SYSTEM_NAME=${CMAKE_HOST_SYSTEM_NAME}")
+    list(APPEND HOST_CMAKE_ARGS "-DCMAKE_OSX_ARCHITECTURES=") 
+    list(APPEND HOST_CMAKE_ARGS "-DCMAKE_OSX_SYSROOT=")
+    list(APPEND HOST_CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE=")
 
     ExternalProject_Add(host_packer_project
         SOURCE_DIR ${PACKER_SOURCE_DIR}
