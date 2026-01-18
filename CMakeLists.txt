@@ -382,21 +382,22 @@ if(CMAKE_CROSSCOMPILING)
     include(ExternalProject)
     set(HOST_BUILD_DIR "${CMAKE_BINARY_DIR}/host_packer_build")
     
+    # Force Unix Makefiles on Non-Windows Hosts (like macOS) to ensure flat directory structure.
+    # This avoids Xcode creating "Release/" subdirectories and demanding code signing.
     if(CMAKE_HOST_WIN32)
-        set(PACKER_TOOL "${HOST_BUILD_DIR}/packer.exe")
         set(HOST_GENERATOR "MinGW Makefiles")
+        set(PACKER_TOOL "${HOST_BUILD_DIR}/packer.exe")
     else()
-        set(PACKER_TOOL "${HOST_BUILD_DIR}/packer")
-        # IMPORTANT: Force "Unix Makefiles" to avoid Xcode.
         set(HOST_GENERATOR "Unix Makefiles")
+        set(PACKER_TOOL "${HOST_BUILD_DIR}/packer")
     endif()
 
     set(HOST_CMAKE_ARGS 
-        "-G" "${HOST_GENERATOR}"
         "-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${HOST_BUILD_DIR}"
         "-DCMAKE_BUILD_TYPE=Release"
     )
     
+    # Explicitly clear cross-compile flags so the tool builds for the HOST
     list(APPEND HOST_CMAKE_ARGS "-DCMAKE_SYSTEM_NAME=${CMAKE_HOST_SYSTEM_NAME}")
     list(APPEND HOST_CMAKE_ARGS "-DCMAKE_OSX_ARCHITECTURES=") 
     list(APPEND HOST_CMAKE_ARGS "-DCMAKE_OSX_SYSROOT=")
@@ -406,20 +407,18 @@ if(CMAKE_CROSSCOMPILING)
         SOURCE_DIR ${PACKER_SOURCE_DIR}
         BINARY_DIR ${HOST_BUILD_DIR}
         PREFIX ${HOST_BUILD_DIR}
+        # Use CMAKE_GENERATOR explicitly to override the parent generator (Xcode)
+        CMAKE_GENERATOR "${HOST_GENERATOR}"
         CMAKE_ARGS ${HOST_CMAKE_ARGS}
         INSTALL_COMMAND ""
         BUILD_ALWAYS 1
     )
     
     set(PACKER_DEPENDS host_packer_project)
-
 else()
     # Normal build (Desktop)
     add_subdirectory(src/tools)
-    set_target_properties(packer PROPERTIES 
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tools"
-    )
-    
+    set_target_properties(packer PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tools")
     set(PACKER_TOOL $<TARGET_FILE:packer>)
     set(PACKER_DEPENDS packer)
 endif()

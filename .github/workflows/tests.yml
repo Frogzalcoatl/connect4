@@ -102,7 +102,8 @@ jobs:
              # Find Connect4.exe explicitly (ignores CompilerId executables)
              find build -name "Connect4.exe" -exec cp {} staging/ \; 
              # Grab DLLs if they exist
-             find build -name "*.dll" -exec cp {} staging/ \; 
+             find build -name "*.dat" -exec cp {} staging/ \; 
+             find build -name "*.dat" -exec cp {} staging/ \;
           fi
 
           # --- LINUX: Binary only (Excluding Android) ---
