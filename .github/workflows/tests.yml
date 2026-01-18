@@ -101,14 +101,14 @@ jobs:
           if [[ "${{ runner.os }}" == "Windows" ]]; then
              # Find Connect4.exe explicitly (ignores CompilerId executables)
              find build -name "Connect4.exe" -exec cp {} staging/ \; 
-             # Grab DLLs if they exist
-             find build -name "*.dat" -exec cp {} staging/ \; 
-             find build -name "*.dat" -exec cp {} staging/ \;
+             # Grab dat
+             find build -name "Connect4.dat" -exec cp {} staging/ \; 
           fi
 
           # --- LINUX: Binary only (Excluding Android) ---
           if [[ "${{ runner.os }}" == "Linux" && "${{ matrix.platform.name }}" != "Android" ]]; then
              find build -name "Connect4" -type f -exec cp {} staging/ \;
+             find build -name "Connect4.dat" -exec cp {} staging/ \; 
           fi
 
           # --- MAC: App Bundle ---

@@ -1,3 +1,5 @@
+# Needed ai for this ngl
+
 cmake_minimum_required(VERSION 3.22)
 project(Connect4 LANGUAGES C)
 
@@ -382,8 +384,7 @@ if(CMAKE_CROSSCOMPILING)
     include(ExternalProject)
     set(HOST_BUILD_DIR "${CMAKE_BINARY_DIR}/host_packer_build")
     
-    # Force Unix Makefiles on Non-Windows Hosts (like macOS) to ensure flat directory structure.
-    # This avoids Xcode creating "Release/" subdirectories and demanding code signing.
+    # Force Unix Makefiles on Non-Windows Hosts (like macOS) to ensure flat directory structure
     if(CMAKE_HOST_WIN32)
         set(HOST_GENERATOR "MinGW Makefiles")
         set(PACKER_TOOL "${HOST_BUILD_DIR}/packer.exe")
@@ -397,7 +398,7 @@ if(CMAKE_CROSSCOMPILING)
         "-DCMAKE_BUILD_TYPE=Release"
     )
     
-    # Explicitly clear cross-compile flags so the tool builds for the HOST
+    # Clear cross-compile flags to ensure it builds for the Host
     list(APPEND HOST_CMAKE_ARGS "-DCMAKE_SYSTEM_NAME=${CMAKE_HOST_SYSTEM_NAME}")
     list(APPEND HOST_CMAKE_ARGS "-DCMAKE_OSX_ARCHITECTURES=") 
     list(APPEND HOST_CMAKE_ARGS "-DCMAKE_OSX_SYSROOT=")
@@ -407,7 +408,6 @@ if(CMAKE_CROSSCOMPILING)
         SOURCE_DIR ${PACKER_SOURCE_DIR}
         BINARY_DIR ${HOST_BUILD_DIR}
         PREFIX ${HOST_BUILD_DIR}
-        # Use CMAKE_GENERATOR explicitly to override the parent generator (Xcode)
         CMAKE_GENERATOR "${HOST_GENERATOR}"
         CMAKE_ARGS ${HOST_CMAKE_ARGS}
         INSTALL_COMMAND ""
@@ -415,12 +415,24 @@ if(CMAKE_CROSSCOMPILING)
     )
     
     set(PACKER_DEPENDS host_packer_project)
+    
+    # Unix Makefiles generates an unsigned binary. macOS arm64 requires a signature.
+    if(APPLE)
+        set(SIGN_PACKER_CMD codesign --force --sign - "${PACKER_TOOL}")
+    else()
+        set(SIGN_PACKER_CMD ${CMAKE_COMMAND} -E echo "No signing needed")
+    endif()
+
 else()
     # Normal build (Desktop)
     add_subdirectory(src/tools)
-    set_target_properties(packer PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tools")
+    set_target_properties(packer PROPERTIES 
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tools"
+    )
+    
     set(PACKER_TOOL $<TARGET_FILE:packer>)
     set(PACKER_DEPENDS packer)
+    set(SIGN_PACKER_CMD ${CMAKE_COMMAND} -E echo "No signing needed")
 endif()
 
 set(MASTER_DAT_NAME ${CMAKE_PROJECT_NAME})
@@ -436,6 +448,7 @@ file(WRITE "${GENERATED_HEADER_PATH}"
 
 add_custom_command(
     OUTPUT "${MASTER_DAT_PATH}"
+    COMMAND ${SIGN_PACKER_CMD}
     COMMAND ${PACKER_TOOL} "${LIST_FILE_PATH}" "${MASTER_DAT_PATH}"
     DEPENDS ${PACKER_DEPENDS} "${LIST_FILE_PATH}"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
