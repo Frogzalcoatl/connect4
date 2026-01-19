@@ -16,12 +16,12 @@ void C4_Screen_Draw_Default(C4_UI_Screen* screen, float UIScale) {
     C4_UI_Canvas_Draw(&screen->canvas, UIScale);
 }
 
-void C4_UI_Screen_HandleEvent_Default(C4_UI_Screen* screen, SDL_Event* event, float UIScale) {
+void C4_UI_Screen_HandleEvent_Default(C4_UI_Screen* screen, SDL_Window* window, SDL_Event* event) {
     if (!screen || !event) {
         SDL_Log("Unable to run default screen event handler. Screen is NULL");
         return;
     }
-    C4_UI_Canvas_HandleEvent(&screen->canvas, event, UIScale);
+    C4_UI_Canvas_HandleEvent(&screen->canvas, window, event);
 }
 
 void C4_UI_Screen_Destroy_Default(C4_UI_Screen* screen) {

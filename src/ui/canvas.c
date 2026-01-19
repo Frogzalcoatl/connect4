@@ -1,5 +1,7 @@
 #include "Connect4/ui/canvas.h"
 #include "Connect4/game/events.h"
+#include "Connect4/physics/intersection.h"
+#include "Connect4/ui/cursorStyle.h"
 #include <stdlib.h>
 
 void C4_UI_Canvas_Init(C4_UI_Canvas* canvas, SDL_Renderer* renderer, TTF_TextEngine* textEngine, float offsetX, float offsetY) {
@@ -224,7 +226,70 @@ static void C4_UI_Canvas_HandleMouseEvents(C4_UI_Canvas* canvas, SDL_Event* even
     }
 }
 
-void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float UIScale) {
+static C4_UI_Node* C4_UI_Node_FindHoveredInteraction(C4_UI_Node* node, SDL_FPoint mousePos) {
+    if (!node) {
+        return NULL;
+    }
+    C4_UI_Node* child = node->lastChild;
+    C4_UI_ShapeType shape;
+    while (child) {
+        shape = node->type == C4_UI_Type_Shape ? node->shape.type : C4_UI_Shape_Rectangle;
+        if (
+            C4_IsPointInsideShape(shape, mousePos, child->absoluteRect, child->shape.rotationDegrees, child->mirror)
+        ) {
+            return child;
+        }
+        child = child->prevSibling;
+    }
+    return NULL;
+} 
+
+static C4_UI_Node* C4_UI_Canvas_FindHoveredInteraction(C4_UI_Canvas* canvas, SDL_Window* window) {
+    if (!canvas || !window) {
+        return NULL;
+    }
+    SDL_FPoint mousePos = {0.f, 0.f};
+    SDL_GetMouseState(&mousePos.x, &mousePos.y);
+    C4_UI_Node* current = canvas->root;
+    while (current) {
+        C4_UI_Node* result = C4_UI_Node_FindHoveredInteraction(current, mousePos);
+        if (result) {
+            return result;
+        }
+        current = current->nextSibling;
+    }
+    return NULL;
+}
+
+static void C4_UI_Canvas_MoveCursorToFocusedNode(C4_UI_Canvas* canvas, SDL_Window* window) {
+    SDL_FRect* nodeRect = &canvas->focusedNode->absoluteRect;
+    float x = nodeRect->x + nodeRect->w / 2.f;
+    float y = nodeRect->y + nodeRect->h / 2.f;
+    SDL_WarpMouseInWindow(window, x, y);
+    SDL_SetCursor(C4_GetSystemCursor(SDL_SYSTEM_CURSOR_POINTER));
+    SDL_ShowCursor();
+}
+
+static void C4_UI_Canvas_SetFocusedNodeBasedOnMousePos(C4_UI_Canvas* canvas, SDL_Window* window) {
+    C4_UI_Canvas_ResetInteractions(canvas);
+    SDL_HideCursor();
+    C4_UI_Node* result = C4_UI_Canvas_FindHoveredInteraction(canvas, window);
+    if (!result) {
+        C4_UI_Node* current = canvas->root;
+        while (current) {
+            result = C4_UI_Node_FindFocusable(current);
+            if (result) {
+                break;
+            }
+            current = current->nextSibling;
+        }
+    }
+    if (result) {
+        C4_UI_Canvas_SetFocus(canvas, result);
+    }
+}
+
+void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Window* window, SDL_Event* event) {
     if (!canvas || !event) {
         SDL_Log("Unable to handle events in canvas. One or more required pointers are NULL");
         return;
@@ -238,36 +303,24 @@ void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Event* event, float UISc
         return;
     }
 
-    (void)UIScale;
     C4_InputEvent inputEvent = C4_GetInput(event);
 
     if (inputEvent.verb != C4_INPUT_VERB_NONE) {
-        if (SDL_CursorVisible()) {
-            SDL_HideCursor();
-            C4_UI_Canvas_ResetInteractions(canvas);
+        if (!SDL_CursorVisible()) {
+            C4_UI_Canvas_HandleAction(canvas, inputEvent);
+            return;
         }
-        C4_UI_Canvas_HandleAction(canvas, inputEvent);
-        return;
+        C4_UI_Canvas_SetFocusedNodeBasedOnMousePos(canvas, window);
     } else if (
         event->type == SDL_EVENT_MOUSE_MOTION ||
         event->type == SDL_EVENT_MOUSE_BUTTON_DOWN || 
-        event->type == SDL_EVENT_MOUSE_BUTTON_UP ||
-        event->type == SDL_EVENT_FINGER_UP // To properly reset isHovered on touch
+        event->type == SDL_EVENT_MOUSE_BUTTON_UP
     ) {
-        if (!SDL_CursorVisible()) {
-            SDL_ShowCursor();
-            C4_UI_Canvas_ResetInteractions(canvas);
+        if (SDL_CursorVisible()) {
+            C4_UI_Canvas_HandleMouseEvents(canvas, event);
+            return;
         }
-
-        // So theres not two nodes focused at the same time from controller and mouse
-        if (event->type == SDL_EVENT_MOUSE_MOTION) {
-            if (canvas->focusedNode) {
-                canvas->focusedNode->input.isHovered = false;
-            }
-            canvas->focusedNode = NULL;
-        }
-
-        C4_UI_Canvas_HandleMouseEvents(canvas, event);
+        C4_UI_Canvas_MoveCursorToFocusedNode(canvas, window);
     }
 }
 

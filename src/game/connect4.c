@@ -307,7 +307,7 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
         }
         SDL_ConvertEventToRenderCoordinates(game->renderer, eventSDL);
         if (game->currentScreen->HandleEvent) {
-            game->currentScreen->HandleEvent(game->currentScreen, eventSDL, game->UIScale);
+            game->currentScreen->HandleEvent(game->currentScreen, game->window, eventSDL);
         }
     }
     while (C4_PollEvent(eventC4)) {

@@ -27,7 +27,7 @@ struct C4_UI_Screen {
     void (*Draw)(C4_UI_Screen* screen, float UIScale);
     void (*OnEnter)(C4_UI_Screen* screen);
     void (*HandleWindowResize)(C4_UI_Screen* screen, C4_UI_LayoutType layout);
-    void (*HandleEvent)(C4_UI_Screen* screen, SDL_Event* event, float UIScale);
+    void (*HandleEvent)(C4_UI_Screen* screen, SDL_Window* window, SDL_Event* event);
     void (*Destroy)(C4_UI_Screen* screen);
     C4_UI_Canvas canvas;
 };
@@ -36,5 +36,5 @@ C4_UI_Screen* C4_Screen_Create(SDL_Renderer* renderer, TTF_TextEngine* textEngin
 
 void C4_Screen_Update_Default(C4_UI_Screen* screen, float deltaTime, float UIScale);
 void C4_Screen_Draw_Default(C4_UI_Screen* screen, float UIScale);
-void C4_UI_Screen_HandleEvent_Default(C4_UI_Screen* screen, SDL_Event* event, float UIScale);
+void C4_UI_Screen_HandleEvent_Default(C4_UI_Screen* screen, SDL_Window* window, SDL_Event* event);
 void C4_UI_Screen_Destroy_Default(C4_UI_Screen* screen);

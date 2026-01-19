@@ -85,13 +85,13 @@ static void C4_MenuScreen_CloseWindowAndTask(void* context) {
     SDL_Log("Ran window close callback with android remove task");
 }
 
-static void C4_MenuScreen_HandleEvent(C4_UI_Screen* screen, SDL_Event* event, float UIScale) {
+static void C4_MenuScreen_HandleEvent(C4_UI_Screen* screen, SDL_Window* window, SDL_Event* event) {
     if (!screen || !event) {
         return;
     }
     C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
 
-    C4_UI_Screen_HandleEvent_Default(screen, event, UIScale);
+    C4_UI_Screen_HandleEvent_Default(screen, window, event);
 
     if (
         event->type == SDL_EVENT_GAMEPAD_ADDED ||

@@ -137,11 +137,12 @@ bool C4_UI_Interaction_HandleMouseEvents(
             }
             return true;
         }
-    } else if (event->type == SDL_EVENT_MOUSE_BUTTON_UP || event->type == SDL_EVENT_FINGER_UP) {
+    } else if (event->type == SDL_EVENT_MOUSE_BUTTON_UP) {
         if (mouseButton == SDL_BUTTON_LEFT) {
             bool wasReleased = input->isPressed && input->isHovered;
             input->isPressed = false;
-            if (event->type == SDL_EVENT_FINGER_UP) {
+            bool isTouch = (event->motion.which == SDL_TOUCH_MOUSEID);
+            if (isTouch) {
                 input->isHovered = false;
             }
             if (wasReleased) {
