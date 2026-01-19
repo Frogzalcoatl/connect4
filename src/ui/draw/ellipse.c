@@ -36,12 +36,6 @@ void C4_UI_DrawEllipse(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState
     int indexCount = segments * 3;
     
     memset(vertexCache, 0, vertexCount * sizeof(SDL_Vertex));
-    
-    if (!vertexCache || !indexCache) {
-        SDL_free(vertexCache);
-        SDL_free(indexCache);
-        return;
-    }
 
     SDL_FColor color;
     C4_ColorToFColor(&styleState->background, &color);
@@ -164,17 +158,17 @@ void C4_UI_DrawEllipseBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_Sty
         if (i < segments) {
             int base = i * 2;
             // First Triangle
-            indexCache[i * 6 + 0] = base + 0;
-            indexCache[i * 6 + 1] = base + 1;
-            indexCache[i * 6 + 2] = base + 2;
+            borderIndexCache[i * 6 + 0] = base + 0;
+            borderIndexCache[i * 6 + 1] = base + 1;
+            borderIndexCache[i * 6 + 2] = base + 2;
             
             // Second Triangle
-            indexCache[i * 6 + 3] = base + 1;
-            indexCache[i * 6 + 4] = base + 3;
-            indexCache[i * 6 + 5] = base + 2;
+            borderIndexCache[i * 6 + 3] = base + 1;
+            borderIndexCache[i * 6 + 4] = base + 3;
+            borderIndexCache[i * 6 + 5] = base + 2;
         }
     }
 
-    SDL_RenderGeometry(renderer, NULL, borderVertexCache, vertexCount, indexCache, indexCount);
+    SDL_RenderGeometry(renderer, NULL, borderVertexCache, vertexCount, borderIndexCache, indexCount);
     return;
 }

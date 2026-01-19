@@ -33,5 +33,5 @@ void C4_PushEvent_CloseWindow(bool androidRemoveTask);
 void C4_PushEvent_ScreenChange(C4_ScreenType screenType);
 void C4_PushEvent_SetCursor(SDL_SystemCursor type);
 void C4_PushEvent_PlaySound(C4_SoundEffect id);
-void C4_PushEvent_PlayMusic(C4_SoundEffect id);
+void C4_PushEvent_PlayMusic(C4_MusicTrack id);
 void C4_PushEvent_SetVolume(C4_AudioTrack track, float level);
