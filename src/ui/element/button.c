@@ -1,10 +1,9 @@
 #include "Connect4/ui/element/button.h"
+#include <assert.h>
 
 C4_UI_Node* C4_UI_Button_Create(C4_MemoryArena* arena, C4_UI_Button_Config* config) {
-    if (!config) {
-        SDL_Log("Unable to create button. Config is NULL");
-        return NULL;
-    }
+    assert(arena && config);
+    
     C4_UI_Node* background = C4_UI_Node_Create(
         arena, &(C4_UI_Node_Config){
             .type = C4_UI_Type_Shape,
@@ -46,10 +45,7 @@ C4_UI_Node* C4_UI_Button_Create(C4_MemoryArena* arena, C4_UI_Button_Config* conf
 }
 
 C4_UI_Node* C4_UI_Buttons_Create(C4_MemoryArena* arena, C4_UI_Buttons_Config* config) {
-    if (!config || !config->buttonsArr || config->buttonsArrSize == 0) {
-        SDL_Log("Unable to create buttons. One or more required values are NULL or 0");
-        return NULL;
-    }
+    assert(arena && config && config->buttonsArr && config->buttonsArrSize > 0);
 
     C4_UI_Node* container = C4_UI_Node_Create(
         arena, &(C4_UI_Node_Config){
@@ -87,9 +83,8 @@ C4_UI_Node* C4_UI_Buttons_Create(C4_MemoryArena* arena, C4_UI_Buttons_Config* co
 }
 
 void C4_UI_Buttons_SetChildrenButtonSizes(C4_UI_Node* node, float width, float height) {
-    if (!node) {
-        return;
-    }
+    assert(node);
+
     C4_UI_Node* current = node->firstChild;
     while (current) {
         current->rect.w = width;
@@ -101,10 +96,8 @@ void C4_UI_Buttons_SetChildrenButtonSizes(C4_UI_Node* node, float width, float h
 }
 
 void C4_UI_Buttons_CreateConfigArr(C4_UI_Button_Config* defaultConfig, char* buttonStrings[], size_t buttonCount, C4_UI_Button_Config returnValue[]) {
-    if (!defaultConfig || !buttonStrings) {
-        SDL_Log("Unable to create config arr. One or more required pointers are NULL.");
-        return;
-    }
+    assert(defaultConfig && buttonStrings && returnValue);
+    
     for (size_t i = 0; i < buttonCount; i++) {
         returnValue[i] = *defaultConfig;
         returnValue[i].text = buttonStrings[i];

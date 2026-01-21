@@ -1,6 +1,8 @@
 #include "Connect4/ui/screens/settings.h"
 #include "Connect4/game/events.h"
 #include "Connect4/constants.h"
+#include "Connect4/game/consoleOutput.h"
+#include <assert.h>
 #include <stdio.h>
 
 typedef struct {
@@ -8,16 +10,13 @@ typedef struct {
 } C4_SettingsScreenData;
 
 static void C4_SettingsScreen_OnEnter(C4_UI_Screen* screen) {
-    if (!screen || !screen->data) {
-        return;
-    }
+    assert(screen && screen->data);
     //C4_SettingsScreenData* data = (C4_SettingsScreenData*)screen->data;
 }
 
 static void C4_SettingsScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutType layout) {
-    if (!screen || !screen->data) {
-        return;
-    }
+    assert(screen && screen->data);
+    assert(layout > C4_UI_LayoutType_None && layout < C4_UI_LayoutType_Count);
     //C4_SettingsScreenData* data = (C4_SettingsScreenData*)screen->data;
 
     switch (layout) {
@@ -32,38 +31,34 @@ static void C4_SettingsScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_Lay
 
 }
 
-static bool C4_SettingsScreen_Init(C4_UI_Screen* screen, C4_Game* game);
+static void C4_SettingsScreen_Init(C4_UI_Screen* screen, C4_Game* game);
 
 C4_UI_Screen* C4_SettingsScreen_Create(C4_Game* game) {
-    if (!game) {
-        return NULL;
-    }
+    assert(game);
+
     C4_UI_Screen* screen = C4_Screen_Create(game->renderer, game->textEngine);
     if (!screen) {
-        return NULL;
+        C4_FatalError(C4_ErrorCode_OutOfMemory, "Unable to allocate memory for settings screen");
     }
 
     screen->data = SDL_calloc(1, sizeof(C4_SettingsScreenData));
     if (!screen->data) {
-        screen->Destroy(screen);
-        return NULL;
+        C4_FatalError(C4_ErrorCode_OutOfMemory, "Unable to allocate memory for settings screen data");
     }
 
     screen->HandleWindowResize = C4_SettingsScreen_HandleWindowResize;
     screen->OnEnter = C4_SettingsScreen_OnEnter;
 
-    if (!C4_SettingsScreen_Init(screen, game)) {
-        screen->Destroy(screen);
-        return NULL;
-    }
+    C4_SettingsScreen_Init(screen, game);
+
+    C4_Log("Created settings screen");
 
     return screen;
 }
 
-static bool C4_SettingsScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
-    if (!screen || !game || !screen->data || !game->renderer) {
-        return false;
-    }
+static void C4_SettingsScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
+    assert(screen && screen->data && game && game->renderer);
+
     //C4_UI_Canvas* canvas = &screen->canvas;
     C4_SettingsScreenData* data = (C4_SettingsScreenData*)screen->data;
     //SDL_Renderer* renderer = game->renderer;
@@ -71,6 +66,4 @@ static bool C4_SettingsScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     data->game = game;
 
     screen->HandleWindowResize(screen, game->currentLayout);
-
-    return true;
 }

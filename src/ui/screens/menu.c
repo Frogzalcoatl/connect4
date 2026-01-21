@@ -4,6 +4,8 @@
 #include "Connect4/ui/element/button.h"
 #include "Connect4/ui/utils.h"
 #include "Connect4/assets/fonts.h"
+#include "Connect4/game/consoleOutput.h"
+#include <assert.h>
 
 typedef struct {
     C4_Game* game;
@@ -13,10 +15,8 @@ typedef struct {
 } C4_MenuScreenData;
 
 static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutType layout) {
-    if (!screen || !screen->data) {
-        SDL_Log("Unable to resize menu ui. One or more required pointers are NULL.");
-        return;
-    }
+    assert (screen && screen->data);
+
     C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
     C4_Game* game = data->game;
 
@@ -42,15 +42,14 @@ static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutT
     C4_UI_CenterInWindow(data->title, C4_UI_Axis_X, (unsigned int)refWindowDim.x, (unsigned int)refWindowDim.y);
 }
 
-// Forward declaration just for the purpose of organization
-static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game);
-
 static void UpdateControllerText(C4_MenuScreenData* data) {
-    char displayText[2048] = "Controllers:\n";
+    assert(data);
 
-    char* controllerArr[C4_MAX_GAMEPADS];
-    C4_Gamepad_GetNames(controllerArr, C4_MAX_GAMEPADS);
-    char* controllerText = C4_JoinStrings((const char**)controllerArr, C4_MAX_GAMEPADS, "\n");
+    char displayText[2048] = "Controllers:\n";
+    char* controllerArr[8] = {0}; 
+    
+    C4_Gamepad_GetNames(controllerArr, 8);
+    char* controllerText = C4_JoinStrings((const char**)controllerArr, 8, "\n");
     
     if (controllerText && *controllerText != '\0') {
         strcat(displayText, controllerText);
@@ -60,6 +59,12 @@ static void UpdateControllerText(C4_MenuScreenData* data) {
 
     if (controllerText) {
         SDL_free(controllerText);
+    }
+
+    for (int i = 0; i < 8; i++) {
+        if (controllerArr[i]) {
+            SDL_free(controllerArr[i]);
+        }
     }
 
     strcat(displayText, "\n\nCurrent: ");
@@ -76,19 +81,18 @@ static void UpdateControllerText(C4_MenuScreenData* data) {
 static void C4_MenuScreen_CloseWindow(void* context) {
     (void)context;
     C4_PushEvent_CloseWindow(false);
-    SDL_Log("Ran window close callback");
+    C4_Log("Ran window close callback");
 }
 
 static void C4_MenuScreen_CloseWindowAndTask(void* context) {
     (void)context;
     C4_PushEvent_CloseWindow(true);
-    SDL_Log("Ran window close callback with android remove task");
+    C4_Log("Ran window close callback with android remove task");
 }
 
 static void C4_MenuScreen_HandleEvent(C4_UI_Screen* screen, SDL_Window* window, SDL_Event* event) {
-    if (!screen || !event) {
-        return;
-    }
+    assert (screen && screen->data && window && event);
+
     C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
 
     C4_UI_Screen_HandleEvent_Default(screen, window, event);
@@ -102,44 +106,42 @@ static void C4_MenuScreen_HandleEvent(C4_UI_Screen* screen, SDL_Window* window, 
 }
 
 static void C4_MenuScreen_OnEnter(C4_UI_Screen* screen) {
-    if (!screen) {
-        return;
-    }
+    assert(screen && screen->data);
+
     C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
     UpdateControllerText(data);
 }
 
+// Forward declaration just for the purpose of organization
+static void C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game);
+
 C4_UI_Screen* C4_MenuScreen_Create(C4_Game* game) {
-    if (!game) {
-        return NULL;
-    }
+    assert(game);
+    
     C4_UI_Screen* screen = C4_Screen_Create(game->renderer, game->textEngine);
     if (!screen) {
-        return NULL;
+        C4_FatalError(C4_ErrorCode_OutOfMemory, "Unable to allocate memory for menu screen");
     }
 
     screen->data = SDL_calloc(1, sizeof(C4_MenuScreenData));
     if (!screen->data) {
-        screen->Destroy(screen);
-        return NULL;
+        C4_FatalError(C4_ErrorCode_OutOfMemory, "Unable to allocate memory for menu screen data");
     }
 
     screen->HandleWindowResize = C4_MenuScreen_HandleWindowResize;
     screen->HandleEvent = C4_MenuScreen_HandleEvent;
     screen->OnEnter = C4_MenuScreen_OnEnter;
 
-    if (!C4_MenuScreen_Init(screen, game)) {
-        screen->Destroy(screen);
-        return NULL;
-    }
+    C4_MenuScreen_Init(screen, game);
+
+    C4_Log("Created menu screen");
 
     return screen;
 }
 
-static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
-    if (!screen || !game || !screen->data || !game->renderer) {
-        return false;
-    }
+static void C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
+    assert(screen && screen->data && game && game->renderer);
+
     C4_UI_Canvas* canvas = &screen->canvas;
     C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
     //SDL_Renderer* renderer = game->renderer;
@@ -177,7 +179,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
             .style = &C4_UI_THEME_DEFAULT.style,
             .rect = (SDL_FRect){0.f, 0.f, 0.f, 0.f},
             .UIScale = UIScale,
-            .shapeType = C4_UI_Shape_Rectangle,
+            .shapeType = C4_UI_ShapeType_Rectangle,
             .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
             .text = "",
             .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 48.f, TTF_STYLE_BOLD),
@@ -201,7 +203,7 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     data->buttons->shape = (C4_UI_Data_Shape){
         .borderWidth = 3,
         .rotationDegrees = 0,
-        .type = C4_UI_Shape_Rectangle
+        .type = C4_UI_ShapeType_Rectangle
     };
     data->buttons->input.OnCancel = C4_MenuScreen_CloseWindow;
     data->buttons->lastChild->input.OnPress = C4_MenuScreen_CloseWindowAndTask;
@@ -224,6 +226,4 @@ static bool C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     C4_UI_Canvas_AddNode(canvas, data->controllerInfo);
     
     UpdateControllerText(data);
-    
-    return true;
 }

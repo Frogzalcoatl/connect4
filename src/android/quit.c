@@ -1,5 +1,5 @@
 #include "Connect4/android/quit.h"
-#include <SDL3/SDL.h>
+#include "SDL3/SDL.h"
 
 #if SDL_PLATFORM_ANDROID
     #include <jni.h>

@@ -1,4 +1,6 @@
 #include "Connect4/ui/cursorStyle.h"
+#include "Connect4/game/consoleOutput.h"
+#include <assert.h>
 #include <stddef.h>
 
 // cursorCache's memory is guaranteed to be filled with zeros before main even runs
@@ -6,10 +8,8 @@
 static SDL_Cursor* cursorCache[SDL_SYSTEM_CURSOR_COUNT] = {0};
 
 SDL_Cursor* C4_GetSystemCursor(SDL_SystemCursor type) {
-    if (type < 0 || type >= SDL_SYSTEM_CURSOR_COUNT) {
-        SDL_Log("Tried to access invalid cursor id. Got default cursor instead.");
-        return C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
-    }
+    assert(type >= 0 && type < SDL_SYSTEM_CURSOR_COUNT);
+
     if (cursorCache[type] != NULL) {
         return cursorCache[type];
     }
@@ -21,7 +21,10 @@ SDL_Cursor* C4_GetSystemCursor(SDL_SystemCursor type) {
     if (type != SDL_SYSTEM_CURSOR_DEFAULT) {
         return C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
     }
-    SDL_Log("Unable to create system cursor");
+    C4_Warn(
+        SDL_LOG_CATEGORY_APPLICATION,
+        "Unable to create system cursor"
+    );
     return NULL;
 }
 
@@ -34,4 +37,6 @@ void C4_DestroyAllCursors(void) {
             cursorCache[i] = NULL;
         }
     }
+
+    C4_Log("Destroyed all system cursors in cache");
 }

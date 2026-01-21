@@ -1,5 +1,6 @@
 #include "Connect4/ui/draw/utils.h"
 #include <math.h>
+#include <assert.h>
 
 SDL_FPoint C4_UI_RotatePoint(SDL_FPoint point, SDL_FPoint center, float degrees) {
     if (degrees == 0) {
@@ -16,6 +17,7 @@ SDL_FPoint C4_UI_RotatePoint(SDL_FPoint point, SDL_FPoint center, float degrees)
 }
 
 SDL_FPoint C4_UI_MirrorPoint(SDL_FPoint point, SDL_FPoint center, C4_UI_Mirror mirror) {
+    assert(mirror >= C4_UI_Mirror_None && mirror < C4_UI_Mirror_Count);
     if (mirror == C4_UI_Mirror_None) return point;
 
     float localX = point.x - center.x;
@@ -40,10 +42,8 @@ void C4_ColorToFColor(SDL_Color* color, SDL_FColor* fColor) {
 }
 
 void C4_InitVertices(SDL_Vertex* vertices, size_t vertexCount, SDL_FColor fColor) {
-    if (!vertices) {
-        SDL_Log("Unable init shape vertices. Vertices pointer is NULL");
-        return;
-    }
+    assert(vertices);
+
     for (size_t i = 0; i < vertexCount; i++) {
         vertices[i].color = fColor;
         vertices[i].tex_coord = (SDL_FPoint){0.f, 0.f};
@@ -55,6 +55,8 @@ SDL_FPoint C4_GetRectCenter(SDL_FRect rect) {
 }
 
 float C4_UI_GetMirroredRotation(float degrees, C4_UI_Mirror mirror) {
+    assert(mirror >= C4_UI_Mirror_None && mirror < C4_UI_Mirror_Count);
+
     if (mirror == C4_UI_Mirror_X || mirror == C4_UI_Mirror_Y) {
         return -degrees;
     }

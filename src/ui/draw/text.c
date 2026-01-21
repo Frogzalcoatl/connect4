@@ -1,13 +1,15 @@
 #include "Connect4/ui/draw/text.h"
 #include <math.h>
+#include <assert.h>
 
 void C4_UI_DrawText(SDL_FRect rect, C4_UI_Data_Text* text, C4_UI_StyleState* styleState, C4_UI_Mirror mirror, SDL_Renderer* renderer, float UIScale) {
-    if (!text || !text->textObject) {
-        SDL_Log("Unable to draw text. One or more required pointers are NULL");
-        return;
-    }
+    assert(text && text->textObject && styleState && renderer);
+    assert(mirror >= C4_UI_Mirror_None && mirror < C4_UI_Mirror_Count);
+
     // Prevent division by zero
-    if (UIScale <= 0.001f) UIScale = 1.0f;
+    if (UIScale <= 0.001f) {
+        UIScale = 1.0f;
+    }
 
     SDL_Color color = styleState->text;
     TTF_SetTextColor(text->textObject, color.r, color.g, color.b, color.a);

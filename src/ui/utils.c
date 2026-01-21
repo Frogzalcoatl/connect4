@@ -1,8 +1,10 @@
 #include "Connect4/ui/utils.h"
 #include "SDL3/SDL.h"
+#include "Connect4/game/consoleOutput.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <assert.h>
 
 int C4_Max(int a, int b) {
     return a > b ? a : b;
@@ -31,9 +33,7 @@ size_t C4_ULLMin(size_t a, size_t b) {
 // Vibe debugged ah function. Mine was extremely broken
 // Remember to free values returned by this func
 char* C4_JoinStrings(const char* strings[], size_t count, const char* separator) {
-    if (!strings || count == 0) {
-        return NULL;
-    }
+    assert(strings && count > 0 && separator);
 
     size_t separatorLength = (separator) ? strlen(separator) : 0;
     // Start with 1 for \0
@@ -48,7 +48,11 @@ char* C4_JoinStrings(const char* strings[], size_t count, const char* separator)
     }
 
     if (validCount == 0) {
-        return SDL_calloc(1, 1);
+        void* empty = SDL_calloc(1, 1);
+        if (!empty) {
+            C4_FatalError(C4_ErrorCode_OutOfMemory, "Failed to allocate empty string");
+        }
+        return empty;
     }
 
     // Add length for separators (valid items - 1)
@@ -58,7 +62,11 @@ char* C4_JoinStrings(const char* strings[], size_t count, const char* separator)
 
     char* newString = SDL_malloc(totalLength);
     if (!newString) {
-        return NULL;
+        C4_FatalError(
+            C4_ErrorCode_OutOfMemory,
+            "Failed to allocate string join buffer of size %zu",
+            totalLength
+        );
     }
 
     char* pointer = newString;

@@ -2,16 +2,12 @@
 #include "Connect4/game/events.h"
 #include "Connect4/physics/intersection.h"
 #include "Connect4/ui/cursorStyle.h"
+#include "Connect4/game/consoleOutput.h"
+#include <assert.h>
 #include <stdlib.h>
 
 void C4_UI_Canvas_Init(C4_UI_Canvas* canvas, SDL_Renderer* renderer, TTF_TextEngine* textEngine, float offsetX, float offsetY) {
-    if (!canvas || !textEngine) {
-        SDL_Log("Unable to init canvas. One or more required pointers are NULL");
-        return;
-    }
-    if (!renderer) {
-        SDL_Log("Warning: Canvas renderer is NULL");
-    }
+    assert(canvas && renderer && textEngine);
 
     canvas->root = NULL;
     canvas->focusedNode = NULL;
@@ -24,13 +20,12 @@ void C4_UI_Canvas_Init(C4_UI_Canvas* canvas, SDL_Renderer* renderer, TTF_TextEng
 
     // Using an arena to prevent memory fragmentation. Better for CPU
     C4_Arena_Init(&canvas->arena, 1024 * 1024);
+
+    C4_Log("Initialized canvas");
 }
 
 static void C4_UI_Canvas_CleanupResources(C4_UI_Canvas* canvas) {
-    if (!canvas) {
-        SDL_Log("Unable to cleanup canvas resources. Canvas is NULL");
-        return;
-    }
+    assert(canvas);
 
     C4_UI_Node* current = canvas->root;
     while (current) {
@@ -40,10 +35,8 @@ static void C4_UI_Canvas_CleanupResources(C4_UI_Canvas* canvas) {
 }
 
 void C4_UI_Canvas_Clear(C4_UI_Canvas* canvas) {
-    if (!canvas) {
-        SDL_Log("Unable to clear canvas. Canvas is NULL");
-        return;
-    }
+    assert(canvas);
+
     C4_UI_Canvas_CleanupResources(canvas);
     C4_Arena_Destroy(&canvas->arena);
     canvas->root = NULL;
@@ -51,18 +44,14 @@ void C4_UI_Canvas_Clear(C4_UI_Canvas* canvas) {
 }
 
 void C4_UI_Canvas_Destroy(C4_UI_Canvas* canvas) {
-    if (!canvas) {
-        return;
-    }
+    assert(canvas);
+
     C4_UI_Canvas_CleanupResources(canvas);
     C4_Arena_Destroy(&canvas->arena);
 }
 
 void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float UIScale) {
-    if (!canvas || !canvas->renderer) {
-        SDL_Log("Unable to draw canvas. One or more required pointers are NULL");
-        return;
-    }
+    assert(canvas && canvas->renderer);
     
     C4_UI_Node* current = canvas->root;
     while (current) {
@@ -72,10 +61,8 @@ void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float UIScale) {
 }
 
 static void C4_UI_Canvas_SetFocus(C4_UI_Canvas* canvas, C4_UI_Node* newNode) {
-    if (!canvas) {
-        SDL_Log("Unable to set canvas focus. Canvas is NULL");
-        return;
-    }
+    assert(canvas && newNode);
+
     if (canvas->focusedNode) {
         C4_UI_Interaction_Reset(&canvas->focusedNode->input);
     }
@@ -95,10 +82,7 @@ static void C4_UI_Canvas_SetFocus(C4_UI_Canvas* canvas, C4_UI_Node* newNode) {
 }
 
 static bool C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event) {
-    if (!canvas) {
-        SDL_Log("Unable to handle actions through canvas. Canvas is NULL");
-        return false;
-    }
+    assert(canvas);
 
     C4_UI_Node* current = canvas->focusedNode;
     
@@ -166,10 +150,7 @@ static bool C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event)
 }
 
 void C4_UI_Canvas_RunBackButton(C4_UI_Canvas* canvas) {
-    if (!canvas) {
-        SDL_Log("Unable to run back button. Canvas is NULL");
-        return;
-    }
+    assert(canvas);
     
     C4_UI_Node* current = canvas->focusedNode;
     if (!current) {
@@ -204,10 +185,7 @@ void C4_UI_Canvas_RunBackButton(C4_UI_Canvas* canvas) {
 }
 
 static void C4_UI_Canvas_HandleMouseEvents(C4_UI_Canvas* canvas, SDL_Event* event) {
-    if (!canvas || !event) {
-        SDL_Log("Unable to handle mouse events in canvas. One or more required pointers are NULL");
-        return;
-    }
+    assert(canvas && event);
 
     if (
         event->type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
@@ -227,13 +205,12 @@ static void C4_UI_Canvas_HandleMouseEvents(C4_UI_Canvas* canvas, SDL_Event* even
 }
 
 static C4_UI_Node* C4_UI_Node_FindHoveredInteraction(C4_UI_Node* node, SDL_FPoint mousePos) {
-    if (!node) {
-        return NULL;
-    }
+    assert(node);
+
     C4_UI_Node* child = node->lastChild;
     C4_UI_ShapeType shape;
     while (child) {
-        shape = node->type == C4_UI_Type_Shape ? node->shape.type : C4_UI_Shape_Rectangle;
+        shape = node->type == C4_UI_Type_Shape ? node->shape.type : C4_UI_ShapeType_Rectangle;
         if (
             C4_IsPointInsideShape(shape, mousePos, child->absoluteRect, child->shape.rotationDegrees, child->mirror)
         ) {
@@ -245,9 +222,8 @@ static C4_UI_Node* C4_UI_Node_FindHoveredInteraction(C4_UI_Node* node, SDL_FPoin
 } 
 
 static C4_UI_Node* C4_UI_Canvas_FindHoveredInteraction(C4_UI_Canvas* canvas, SDL_Window* window) {
-    if (!canvas || !window) {
-        return NULL;
-    }
+    assert(canvas && window);
+
     SDL_FPoint mousePos = {0.f, 0.f};
     SDL_GetMouseState(&mousePos.x, &mousePos.y);
     C4_UI_Node* current = canvas->root;
@@ -262,6 +238,12 @@ static C4_UI_Node* C4_UI_Canvas_FindHoveredInteraction(C4_UI_Canvas* canvas, SDL
 }
 
 static void C4_UI_Canvas_MoveCursorToFocusedNode(C4_UI_Canvas* canvas, SDL_Window* window) {
+    assert(canvas && window);
+
+    if (!canvas->focusedNode) {
+        return;
+    }
+
     SDL_FRect* nodeRect = &canvas->focusedNode->absoluteRect;
     float x = nodeRect->x + nodeRect->w / 2.f;
     float y = nodeRect->y + nodeRect->h / 2.f;
@@ -271,6 +253,8 @@ static void C4_UI_Canvas_MoveCursorToFocusedNode(C4_UI_Canvas* canvas, SDL_Windo
 }
 
 static void C4_UI_Canvas_SetFocusedNodeBasedOnMousePos(C4_UI_Canvas* canvas, SDL_Window* window) {
+    assert(canvas && window);
+
     C4_UI_Canvas_ResetInteractions(canvas);
     SDL_HideCursor();
     C4_UI_Node* result = C4_UI_Canvas_FindHoveredInteraction(canvas, window);
@@ -290,10 +274,7 @@ static void C4_UI_Canvas_SetFocusedNodeBasedOnMousePos(C4_UI_Canvas* canvas, SDL
 }
 
 void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Window* window, SDL_Event* event) {
-    if (!canvas || !event) {
-        SDL_Log("Unable to handle events in canvas. One or more required pointers are NULL");
-        return;
-    }
+    assert(canvas && window && event);
 
     if (
         event->type == SDL_EVENT_KEY_DOWN &&
@@ -325,10 +306,8 @@ void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Window* window, SDL_Even
 }
 
 void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime, float UIScale) {
-    if (!canvas) {
-        SDL_Log("Unable to update canvas. One or more required pointers are NULL");
-        return;
-    }
+    assert(canvas);
+
     if (deltaTime <= 0.f) {
         deltaTime = 0.0001f;
     }
@@ -352,10 +331,8 @@ void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime, float UIScale) {
 }
 
 void C4_UI_Canvas_ResetInteractions(C4_UI_Canvas* canvas) {
-    if (!canvas) {
-        SDL_Log("Unable to reset canvas interactions. Canvas is NULL");
-        return;
-    }
+    assert(canvas);
+    
     C4_UI_Node* current = canvas->root;
     while (current) {
         C4_UI_Node_Reset(current);
@@ -364,10 +341,8 @@ void C4_UI_Canvas_ResetInteractions(C4_UI_Canvas* canvas) {
 }
 
 void C4_UI_Canvas_AddNode(C4_UI_Canvas* canvas, C4_UI_Node* node) {
-    if (!canvas || !node) {
-        SDL_Log("Unable to add node to canvas. One or more required pointers are NULL");
-        return;
-    }
+    assert(canvas && node);
+
     if (!canvas->root) {
         canvas->root = node;
         node->prevSibling = NULL;

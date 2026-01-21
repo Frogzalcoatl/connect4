@@ -3,11 +3,12 @@
 #include "Connect4/ui/draw/text.h"
 #include "Connect4/ui/utils.h"
 #include "Connect4/ui/memoryArena.h"
+#include "Connect4/game/consoleOutput.h"
+#include <assert.h>
 #include <stdlib.h>
 
 void C4_UI_Node_CleanupResources(C4_UI_Node* node) {
     if (!node) {
-        SDL_Log("Unable to cleanup node resources. Node is NULL");
         return;
     }
 
@@ -32,10 +33,7 @@ void C4_UI_Node_CleanupResources(C4_UI_Node* node) {
 }
 
 void C4_UI_Node_CalculateLayout(C4_UI_Node* node, float scale, float parentX, float parentY) {
-    if (!node) {
-        SDL_Log("Unable to calculate node layout. Node is NULL");
-        return;
-    }
+    assert(node);
 
     node->absoluteRect.x = parentX + (node->rect.x * scale);
     node->absoluteRect.y = parentY + (node->rect.y * scale);
@@ -50,10 +48,7 @@ void C4_UI_Node_CalculateLayout(C4_UI_Node* node, float scale, float parentX, fl
 }
 
 void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer, float UIScale) {
-    if (!node) {
-        SDL_Log("Unable to draw node. Node is NULL");
-        return;
-    }
+    assert(node);
 
     C4_UI_Interaction* activeInput = &node->input;
     
@@ -90,10 +85,8 @@ void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer, float UIScale) {
 }
 
 C4_UI_Node* C4_UI_Node_FindFocusable(C4_UI_Node* node) {
-    if (!node) {
-        SDL_Log("Unable to find focusable node. Node is NULL");
-        return NULL;
-    }
+    assert(node);
+
     if (node->input.isFocusable && node->input.isActive) {
         return node;
     }
@@ -109,10 +102,7 @@ C4_UI_Node* C4_UI_Node_FindFocusable(C4_UI_Node* node) {
 }
 
 bool C4_UI_Node_HandleAction(C4_UI_Node* node, C4_InputEvent event) {
-    if (!node) {
-        SDL_Log("Unable to handle action on NULL node");
-        return false;
-    }
+    assert(node);
 
     if (C4_UI_Interaction_HandleAction(&node->input, event)) {
         return true;
@@ -130,10 +120,7 @@ bool C4_UI_Node_HandleAction(C4_UI_Node* node, C4_InputEvent event) {
 }
 
 bool C4_UI_Node_HandleMouseEvents(C4_UI_Node* node, SDL_Event* event) {
-    if (!node || !event) {
-        SDL_Log("Unable to handle mouse events on node. Node is NULL");
-        return false;
-    }
+    assert(node && event);
         
     C4_UI_Node* child = node->lastChild;
     while (child) {
@@ -143,7 +130,7 @@ bool C4_UI_Node_HandleMouseEvents(C4_UI_Node* node, SDL_Event* event) {
         child = child->prevSibling;
     }
 
-    C4_UI_ShapeType shapeType = node->type == C4_UI_Type_Shape ? node->shape.type : C4_UI_Shape_Rectangle;
+    C4_UI_ShapeType shapeType = node->type == C4_UI_Type_Shape ? node->shape.type : C4_UI_ShapeType_Rectangle;
 
     float rotationDegrees = node->type == C4_UI_Type_Shape ? node->shape.rotationDegrees : 0.f;
 
@@ -151,10 +138,8 @@ bool C4_UI_Node_HandleMouseEvents(C4_UI_Node* node, SDL_Event* event) {
 }
 
 void C4_UI_Node_Update(C4_UI_Node* node, float deltaTime) {
-    if (!node) {
-        SDL_Log("Unable to update node. Node is NULL");
-        return;
-    }
+    assert(node);
+
     C4_UI_Interaction_Update(&node->input, deltaTime);
     
     C4_UI_Node* child = node->firstChild;
@@ -165,6 +150,8 @@ void C4_UI_Node_Update(C4_UI_Node* node, float deltaTime) {
 }
 
 void C4_UI_Node_AttachChild(C4_UI_Node* parent, C4_UI_Node* child) {
+    assert(parent && child);
+
     child->parent = parent;
     if (!parent->firstChild) {
         parent->firstChild = child;
@@ -177,6 +164,8 @@ void C4_UI_Node_AttachChild(C4_UI_Node* parent, C4_UI_Node* child) {
 }
 
 void C4_UI_Node_PushNode(C4_UI_Node* head, C4_UI_Node* newNode) {
+    assert(head && newNode);
+
     C4_UI_Node* current = head;
     while (current->nextSibling) {
         current = current->nextSibling;
@@ -186,15 +175,7 @@ void C4_UI_Node_PushNode(C4_UI_Node* head, C4_UI_Node* newNode) {
 }
 
 static void C4_UI_Node_UpdateTextRect(C4_UI_Node* node) {
-    if (!node || !node->text.textObject) {
-        SDL_Log("Unable to update text rect. One or more required pointers are NULL");
-        return;
-    }
-
-    if (node->type != C4_UI_Type_Text) {
-        SDL_Log("Unable to update text rect. This isnt a text node?");
-        return;
-    }
+    assert(node && node->text.textObject && node->type == C4_UI_Type_Text);
 
     int w, h;
     if (TTF_GetTextSize(node->text.textObject, &w, &h)) {
@@ -204,15 +185,7 @@ static void C4_UI_Node_UpdateTextRect(C4_UI_Node* node) {
 }
 
 void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString) {
-    if (!node || !node->text.textObject) {
-        SDL_Log("Unable to set text string. One or more required pointers are NULL");
-        return;
-    }
-
-    if (node->type != C4_UI_Type_Text) {
-        SDL_Log("Unable to set text string. This isnt a text node?");
-        return;
-    }
+    assert(node && node->text.textObject && node->type == C4_UI_Type_Text);
 
     if (node->text.storage && node->text.storage != newString) {
         SDL_free(node->text.storage);
@@ -229,18 +202,14 @@ void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString) {
 }
 
 void C4_UI_Node_ChangeFont(C4_UI_Node* node, TTF_Font* newFont) {
-    if (!node || !node->text.textObject) {
-        SDL_Log("Unable to change node font. One or more required pointers are NULL");
-        return;
-    }
-
-    if (node->type != C4_UI_Type_Text) {
-        SDL_Log("Unable to change node font. This isnt a text node?");
-        return;
-    }
+    assert(node && node->text.textObject && node->type == C4_UI_Type_Text);
     
     if (!TTF_SetTextFont(node->text.textObject, newFont)) {
-        SDL_Log("Failed to set text font: %s", SDL_GetError());
+        C4_Warn(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "Failed to set text font: %s",
+            SDL_GetError()
+        );
     } else {
         node->text.font = newFont;
     }
@@ -248,50 +217,42 @@ void C4_UI_Node_ChangeFont(C4_UI_Node* node, TTF_Font* newFont) {
 }
 
 void C4_UI_Node_SetTextWrap(C4_UI_Node* node, int widthInPixels) {
-    if (!node || !node->text.textObject) {
-        SDL_Log("Unable to set text wrap. One or more required pointers are NULL");
-        return;
-    }
-
-    if (node->type != C4_UI_Type_Text) {
-        SDL_Log("Unable to set text wrap. This isnt a text node?");
-        return;
-    }
+    assert(node && node->text.textObject && node->type == C4_UI_Type_Text);
     
     if (!TTF_SetTextWrapWidth(node->text.textObject, widthInPixels)) {
-        SDL_Log("Failed to set wrap width: %s", SDL_GetError());
+        C4_Warn(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "Failed to set text wrap width: %s",
+            SDL_GetError()
+        );
     }
     C4_UI_Node_UpdateTextRect(node);
 }
 
 C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) {
-    if (!arena || !config) {
-        SDL_Log("Unable to create node. One or more required pointers are NULL");
-        return NULL;
-    }
+    assert(arena && config);
+
     C4_UI_Node* node = C4_Arena_Alloc(arena, sizeof(C4_UI_Node));
     if (!node) {
-        SDL_Log("Unable to allocate memory for UI node");
-        return NULL;
+        C4_FatalError(
+            C4_ErrorCode_OutOfMemory, 
+            "Unable to allocate memory for ui node"
+        );
     }
 
     node->type = config->type;
 
     if (node->type == C4_UI_Type_Shape) {
-        if (!config->shape) {
-            SDL_Log("Tried to create node of type shape without matching config");
-            return NULL;
-        }
+        assert(config->shape);
+        
         node->shape.type = config->shape->type;
         node->shape.rotationDegrees = 0.0f;
         node->shape.borderWidth = config->shape->borderWidth;
         node->rect = config->shape->rect;
         
     } else if (node->type == C4_UI_Type_Text) {
-        if (!config->text) {
-            SDL_Log("Tried to create node of type text without matching config");
-            return NULL;
-        }
+        assert(config->text);
+
         C4_UI_Data_Text_Config* text = config->text;
         node->text.font = text->font;
 
@@ -370,10 +331,9 @@ static void C4_UI_AlignHelper(
     float parentCenterX,
     float parentCenterY
 ) {
-    if (!newPos) {
-        SDL_Log("Unable to run ui align helper. newPos pointer is NULL");
-        return;
-    }
+    assert(newPos);
+    assert(alignType >= C4_UI_Align_TopLeft && alignType < C4_UI_Align_Count);
+
     switch (alignType) {
         case C4_UI_Align_TopLeft: {
             newPos->x = minChildX;
@@ -406,22 +366,19 @@ static void C4_UI_AlignHelper(
         case C4_UI_Align_Bottom: {
             newPos->x = parentCenterX - rect.w / 2.f;
             newPos->y = maxChildY - rect.h;
-        } case C4_UI_Align_BottomRight: {
+        }; break;
+        case C4_UI_Align_BottomRight: {
             newPos->x = maxChildX - rect.w;
             newPos->y = maxChildY - rect.h;
-        }
+        }; break;
+        default: break;
     }
 }
 
 void C4_UI_Node_AlignChildren(C4_UI_Node* node, C4_UI_Axis axis) {
-    if (!node) {
-        SDL_Log("Unable to align node children. Node is NULL");
-        return;
-    }
-    if (axis < C4_UI_Axis_X || axis > C4_UI_Axis_XY) {
-        SDL_Log("Unable to align node children. Axis is invalid");
-        return;
-    }
+    assert(node);
+    assert(axis > C4_UI_Axis_None && axis < C4_UI_Axis_Count);
+    
     float minChildX = node->padding;
     float minChildY = node->padding;
     float maxChildX = node->rect.w - node->padding;
@@ -458,13 +415,9 @@ void C4_UI_Node_AlignChildren(C4_UI_Node* node, C4_UI_Axis axis) {
 }
 
 void C4_UI_Node_ApplyChildSpacing(C4_UI_Node* parent) {
-    if (!parent) {
-        SDL_Log("Unable to apply child spacing. Parent is NULL");
-        return;
-    }
+    assert(parent);
 
     if (!parent->firstChild) {
-        SDL_Log("Unable to apply child spacing. Node does not have any children");
         return;
     }
 
@@ -498,10 +451,7 @@ void C4_UI_Node_ApplyChildSpacing(C4_UI_Node* parent) {
 }
 
 void C4_UI_Node_ClampToWindow(C4_UI_Node* node, unsigned int windowWidth, unsigned int windowHeight) {
-    if (!node) {
-        SDL_Log("Unable to clamp node to window. Node is NULL");
-        return;
-    }
+    assert(node);
 
     SDL_FRect* rect = &node->rect;
 
@@ -523,10 +473,9 @@ void C4_UI_Node_ClampToWindow(C4_UI_Node* node, unsigned int windowWidth, unsign
 }
 
 void C4_UI_CenterInWindow(C4_UI_Node* node, C4_UI_Axis axis, unsigned int windowWidth, unsigned int windowHeight) {
-    if (!node) {
-        SDL_Log("Unable to center node in window. Node is NULL");
-        return;
-    }
+    assert(node);
+    assert(axis > C4_UI_Axis_None && axis < C4_UI_Axis_Count);
+
     SDL_FRect* rect = &node->rect;
 
     if (axis == C4_UI_Axis_X || axis == C4_UI_Axis_XY) {
@@ -541,10 +490,9 @@ void C4_UI_CenterInWindow(C4_UI_Node* node, C4_UI_Axis axis, unsigned int window
 }
 
 void C4_UI_AlignInWindow(C4_UI_Node* node, C4_UI_Align align, unsigned int windowWidth, unsigned int windowHeight) {
-    if (!node) {
-        SDL_Log("Unable to align node in window. Node is NULL");
-        return;
-    }
+    assert(node);
+    assert(align >= C4_UI_Align_TopLeft && align < C4_UI_Align_Count);
+
     SDL_FPoint newPos;
     C4_UI_AlignHelper(
         &newPos,
@@ -562,10 +510,7 @@ void C4_UI_AlignInWindow(C4_UI_Node* node, C4_UI_Align align, unsigned int windo
 }
 
 void C4_UI_Node_Reset(C4_UI_Node* node) {
-    if (!node) {
-        SDL_Log("Unable to reset node. Node is NULL");
-        return;
-    }
+    assert(node);
 
     C4_UI_Interaction_Reset(&node->input);
 

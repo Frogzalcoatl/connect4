@@ -3,6 +3,7 @@
     #include "Connect4/discord-rpc/index.h"
     #include "discord_rpc.h"
     #include "SDL3/SDL.h"
+    #include"Connect4/game/consoleOutput.h"
     #include <string.h>
     #include <time.h>
 
@@ -17,12 +18,14 @@
     static void handleDiscordReady(const DiscordUser* connectedUser) {
         (void)connectedUser;
         isConnected = true;
+        C4_Log("discord-rpc connected");
         C4_Discord_UpdateStatus(cachedState, cachedDetails);
     }
 
     static void handleDiscordDisconnected(int errorCode, const char* message) {
         (void)errorCode; (void)message;
         isConnected = false;
+        C4_Log("discord-rpc disconnected");
     }
 
     void C4_Discord_Init() {
@@ -32,7 +35,7 @@
         handlers.disconnected = handleDiscordDisconnected;
         handlers.errored = handleDiscordDisconnected;
         // See https://discord.com/developers/applications/1454580494376108218/information if you wanna change the icon or smth
-        // Gotta be signed in to frogzalcoatl. Can add other users to the application somehow i think.
+        // Gotta be signed in to frogzalcoatl. Can also add other users i think.
         Discord_Initialize("1454580494376108218", &handlers, 1, NULL);
         startTime = time(NULL);
     }
@@ -57,6 +60,12 @@
         discordPresence.largeImageText = "Connect4";
         discordPresence.startTimestamp = startTime;
         Discord_UpdatePresence(&discordPresence);
+
+        C4_Log(
+            "discord-rpc updated status: \"%s\" | \"%s\" | \"%s\"",
+            discordPresence.largeImageText,
+            state, details
+        );
     }
 
     void C4_Discord_Loop() {
@@ -70,6 +79,7 @@
 
     void C4_Discord_Shutdown() {
         Discord_Shutdown();
+        C4_Log("Shutdown discord-rpc");
     }
 #else
     void C4_Discord_Init() {}

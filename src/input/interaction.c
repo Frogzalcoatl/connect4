@@ -1,19 +1,23 @@
 #include "Connect4/input/interaction.h"
 #include "Connect4/physics/intersection.h"
 #include "Connect4/game/events.h"
+#include "Connect4/game/consoleOutput.h"
+#include <assert.h>
 
 void C4_UI_Interaction_Update(C4_UI_Interaction* input, float deltaTime) {
     if (!input) {
-        SDL_Log("Unable to update interaction. Pointer is NULL");
         return;
     }
+
+    assert(deltaTime >= 0.0f);
+    
     if (!input->isActive) {
         input->isPressed = false;
         input->isHovered = false;
         input->isRepeating = false;
         input->timing.pressTimer = 0.f;
     }
-    if (!input || !input->isPressed || !input->WhilePressed) {
+    if (!input->isPressed || !input->WhilePressed) {
         input->timing.pressTimer = 0.f;
         input->isRepeating = false;
         return;
@@ -45,9 +49,9 @@ void C4_UI_Interaction_Update(C4_UI_Interaction* input, float deltaTime) {
 
 bool C4_UI_Interaction_HandleAction(C4_UI_Interaction* input, C4_InputEvent event) {
     if (!input) {
-        SDL_Log("Unable to handle interaction action. Interaction pointer is NULL");
         return false;
     }
+
     if (event.verb == C4_INPUT_VERB_CANCEL) {
         if (event.state == C4_INPUT_STATE_PRESSED && input->OnCancel) {
             input->OnCancel(input->context);
@@ -96,6 +100,13 @@ bool C4_UI_Interaction_HandleMouseEvents(
     float rotationDegrees,
     C4_UI_Mirror mirror
 ) {
+    if (!input || !event) {
+        return false;
+    }
+    
+    assert(shape >= 0 && shape < C4_UI_ShapeType_Count);
+    assert(mirror >= C4_UI_Mirror_None && mirror < C4_UI_Mirror_Count);
+
     if (!input->isActive) {
         return false;
     }
@@ -160,9 +171,8 @@ bool C4_UI_Interaction_HandleMouseEvents(
 }
 
 void C4_UI_Interaction_Reset(C4_UI_Interaction* input) {
-    if (!input) {
-        return;
-    }
+    assert(input);
+
     input->isHovered = false;
     input->isPressed = false;
     input->isRepeating = false;

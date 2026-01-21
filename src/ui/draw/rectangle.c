@@ -1,11 +1,10 @@
 #include "Connect4/ui/draw/rectangle.h"
 #include "Connect4/ui/draw/utils.h"
+#include <assert.h>
 
 void C4_UI_DrawRectangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirror mirror, SDL_Renderer* renderer) {
-    if (!shape || !styleState || !renderer) {
-        SDL_Log("Unable to draw rectangle. One or more required pointers are NULL");
-        return;
-    }
+    assert(shape && styleState && renderer);
+    assert(mirror >= C4_UI_Mirror_None && mirror < C4_UI_Mirror_Count);
 
     SDL_FColor fColor;
     C4_ColorToFColor(&styleState->background, &fColor);
@@ -33,10 +32,8 @@ void C4_UI_DrawRectangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleSta
 }
 
 void C4_UI_DrawRectangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirror mirror, SDL_Renderer* renderer, float UIScale) {
-    if (!shape || !styleState || !renderer) {
-        SDL_Log("Unable to draw rectangle borders. One or more required pointers are NULL");
-        return;
-    }
+    assert(shape && styleState && renderer);
+    assert(mirror >= C4_UI_Mirror_None && mirror < C4_UI_Mirror_Count);
 
     if (shape->borderWidth == 0) {
         return;

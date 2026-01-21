@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL3/SDL.h>
+#include "SDL3/SDL.h"
 #include "Connect4/ui/canvas.h"
 #include <stdlib.h>
 
@@ -13,7 +13,8 @@ typedef enum C4_ScreenType {
 typedef enum C4_UI_LayoutType {
     C4_UI_LayoutType_None,
     C4_UI_LayoutType_Wide,
-    C4_UI_LayoutType_Tall
+    C4_UI_LayoutType_Tall,
+    C4_UI_LayoutType_Count
 } C4_UI_LayoutType;
 
 C4_UI_LayoutType C4_UI_GetCurrentLayout(unsigned int windowWidth, unsigned int windowHeight);

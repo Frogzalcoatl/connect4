@@ -1,8 +1,15 @@
 #include "Connect4/physics/intersection.h"
 #include "Connect4/ui/draw/utils.h"
 #include <math.h>
+#include <assert.h>
 
-bool C4_IsPointInsideRectangle(SDL_FPoint point, SDL_FRect rectangleBounds, float rotationDegrees, C4_UI_Mirror mirror) {    
+bool C4_IsPointInsideRectangle(SDL_FPoint point, SDL_FRect rectangleBounds, float rotationDegrees, C4_UI_Mirror mirror) {
+    assert(mirror >= C4_UI_Mirror_None && mirror < C4_UI_Mirror_Count);
+    
+    if (rectangleBounds.w == 0 || rectangleBounds.h == 0) {
+        return false;
+    }
+    
     float centerX = rectangleBounds.x + rectangleBounds.w / 2.f;
     float centerY = rectangleBounds.y + rectangleBounds.h / 2.f;
 
@@ -16,7 +23,7 @@ bool C4_IsPointInsideRectangle(SDL_FPoint point, SDL_FRect rectangleBounds, floa
     float localY = relativeX * sinf(angleRadians) + relativeY * cosf(angleRadians);
 
     /*
-    Is you ever add something that can make rectangles non symmetrical
+    If you ever add something that can make rectangles non symmetrical
     if (mirror == C4_UI_Mirror_X || mirror == C4_UI_Mirror_XY) {
         localX = -localX;
     }
@@ -35,6 +42,8 @@ bool C4_IsPointInsideRectangle(SDL_FPoint point, SDL_FRect rectangleBounds, floa
 }
 
 bool C4_IsPointInsideTriangle(SDL_FPoint point, SDL_FRect triangleBounds, float rotationDegrees, C4_UI_Mirror mirror) {
+    assert(mirror >= C4_UI_Mirror_None && mirror < C4_UI_Mirror_Count);
+    
     if (triangleBounds.w == 0 || triangleBounds.h == 0) {
         return false;
     }
@@ -69,6 +78,8 @@ bool C4_IsPointInsideTriangle(SDL_FPoint point, SDL_FRect triangleBounds, float 
 }
 
 bool C4_IsPointInsideEllipse(SDL_FPoint point, SDL_FRect circleBounds, float rotationDegrees, C4_UI_Mirror mirror) {
+    assert(mirror >= C4_UI_Mirror_None && mirror < C4_UI_Mirror_Count);
+    
     float radiiX = circleBounds.w / 2.f;
     float radiiY = circleBounds.h / 2.f;
 
@@ -103,10 +114,13 @@ bool C4_IsPointInsideEllipse(SDL_FPoint point, SDL_FRect circleBounds, float rot
 }
 
 bool C4_IsPointInsideShape(C4_UI_ShapeType shapeType, SDL_FPoint point, SDL_FRect shapeBounds, float rotationDegrees, C4_UI_Mirror mirror) {
+    assert(mirror >= C4_UI_Mirror_None && mirror < C4_UI_Mirror_Count);
+    assert(shapeType > 0 && shapeType <= C4_UI_ShapeType_Ellipse); 
+    
     switch (shapeType) {
-        case C4_UI_Shape_Rectangle: return C4_IsPointInsideRectangle(point, shapeBounds, rotationDegrees, mirror);
-        case C4_UI_Shape_Triangle: return C4_IsPointInsideTriangle(point, shapeBounds, rotationDegrees, mirror);
-        case C4_UI_Shape_Ellipse: return C4_IsPointInsideEllipse(point, shapeBounds, rotationDegrees, mirror);
+        case C4_UI_ShapeType_Rectangle: return C4_IsPointInsideRectangle(point, shapeBounds, rotationDegrees, mirror);
+        case C4_UI_ShapeType_Triangle: return C4_IsPointInsideTriangle(point, shapeBounds, rotationDegrees, mirror);
+        case C4_UI_ShapeType_Ellipse: return C4_IsPointInsideEllipse(point, shapeBounds, rotationDegrees, mirror);
         default: return false;
     }
 }

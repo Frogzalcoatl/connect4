@@ -17,10 +17,14 @@ char* myStrdup(const char* src) {
 }
 
 int main(int argc, char* argv[]) {
-    // Usage ex: ./packer assets_list.txt game.dat
-    if (argc < 3) {
-        printf("Usage: packer <list_file> <output_file>\n");
+    // Usage ex: ./packer assets_list.txt game.dat 1.0
+    if (argc < 4) {
+        printf("Usage: packer <list_file> <output_file> <header_version>\n");
     }
+
+    float versionArg;
+    sscanf(argv[3], "%f", &versionArg);
+    printf("Header version set to %f\n", versionArg);
 
     // "r" stands for "Read" (Text Mode)
     FILE* listFile = fopen(argv[1], "r");
@@ -66,7 +70,7 @@ int main(int argc, char* argv[]) {
 
     C4_PackHeader header = {0};
     header.magic = C4_PACK_MAGIC;
-    header.version = 1;
+    header.version = versionArg;
     header.fileCount = (uint32_t)fileCount;
 
     C4_PackEntry* entries = calloc(fileCount, sizeof(C4_PackEntry));

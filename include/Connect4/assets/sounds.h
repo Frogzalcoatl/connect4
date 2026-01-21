@@ -43,6 +43,6 @@ typedef enum C4_AudioTrack {
 } C4_AudioTrack;
 
 // Range 0.0f-1.0f
-void C4_SoundSystem_SetVolume(C4_SoundSystem* soundSystem, C4_AudioTrack track, float volume);
+void C4_SoundSystem_SetVolume(C4_SoundSystem* soundSystem, C4_AudioTrack trackID, float volume);
 
 float C4_GetBPMBounce(C4_SoundSystem* soundSystem, float bpm);

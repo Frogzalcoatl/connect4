@@ -1,6 +1,6 @@
 # TODO
 
-* Improve asset management effeciency
+* Determine whether the retrolink controllers work on linux
 * Clean up the ui element declaration. It feels weird to have to do scaling calculationsin menu.c. Maybe it should all be handled in the other non screen files?
 * Add border radius. Store properties in the same way css does.
 * Simplify ui element configs. Maybe even try to get the functions to only a few parameters and not even use config structs

@@ -10,7 +10,7 @@
 // No way im gonna have more than 4 billion individual asset files.
 typedef struct C4_PackHeader {
     uint32_t magic;
-    uint32_t version;
+    float version;
     uint32_t fileCount;
     // The underscore marks "Internal use only / dont touch" like xsku does.
     // Honestly might implement the underscore in my other structs too

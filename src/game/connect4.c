@@ -13,8 +13,10 @@
 #include "Connect4/input/gamepad.h"
 #include "Connect4/tools/virtualFileSystem.h"
 #include "Connect4/dat.h"
+#include "Connect4/game/consoleOutput.h"
 #include <stdlib.h>
 #include <time.h>
+#include <assert.h>
 
 void Connect4_ConnectScancodesToInputVerbs(void) {
     // Arrow keys, enter, and esc are already setup by default
@@ -25,68 +27,91 @@ void Connect4_ConnectScancodesToInputVerbs(void) {
     C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_CONFIRM, SDL_SCANCODE_SPACE);
 }
 
-bool Connect4_Init_Dependencies(void) {
+static bool C4_AddGameControllerDB(const char* controllerDbPath) {
+    assert(controllerDbPath);
+    
+    size_t len;
+    void* rawData = C4_VFS_ReadFile(controllerDbPath, &len);
+    if (!rawData) {
+        return false;
+    }
+    SDL_IOStream* io = SDL_IOFromConstMem(rawData, len);
+    if (!io) {
+        return false;
+    }
+    const int mappingsAdded = SDL_AddGamepadMappingsFromIO(io, true);
+    C4_VFS_FreeFile(rawData);
+    C4_Log("Added %d gamepad mappings from file %s", mappingsAdded, controllerDbPath);
+    return true;
+}
+
+void Connect4_Init_Dependencies(void) {
 
     // To simulate touch events for testing
     // SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "1");
 
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD)) {
-        // The error is inserted at %s
-        SDL_Log("SDL_Init failed: %s", SDL_GetError());
-        return false;
+        C4_FatalError(C4_ErrorCode_DependencyErrorSDL, "%s", SDL_GetError());
     }
-
     // I like logs starting under the file path of the exe in my ide.
     SDL_Log("");
+    C4_Log("Initialized SDL with flags: SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD");
 
-    if (!C4_VFS_Init(MASTER_DAT_PATH)) {
-        SDL_Log("Virtual file system init failed");
-        return false;
-    }
-
-    size_t len;
-    void* rawData = C4_VFS_ReadFile("assets/gamecontrollerdb.txt", &len);
-    if (rawData) {
-        SDL_IOStream* io = SDL_IOFromConstMem(rawData, len);
-        SDL_AddGamepadMappingsFromIO(io, true);
-    } else {
-        SDL_Log("Unable to add gamepad mappings from file assets/gamecontrollerdb.txt");
-    }
-    SDL_AddGamepadMapping(SAHARS_RETROLINK_CONTROLLER_MAPPING);
+    C4_VFS_Init(MASTER_DAT_PATH);
     
     if (!TTF_Init()) {
-        SDL_Log("TTF_Init failed: %s", SDL_GetError());
-        return false;
+        C4_FatalError(C4_ErrorCode_DependencyErrorTTF, "%s", SDL_GetError());
     }
+    C4_Log("Initialized SDL_ttf");
 
     if (!MIX_Init()) {
-        SDL_Log("MIX_Init failedL %s", SDL_GetError());
-        return false;
+        C4_FatalError(C4_ErrorCode_DependencyErrorMIX, "%s", SDL_GetError());
     }
+    C4_Log("Initialized SDL_mixer");
 
     C4_Input_Init();
+
+    const char controllerDbPath[] = "assets/gamecontrollerdb.txt";
+    if (!C4_AddGameControllerDB(controllerDbPath)) {
+        C4_Warn(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "Unable to add gamepad mappings from file: %s",
+            controllerDbPath
+        );
+    }
+
+    SDL_AddGamepadMapping(SAHARS_RETROLINK_CONTROLLER_MAPPING);
+    C4_Log("Added gamepad mapping \"SAHARS_RETROLINK_CONTROLLER\"");
+
     Connect4_ConnectScancodesToInputVerbs();
 
     C4_Discord_Init();
-
-    return true;
 }
 
 void Connect4_Quit_Dependencies(void) {
     C4_Discord_Shutdown();
+
     C4_Input_Shutdown();
+
     C4_CloseAllFonts();
+
     C4_DestroyAllCursors();
-    MIX_Quit();
+
     C4_VFS_Quit();
+
+    MIX_Quit();
+    C4_Log("Quit SDL_mixer");
+
     TTF_Quit();
+    C4_Log("Quit SDL_ttf");
+
     SDL_Quit();
+    C4_Log("Quit SDL");
 }
 
 static void C4_Game_RecalculateScale(C4_Game* game) {
-    if (!game){
-        return;
-    }
+    assert(game);
+
     const float REFERENCE_HEIGHT = 1080.0f;
     game->UIScale = (float)game->windowHeight / REFERENCE_HEIGHT * game->userScalePreference;
 
@@ -96,9 +121,8 @@ static void C4_Game_RecalculateScale(C4_Game* game) {
 }
 
 static void C4_Game_SetUserScale(C4_Game* game, float newScale) {
-    if (!game) {
-        return;
-    }
+    assert(game);
+
     game->userScalePreference = newScale;
     
     C4_Game_RecalculateScale(game);
@@ -115,9 +139,8 @@ SDL_FPoint C4_GetReferenceWindowDimensions(unsigned int w, unsigned int h, float
 }
 
 static void C4_Game_UpdateWindowProperties(C4_Game* game, unsigned int windowWidth, unsigned int windowHeight) {
-    if (!game) {
-        return;
-    }
+    assert(game);
+
     game->currentLayout = C4_UI_GetCurrentLayout(windowWidth, windowHeight);
     game->windowWidth = windowWidth;
     game->windowHeight = windowHeight;
@@ -125,7 +148,9 @@ static void C4_Game_UpdateWindowProperties(C4_Game* game, unsigned int windowWid
     C4_Game_RecalculateScale(game);
 }
 
-static bool C4_Game_WindowSetup(C4_Game* game) {
+static void C4_Game_WindowSetup(C4_Game* game) {
+    assert(game);
+
     SDL_WindowFlags windowFlags;
     #if SDL_PLATFORM_ANDROID || SDL_PLATFORM_IOS
         windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN;
@@ -142,32 +167,14 @@ static bool C4_Game_WindowSetup(C4_Game* game) {
 
     game->window = SDL_CreateWindow("Connect4", initialWindowWidth, initialWindowHeight, windowFlags);
     if (!game->window) {
-        SDL_Log("Unable to create SDL Window: %s", SDL_GetError());
-        return false;
+        C4_FatalError(C4_ErrorCode_RipConnect4Struct, "Unable to set up SDL window");
     }
 
     int windowWidth, windowHeight;
     SDL_GetWindowSizeInPixels(game->window, &windowWidth, &windowHeight);
     C4_Game_UpdateWindowProperties(game, windowWidth, windowHeight);
 
-    return true;
-}
-
-static bool C4_Game_RendererSetup(C4_Game* game) {
-    game->renderer = SDL_CreateRenderer(game->window, NULL);
-    if (!game->renderer) {
-        SDL_Log("Unable to create SDL renderer: %s", SDL_GetError());
-        return false;
-    }
-    SDL_SetRenderVSync(game->renderer, 1);
-
-    game->textEngine = TTF_CreateRendererTextEngine(game->renderer);
-    if (!game->textEngine) {
-        SDL_Log("Failed to create text engine: %s", SDL_GetError());
-        return false;
-    }
-
-    return true;
+    C4_Log("SDL window setup complete");
 }
 
 static C4_UI_Screen* (*C4_ScreenCreationArray[C4_ScreenType_ScreenCount])(C4_Game* game) = {
@@ -175,30 +182,28 @@ static C4_UI_Screen* (*C4_ScreenCreationArray[C4_ScreenType_ScreenCount])(C4_Gam
     C4_GameScreen_Create,
     C4_SettingsScreen_Create,
 };
-static bool C4_Game_CreateScreens(C4_Game* game) {
+static void C4_Game_CreateScreens(C4_Game* game) {
+    assert(game);
+
     for (size_t i = 0; i < C4_ScreenType_ScreenCount; i++) {
         game->screens[i] = C4_ScreenCreationArray[i](game);
         if (!game->screens[i]) {
-            SDL_Log("Unable to create screen index: %zu", i);
-            return false;
+            C4_FatalError(
+                C4_ErrorCode_RipConnect4Struct,
+                "Unable to create screen index: %zu",
+                i
+            );
         }
     }
-    return true;
+
+    C4_Log("C4 screen creation complete");
 }
 
 static void C4_Game_SetScreen(C4_Game* game, C4_ScreenType type) {
-    if (!game) {
-        SDL_Log("Unable to set screen. C4_Game is NULL");
-        return;
-    }
-    if (type < 0 || type >= C4_ScreenType_ScreenCount) {
-        SDL_Log("Unable to set screen. Type is Invalid");
-        return;
-    }
-    if (game->screens[type] == NULL) {
-        SDL_Log("Unable to set screen. Screen is NULL");
-        return;
-    }
+    assert(game);
+    assert(type >= 0 && type < C4_ScreenType_ScreenCount);
+    assert(game->screens[type]);
+
     game->currentScreenType = type;
     game->currentScreen = game->screens[type];
     if (game->currentScreen->OnEnter) {
@@ -220,33 +225,54 @@ static void C4_Game_SetScreen(C4_Game* game, C4_ScreenType type) {
 C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountToWin) {
     C4_Game* game = SDL_calloc(1, sizeof(C4_Game));
     if (!game) {
-        SDL_Log("Unable allocate memory for C4 Game");
-        return NULL;
+        C4_FatalError(C4_ErrorCode_OutOfMemory, "Unable allocate memory for C4 Game");
     }
 
     game->userScalePreference = 1.f;
 
-    if (!C4_Game_WindowSetup(game)) {
-        C4_Game_Destroy(game);
-        return NULL;
-    }
+    C4_Game_WindowSetup(game);
 
-    if (!C4_Game_RendererSetup(game)) {
-        C4_Game_Destroy(game);
-        return NULL;
+    game->renderer = SDL_CreateRenderer(game->window, NULL);
+    if (!game->renderer) {
+        C4_FatalError(
+            C4_ErrorCode_RipConnect4Struct,
+            "Unable to create SDL renderer: %s",
+            SDL_GetError()
+        );
     }
+    SDL_SetRenderVSync(game->renderer, 1);
+    C4_Log("SDL renderer setup complete");
 
+    game->textEngine = TTF_CreateRendererTextEngine(game->renderer);
+    if (!game->textEngine) {
+        C4_FatalError(
+            C4_ErrorCode_RipConnect4Struct,
+            "Unable to create SDL text engine: %s",
+            SDL_GetError()
+        );
+    }
+    C4_Log("SDL_ttf text engine setup complete");
+
+    // Game can still function if the soundsystem is null. Just no audio rip
     game->soundSystem = C4_SoundSystem_Create();
+    if (!game->soundSystem) {
+        const char audioWarning[] = "Unable to initialize sound system. Application will continue without audio.";
+        C4_Warn(SDL_LOG_CATEGORY_AUDIO, audioWarning);
+        SDL_ShowSimpleMessageBox(
+            SDL_MESSAGEBOX_WARNING,
+            "Connect4 Warning",
+            audioWarning,
+            game->window
+        );
+    }
     C4_SoundSystem_SetVolume(game->soundSystem, C4_AudioTrack_Music, 0.3f);
     C4_SoundSystem_PlayMusic(game->soundSystem, C4_MusicTrack_Test);
 
     game->board = C4_Board_Create(boardWidth, boardHeight, amountToWin);
+
     game->running = false;
 
-    if (!C4_Game_CreateScreens(game)) {
-        C4_Game_Destroy(game);
-        return NULL;
-    }
+    C4_Game_CreateScreens(game);
 
     C4_Game_SetScreen(game, C4_ScreenType_Menu);
 
@@ -254,10 +280,8 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
 }
 
 void C4_Game_Destroy(C4_Game* game) {
-    if (!game) {
-        SDL_Log("Tried to destroy NULL C4 Game");
-        return;
-    }
+    assert(game);
+
     for (size_t i = 0; i < C4_ScreenType_ScreenCount; i++) {
         if (game->screens[i]->Destroy) {
             game->screens[i]->Destroy(game->screens[i]);
@@ -282,6 +306,8 @@ void C4_Game_Destroy(C4_Game* game) {
 }
 
 static void C4_Game_HandleKeyboardInput(C4_Game* game, int scancode) {
+    assert(game);
+
     if (scancode == SDL_SCANCODE_F11) {
         game->isFullscreen = !game->isFullscreen;
         SDL_SetWindowFullscreen(game->window, game->isFullscreen);
@@ -290,6 +316,9 @@ static void C4_Game_HandleKeyboardInput(C4_Game* game, int scancode) {
 }
 
 static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* eventC4) {
+    assert(game);
+    assert(eventSDL);
+    assert(eventC4);
     while (SDL_PollEvent(eventSDL)) {
         if (eventSDL->type == SDL_EVENT_QUIT) {
             game->running = false;
@@ -339,6 +368,7 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
 }
 
 void C4_Game_Run(C4_Game* game) {
+    assert(game);
     game->running = true;
     SDL_Event eventSDL;
     C4_Event eventC4;
@@ -349,6 +379,7 @@ void C4_Game_Run(C4_Game* game) {
         lastTicks = currentTicks;
 
         C4_Game_HandleEvents(game, &eventSDL, &eventC4);
+
         if (game->currentScreen->Update) {
             game->currentScreen->Update(game->currentScreen, deltaTime, game->UIScale);
         }

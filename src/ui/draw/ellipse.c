@@ -1,5 +1,6 @@
 #include "Connect4/ui/draw/ellipse.h"
 #include "Connect4/ui/draw/utils.h"
+#include <assert.h>
 
 // Im ngl this entire file is vibecoded. I was NOT in the mood to figure out the math for drawing circles myself.
 // It doesnt look like it wouldve been too difficult but idk. I wanna move on to actually working on this game.
@@ -17,9 +18,8 @@ static int GetEllipseSegments(float radiusX, float radiusY) {
 }
 
 void C4_UI_DrawEllipse(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirror mirror, SDL_Renderer* renderer) {
-    if (!shape || !renderer) {
-        return;
-    }
+    assert(shape && styleState && renderer);
+    assert(mirror >= C4_UI_Mirror_None && mirror < C4_UI_Mirror_Count);
 
     float radiusX = rect.w / 2.0f;
     float radiusY = rect.h / 2.0f;
@@ -34,8 +34,6 @@ void C4_UI_DrawEllipse(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState
 
     int vertexCount = segments + 1;
     int indexCount = segments * 3;
-    
-    memset(vertexCache, 0, vertexCount * sizeof(SDL_Vertex));
 
     SDL_FColor color;
     C4_ColorToFColor(&styleState->background, &color);
@@ -76,7 +74,6 @@ void C4_UI_DrawEllipse(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState
     }
 
     SDL_RenderGeometry(renderer, NULL, vertexCache, vertexCount, indexCache, indexCount);
-    return;
 }
 
 #define MAX_BORDER_VERTICES ((MAX_ELLIPSE_SEGMENTS + 1) * 2) 
@@ -86,7 +83,10 @@ static SDL_Vertex borderVertexCache[MAX_BORDER_VERTICES];
 static int borderIndexCache[MAX_BORDER_INDICES];
 
 void C4_UI_DrawEllipseBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirror mirror, SDL_Renderer* renderer, float UIScale) {
-    if (!renderer || !shape || shape->borderWidth <= 0.0f) {
+    assert(shape && renderer);
+    assert(mirror >= C4_UI_Mirror_None && mirror < C4_UI_Mirror_Count);
+    
+    if (shape->borderWidth <= 0.0f) {
         return;
     }
 
@@ -108,8 +108,6 @@ void C4_UI_DrawEllipseBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_Sty
     
     int vertexCount = (segments + 1) * 2; 
     int indexCount = segments * 6;
-
-    memset(borderVertexCache, 0, vertexCount * sizeof(SDL_Vertex));
 
     SDL_FColor color;
     C4_ColorToFColor(&styleState->border, &color);
@@ -170,5 +168,4 @@ void C4_UI_DrawEllipseBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_Sty
     }
 
     SDL_RenderGeometry(renderer, NULL, borderVertexCache, vertexCount, borderIndexCache, indexCount);
-    return;
 }

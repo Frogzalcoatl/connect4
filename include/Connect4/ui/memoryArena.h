@@ -28,7 +28,7 @@ typedef struct C4_MemoryArena {
 
 void C4_Arena_Init(C4_MemoryArena* arena, size_t blockSize);
 void* C4_Arena_Alloc(C4_MemoryArena* arena, size_t size);
-void C4_Arena_SDL_LogMemory(C4_MemoryArena* arena);
+void C4_Arena_LogMemoryUsage(C4_MemoryArena* arena);
 void C4_Arena_Destroy(C4_MemoryArena* arena);
 
 typedef struct C4_ArenaTemp {

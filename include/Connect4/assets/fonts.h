@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL3_ttf/SDL_ttf.h>
+#include "SDL3_ttf/SDL_ttf.h"
 
 typedef enum C4_FontAsset {
     C4_FONT_ASSET_MONOCRAFT,

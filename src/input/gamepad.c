@@ -1,10 +1,18 @@
 #include "Connect4/input/gamepad.h"
 #include "Connect4/ui/utils.h"
+#include "Connect4/game/consoleOutput.h"
+#include "Connect4/tools/dynamicArray.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
-static SDL_Gamepad* connectedGamepads[C4_MAX_GAMEPADS] = {NULL};
+typedef struct C4_GamepadList {
+    SDL_Gamepad** data;
+    size_t count;
+    size_t capacity;
+} C4_GamepadList;
+C4_GamepadList connectedGamepads;
 
 static SDL_Gamepad* activeGamepad = NULL;
 
@@ -23,58 +31,28 @@ static const float INPUT_REPEAT_DELAY = 0.5f;
 static const float INPUT_REPEAT_INTERVAL = 0.1f;
 
 void C4_Input_ConnectScancodeToVerb(C4_InputVerb inputVerb, SDL_Scancode scancode) {
-    if (inputVerb <= 0 || inputVerb >= C4_INPUT_VERB_COUNT) {
-        SDL_Log("Unable to connect verb scancode. Inputverb index %d is outside of bounds.", inputVerb);
-        return;
-    }
-    if (scancode >= SDL_SCANCODE_COUNT || scancode <= SDL_SCANCODE_UNKNOWN) {
-        SDL_Log("Unable to connect verb scancode. Scancode index %d is outside of bounds", scancode);
-        return;
-    }
+    assert(inputVerb > 0 && inputVerb < C4_INPUT_VERB_COUNT);
+    assert(scancode > SDL_SCANCODE_UNKNOWN && scancode < SDL_SCANCODE_COUNT);
+
     C4_VerbMapping* map = &verbMappings[inputVerb];
-    for (int i = 0; i < map->count; i++) {
-        if (map->scancodes[i] == scancode) {
+    for (size_t i = 0; i < map->count; i++) {
+        if (map->data[i] == scancode) {
             return;
         }
     }
-    if (map->count == map->capacity) {
-        int newCapacity = (map->capacity == 0) ? 4 : map->capacity * 2;
-
-        // Realloc attemps to expand the memory block. If it cant, the data is moved to a new spot.
-        SDL_Scancode* newBlock = realloc(map->scancodes, newCapacity * sizeof(SDL_Scancode));
-
-        if (!newBlock) {
-            SDL_Log("Unable to add key mapping. Out of memory");
-            return;
-        }
-
-        map->scancodes = newBlock;
-        map->capacity = newCapacity;
-    }
-
-    map->scancodes[map->count] = scancode;
-    map->count++;
+    
+    C4_DynamicArray_Push_Back(*map, scancode);
 }
 
 void C4_Input_DisconnectScancodeFromVerb(C4_InputVerb inputVerb, SDL_Scancode scancode) {
-    if (inputVerb <= 0 || inputVerb >= C4_INPUT_VERB_COUNT) {
-        SDL_Log("Unable to set verb scancode. Inputverb index %d is outside of bounds.", inputVerb);
-        return;
-    }
-    if (scancode >= SDL_SCANCODE_COUNT || scancode <= SDL_SCANCODE_UNKNOWN) {
-        SDL_Log("Unable to set verb scancode. Scancode index %d is outside of bounds", scancode);
-        return;
-    }
+    assert(inputVerb > 0 && inputVerb < C4_INPUT_VERB_COUNT);
+    assert(scancode > SDL_SCANCODE_UNKNOWN && scancode < SDL_SCANCODE_COUNT);
 
     C4_VerbMapping* map = &verbMappings[inputVerb];
 
-    for (int i = 0; i < map->count; i++) {
-        if (map->scancodes[i] == scancode) {
-            // Move the last item in the array to the removed scancode index
-            if (i != map->count - 1) {
-                map->scancodes[i] = map->scancodes[map->count - 1];
-            }
-            map->count--;
+    for (size_t i = 0; i < map->count; i++) {
+        if (map->data[i] == scancode) {
+            C4_DynamicArray_Remove_ReplaceWithBack(*map, i);
             return;
         }
     }
@@ -88,6 +66,7 @@ void C4_Input_Init(void) {
     C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_NAV_LEFT, SDL_SCANCODE_LEFT);
     C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_CONFIRM, SDL_SCANCODE_RETURN);
     C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_CONFIRM, SDL_SCANCODE_KP_ENTER);
+    C4_Log("Initialized C4_Input");
 }
 
 void C4_Gamepad_OnlyAcceptInputFromActiveGamepad(bool value) {
@@ -95,10 +74,10 @@ void C4_Gamepad_OnlyAcceptInputFromActiveGamepad(bool value) {
 }
 
 static C4_InputVerb C4_MapScancodeToVerb(SDL_Scancode scancode) {
-    for (int i = 1; i < C4_INPUT_VERB_COUNT; i++) {
+    for (size_t i = 1; i < C4_INPUT_VERB_COUNT; i++) {
         C4_VerbMapping* map = &verbMappings[i];
-        for (int j = 0; j < map->count; j++) {
-            if (map->scancodes[j] == scancode) {
+        for (size_t j = 0; j < map->count; j++) {
+            if (map->data[j] == scancode) {
                 return (C4_InputVerb)i;
             }
         }
@@ -130,18 +109,29 @@ static void C4_RefreshActiveGamepad(void) {
     if (activeGamepad != NULL) {
         return;
     }
-    for (int i = 0; i < C4_MAX_GAMEPADS; i++) {
-        if (connectedGamepads[i] != NULL) {
-            activeGamepad = connectedGamepads[i];
+    for (size_t i = 0; i < connectedGamepads.count; i++) {
+        if (connectedGamepads.data[i]) {
+            C4_Gamepad_SetActiveIndex(i);
             return;
         }
     }
 }
 
-void C4_Gamepad_SetActiveIndex(int index) {
-    if (index >= 0 && index < C4_MAX_GAMEPADS && connectedGamepads[index] != NULL) {
-        activeGamepad = connectedGamepads[index];
+void C4_Gamepad_SetActiveIndex(size_t index) {
+    assert(index < connectedGamepads.count);
+
+    if (!connectedGamepads.data[index]) {
+        C4_Warn(
+            SDL_LOG_CATEGORY_INPUT,
+            "Unable to set active gampad to index %zu",
+            index
+        );
+        return;
     }
+    activeGamepad = connectedGamepads.data[index];
+    char activeGamepadName[256];
+    C4_Gamepad_GetActiveName(activeGamepadName, sizeof(activeGamepadName));
+    C4_Log("Active gamepad set to index %zu: %s", index, activeGamepadName);
 }
 
 void C4_Input_Shutdown(void) {
@@ -150,26 +140,30 @@ void C4_Input_Shutdown(void) {
         activeGamepad = NULL;
     }
 
-    for (int i = 0; i < C4_INPUT_VERB_COUNT; i++) {
-        if (verbMappings[i].scancodes) {
-            free(verbMappings[i].scancodes);
-            verbMappings[i].scancodes = NULL;
+    for(size_t i = 0; i < connectedGamepads.count; i++) {
+        if(connectedGamepads.data[i]) {
+            SDL_CloseGamepad(connectedGamepads.data[i]);
         }
-        verbMappings[i].count = 0;
-        verbMappings[i].capacity = 0;
     }
+    C4_DynamicArray_Free(connectedGamepads);
+
+    for (int i = 0; i < C4_INPUT_VERB_COUNT; i++) {
+        C4_DynamicArray_Free(verbMappings[i]);
+    }
+    C4_Log("Shutdown C4_Input");
 }
 
 void C4_Input_ResetVerbState(C4_InputVerb verb) {
-    if (verb <= 0 || verb >= C4_INPUT_VERB_COUNT) {
-        return;
-    }
+    assert(verb > 0 && verb < C4_INPUT_VERB_COUNT);
+
     verbStates[verb].isDown = false;
     verbStates[verb].isRepeating = false;
     verbStates[verb].timer = 0.f;
 }
 
 C4_InputEvent C4_GetInput(SDL_Event* event) {
+    assert(event);
+
     C4_InputEvent input = {
         .verb = C4_INPUT_VERB_NONE,
         .state = C4_INPUT_STATE_RELEASED
@@ -177,34 +171,47 @@ C4_InputEvent C4_GetInput(SDL_Event* event) {
 
     switch (event->type) {
         case SDL_EVENT_GAMEPAD_ADDED: {
-            int slot = -1;
-            for (int i = 0; i < C4_MAX_GAMEPADS; i++) {
-                if (connectedGamepads[i] == NULL) {
-                    slot = i;
+            SDL_Gamepad* newPad = SDL_OpenGamepad(event->gdevice.which);
+            if (!newPad) {
+                return input;
+            }
+
+            C4_DynamicArray_Push_Ptr_FillHole(connectedGamepads, newPad);
+
+            int openIndex = -1;
+            for(size_t i = 0; i < connectedGamepads.count; i++) {
+                if(connectedGamepads.data[i] == newPad) {
+                    openIndex = (int)i;
                     break;
                 }
             }
-            if (slot == -1) {
-                SDL_Log("Gamepad connected but ignored (Max limit reached)");
-                return input;
+            
+            char gamepadName[256];
+            if (activeGamepad) {
+                C4_Gamepad_GetNameAtIndex(openIndex, gamepadName, sizeof(gamepadName));
+            } else {
+                snprintf(gamepadName, sizeof(gamepadName), "%s", SDL_GetGamepadName(newPad));
             }
-            SDL_Gamepad* newPad = SDL_OpenGamepad(event->gdevice.which);
-            if (newPad) {
-                connectedGamepads[slot] = newPad;
-                C4_RefreshActiveGamepad();
-            }
+            C4_Log(
+                "Gamepad connected at index %d: %s",
+                openIndex, gamepadName
+            );
+            C4_RefreshActiveGamepad();
         }; return input;
         case SDL_EVENT_GAMEPAD_REMOVED: {
-            for (int i = 0; i < C4_MAX_GAMEPADS; i++) {
+            for (size_t i = 0; i < connectedGamepads.count; i++) {
                 if (
-                    connectedGamepads[i] && 
-                    SDL_GetGamepadID(connectedGamepads[i]) == event->gdevice.which
+                    connectedGamepads.data[i] && 
+                    SDL_GetGamepadID(connectedGamepads.data[i]) == event->gdevice.which
                 ) {
-                    if (connectedGamepads[i] == activeGamepad) {
+                    if (connectedGamepads.data[i] == activeGamepad) {
                         activeGamepad = NULL;
                     }
-                    SDL_CloseGamepad(connectedGamepads[i]);
-                    connectedGamepads[i] = NULL;
+                    SDL_CloseGamepad(connectedGamepads.data[i]);
+                    
+                    C4_DynamicArray_Remove_Ptr_MakeHole(connectedGamepads, i);
+
+                    C4_Log("Disconnected gamepad at index %zu", i);
                     C4_RefreshActiveGamepad();
                     return input;
                 }
@@ -284,10 +291,10 @@ void C4_Gamepad_GetNames(char** returnValue, size_t returnValueSize) {
     if (!returnValue) {
         return;
     }
-    size_t limit = C4_ULLMin(C4_MAX_GAMEPADS, returnValueSize);
+    size_t limit = C4_ULLMin(connectedGamepads.count, returnValueSize);
 
     for (size_t i = 0; i < limit; i++) {
-        SDL_Gamepad* currentPad = connectedGamepads[i];
+        SDL_Gamepad* currentPad = connectedGamepads.data[i];
 
         if (currentPad == NULL) {
             returnValue[i] = NULL;
@@ -303,8 +310,8 @@ void C4_Gamepad_GetNames(char** returnValue, size_t returnValueSize) {
         int myInstanceIndex = 1;
 
         for (size_t j = 0; j < limit; j++) {
-            if (connectedGamepads[j] != NULL) {
-                const char* otherName = SDL_GetGamepadName(connectedGamepads[j]);
+            if (connectedGamepads.data[j]) {
+                const char* otherName = SDL_GetGamepadName(connectedGamepads.data[j]);
                 if (otherName && strcmp(rawName, otherName) == 0) {
                     totalMatches++;
                     if (j < i) {
@@ -330,42 +337,32 @@ void C4_Gamepad_GetNames(char** returnValue, size_t returnValueSize) {
     }
 }
 
-void C4_Gamepad_GetActiveName(char* returnValue, size_t returnValueSize) {
+void C4_Gamepad_GetNameAtIndex(size_t index, char* returnValue, size_t returnValueSize) {
+    assert(index < connectedGamepads.count);
     if (!returnValue || returnValueSize == 0) {
         return;
     }
 
-    if (!activeGamepad) {
+    if (!connectedGamepads.data[index]) {
         snprintf(returnValue, returnValueSize, "None");
         return;
     }
 
-    int activeIndex = -1;
-    for (int i = 0; i < C4_MAX_GAMEPADS; i++) {
-        if (connectedGamepads[i] == activeGamepad) {
-            activeIndex = i;
-            break;
-        }
+    const char* rawName = SDL_GetGamepadName(connectedGamepads.data[index]);
+    if (!rawName) {
+        rawName = "Unknown Controller";
     }
-
-    if (activeIndex == -1) {
-        snprintf(returnValue, returnValueSize, "Unknown");
-        return;
-    }
-
-    const char* rawName = SDL_GetGamepadName(activeGamepad);
-    if (!rawName) rawName = "Unknown Controller";
 
     int totalMatches = 0;
     int myInstanceIndex = 1;
 
-    for (int j = 0; j < C4_MAX_GAMEPADS; j++) {
-        if (connectedGamepads[j] != NULL) {
-            const char* otherName = SDL_GetGamepadName(connectedGamepads[j]);
+    for (size_t j = 0; j < connectedGamepads.count; j++) {
+        if (connectedGamepads.data[j] != NULL) {
+            const char* otherName = SDL_GetGamepadName(connectedGamepads.data[j]);
             
             if (otherName && strcmp(rawName, otherName) == 0) {
                 totalMatches++;
-                if (j < activeIndex) {
+                if (j < index) {
                     myInstanceIndex++;
                 }
             }
@@ -377,4 +374,28 @@ void C4_Gamepad_GetActiveName(char* returnValue, size_t returnValueSize) {
     } else {
         snprintf(returnValue, returnValueSize, "%s", rawName);
     }
+}
+
+void C4_Gamepad_GetActiveName(char* returnValue, size_t returnValueSize) {
+    assert(returnValue && returnValueSize > 0);
+
+    if (!activeGamepad) {
+        snprintf(returnValue, returnValueSize, "None");
+        return;
+    }
+
+    int64_t activeIndex = -1;
+    for (size_t i = 0; i < connectedGamepads.count; i++) {
+        if (connectedGamepads.data[i] == activeGamepad) {
+            activeIndex = i;
+            break;
+        }
+    }
+
+    if (activeIndex == -1) {
+        snprintf(returnValue, returnValueSize, "Unknown");
+        return;
+    }
+
+    C4_Gamepad_GetNameAtIndex(activeIndex, returnValue, returnValueSize);    
 }

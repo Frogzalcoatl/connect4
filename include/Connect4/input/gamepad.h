@@ -1,7 +1,5 @@
 #pragma once
-#include <SDL3/SDL.h>
-
-#define C4_MAX_GAMEPADS 8
+#include "SDL3/SDL.h"
 
 typedef enum C4_InputVerb {
     C4_INPUT_VERB_NONE,
@@ -15,9 +13,9 @@ typedef enum C4_InputVerb {
 } C4_InputVerb;
 
 typedef struct C4_VerbMapping {
-    SDL_Scancode* scancodes;
-    int count;
-    int capacity;
+    SDL_Scancode* data;
+    size_t count;
+    size_t capacity;
 } C4_VerbMapping;
 
 typedef enum C4_InputState {
@@ -33,9 +31,10 @@ typedef struct C4_InputEvent {
 void C4_Input_Init(void);
 void C4_Input_Shutdown(void);
 C4_InputEvent C4_GetInput(SDL_Event* event);
-void C4_Gamepad_SetActiveIndex(int index);
+void C4_Gamepad_SetActiveIndex(size_t index);
 void C4_Gamepad_GetNames(char** returnValue, size_t returnValueSize);
 void C4_Gamepad_GetActiveName(char* returnValue, size_t returnValueSize);
+void C4_Gamepad_GetNameAtIndex(size_t index, char* returnValue, size_t returnValueSize);
 void C4_Gamepad_OnlyAcceptInputFromActiveGamepad(bool value);
 void C4_Input_ConnectScancodeToVerb(C4_InputVerb inputVerb, SDL_Scancode scancode);
 void C4_Input_DisconnectScancodeFromVerb(C4_InputVerb inputVerb, SDL_Scancode scancode);
