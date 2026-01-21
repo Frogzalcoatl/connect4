@@ -119,7 +119,7 @@ static void C4_Game_RecalculateScale(C4_Game* game) {
         game->UIScale = 0.1f;
     }
 }
-
+/*
 static void C4_Game_SetUserScale(C4_Game* game, float newScale) {
     assert(game);
 
@@ -131,7 +131,7 @@ static void C4_Game_SetUserScale(C4_Game* game, float newScale) {
         game->currentScreen->HandleWindowResize(game->currentScreen, game->currentLayout);
     }
 }
-
+*/
 SDL_FPoint C4_GetReferenceWindowDimensions(unsigned int w, unsigned int h, float UIScale) {
     float width = w / UIScale;
     float height = h / UIScale;

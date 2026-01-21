@@ -21,15 +21,17 @@ else()
     set(SDL_STATIC_MODE ON)
 endif()
 
-# Helper macro to silence warnings for a specific target
+# Helper to silence warnings for a specific target
 function(disable_target_warnings target)
     if(TARGET ${target})
-        if(MSVC)
-            # /W0 = Disable all warnings
-            target_compile_options(${target} PRIVATE /W0) 
-        else()
-            # -w = Disable all warnings
-            target_compile_options(${target} PRIVATE -w) 
+        if(CMAKE_C_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            target_compile_options(${target} PRIVATE -w)
+
+        elseif(CMAKE_C_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+            target_compile_options(${target} PRIVATE -w)
+
+        elseif(MSVC)
+            target_compile_options(${target} PRIVATE /W0)
         endif()
     endif()
 endfunction()
@@ -89,6 +91,12 @@ if(NOT SDL3_ttf_FOUND)
     disable_target_warnings(SDL3_ttf)
     disable_target_warnings(SDL3_ttf-shared) 
     disable_target_warnings(SDL3_ttf-static)
+    if(TARGET freetype)
+        disable_target_warnings(freetype)
+    endif()
+    if(TARGET harfbuzz)
+        disable_target_warnings(harfbuzz)
+    endif()
 
     if(NOT TARGET SDL3_ttf::SDL3_ttf)
         if(TARGET SDL3_ttf)
@@ -145,9 +153,20 @@ if(NOT SDL3_image_FOUND)
         SYSTEM
     )
     FetchContent_MakeAvailable(SDL3_image)
+
     disable_target_warnings(SDL3_image)
     disable_target_warnings(SDL3_image-shared)
     disable_target_warnings(SDL3_image-static)
+
+    foreach(sublib png jpeg zlib)
+        if(TARGET ${sublib})
+            disable_target_warnings(${sublib})
+        endif()
+        # Sometimes SDL names them with a prefix, check for those too
+        if(TARGET SDL3_image_${sublib})
+            disable_target_warnings(SDL3_image_${sublib})
+        endif()
+    endforeach()
 
     if(NOT TARGET SDL3_image::SDL3_image)
         if(TARGET SDL3_image)
@@ -224,6 +243,12 @@ if(NOT SDL3_mixer_FOUND)
     
     FetchContent_MakeAvailable(SDL3_mixer)
 
+    foreach(sublib ogg vorbis vorbisenc vorbisfile opus)
+        if(TARGET ${sublib})
+            disable_target_warnings(${sublib})
+        endif()
+    endforeach()
+
     set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "Silence Deprecation Warnings" FORCE)
     set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS OFF CACHE BOOL "Silence Dev Warnings" FORCE)
 
@@ -277,8 +302,20 @@ if(MSVC)
     target_compile_options(${EXE_NAME} PRIVATE /W4 /std:clatest)
     target_compile_definitions(${EXE_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
 else()
-    target_compile_options(${EXE_NAME} PRIVATE -Wall -Wextra)
+    target_compile_options(${EXE_NAME} PRIVATE
+        -Wall
+        -Wextra
+        -pedantic
+        -Werror
+        -Wno-newline-eof
+        -Wno-deprecated-declarations
+        -Wno-empty-translation-unit
+    )
+    
     target_compile_features(${EXE_NAME} PRIVATE c_std_23)
+    
+    # This Apple check fixes an issue where strict casting (common in older C code)
+    # causes errors on newer M1/M2 Mac compilers.
     if(APPLE)
         target_compile_options(${EXE_NAME} PRIVATE -Wno-error=incompatible-function-pointer-types)
     endif()
@@ -341,11 +378,6 @@ if(USE_DISCORD)
     enable_language(CXX)
     set(DISCORD_RPC_DIR "${CMAKE_SOURCE_DIR}/deps/discord-rpc")
 
-    target_include_directories(${EXE_NAME} PRIVATE
-        "${DISCORD_RPC_DIR}/include"
-        "${DISCORD_RPC_DIR}/thirdparty/rapidjson-1.1.0/include"
-    )
-
     set(DISCORD_SRC
         "${DISCORD_RPC_DIR}/src/discord_rpc.cpp"
         "${DISCORD_RPC_DIR}/src/rpc_connection.cpp"
@@ -357,24 +389,31 @@ if(USE_DISCORD)
             "${DISCORD_RPC_DIR}/src/connection_win.cpp"
             "${DISCORD_RPC_DIR}/src/discord_register_win.cpp"
         )
-        target_compile_definitions(${EXE_NAME} PRIVATE DISCORD_WINDOWS)
     elseif(APPLE)
         enable_language(OBJC)
         list(APPEND DISCORD_SRC 
             "${DISCORD_RPC_DIR}/src/connection_unix.cpp"
             "${DISCORD_RPC_DIR}/src/discord_register_osx.m"
         )
-        target_compile_definitions(${EXE_NAME} PRIVATE DISCORD_OSX)
     else() # Linux
         list(APPEND DISCORD_SRC 
             "${DISCORD_RPC_DIR}/src/connection_unix.cpp"
             "${DISCORD_RPC_DIR}/src/discord_register_linux.cpp"
         )
-        target_compile_definitions(${EXE_NAME} PRIVATE DISCORD_LINUX)
     endif()
 
-    target_sources(${EXE_NAME} PRIVATE ${DISCORD_SRC})
+    add_library(discord-rpc STATIC ${DISCORD_SRC})
+
+    target_include_directories(discord-rpc SYSTEM PUBLIC
+        "${DISCORD_RPC_DIR}/include"
+        "${DISCORD_RPC_DIR}/thirdparty/rapidjson-1.1.0/include"
+    )
+
+    disable_target_warnings(discord-rpc)
+
+    target_link_libraries(${EXE_NAME} PRIVATE discord-rpc)
     target_compile_definitions(${EXE_NAME} PRIVATE USE_DISCORD)
+    
     message(STATUS "discord-rpc enabled")
 endif()
 
