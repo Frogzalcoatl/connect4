@@ -27,11 +27,11 @@ void Connect4_ConnectScancodesToInputVerbs(void) {
     C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_CONFIRM, SDL_SCANCODE_SPACE);
 }
 
-static bool C4_AddGameControllerDB(const char* controllerDbPath) {
-    assert(controllerDbPath);
+static bool C4_AddMappingFromVFS(const char* filePath) {
+    assert(filePath);
     
     size_t len;
-    void* rawData = C4_VFS_ReadFile(controllerDbPath, &len);
+    void* rawData = C4_VFS_ReadFile(filePath, &len);
     if (!rawData) {
         return false;
     }
@@ -41,7 +41,7 @@ static bool C4_AddGameControllerDB(const char* controllerDbPath) {
     }
     const int mappingsAdded = SDL_AddGamepadMappingsFromIO(io, true);
     C4_VFS_FreeFile(rawData);
-    C4_Log("Added %d gamepad mappings from file %s", mappingsAdded, controllerDbPath);
+    C4_Log("Added %d gamepad mappings from file %s", mappingsAdded, filePath);
     return true;
 }
 
@@ -72,7 +72,7 @@ void Connect4_Init_Dependencies(void) {
     C4_Input_Init();
 
     const char controllerDbPath[] = "assets/gamecontrollerdb.txt";
-    if (!C4_AddGameControllerDB(controllerDbPath)) {
+    if (!C4_AddMappingFromVFS(controllerDbPath)) {
         C4_Warn(
             SDL_LOG_CATEGORY_APPLICATION,
             "Unable to add gamepad mappings from file: %s",

@@ -187,7 +187,11 @@ static void C4_UI_Node_UpdateTextRect(C4_UI_Node* node) {
 void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString) {
     assert(node && node->text.textObject && node->type == C4_UI_Type_Text);
 
-    if (node->text.storage && node->text.storage != newString) {
+    if (node->text.storage && strcmp(node->text.storage, newString) == 0) {
+        return;
+    }
+
+    if (node->text.storage) {
         SDL_free(node->text.storage);
     }
 

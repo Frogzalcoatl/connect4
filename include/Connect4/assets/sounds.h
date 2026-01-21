@@ -26,6 +26,7 @@ typedef struct C4_SoundSystem {
     MIX_Audio* currentMusic;
     C4_MusicTrack currentMusicID;
     MIX_Track* musicTrack;
+    void* currentMusicData; 
     MIX_Track* sfxTracks[SFX_POOL_SIZE];
     Uint64 musicStartTime;
     bool isMusicPlaying;

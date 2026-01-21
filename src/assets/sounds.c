@@ -112,6 +112,10 @@ void C4_SoundSystem_Destroy(C4_SoundSystem* soundSystem) {
         MIX_DestroyAudio(soundSystem->currentMusic);
         soundSystem->currentMusic = NULL;
     }
+    if (soundSystem->currentMusicData) {
+        C4_VFS_FreeFile(soundSystem->currentMusicData);
+        soundSystem->currentMusicData = NULL;
+    }
     if (soundSystem->mixerDevice) {
         MIX_DestroyMixer(soundSystem->mixerDevice);
         soundSystem->mixerDevice = NULL;
@@ -156,10 +160,17 @@ void C4_SoundSystem_PlayMusic(C4_SoundSystem* soundSystem, C4_MusicTrack musicID
     }
 
     MIX_PauseTrack(soundSystem->musicTrack);
+
     if (soundSystem->currentMusic) {
         MIX_DestroyAudio(soundSystem->currentMusic);
         soundSystem->currentMusic = NULL;
     }
+
+    if (soundSystem->currentMusicData) {
+        C4_VFS_FreeFile(soundSystem->currentMusicData);
+        soundSystem->currentMusicData = NULL;
+    }
+
     soundSystem->currentMusicID = C4_MusicTrack_None;
 
     size_t len;
@@ -167,6 +178,7 @@ void C4_SoundSystem_PlayMusic(C4_SoundSystem* soundSystem, C4_MusicTrack musicID
     if (!rawData) {
         return;
     }
+
     SDL_IOStream* io = SDL_IOFromMem(rawData, len);
     if (!io) {
         C4_Warn(
@@ -174,10 +186,11 @@ void C4_SoundSystem_PlayMusic(C4_SoundSystem* soundSystem, C4_MusicTrack musicID
             "Failed to create IO for music: %s",
             MUSIC_ASSETS[musicID]
         );
+        C4_VFS_FreeFile(rawData);
         return;
     }
 
-    soundSystem->currentMusic = MIX_LoadAudio_IO(soundSystem->mixerDevice, io, true, true);
+    soundSystem->currentMusic = MIX_LoadAudio_IO(soundSystem->mixerDevice, io, false, true);
 
     C4_VFS_FreeFile(rawData);
 
@@ -187,8 +200,11 @@ void C4_SoundSystem_PlayMusic(C4_SoundSystem* soundSystem, C4_MusicTrack musicID
             "Mixer failed to load audio IO: %s",
             SDL_GetError()
         );
+        C4_VFS_FreeFile(rawData);
         return;
     }
+
+    soundSystem->currentMusicData = rawData;
     
     soundSystem->currentMusicID = musicID;
     

@@ -288,16 +288,24 @@ bool C4_Input_CheckRepeat(float deltaTime, C4_InputEvent* outEvent) {
 }
 
 void C4_Gamepad_GetNames(char** returnValue, size_t returnValueSize) {
-    if (!returnValue) {
+    if (!returnValue || returnValueSize == 0) {
         return;
     }
-    size_t limit = C4_ULLMin(connectedGamepads.count, returnValueSize);
 
-    for (size_t i = 0; i < limit; i++) {
+    for (size_t i = 0; i < returnValueSize; i++) {
+        returnValue[i] = NULL;
+    }
+
+    size_t foundCount = 0;
+
+    for (size_t i = 0; i < connectedGamepads.count; i++) {
+        if (foundCount >= returnValueSize) {
+            break;
+        }
+
         SDL_Gamepad* currentPad = connectedGamepads.data[i];
 
         if (currentPad == NULL) {
-            returnValue[i] = NULL;
             continue;
         }
 
@@ -309,7 +317,7 @@ void C4_Gamepad_GetNames(char** returnValue, size_t returnValueSize) {
         int totalMatches = 0;
         int myInstanceIndex = 1;
 
-        for (size_t j = 0; j < limit; j++) {
+        for (size_t j = 0; j < connectedGamepads.count; j++) {
             if (connectedGamepads.data[j]) {
                 const char* otherName = SDL_GetGamepadName(connectedGamepads.data[j]);
                 if (otherName && strcmp(rawName, otherName) == 0) {
@@ -321,19 +329,23 @@ void C4_Gamepad_GetNames(char** returnValue, size_t returnValueSize) {
             }
         }
         
+        size_t destIndex = foundCount;
+
         if (totalMatches > 1) {
             size_t neededLen = strlen(rawName) + 16; 
-            returnValue[i] = SDL_malloc(neededLen);
-            if (returnValue[i]) {
-                snprintf(returnValue[i], neededLen, "%s (%d)", rawName, myInstanceIndex);
+            returnValue[destIndex] = SDL_malloc(neededLen);
+            if (returnValue[destIndex]) {
+                snprintf(returnValue[destIndex], neededLen, "%s (%d)", rawName, myInstanceIndex);
             }
         } else {
             size_t len = strlen(rawName);
-            returnValue[i] = SDL_malloc(len + 1);
-            if (returnValue[i]) {
-                strcpy(returnValue[i], rawName);
+            returnValue[destIndex] = SDL_malloc(len + 1);
+            if (returnValue[destIndex]) {
+                strcpy(returnValue[destIndex], rawName);
             }
         }
+        
+        foundCount++;
     }
 }
 
