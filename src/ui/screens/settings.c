@@ -11,12 +11,14 @@ typedef struct {
 
 static void C4_SettingsScreen_OnEnter(C4_UI_Screen* screen) {
     assert(screen && screen->data);
+    (void)screen;
     //C4_SettingsScreenData* data = (C4_SettingsScreenData*)screen->data;
 }
 
 static void C4_SettingsScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutType layout) {
     assert(screen && screen->data);
     assert(layout > C4_UI_LayoutType_None && layout < C4_UI_LayoutType_Count);
+    (void)screen;
     //C4_SettingsScreenData* data = (C4_SettingsScreenData*)screen->data;
 
     switch (layout) {

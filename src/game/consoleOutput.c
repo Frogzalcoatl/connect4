@@ -47,7 +47,7 @@ static const char* ERROR_MESSAGES[C4_ErrorCode_Count] = {
 
 void C4_FatalError(C4_ErrorCode code, const char* format, ...) {
     if (code < 0 || code >= C4_ErrorCode_Count) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "[ERROR] Invalid error code thrown: %d", code);
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Invalid error code thrown: %d", code);
         exit(EXIT_FAILURE);
     }
 
@@ -69,7 +69,7 @@ void C4_FatalError(C4_ErrorCode code, const char* format, ...) {
         snprintf(finalMessage, sizeof(finalMessage), "%s", baseMessage);
     }
 
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "[ERORR] %s", finalMessage);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", finalMessage);
 
     SDL_ShowSimpleMessageBox(
         SDL_MESSAGEBOX_ERROR,

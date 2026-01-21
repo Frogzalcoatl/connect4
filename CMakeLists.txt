@@ -194,13 +194,13 @@ set(SDLMIXER_FLAC_LIBFLAC OFF CACHE BOOL "Disable libflac" FORCE)
 set(SDLMIXER_FLAC OFF CACHE BOOL "Disable FLAC" FORCE)
 set(SDLMIXER_MIDI OFF CACHE BOOL "Disable MIDI" FORCE)
 set(SDLMIXER_MOD OFF CACHE BOOL "Disable MOD"  FORCE)
+set(SDLMIXER_MP3 OFF CACHE BOOL "Enable MP3" FORCE)
 set(SDLMIXER_OPUS OFF CACHE BOOL "Disable OPUS" FORCE)
 set(SDLMIXER_XMP OFF CACHE BOOL "Disable XMP" FORCE)
 set(SDLMIXER_WAVPACK OFF CACHE BOOL "Disable WavPack" FORCE)
 
 # Enabled formats
 set(SDLMIXER_OGG ON CACHE BOOL "Enable OGG" FORCE)
-set(SDLMIXER_MP3 ON CACHE BOOL "Enable MP3" FORCE)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Force static libs" FORCE)
 set(OGG_SHARED OFF CACHE BOOL "Disable Ogg Shared" FORCE)
@@ -254,7 +254,7 @@ else()
     set(EXE_NAME ${PROJECT_NAME})
     if(WIN32)
         set(ICON_RC resources/icon.rc)
-        set(WIN_FLAGS WIN32)
+        # set(WIN_FLAGS WIN32)
     endif()
     if(APPLE)
         set(ICON_MACOS resources/icon.icns)
@@ -262,6 +262,14 @@ else()
         set_source_files_properties(${ICON_MACOS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     endif()
     add_executable(${EXE_NAME} MACOSX_BUNDLE ${WIN_FLAGS} ${SOURCES} ${ICON_RC})
+endif()
+
+if(WIN32)
+    # If Debug: WIN32_EXECUTABLE = FALSE (Console opens)
+    # If Release: WIN32_EXECUTABLE = TRUE (No Console)
+    set_target_properties(${EXE_NAME} PROPERTIES 
+        WIN32_EXECUTABLE "$<NOT:$<CONFIG:Debug>>"
+    )
 endif()
 
 # --- COMPILER SETTINGS ---

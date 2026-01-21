@@ -221,8 +221,8 @@ static C4_UI_Node* C4_UI_Node_FindHoveredInteraction(C4_UI_Node* node, SDL_FPoin
     return NULL;
 } 
 
-static C4_UI_Node* C4_UI_Canvas_FindHoveredInteraction(C4_UI_Canvas* canvas, SDL_Window* window) {
-    assert(canvas && window);
+static C4_UI_Node* C4_UI_Canvas_FindHoveredInteraction(C4_UI_Canvas* canvas) {
+    assert(canvas);
 
     SDL_FPoint mousePos = {0.f, 0.f};
     SDL_GetMouseState(&mousePos.x, &mousePos.y);
@@ -252,12 +252,12 @@ static void C4_UI_Canvas_MoveCursorToFocusedNode(C4_UI_Canvas* canvas, SDL_Windo
     SDL_ShowCursor();
 }
 
-static void C4_UI_Canvas_SetFocusedNodeBasedOnMousePos(C4_UI_Canvas* canvas, SDL_Window* window) {
-    assert(canvas && window);
+static void C4_UI_Canvas_SetFocusedNodeBasedOnMousePos(C4_UI_Canvas* canvas) {
+    assert(canvas);
 
     C4_UI_Canvas_ResetInteractions(canvas);
     SDL_HideCursor();
-    C4_UI_Node* result = C4_UI_Canvas_FindHoveredInteraction(canvas, window);
+    C4_UI_Node* result = C4_UI_Canvas_FindHoveredInteraction(canvas);
     if (!result) {
         C4_UI_Node* current = canvas->root;
         while (current) {
@@ -291,7 +291,7 @@ void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Window* window, SDL_Even
             C4_UI_Canvas_HandleAction(canvas, inputEvent);
             return;
         }
-        C4_UI_Canvas_SetFocusedNodeBasedOnMousePos(canvas, window);
+        C4_UI_Canvas_SetFocusedNodeBasedOnMousePos(canvas);
     } else if (
         event->type == SDL_EVENT_MOUSE_MOTION ||
         event->type == SDL_EVENT_MOUSE_BUTTON_DOWN || 

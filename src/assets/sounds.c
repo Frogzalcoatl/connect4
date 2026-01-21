@@ -5,13 +5,13 @@
 #include <assert.h>
 
 static const char* SOUND_ASSETS[C4_SoundEffect_Count] = {
-    "assets/sounds/ButtonClick.wav",
-    "assets/sounds/ButtonHover.wav",
-    "assets/sounds/Player1Place.wav",
-    "assets/sounds/Player2Place.wav"
+    "assets/sounds/ButtonClick.ogg",
+    "assets/sounds/ButtonHover.ogg",
+    "assets/sounds/Player1Place.ogg",
+    "assets/sounds/Player2Place.ogg"
 };
 static const char* MUSIC_ASSETS[C4_MusicTrack_Count] = {
-    "assets/music/test.mp3"
+    "assets/music/test.ogg"
 };
 
 static const char* SOUND_TAG = "SFX";

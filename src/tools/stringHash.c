@@ -1,6 +1,6 @@
 #include "Connect4/tools/stringHash.h"
 
-// This turns a string like "assets/sounds/jump.wav" into a unique number.
+// This turns a string like "assets/sounds/jump.ogg" into a unique number.
 // Using numbers because comparing numbers is faster than comparing strings.
 // Uses the FNV-1a (Fowler-Noll-Vo) algorithm
 uint64_t stringHash(const char* str) {

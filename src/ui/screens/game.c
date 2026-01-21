@@ -10,10 +10,12 @@ typedef struct {
 
 static void C4_GameScreen_OnEnter(C4_UI_Screen* screen) {
     assert(screen && screen->data);
+    (void)screen;
 }
 
 void C4_GameScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutType layout) {
     assert(screen && screen->data);
+    (void)screen;
     //C4_GameScreenData* gameData = (C4_GameScreenData*)screen->data;
     //C4_Game* game = gameData->game;
     //SDL_Renderer* renderer = game->renderer;
