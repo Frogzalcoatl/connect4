@@ -54,7 +54,7 @@ void Connect4_Init_Dependencies(void) {
         C4_FatalError(C4_ErrorCode_DependencyErrorSDL, "%s", SDL_GetError());
     }
     // I like logs starting under the file path of the exe in my ide.
-    SDL_Log("");
+    SDL_Log(" ");
     C4_Log("Initialized SDL with flags: SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD");
 
     C4_VFS_Init(MASTER_DAT_PATH);

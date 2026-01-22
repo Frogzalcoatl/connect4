@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     C4_Game* connect4 = C4_Game_Create(7, 6, 4);
     if (!connect4) {
         Connect4_Quit_Dependencies();
-        C4_FatalError(C4_ErrorCode_RipConnect4Struct, "");
+        C4_FatalError(C4_ErrorCode_RipConnect4Struct, " ");
     }
 
     C4_Game_Run(connect4);

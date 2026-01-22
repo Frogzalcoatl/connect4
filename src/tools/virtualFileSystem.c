@@ -30,14 +30,14 @@ void C4_VFS_Init(const char* filePath) {
 
     vfs.packFile = SDL_IOFromFile(filePath, "rb");
     if (!vfs.packFile) {
-        C4_FatalError(C4_ErrorCode_DatFileMissing, "");
+        C4_FatalError(C4_ErrorCode_DatFileMissing, " ");
     }
 
     C4_PackHeader header;
     SDL_ReadIO(vfs.packFile, &header, sizeof(C4_PackHeader));
 
     if (header.magic != C4_PACK_MAGIC) {
-        C4_FatalError(C4_ErrorCode_DatFileInvalid, "");
+        C4_FatalError(C4_ErrorCode_DatFileInvalid, " ");
     }
 
     if (header.version != GAME_VERSION) {

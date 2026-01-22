@@ -1,3 +1,9 @@
+# NOTE FROM FROGZALCOATL
+
+* I did make one small change in include/rapidjson/document.h on line 325. The fact "SizeType length" was a constant was causing compiler errors on gcc for me idk why.
+
+***
+
 ![](doc/logo/rapidjson.png)
 
 ![](https://img.shields.io/badge/release-v1.1.0-blue.png)

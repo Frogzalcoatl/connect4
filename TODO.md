@@ -1,5 +1,7 @@
 # TODO
 
+* Improve build setup based on advice from aistudio
+* Set up linux retrolink mapping using the c file in SDLs test folder
 * Clean up the ui element declaration. It feels weird to have to do scaling calculationsin menu.c. Maybe it should all be handled in the other non screen files?
 * Add border radius. Store properties in the same way css does.
 * Simplify ui element configs. Maybe even try to get the functions to only a few parameters and not even use config structs

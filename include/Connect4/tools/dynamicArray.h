@@ -52,7 +52,7 @@
 // Overwrites the removed index with last element of array (faster than shift)
 #define C4_DynamicArray_Remove_ReplaceWithBack(arr, index) \
     do { \
-        if ((index) >= 0 && (index) < (arr).count) { \
+        if ((index) < (arr).count) { \
             (arr).data[index] = (arr).data[(arr).count - 1]; \
             (arr).count--; \
         } \
@@ -81,7 +81,7 @@ dont conflict with variables in functions where this macro is used.
 // Requires array elements to be nullable pointers
 #define C4_DynamicArray_Remove_Ptr_MakeHole(arr, index) \
     do { \
-        if ((index) >= 0 && (index) < (arr).count) { \
+        if ((index) < (arr).count) { \
             (arr).data[index] = NULL; \
         } \
     } while(0)

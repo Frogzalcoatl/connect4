@@ -1,6 +1,6 @@
 # Needed ai for this ngl
 
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.25)
 project(Connect4 LANGUAGES C)
 
 set(GAME_VERSION 1.0)
@@ -32,6 +32,9 @@ function(disable_target_warnings target)
 
         elseif(MSVC)
             target_compile_options(${target} PRIVATE /W0)
+        endif()
+        if(WIN32)
+            target_compile_definitions(${target} PRIVATE _CRT_SECURE_NO_WARNINGS)
         endif()
     endif()
 endfunction()
@@ -91,11 +94,18 @@ if(NOT SDL3_ttf_FOUND)
     disable_target_warnings(SDL3_ttf)
     disable_target_warnings(SDL3_ttf-shared) 
     disable_target_warnings(SDL3_ttf-static)
+
     if(TARGET freetype)
         disable_target_warnings(freetype)
     endif()
     if(TARGET harfbuzz)
         disable_target_warnings(harfbuzz)
+    endif()
+    if(TARGET plutosvg)
+        disable_target_warnings(plutosvg)
+    endif()
+    if(TARGET plutovg)
+        disable_target_warnings(plutosvg)
     endif()
 
     if(NOT TARGET SDL3_ttf::SDL3_ttf)
@@ -286,7 +296,7 @@ else()
         # This tells CMake to copy the file to Connect4.app/Contents/Resources/
         set_source_files_properties(${ICON_MACOS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     endif()
-    add_executable(${EXE_NAME} MACOSX_BUNDLE ${WIN_FLAGS} ${SOURCES} ${ICON_RC})
+    add_executable(${EXE_NAME} MACOSX_BUNDLE ${WIN_FLAGS} ${SOURCES} ${ICON_RC} ${ICON_MACOS})
 endif()
 
 if(WIN32)
@@ -302,20 +312,31 @@ if(MSVC)
     target_compile_options(${EXE_NAME} PRIVATE /W4 /std:clatest)
     target_compile_definitions(${EXE_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
 else()
+    if(MINGW)
+        target_compile_definitions(${EXE_NAME} PRIVATE __USE_MINGW_ANSI_STDIO=1)
+    endif()
     target_compile_options(${EXE_NAME} PRIVATE
         -Wall
         -Wextra
         -pedantic
-        -Werror
-        -Wno-newline-eof
-        -Wno-deprecated-declarations
-        -Wno-empty-translation-unit
     )
+    
+    if (CMAKE_C_COMPILER_ID MATCHES "Clang")
+        target_compile_options(${EXE_NAME} PRIVATE
+            -Wno-newline-eof
+            -Wno-deprecated-declarations
+            -Wno-empty-translation-unit
+        )
+    endif()
+
+    if (CMAKE_C_COMPILER_ID MATCHES "GNU")
+        target_compile_options(${EXE_NAME} PRIVATE
+            -Wno-deprecated-declarations
+        )
+    endif()
     
     target_compile_features(${EXE_NAME} PRIVATE c_std_23)
     
-    # This Apple check fixes an issue where strict casting (common in older C code)
-    # causes errors on newer M1/M2 Mac compilers.
     if(APPLE)
         target_compile_options(${EXE_NAME} PRIVATE -Wno-error=incompatible-function-pointer-types)
     endif()
@@ -508,12 +529,11 @@ if(ANDROID)
         "${MASTER_DAT_PATH}"
         "${ANDROID_ASSETS_DIR}/${MASTER_DAT_NAME}.dat"
     )
-else()    
-    add_custom_target(EnsureGameDat ALL
+else()
+    add_custom_command(TARGET ${EXE_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${MASTER_DAT_PATH}"
         "$<TARGET_FILE_DIR:${EXE_NAME}>/${MASTER_DAT_NAME}.dat"
-        COMMENT "Verifying assets in output directory..."
+        COMMENT "Copying ${MASTER_DAT_NAME}.dat to output directory..."
     )
-    add_dependencies(EnsureGameDat ${EXE_NAME})
 endif()
