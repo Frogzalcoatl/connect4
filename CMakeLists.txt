@@ -1,6 +1,6 @@
 # Needed ai for this ngl
 
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.22)
 project(Connect4 LANGUAGES C)
 
 set(GAME_VERSION 1.0)
