@@ -86,22 +86,22 @@ C4_SoundSystem* C4_SoundSystem_Create(void) {
 
 void C4_SoundSystem_Destroy(C4_SoundSystem* soundSystem) {
     if (!soundSystem) {
-        C4_Warn(
-            SDL_LOG_CATEGORY_AUDIO,
-            "Unable to destroy sound system. Pointer is NULL."
-        );
         return;
     }
+
     if (soundSystem->musicTrack) {
+        MIX_SetTrackAudio(soundSystem->musicTrack, NULL);
         MIX_DestroyTrack(soundSystem->musicTrack);
         soundSystem->musicTrack = NULL;
     }
     for (int i = 0; i < SFX_POOL_SIZE; i++) {
         if (soundSystem->sfxTracks[i]) {
+            MIX_SetTrackAudio(soundSystem->sfxTracks[i], NULL);
             MIX_DestroyTrack(soundSystem->sfxTracks[i]);
             soundSystem->sfxTracks[i] = NULL;
         }
     }
+
     for (size_t i = 0; i < C4_SoundEffect_Count; i++) {
         if (soundSystem->loadedSounds[i]) {
             MIX_DestroyAudio(soundSystem->loadedSounds[i]);
@@ -112,14 +112,17 @@ void C4_SoundSystem_Destroy(C4_SoundSystem* soundSystem) {
         MIX_DestroyAudio(soundSystem->currentMusic);
         soundSystem->currentMusic = NULL;
     }
-    if (soundSystem->currentMusicData) {
-        C4_VFS_FreeFile(soundSystem->currentMusicData);
-        soundSystem->currentMusicData = NULL;
-    }
+
     if (soundSystem->mixerDevice) {
         MIX_DestroyMixer(soundSystem->mixerDevice);
         soundSystem->mixerDevice = NULL;
     }
+
+    if (soundSystem->currentMusicData) {
+        C4_VFS_FreeFile(soundSystem->currentMusicData);
+        soundSystem->currentMusicData = NULL;
+    }
+
     SDL_free(soundSystem);
 }
 
@@ -191,8 +194,6 @@ void C4_SoundSystem_PlayMusic(C4_SoundSystem* soundSystem, C4_MusicTrack musicID
     }
 
     soundSystem->currentMusic = MIX_LoadAudio_IO(soundSystem->mixerDevice, io, false, true);
-
-    C4_VFS_FreeFile(rawData);
 
     if (!soundSystem->currentMusic) {
         C4_Warn(

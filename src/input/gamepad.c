@@ -135,10 +135,7 @@ void C4_Gamepad_SetActiveIndex(size_t index) {
 }
 
 void C4_Input_Shutdown(void) {
-    if (activeGamepad) {
-        SDL_CloseGamepad(activeGamepad);
-        activeGamepad = NULL;
-    }
+    activeGamepad = NULL;
 
     for(size_t i = 0; i < connectedGamepads.count; i++) {
         if(connectedGamepads.data[i]) {
