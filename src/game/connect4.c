@@ -62,7 +62,6 @@ void Connect4_Init_Dependencies(void) {
     char fullDatPath[2048];
     if (basePath) {
         SDL_snprintf(fullDatPath, sizeof(fullDatPath), "%s%s", basePath, MASTER_DAT_PATH);
-        SDL_free(basePath);
     } else {
         SDL_strlcpy(fullDatPath, MASTER_DAT_PATH, sizeof(fullDatPath));
     }

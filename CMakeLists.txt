@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.22)
 project(Connect4 LANGUAGES C CXX)
 
 set(GAME_VERSION 1.0)
-set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # SDL_Mixer Config, since it applies to both android and desktop
