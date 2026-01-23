@@ -1,115 +1,121 @@
-name: Tests
+name: Build and Test
 
 on: [push, pull_request]
 
 env:
   PROJECT_NAME: Connect4
-
-defaults:
-  run:
-    shell: bash
+  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
 
 jobs:
   build:
-    name: ${{ matrix.platform.name }}
-    runs-on: ${{ matrix.platform.os }}
+    name: ${{ matrix.preset }}
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - { name: Windows VS2022, os: windows-2022 }
-          - { name: Linux GCC, os: ubuntu-latest }
-          - { name: MacOS, os: macos-latest }
-          - { name: Android, os: ubuntu-latest }
+        include:
+          - preset: windows-msvc
+            os: windows-2022
+          - preset: linux-gcc
+            os: ubuntu-latest
+          - preset: macos-clang
+            os: macos-latest
+          - preset: android
+            os: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
-      # --- LINUX DEPENDENCIES ---
+      # Export GitHub Actions cache for vcpkg
+      - name: Export GitHub Actions cache environment variables
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      # --- SYSTEM DEPENDENCIES (Required for SDL/vcpkg to build on Linux) ---
       - name: Install Linux Dependencies
-        if: runner.os == 'Linux' && matrix.platform.name != 'Android'
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-          build-essential git make pkg-config cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev \
-          libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
-          libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
-          libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
-          libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev
+            build-essential cmake ninja-build pkg-config \
+            libasound2-dev libpulse-dev libx11-dev libxext-dev \
+            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev \
+            libxss-dev libxtst-dev libxkbcommon-dev libdrm-dev \
+            libgbm-dev libgl1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev \
+            libdbus-1-dev libibus-1.0-dev libudev-dev
 
       # --- ANDROID SETUP ---
       - name: Setup Java
-        if: matrix.platform.name == 'Android'
+        if: matrix.preset == 'android'
         uses: actions/setup-java@v4
         with:
           distribution: "temurin"
-          java-version: "17" # Required for newer Android Gradle Plugins
+          java-version: "17"
 
-      # --- STANDARD CMAKE CONFIGURE (Skipped for Android) ---
-      - name: Configure
-        if: matrix.platform.name != 'Android'
-        run: cmake -B build ${{matrix.platform.flags}} -DCMAKE_BUILD_TYPE=Release
+      # --- CONFIGURE & BUILD (Desktop) ---
+      - name: Configure CMake
+        if: matrix.preset != 'android'
+        # We use the preset name directly from our matrix
+        run: cmake --preset ${{ matrix.preset }} -DCMAKE_BUILD_TYPE=Release
 
-      # --- STANDARD CMAKE BUILD (Skipped for Android) ---
       - name: Build
-        if: matrix.platform.name != 'Android'
-        run: cmake --build build --config Release
+        if: matrix.preset != 'android'
+        run: cmake --build --preset ${{ matrix.preset }} --config Release
 
-      - name: Decode Keystore
-        if: matrix.platform.name == 'Android'
-        env:
-          ANDROID_DEBUG_KEYSTORE_BASE64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
-        run: |
-          cd android/app
-          if [ -n "$ANDROID_DEBUG_KEYSTORE_BASE64" ]; then
-            echo "Decoding custom debug keystore..."
-            echo "$ANDROID_DEBUG_KEYSTORE_BASE64" | base64 --decode > debug.keystore
-          else
-            echo "Secret is empty (likely a fork). Using default Android debug keystore."
-          fi
-
-      # --- ANDROID GRADLE BUILD ---
+      # --- BUILD (Android) ---
       - name: Build Android APK
-        if: matrix.platform.name == 'Android'
+        if: matrix.preset == 'android'
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
-      # --- PREPARE ARTIFACTS (FLATTENING) ---
+      # --- ARTIFACT PREPARATION ---
       - name: Prepare Artifacts
+        shell: bash
         run: |
           mkdir -p staging
 
-          # --- WINDOWS: Specific EXE only ---
+          # --- WINDOWS: Collect EXE + DLLs ---
           if [[ "${{ runner.os }}" == "Windows" ]]; then
-             # Find project exe explicitly (ignores CompilerId executables)
-             find build -name "${PROJECT_NAME}.exe" -exec cp {} staging/ \; 
-             # Grab dat
-             find build -name "${PROJECT_NAME}.dat" -exec cp {} staging/ \; 
+            # Copy the EXE
+            find build -name "${PROJECT_NAME}.exe" -exec cp {} staging/ \;
+            # Copy all DLLs found in the build folder (vcpkg puts them there)
+            find build -name "*.dll" -exec cp {} staging/ \;
+            # Copy the asset file
+            find build -name "${PROJECT_NAME}.dat" -exec cp {} staging/ \;
           fi
 
-          # --- LINUX: Binary only (Excluding Android) ---
-          if [[ "${{ runner.os }}" == "Linux" && "${{ matrix.platform.name }}" != "Android" ]]; then
-             find build -name "${PROJECT_NAME}" -type f -exec cp {} staging/ \;
-             find build -name "${PROJECT_NAME}.dat" -exec cp {} staging/ \; 
+          # --- LINUX: Collect Binary + SO files ---
+          if [[ "${{ runner.os }}" == "Linux" && "${{ matrix.preset }}" != "android" ]]; then
+            cp build/${{ matrix.preset }}/${PROJECT_NAME} staging/
+            cp build/${{ matrix.preset }}/${PROJECT_NAME}.dat staging/
+            
+            # Manually grab vcpkg-built shared libraries
+            # These are usually in build/${preset}/vcpkg_installed/${triplet}/lib/
+            find build/${{ matrix.preset }}/vcpkg_installed -name "*.so*" -type f -exec cp {} staging/ \;
           fi
 
-          # --- MAC: App Bundle ---
-          if [[ "${{ matrix.platform.name }}" == "MacOS" ]]; then
-             find build -name "${PROJECT_NAME}.app" -type d -exec cp -r {} staging/ \;
+          # --- MAC: App Bundle (Self-contained) ---
+          if [[ "${{ matrix.preset }}" == "macos-clang" ]]; then
+            # Mac bundles (.app) usually contain their own libs if configured correctly
+            cp -r build/${{ matrix.preset }}/${PROJECT_NAME}.app staging/
           fi
 
           # --- ANDROID ---
-          if [[ "${{ matrix.platform.name }}" == "Android" ]]; then
-             find android -name "*.apk" -exec cp {} staging/ \;
+          if [[ "${{ matrix.preset }}" == "android" ]]; then
+            find android -name "*.apk" -exec cp {} staging/ \;
           fi
 
-      # --- ARTIFACT UPLOAD ---
-      - name: Upload Build Artifacts
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PROJECT_NAME }}-${{ matrix.platform.name }}
+          name: ${{ env.PROJECT_NAME }}-${{ matrix.preset }}
           path: staging/*

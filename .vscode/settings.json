@@ -1,6 +1,7 @@
 {
     "git.ignoredRepositories": [
-        "build/_deps/sdl3-src"
+        "build/_deps/sdl3-src",
+        "vcpkg"
     ],
     "java.configuration.updateBuildConfiguration": "automatic"
 }
