@@ -57,7 +57,17 @@ void Connect4_Init_Dependencies(void) {
     SDL_Log(" ");
     C4_Log("Initialized SDL with flags: SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD");
 
-    C4_VFS_Init(MASTER_DAT_PATH);
+    const char* basePath = SDL_GetBasePath();
+
+    char fullDatPath[2048];
+    if (basePath) {
+        SDL_snprintf(fullDatPath, sizeof(fullDatPath), "%s%s", basePath, MASTER_DAT_PATH);
+        SDL_free(basePath);
+    } else {
+        SDL_strlcpy(fullDatPath, MASTER_DAT_PATH, sizeof(fullDatPath));
+    }
+
+    C4_VFS_Init(fullDatPath);
     
     if (!TTF_Init()) {
         C4_FatalError(C4_ErrorCode_DependencyErrorTTF, "%s", SDL_GetError());

@@ -24,6 +24,18 @@
             "windows": {
                 "command": ".\\gradlew.bat clean assembleDebug"
             }
+        },
+        {
+            "label": "Build Windows Installer (Inno Setup)",
+            "type": "shell",
+            "windows": {
+                "command": "C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe",
+                "args": [
+                    "/DMyAppBuildDir=${command:cmake.buildDirectory}/bin/Release",
+                    "${workspaceFolder}/resources/windows-installer.iss"
+                ]
+            },
+            "group": "build"
         }
     ]
 }

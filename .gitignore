@@ -32,3 +32,7 @@ captures/
 *.hprof
 android/.vscode/
 android/app/src/main/assets/
+
+# Windows installer
+resources/Output/
+resources/*.exe

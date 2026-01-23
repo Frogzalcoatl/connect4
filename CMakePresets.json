@@ -2,13 +2,19 @@
     "version": 3,
     "cmakeMinimumRequired": {
         "major": 3,
-        "minor": 25
+        "minor": 22
     },
     "configurePresets": [
         {
             "name": "base",
             "hidden": true,
-            "binaryDir": "${sourceDir}/build/${presetName}"
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+            },
+            "environment": {
+                "VCPKG_ROOT": "${sourceDir}/vcpkg"
+            }
         },
         {
             "name": "windows-msvc",
