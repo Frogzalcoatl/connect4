@@ -15,16 +15,16 @@ jobs:
             fail-fast: false
             matrix:
                 include:
-                    - preset: windows-msvc
+                    - preset: Windows-MSVC
                       build_preset: msvc-release
                       os: windows-2022
-                    - preset: linux-gcc
+                    - preset: Linux-GCC
                       build_preset: linux-gcc-release
                       os: ubuntu-latest
-                    - preset: macos-clang
+                    - preset: MacOS-Clang
                       build_preset: macos-clang-release
                       os: macos-latest
-                    - preset: android
+                    - preset: Android
                       os: ubuntu-latest
 
         steps:

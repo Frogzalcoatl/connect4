@@ -110,7 +110,7 @@ if(ANDROID)
     
     FetchContent_Declare(SDL3_mixer
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
-        GIT_TAG main
+        GIT_TAG prerelease-3.1.2
         GIT_SHALLOW TRUE
         SYSTEM
     )
@@ -155,7 +155,7 @@ else()
     include(FetchContent)
     FetchContent_Declare(SDL3_mixer
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
-        GIT_TAG main 
+        GIT_TAG prerelease-3.1.2 
         GIT_SHALLOW TRUE
         SYSTEM
     )

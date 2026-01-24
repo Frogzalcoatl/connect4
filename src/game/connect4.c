@@ -89,7 +89,8 @@ void Connect4_Init_Dependencies(void) {
         );
     }
 
-    SDL_AddGamepadMapping(SAHARS_RETROLINK_CONTROLLER_MAPPING);
+    SDL_AddGamepadMapping(SAHARS_RETROLINK_CONTROLLER_MAPPING_WINDOWS);
+    SDL_AddGamepadMapping(SAHARS_RETROLINK_CONTROLLER_MAPPING_LINUX);
     C4_Log("Added gamepad mapping \"SAHARS_RETROLINK_CONTROLLER\"");
 
     Connect4_ConnectScancodesToInputVerbs();
@@ -122,7 +123,17 @@ static void C4_Game_RecalculateScale(C4_Game* game) {
     assert(game);
 
     const float REFERENCE_HEIGHT = 1080.0f;
-    game->UIScale = (float)game->windowHeight / REFERENCE_HEIGHT * game->userScalePreference;
+    const float REFERENCE_WIDTH = 1920.f;
+    float scaleW = (float)game->windowWidth / REFERENCE_WIDTH;
+    float scaleH = (float)game->windowHeight / REFERENCE_HEIGHT;
+
+    if (game->windowWidth < game->windowHeight) {
+        game->UIScale = scaleW;
+    } else {
+        game->UIScale = scaleH;
+    }
+
+    game->UIScale *= game->userScalePreference;
 
     if (game->UIScale < 0.1f) {
         game->UIScale = 0.1f;
