@@ -10,14 +10,15 @@ env:
 
 jobs:
     build:
-        name: ${{ matrix.preset }}
+        name: ${{ matrix.name }}
         runs-on: ${{ matrix.os }}
 
         strategy:
             fail-fast: false
             matrix:
                 include:
-                    - preset: Windows-MSVC
+                    - name: Windows-MSVC
+                      preset: windows-msvc
                       build_preset: msvc-release
                       os: windows-2022
 

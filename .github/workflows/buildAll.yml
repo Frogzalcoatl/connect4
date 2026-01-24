@@ -8,23 +8,27 @@ env:
 
 jobs:
     build:
-        name: ${{ matrix.preset }}
+        name: ${{ matrix.name }}
         runs-on: ${{ matrix.os }}
 
         strategy:
             fail-fast: false
             matrix:
                 include:
-                    - preset: Windows-MSVC
+                    - name: Windows-MSVC
+                      preset: windows-msvc
                       build_preset: msvc-release
                       os: windows-2022
-                    - preset: Linux-GCC
+                    - name: Linux-GCC
+                      preset: linux-gcc
                       build_preset: linux-gcc-release
                       os: ubuntu-latest
-                    - preset: MacOS-Clang
+                    - name: MacOS-Clang
+                      preset: macos-clang
                       build_preset: macos-clang-release
                       os: macos-latest
-                    - preset: Android
+                    - name: Android
+                      preset: android
                       os: ubuntu-latest
 
         steps:
