@@ -111,9 +111,6 @@ if(ANDROID)
     )
     FetchContent_MakeAvailable(SDL3_mixer)
 
-    # Android specific setup
-    find_package(JNI REQUIRED)
-
     set(CMAKE_C_FLAGS ${OLD_CMAKE_C_FLAGS})
     set(CMAKE_CXX_FLAGS ${OLD_CMAKE_CXX_FLAGS})
     
@@ -228,6 +225,19 @@ if(NOT MSVC AND NOT MINGW AND NOT ANDROID)
 endif()
 
 # --- LINKING ---
+if(ANDROID)
+    # On Android, jni.h is part of the system sysroot so it doesnt need to be found
+    message(STATUS "Android: Using NDK JNI headers")
+    # No action needed for the build, but for IntelliSense:
+    target_include_directories(${EXE_NAME} PRIVATE ${CMAKE_SYSROOT}/usr/include)
+else()
+    # On Desktop, finding the installed Java JDK is required
+    find_package(JNI)
+    if(JNI_FOUND)
+        target_include_directories(${EXE_NAME} PRIVATE ${JNI_INCLUDE_DIRS})
+    endif()
+endif()
+
 if(TARGET SDL3_mixer AND NOT TARGET SDL3_mixer::SDL3_mixer)
     add_library(SDL3_mixer::SDL3_mixer ALIAS SDL3_mixer)
 endif()
@@ -243,10 +253,6 @@ target_link_libraries(${EXE_NAME} PRIVATE
 if(NOT ANDROID)
     target_link_libraries(${EXE_NAME} PRIVATE discord-rpc::discord-rpc)
     target_compile_definitions(${EXE_NAME} PRIVATE USE_DISCORD)
-endif()
-
-if(JNI_FOUND)
-    target_include_directories(${EXE_NAME} PRIVATE ${JNI_INCLUDE_DIRS})
 endif()
 
 target_include_directories(${EXE_NAME} PUBLIC 
