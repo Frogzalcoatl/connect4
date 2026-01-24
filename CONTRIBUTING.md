@@ -72,7 +72,6 @@ This handles all paths and dependencies automatically.
 5.  **SDK Tools Tab:** Check the following:
     *   **Android SDK Build-Tools**
     *   **NDK (Side by side)**
-    *   **CMake**
     *   **Android SDK Command-line Tools**
 6.  Click **Apply** to download and install.
 
@@ -88,12 +87,12 @@ If you don't wanna install the full Android Studio IDE.
 
     **Windows:**
     ```cmd
-    sdkmanager.bat "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;28.2.13676358" "cmake;3.22.1"
+    sdkmanager.bat "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;28.2.13676358"
     ```
 
     **Mac/Linux:**
     ```bash
-    ./sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;28.2.13676358" "cmake;3.22.1"
+    ./sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;28.2.13676358"
     ```
 
 ### 2. Configuration (`local.properties`)
