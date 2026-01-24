@@ -258,6 +258,17 @@ set(MASTER_DAT_NAME ${CMAKE_PROJECT_NAME})
 set(MASTER_DAT_PATH "${CMAKE_BINARY_DIR}/${MASTER_DAT_NAME}.dat")
 set(LIST_FILE_PATH "${CMAKE_BINARY_DIR}/assets_list.txt")
 
+# Helper to determine warning silence flag
+if(MSVC OR (CMAKE_HOST_WIN32 AND NOT MINGW))
+    set(SILENCE_WARNING_FLAG "/W0")
+else()
+    set(SILENCE_WARNING_FLAG "-w")
+endif()
+
+# Always generate the header and asset list (needed for compilation/packing)
+set(GENERATED_HEADER_PATH "${CMAKE_BINARY_DIR}/generated/${CMAKE_PROJECT_NAME}/dat.h")
+file(WRITE "${GENERATED_HEADER_PATH}" "// Auto-generated.\n#pragma once\n\n#define MASTER_DAT_PATH \"${MASTER_DAT_NAME}.dat\"\n#define GAME_VERSION ${GAME_VERSION}")
+
 file(GLOB_RECURSE RAW_ASSETS "${CMAKE_SOURCE_DIR}/assets/*")
 set(ASSET_LIST_TEXT "")
 foreach(entry ${RAW_ASSETS})
@@ -268,14 +279,10 @@ foreach(entry ${RAW_ASSETS})
 endforeach()
 file(WRITE "${LIST_FILE_PATH}" "${ASSET_LIST_TEXT}")
 
-set(GENERATED_HEADER_PATH "${CMAKE_BINARY_DIR}/generated/${CMAKE_PROJECT_NAME}/dat.h")
-file(WRITE "${GENERATED_HEADER_PATH}" "// Auto-generated.\n#pragma once\n\n#define MASTER_DAT_PATH \"${MASTER_DAT_NAME}.dat\"\n#define GAME_VERSION ${GAME_VERSION}")
-
 if(CMAKE_CROSSCOMPILING)
-    # Android Build -> Compile Packer for Host
+    # ANDROID CASE: Compile Packer for the Host machine
     include(ExternalProject)
     set(HOST_BUILD_DIR "${CMAKE_BINARY_DIR}/host_packer_build")
-    
     set(PACKER_TOOL "${HOST_BUILD_DIR}/packer")
     if(CMAKE_HOST_WIN32)
         set(PACKER_TOOL "${HOST_BUILD_DIR}/packer.exe")
@@ -287,50 +294,52 @@ if(CMAKE_CROSSCOMPILING)
         CMAKE_ARGS 
             "-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${HOST_BUILD_DIR}"
             "-DCMAKE_BUILD_TYPE=Release"
-            "-DCMAKE_SYSTEM_NAME=${CMAKE_HOST_SYSTEM_NAME}"
+            "-DCMAKE_C_FLAGS=${SILENCE_WARNING_FLAG}"
         INSTALL_COMMAND ""
         BUILD_ALWAYS 1
     )
     set(PACKER_DEPENDS host_packer_project)
 else()
+    # DESKTOP CASE: Build Packer normally
     add_subdirectory(src/tools)
     if(TARGET packer)
-        # Force packer to its own folder so it stays out of the game's bin folder
         set_target_properties(packer PROPERTIES 
-            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tools"
+            # This trick ($<1:...>) prevents multi-config generators from appending /Debug or /Release
+            RUNTIME_OUTPUT_DIRECTORY "$<1:${CMAKE_BINARY_DIR}/tools>"
         )
         if(MSVC)
+            target_compile_options(packer PRIVATE /W0)
             target_compile_definitions(packer PRIVATE _CRT_SECURE_NO_WARNINGS)
+        else()
+            target_compile_options(packer PRIVATE -w)
         endif()
     endif()
     set(PACKER_TOOL $<TARGET_FILE:packer>)
     set(PACKER_DEPENDS packer)
 endif()
 
-add_custom_command(
-    OUTPUT "${MASTER_DAT_PATH}"
-    COMMAND ${PACKER_TOOL} "${LIST_FILE_PATH}" "${MASTER_DAT_PATH}" "${GAME_VERSION}"
-    DEPENDS ${PACKER_DEPENDS} "${LIST_FILE_PATH}"
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Packing Assets..."
-)
-
-add_custom_target(PackAssets ALL DEPENDS "${MASTER_DAT_PATH}")
-add_dependencies(${EXE_NAME} PackAssets)
+# --- ASSET EXECUTION LOGIC (Post-Build) ---
 
 if(ANDROID)
-    set(ANDROID_ASSETS_DIR "${CMAKE_SOURCE_DIR}/android/app/src/main/assets")
-    file(MAKE_DIRECTORY "${ANDROID_ASSETS_DIR}")
+    # Android: Always use the packer
     add_custom_command(TARGET ${EXE_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${MASTER_DAT_PATH}"
-        "${ANDROID_ASSETS_DIR}/${MASTER_DAT_NAME}.dat"
+        COMMAND ${PACKER_TOOL} "${LIST_FILE_PATH}" "${MASTER_DAT_PATH}" "${GAME_VERSION}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${MASTER_DAT_PATH}" "${CMAKE_SOURCE_DIR}/android/app/src/main/assets/${MASTER_DAT_NAME}.dat"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Packing assets for Android..."
     )
 else()
+    # Desktop: Logic depends on Build Preset
     add_custom_command(TARGET ${EXE_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${MASTER_DAT_PATH}"
-        "$<TARGET_FILE_DIR:${EXE_NAME}>/${MASTER_DAT_NAME}.dat"
+        # 1. RELEASE/OTHER: Run Packer
+        COMMAND $<$<NOT:$<CONFIG:Debug>>:${PACKER_TOOL}> $<$<NOT:$<CONFIG:Debug>>:${LIST_FILE_PATH}> $<$<NOT:$<CONFIG:Debug>>:${MASTER_DAT_PATH}> $<$<NOT:$<CONFIG:Debug>>:${GAME_VERSION}>
+        COMMAND $<$<NOT:$<CONFIG:Debug>>:${CMAKE_COMMAND}> -E copy_if_different $<$<NOT:$<CONFIG:Debug>>:${MASTER_DAT_PATH}> "$<TARGET_FILE_DIR:${EXE_NAME}>/${MASTER_DAT_NAME}.dat"
+        
+        # 2. DEBUG: Copy raw folder instead
+        COMMAND $<$<CONFIG:Debug>:${CMAKE_COMMAND}> -E copy_directory "${CMAKE_SOURCE_DIR}/assets" "$<TARGET_FILE_DIR:${EXE_NAME}>/assets"
+        
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Processing assets for $<CONFIG>..."
     )
 endif()
 
