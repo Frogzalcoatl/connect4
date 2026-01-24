@@ -1,0 +1,61 @@
+# Will include other oses once sdl3_mixer is available on vcpkg. sdl3_mixer just released their first prerelease on Jan 21, 2026 so it should be soon.
+
+name: Windows Build (Push/PR)
+
+on: [push, pull_request]
+
+env:
+    PROJECT_NAME: Connect4
+    VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+
+jobs:
+    build:
+        name: ${{ matrix.preset }}
+        runs-on: ${{ matrix.os }}
+
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - preset: windows-msvc
+                      os: windows-2022
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  submodules: true
+
+            # Export GitHub Actions cache for vcpkg
+            - name: Export GitHub Actions cache environment variables
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+                      core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+            # --- CONFIGURE & BUILD (Windows) ---
+            - name: Configure CMake
+              if: matrix.preset != 'android'
+              run: cmake --preset ${{ matrix.preset }} -DCMAKE_BUILD_TYPE=Release
+
+            - name: Build
+              if: matrix.preset != 'android'
+              run: cmake --build --preset ${{ matrix.preset }} --config Release
+
+            # --- ARTIFACT PREPARATION ---
+            - name: Prepare Artifacts
+              shell: bash
+              run: |
+                  mkdir -p staging
+
+                  # --- WINDOWS: Collect EXE + DLLs ---
+                    find build -name "${PROJECT_NAME}.exe" -exec cp {} staging/ \;
+                    find build -name "*.dll" -exec cp {} staging/ \;
+                    find build -name "${PROJECT_NAME}.dat" -exec cp {} staging/ \;
+
+            - name: Upload Artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ${{ env.PROJECT_NAME }}-${{ matrix.preset }}
+                  path: staging/*
