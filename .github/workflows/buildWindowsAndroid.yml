@@ -1,6 +1,6 @@
 # Will include other oses once sdl3_mixer is available on vcpkg. sdl3_mixer just released their first prerelease on Jan 21, 2026 so it should be soon.
 
-name: Windows Build (Push/PR)
+name: Windows & Android Build (Push/PR)
 
 on: [push, pull_request]
 
@@ -21,6 +21,9 @@ jobs:
                       preset: windows-msvc
                       build_preset: msvc-release
                       os: windows-2022
+                    - name: Android
+                      preset: android
+                      os: ubuntu-latest
 
         steps:
             - name: Checkout
@@ -36,6 +39,14 @@ jobs:
                       core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
                       core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
+            # --- ANDROID SETUP ---
+            - name: Setup Java
+              if: matrix.preset == 'android'
+              uses: actions/setup-java@v4
+              with:
+                  distribution: "temurin"
+                  java-version: "17"
+
             # --- CONFIGURE & BUILD (Windows) ---
             - name: Configure CMake
               if: matrix.preset != 'android'
@@ -45,6 +56,14 @@ jobs:
               if: matrix.preset != 'android'
               run: cmake --build --preset msvc-release
 
+            # --- BUILD (Android) ---
+            - name: Build Android APK
+              if: matrix.preset == 'android'
+              run: |
+                  cd android
+                  chmod +x gradlew
+                  ./gradlew assembleDebug --no-daemon
+
             # --- ARTIFACT PREPARATION ---
             - name: Prepare Artifacts
               shell: bash
@@ -52,9 +71,16 @@ jobs:
                   mkdir -p staging
 
                   # --- WINDOWS: Collect EXE + DLLs ---
+                  if [[ "${{ runner.os }}" == "Windows" ]]; then
                     find build -name "${PROJECT_NAME}.exe" -exec cp {} staging/ \;
                     find build -name "*.dll" -exec cp {} staging/ \;
                     find build -name "${PROJECT_NAME}.dat" -exec cp {} staging/ \;
+                  fi
+
+                  # --- ANDROID: Collect APK ---
+                  if [[ "${{ matrix.preset }}" == "android" ]]; then
+                    find android -name "*.apk" -exec cp {} staging/ \;
+                  fi
 
             - name: Upload Artifacts
               uses: actions/upload-artifact@v4
