@@ -1,16 +1,29 @@
 # Contributing to Connect4
 
-I highly doubt im gonna have anyone contributing to this project. This is more so for me bc my dumb ah is gonna forget the dependencies i need to build the project if im ever not on my main pc.
+This guide is for anyone (mostly just future me) who needs to build the project from source. The project now uses vcpkg for desktop dependencies and FetchContent for Android.
 
 ## Global Dependencies
 1. **Git**
 2. **CMake** (Version 3.22+) [Download](https://cmake.org/download/)
+3. **Ninja** (Recommended for faster builds, required by some cmake presets)
+
+
+## vcpkg setup (Submodule)
+This project uses **vcpkg** for desktop dependencies. It is included as a git submodule in the root directory.
+1. **Initialize the submodule:**
+```bash
+git submodule update --init --recursive
+```
+2. **Bootstrap vcpkg** (This creates the actual vcpkg executable)
+    * **Windows:** `.\vcpkg\bootstrap-vcpkg.bat`
+    * **Mac/Linux:** `./vcpkg/bootstrap-vcpkg.sh`
 
 ## Platform Specific Dependencies
 
 **Windows**
 * Download [Build Tools for Visual Studio](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2026)
     * Select and install the **"Desktop development with C++"** workload.
+* If you want to build the windows installer, download [inno setup](https://jrsoftware.org/isdl.php) and run the provided vscode task.
 
 **MacOS**
 * Install Xcode Command Line Tools:
@@ -32,18 +45,17 @@ libgbm-dev libgl1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev \
 libdbus-1-dev libibus-1.0-dev libudev-dev
 ```
 
-## Build Instructions
-1. **Configure:** (Generate build files in the `/build` folder)
+## Desktop Build Instructions
+1. **Configure:** Pick a preset (e.g., windows-msvc, linux-gcc, macos-clang see more in CMakePresets.json)
 ```bash
-cmake -B build
+cmake --preset windows-msvc
 ```
-2. **Compile:**
+2. **Build:**
 ```bash
-cmake --build build --config Release
+cmake --build --preset msvc-release
 ```
 3. **Run:**
-    * Windows `.\build\bin\Release\Connect4.exe`
-    * Mac/Linux `./build/bin/Connect4`
+    * Find the executable and the .dat file in the build/<preset>/bin/ folder.
 
 ## Android Development (Optional)
 This is only needed if you wanna build apks locally or test edits to java files in the `android/` folder
@@ -89,12 +101,14 @@ Create a file named `local.properties` inside the project's `android/` folder. I
 
 **Windows Example:**
 ```local.properties
-sdk.dir=C\:\\Users\\YourName\\AppData\\Local\\Android\\Sdk
+sdk.dir=C/:/Users/YourName/AppData/Local/Android/Sdk
+cmake.dir=C:/Program Files/CMake
 ```
 
 **Mac/Linux Example:**
 ```local.properties
 sdk.dir=/Users/YourName/Library/Android/sdk
+cmake.dir=/Users/YourName/Library/Android/sdk/cmake
 ```
 
 ### 3. **Build**
@@ -104,7 +118,7 @@ cd android
 # Windows
 .\gradlew.bat assembleDebug
 # Mac/Linux
-./gradlew.bat assembleDebug
+./gradlew assembleDebug
 ```
 * These commands are also available in `.vscode/tasks.json` if youre using vscode
 
