@@ -48,6 +48,17 @@ if(ANDROID)
     # ANDROID: Build dependencies from source
     message(STATUS "Android build detected: Fetching dependencies from source...")
     
+    set(OLD_CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
+    set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+
+    if(MSVC)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W0")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W0")
+    else()
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+    endif()
+    
     include(FetchContent)
 
     FetchContent_Declare(SDL3
@@ -111,6 +122,9 @@ if(ANDROID)
 
     # Android specific setup
     find_package(JNI REQUIRED)
+
+    set(CMAKE_C_FLAGS ${OLD_CMAKE_C_FLAGS})
+    set(CMAKE_CXX_FLAGS ${OLD_CMAKE_CXX_FLAGS})
     
 else()
     # DESKTOP: Use vcpkg for most, Manual Fetch for Mixer

@@ -22,10 +22,7 @@
             },
             "group": "build",
             "windows": {
-                "command": ".\\gradlew.bat clean assembleDebug",
-                "args": [
-                    "--info"
-                ]
+                "command": ".\\gradlew.bat clean assembleDebug"
             }
         },
         {
