@@ -16,10 +16,24 @@ char* myStrdup(const char* src) {
     return dest;
 }
 
+typedef struct {
+    C4_PackEntry entry;
+    char* path;
+} PackerTask;
+
+int comparePackerTasks(const void* a, const void* b) {
+    const PackerTask* taskA = (const PackerTask*)a;
+    const PackerTask* taskB = (const PackerTask*)b;
+    if (taskA->entry.id < taskB->entry.id) return -1;
+    if (taskA->entry.id > taskB->entry.id) return 1;
+    return 0;
+}
+
 int main(int argc, char* argv[]) {
     // Usage ex: ./packer assets_list.txt game.dat 1.0
     if (argc < 4) {
         printf("Usage: packer <list_file> <output_file> <header_version>\n");
+        return 1;
     }
 
     float versionArg;
@@ -73,73 +87,51 @@ int main(int argc, char* argv[]) {
     header.version = versionArg;
     header.fileCount = (uint32_t)fileCount;
 
-    C4_PackEntry* entries = calloc(fileCount, sizeof(C4_PackEntry));
-    if (!entries && fileCount > 0) {
-        printf("Error: Out of memory for entries.\n");
-        return 1;
+    PackerTask* tasks = calloc(fileCount, sizeof(PackerTask));
+    for (int i = 0; i < fileCount; i++) {
+        tasks[i].path = filePaths[i];
+        tasks[i].entry.id = stringHash(filePaths[i]);
     }
 
+    // Sort by ID first
+    qsort(tasks, fileCount, sizeof(PackerTask), comparePackerTasks);
+
+    // Calculate offsets now that they are in order
     uint64_t currentOffset = sizeof(C4_PackHeader) + (fileCount * sizeof(C4_PackEntry));
-
     for (int i = 0; i < fileCount; i++) {
-        const char* path = filePaths[i];
-
-        // "rb" stands for read binary
-        FILE* asset = fopen(path, "rb");
-        if (!asset) {
-            printf("Error: Could not find asset: %s\n", path);
-            free(entries);
-            for (int k = 0; k < fileCount; k++) {
-                free(filePaths[k]);
-            }
-            free(filePaths);
-            return 1;
-        }
-
+        FILE* asset = fopen(tasks[i].path, "rb");
         fseek(asset, 0, SEEK_END);
-        uint64_t size = ftell(asset);
+        tasks[i].entry.size = ftell(asset);
+        tasks[i].entry.offset = currentOffset;
+        currentOffset += tasks[i].entry.size;
         fclose(asset);
-
-        entries[i].id = stringHash(path);
-        entries[i].size = size;
-        entries[i].offset = currentOffset;
-
-        printf("Packing %s (ID: %zu, Size %zu)\n", path, entries[i].id, size);
-        currentOffset += size;
     }
 
-    // Write output
+    // Write everything
     FILE* outFile = fopen(argv[2], "wb");
-    if (!outFile) {
-        printf("Error: Could not create output file %s\n", argv[2]);
-        return 1;
+    fwrite(&header, sizeof(C4_PackHeader), 1, outFile);
+    
+    // Write the sorted entries (the table of contents)
+    for (int i = 0; i < fileCount; i++) {
+        fwrite(&tasks[i].entry, sizeof(C4_PackEntry), 1, outFile);
     }
 
-    // Just writing the position of all the entires. Sort of liek a table of contents
-    fwrite(&header, sizeof(C4_PackHeader), 1, outFile);
-    fwrite(entries, sizeof(C4_PackEntry), fileCount, outFile);
-    
-    // Write blobs
+    // Write the actual file data
     for (int i = 0; i < fileCount; i++) {
-        FILE* asset = fopen(filePaths[i], "rb");
-
-        // Optimization: read/write in chunks instead of allocating massive buffers
-        uint8_t copyBuffer[4096* 64];
-        size_t bytesLeft = (size_t)entries[i].size;
-
+        FILE* asset = fopen(tasks[i].path, "rb");
+        uint8_t copyBuffer[4096 * 64];
+        size_t bytesLeft = (size_t)tasks[i].entry.size;
         while (bytesLeft > 0) {
             size_t toRead = (bytesLeft < sizeof(copyBuffer)) ? bytesLeft : sizeof(copyBuffer);
             fread(copyBuffer, 1, toRead, asset);
             fwrite(copyBuffer, 1, toRead, outFile);
             bytesLeft -= toRead;
         }
-
         fclose(asset);
     }
-
     fclose(outFile);
+    free(tasks);
 
-    free(entries);
     for (int i = 0; i < fileCount; i++) {
         free(filePaths[i]);
     }

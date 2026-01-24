@@ -11,7 +11,16 @@
 #include <assert.h>
 
 // Using a .dat file makes it significantly easier to read files on android
-// Dont have to go through jni nightmare again
+// Dont have to go through jni gyattness again
+
+static int C4_VFS_CompareEntries(const void* key, const void* element) {
+    uint64_t searchId = *(const uint64_t*)key;
+    const C4_PackEntry* entry = (const C4_PackEntry*)element;
+
+    if (searchId < entry->id) return -1;
+    if (searchId > entry->id) return 1;
+    return 0;
+}
 
 typedef struct C4_VFS_State {
     SDL_IOStream* packFile;
@@ -173,22 +182,13 @@ void* C4_VFS_ReadFile(const char* filename, size_t* outSize) {
         return NULL;
     }
 
-    uint64_t id = stringHash(filename);
-    C4_PackEntry* entry = NULL;
-
     if (!vfs.entries) {
         C4_Warn(SDL_LOG_CATEGORY_APPLICATION, "Unable to access .dat file entries. Attempting to reinitialize dat file");
-        if (!vfs.entries) {
-            return NULL;
-        }
+        return NULL;
     }
-    
-    for (int i = 0; i < vfs.fileCount; i++) {
-        if (vfs.entries[i].id == id) {
-            entry = &vfs.entries[i];
-            break;
-        }
-    }
+
+    uint64_t id = stringHash(filename);
+    C4_PackEntry* entry = bsearch(&id, vfs.entries, vfs.fileCount, sizeof(C4_PackEntry), C4_VFS_CompareEntries);
 
     if (!entry) {
         C4_Warn(SDL_LOG_CATEGORY_APPLICATION, "Unable to read file in %s:\n%s", MASTER_DAT_PATH, filename);
