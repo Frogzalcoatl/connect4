@@ -14,6 +14,21 @@
             }
         },
         {
+            "label": "Android: Clean and Rebuild APK (Debug) (Extra Info)",
+            "type": "shell",
+            "command": "./gradlew clean assembleDebug",
+            "options": {
+                "cwd": "${workspaceFolder}/android"
+            },
+            "group": "build",
+            "windows": {
+                "command": ".\\gradlew.bat clean assembleDebug",
+                "args": [
+                    "--info"
+                ]
+            }
+        },
+        {
             "label": "Android: Clean and Rebuild APK (Debug)",
             "type": "shell",
             "command": "./gradlew clean assembleDebug",
@@ -22,7 +37,7 @@
             },
             "group": "build",
             "windows": {
-                "command": ".\\gradlew.bat clean assembleDebug"
+                "command": ".\\gradlew.bat clean assembleDebug",
             }
         },
         {

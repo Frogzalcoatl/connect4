@@ -3,12 +3,7 @@
 # Fix Cmake 4.x strictness
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 
-# Silnce Python warnings in Harfbuzz
-if(POLICY CMP0148)
-  cmake_policy(SET CMP0148 OLD)
-endif()
-
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.22)
 project(Connect4 LANGUAGES C CXX)
 
 set(GAME_VERSION 1.0)
@@ -65,7 +60,6 @@ if(ANDROID)
         GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
         GIT_TAG release-3.4.0
         GIT_SHALLOW OFF
-        SYSTEM
     )
     FetchContent_MakeAvailable(SDL3)
 
@@ -99,7 +93,6 @@ if(ANDROID)
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
         GIT_TAG release-3.2.0
         GIT_SHALLOW OFF
-        SYSTEM
     )
     FetchContent_MakeAvailable(SDL3_image)
 
@@ -108,7 +101,6 @@ if(ANDROID)
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
         GIT_TAG release-3.2.0
         GIT_SHALLOW OFF
-        SYSTEM
     )
     FetchContent_MakeAvailable(SDL3_ttf)
     
@@ -116,7 +108,6 @@ if(ANDROID)
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
         GIT_TAG prerelease-3.1.2
         GIT_SHALLOW OFF
-        SYSTEM
     )
     FetchContent_MakeAvailable(SDL3_mixer)
 
@@ -164,7 +155,6 @@ else()
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
         GIT_TAG prerelease-3.1.2 
         GIT_SHALLOW OFF
-        SYSTEM
     )
     FetchContent_MakeAvailable(SDL3_mixer)
 endif()
