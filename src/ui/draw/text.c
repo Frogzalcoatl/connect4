@@ -42,7 +42,7 @@ void C4_UI_DrawText(SDL_FRect rect, C4_UI_Data_Text* text, C4_UI_StyleState* sty
 
     SDL_SetRenderScale(renderer, scaleX * flipX, scaleY * flipY);
 
-    TTF_DrawRendererText(text->textObject, roundf(drawX), roundf(drawY));
+    TTF_DrawRendererText(text->textObject, SDL_roundf(drawX), SDL_roundf(drawY));
 
     SDL_SetRenderScale(renderer, oldScaleX, oldScaleY);
 }

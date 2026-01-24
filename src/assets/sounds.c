@@ -276,7 +276,7 @@ float C4_GetBPMBounce(C4_SoundSystem* soundSystem, float bpm) {
 
     double position = C4_GetMusicPosition(soundSystem);
     
-    double frequency = (bpm / 60.0) * M_PI * 2.0;
+    double frequency = (bpm / 60.0) * SDL_PI_D * 2.0;
     
     return (float)SDL_fabs(SDL_sin(position * frequency / 2.0)); 
 }

@@ -259,7 +259,7 @@ set(MASTER_DAT_PATH "${CMAKE_BINARY_DIR}/${MASTER_DAT_NAME}.dat")
 set(LIST_FILE_PATH "${CMAKE_BINARY_DIR}/assets_list.txt")
 
 # Helper to determine warning silence flag
-if(MSVC OR (CMAKE_HOST_WIN32 AND NOT MINGW))
+if(MSVC)
     set(SILENCE_WARNING_FLAG "/W0")
 else()
     set(SILENCE_WARNING_FLAG "-w")
@@ -322,6 +322,7 @@ endif()
 
 if(ANDROID)
     # Android: Always use the packer
+    add_dependencies(${EXE_NAME} host_packer_project)
     add_custom_command(TARGET ${EXE_NAME} POST_BUILD
         COMMAND ${PACKER_TOOL} "${LIST_FILE_PATH}" "${MASTER_DAT_PATH}" "${GAME_VERSION}"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${MASTER_DAT_PATH}" "${CMAKE_SOURCE_DIR}/android/app/src/main/assets/${MASTER_DAT_NAME}.dat"
