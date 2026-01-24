@@ -66,11 +66,6 @@ jobs:
                   distribution: "temurin"
                   java-version: "17"
 
-            - name: Setup CMake
-              uses: jwlawson/actions-setup-cmake@v2
-              with:
-                  cmake-version: "3.31.x"
-
             # --- CONFIGURE & BUILD (Desktop) ---
             - name: Configure CMake
               if: matrix.preset != 'android'
