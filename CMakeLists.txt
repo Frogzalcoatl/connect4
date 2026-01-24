@@ -1,21 +1,27 @@
 # Needed ai for this ngl
 
-cmake_minimum_required(VERSION 3.22)
+# Fix Cmake 4.x strictness
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
+# Silnce Python warnings in Harfbuzz
+if(POLICY CMP0148)
+  cmake_policy(SET CMP0148 OLD)
+endif()
+
+cmake_minimum_required(VERSION 3.31)
 project(Connect4 LANGUAGES C CXX)
 
 set(GAME_VERSION 1.0)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-# SDL_Mixer Config, since it applies to both android and desktop
+# SDL_Mixer Config
 # Build Type
 set(SDLMIXER_SHARED OFF CACHE BOOL "Force static" FORCE)
 set(SDLMIXER_STATIC ON  CACHE BOOL "Force static" FORCE)
 set(SDLMIXER_VENDORED ON CACHE BOOL "Use vendored deps" FORCE)
-
 # Enabled Formats
 set(SDLMIXER_OGG ON CACHE BOOL "Enable OGG" FORCE)
-
 # Disabled Formats (Keep lightweight)
 set(SDLMIXER_FLAC OFF CACHE BOOL "Disable FLAC" FORCE)
 set(SDLMIXER_MIDI OFF CACHE BOOL "Disable MIDI" FORCE)
@@ -25,7 +31,6 @@ set(SDLMIXER_OPUS OFF CACHE BOOL "Disable OPUS" FORCE)
 set(SDLMIXER_GME  OFF CACHE BOOL "Disable Game Music Emu" FORCE)
 set(SDLMIXER_XMP  OFF CACHE BOOL "Disable XMP" FORCE)
 set(SDLMIXER_WAVPACK OFF CACHE BOOL "Disable WavPack" FORCE)
-
 # Advanced Optimizations (Optional, good for Android)
 option(USE_ASSEMBLY_OPTIMIZATIONS "Enable YASM assembly optimizations" OFF)
 if(USE_ASSEMBLY_OPTIMIZATIONS)
@@ -35,10 +40,8 @@ else()
     set(SDLMIXER_MP3_MPG123 OFF CACHE BOOL "Disable mpg123" FORCE)
     set(SDLMIXER_MP3_MINIMP3 ON  CACHE BOOL "Enable minimp3" FORCE)
 endif()
-
 # Explicitly disable libflac to avoid searching for YASM/NASM
 set(SDLMIXER_FLAC_LIBFLAC OFF CACHE BOOL "Disable libflac" FORCE)
-
 
 # --- DEPENDENCY STRATEGY ---
 if(ANDROID)
@@ -50,14 +53,10 @@ if(ANDROID)
     FetchContent_Declare(SDL3
         GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
         GIT_TAG release-3.4.0
-        GIT_SHALLOW TRUE
+        GIT_SHALLOW OFF
         SYSTEM
     )
     FetchContent_MakeAvailable(SDL3)
-    # Create alias so linking logic matches vcpkg names
-    if(NOT TARGET SDL3::SDL3)
-        add_library(SDL3::SDL3 ALIAS SDL3)
-    endif()
 
     # DISABLE complex formats that require external tools (like NASM)
     set(SDLIMAGE_AVIF OFF CACHE BOOL "Disable AVIF to avoid NASM dependency" FORCE)
@@ -88,30 +87,24 @@ if(ANDROID)
     FetchContent_Declare(SDL3_image
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
         GIT_TAG release-3.2.0
-        GIT_SHALLOW TRUE
+        GIT_SHALLOW OFF
         SYSTEM
     )
     FetchContent_MakeAvailable(SDL3_image)
-    if(NOT TARGET SDL3_image::SDL3_image)
-        add_library(SDL3_image::SDL3_image ALIAS SDL3_image)
-    endif()
 
     set(SDLTTF_VENDORED ON CACHE BOOL "" FORCE)
     FetchContent_Declare(SDL3_ttf
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
         GIT_TAG release-3.2.0
-        GIT_SHALLOW TRUE
+        GIT_SHALLOW OFF
         SYSTEM
     )
     FetchContent_MakeAvailable(SDL3_ttf)
-    if(NOT TARGET SDL3_ttf::SDL3_ttf)
-        add_library(SDL3_ttf::SDL3_ttf ALIAS SDL3_ttf)
-    endif()
     
     FetchContent_Declare(SDL3_mixer
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
         GIT_TAG prerelease-3.1.2
-        GIT_SHALLOW TRUE
+        GIT_SHALLOW OFF
         SYSTEM
     )
     FetchContent_MakeAvailable(SDL3_mixer)
@@ -156,7 +149,7 @@ else()
     FetchContent_Declare(SDL3_mixer
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
         GIT_TAG prerelease-3.1.2 
-        GIT_SHALLOW TRUE
+        GIT_SHALLOW OFF
         SYSTEM
     )
     FetchContent_MakeAvailable(SDL3_mixer)
@@ -220,7 +213,7 @@ endif()
 if(APPLE)
     set_target_properties(${EXE_NAME} PROPERTIES
         MACOSX_BUNDLE_ICON_FILE "icon.icns"
-        MACOSX_BUNDLE_GUI_IDENTIFIER "com.yourname.${EXE_NAME}"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.frogzalcoatl.${EXE_NAME}"
     )
 endif()
 
@@ -365,13 +358,13 @@ elseif(UNIX AND NOT APPLE)
     set(CPACK_GENERATOR "DEB;RPM;TGZ")
 
     # DEB Specifics (Ubuntu/Debian)
-    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Your Name <email@example.com>")
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Frogzalcoatl <frogzalcoatl@gmail.com>")
     set(CPACK_DEBIAN_PACKAGE_SECTION "games")
     # Tell Linux it needs SDL3 installed to run
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "libsdl3, libsdl3-image, libsdl3-mixer") 
 
     # RPM Specifics (Fedora)
-    set(CPACK_RPM_PACKAGE_LICENSE "MIT") # Or your license
+    set(CPACK_RPM_PACKAGE_LICENSE "MIT")
     set(CPACK_RPM_PACKAGE_GROUP "Amusements/Games")
     set(CPACK_RPM_PACKAGE_REQUIRES "sdl3, sdl3_image, sdl3_mixer")
 elseif(WIN32)
