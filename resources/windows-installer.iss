@@ -7,6 +7,7 @@
 #define MyAppPublisher "Frogzalcoatl"
 #define MyAppURL "https://github.com/Frogzalcoatl/connect4"
 #define MyAppExeName "Connect4.exe"
+#define MyAppMutex "Global\1efdd983-4a0e-42d4-9183-f748b0f799f0"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -31,12 +32,14 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 DisableProgramGroupPage=yes
 LicenseFile={#SourcePath}\..\LICENSE
-; Uncomment the following line to run in non administrative install mode (install for current user only).
-;PrivilegesRequired=lowest
+PrivilegesRequired=lowest
 OutputBaseFilename=Connect4-v1.0-win64
 SetupIconFile={#SourcePath}\icon.ico
 SolidCompression=yes
 WizardStyle=classic dark
+AppMutex={#MyAppMutex}
+CloseApplications=yes
+CloseApplicationsFilter=*.exe,*.dll
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -55,9 +58,46 @@ Source: "{#MyAppBuildDir}\*.dat"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; AppUserModelID: "{#MyAppPublisher}.{#MyAppName}"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; AppUserModelID: "{#MyAppPublisher}.{#MyAppName}"
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
+[UninstallDelete]
+Type: filesandordirs; Name: "{app}"
+; Targets Taskbar pins
+Type: files; Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\{#MyAppName}.lnk"
+; Targets Start Menu pins (older Win 10/11 styles)
+Type: files; Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\User Pinned\StartMenu\{#MyAppName}.lnk"
+
+[Code]
+procedure SHChangeNotify(EventId: LongInt; Flags: Uint; Item1, Item2: Integer);
+  external 'SHChangeNotify@shell32.dll stdcall';
+
+const
+  SHCNE_ASSOCCHANGED = $08000000;
+  SHCNF_IDLIST = $0000;
+
+procedure CurUninstallStepChanged(UninstallStep: TUninstallStep);
+begin
+  if UninstallStep = usPostUninstall then
+  begin
+    // This forces Windows to refresh the icons and pins
+    SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, 0, 0);
+  end;
+end;
+
+function InitializeUninstall(): Boolean;
+begin
+  while CheckForMutexes('{#MyAppMutex}') do
+  begin
+    if MsgBox('The game is still running. Please close {#MyAppName} before uninstalling.', 
+      mbError, MB_RETRYCANCEL) = idCancel then
+    begin
+      Result := False;
+      Exit;
+    end;
+  end;
+  Result := True;
+end;
