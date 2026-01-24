@@ -1,6 +1,5 @@
 #include "Connect4/physics/intersection.h"
 #include "Connect4/ui/draw/utils.h"
-#include <math.h>
 #include <assert.h>
 
 bool C4_IsPointInsideRectangle(SDL_FPoint point, SDL_FRect rectangleBounds, float rotationDegrees, C4_UI_Mirror mirror) {
@@ -19,8 +18,8 @@ bool C4_IsPointInsideRectangle(SDL_FPoint point, SDL_FRect rectangleBounds, floa
     // Rotate the point backwards to be able to just check basic rectangle collision
     float effectiveRotation = C4_UI_GetMirroredRotation(rotationDegrees, mirror);
     float angleRadians = -effectiveRotation * ((float)M_PI / 180.f);
-    float localX = relativeX * cosf(angleRadians) - relativeY * sinf(angleRadians);
-    float localY = relativeX * sinf(angleRadians) + relativeY * cosf(angleRadians);
+    float localX = relativeX * SDL_cosf(angleRadians) - relativeY * SDL_sinf(angleRadians);
+    float localY = relativeX * SDL_sinf(angleRadians) + relativeY * SDL_cosf(angleRadians);
 
     /*
     If you ever add something that can make rectangles non symmetrical
@@ -56,8 +55,8 @@ bool C4_IsPointInsideTriangle(SDL_FPoint point, SDL_FRect triangleBounds, float 
 
     float effectiveRotation = C4_UI_GetMirroredRotation(rotationDegrees, mirror);
     float angleRadians = -effectiveRotation * ((float)M_PI / 180.f);
-    float localX = relativeX * cosf(angleRadians) - relativeY * sinf(angleRadians);
-    float localY = relativeX * sinf(angleRadians) + relativeY * cosf(angleRadians);
+    float localX = relativeX * SDL_cosf(angleRadians) - relativeY * SDL_sinf(angleRadians);
+    float localY = relativeX * SDL_sinf(angleRadians) + relativeY * SDL_cosf(angleRadians);
 
     if (mirror == C4_UI_Mirror_X || mirror == C4_UI_Mirror_XY) {
         localX = -localX;
@@ -95,8 +94,8 @@ bool C4_IsPointInsideEllipse(SDL_FPoint point, SDL_FRect circleBounds, float rot
 
     float effectiveRotation = C4_UI_GetMirroredRotation(rotationDegrees, mirror);
     float angleRadians = -effectiveRotation * ((float)M_PI / 180.f);
-    float localX = relativeX * cosf(angleRadians) - relativeY * sinf(angleRadians);
-    float localY = relativeX * sinf(angleRadians) + relativeY * cosf(angleRadians);
+    float localX = relativeX * SDL_cosf(angleRadians) - relativeY * SDL_sinf(angleRadians);
+    float localY = relativeX * SDL_sinf(angleRadians) + relativeY * SDL_cosf(angleRadians);
 
     /*
     Same here as rectangle

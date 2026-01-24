@@ -6,30 +6,6 @@
 #include <stdbool.h>
 #include <assert.h>
 
-int C4_Max(int a, int b) {
-    return a > b ? a : b;
-}
-
-int C4_Min(int a, int b) {
-    return a < b ? a : b;
-}
-
-float C4_FMax(float a, float b) {
-    return a > b ? a : b;
-}
-
-float C4_FMin(float a, float b) {
-    return a < b ? a : b;
-}
-
-size_t C4_ULLMax(size_t a, size_t b) {
-    return a > b ? a : b;
-}
-
-size_t C4_ULLMin(size_t a, size_t b) {
-    return a < b ? a : b;
-}
-
 // Vibe debugged ah function. Mine was extremely broken
 // Remember to free values returned by this func
 char* C4_JoinStrings(const char* strings[], size_t count, const char* separator) {

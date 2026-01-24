@@ -1,5 +1,4 @@
 #include "Connect4/ui/draw/text.h"
-#include <math.h>
 #include <assert.h>
 
 void C4_UI_DrawText(SDL_FRect rect, C4_UI_Data_Text* text, C4_UI_StyleState* styleState, C4_UI_Mirror mirror, SDL_Renderer* renderer, float UIScale) {

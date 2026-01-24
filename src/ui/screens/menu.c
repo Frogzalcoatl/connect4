@@ -32,7 +32,7 @@ static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutT
 
     SDL_FPoint refWindowDim = C4_GetReferenceWindowDimensions(game->windowWidth, game->windowHeight, game->UIScale);
 
-    C4_UI_Buttons_SetChildrenButtonSizes(data->buttons, C4_FMin(refWindowDim.x - 60, 800.f), 100.f);
+    C4_UI_Buttons_SetChildrenButtonSizes(data->buttons, SDL_min(refWindowDim.x - 60, 800.f), 100.f);
     C4_UI_CenterInWindow(data->buttons, C4_UI_Axis_XY, (unsigned int)refWindowDim.x, (unsigned int)refWindowDim.y);
     C4_UI_Node_AlignChildren(data->buttons, C4_UI_Axis_X);
 

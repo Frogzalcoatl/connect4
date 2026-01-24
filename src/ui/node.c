@@ -438,11 +438,11 @@ void C4_UI_Node_ApplyChildSpacing(C4_UI_Node* parent) {
             current->rect.x = parent->rect.w - parent->padding;
             current->rect.y = parent->padding;
             parent->rect.w += current->rect.w + parent->spacing;
-            parent->rect.h = C4_FMax(parent->rect.h, current->rect.h + parent->padding * 2.f);
+            parent->rect.h = SDL_max(parent->rect.h, current->rect.h + parent->padding * 2.f);
         } else {
             current->rect.x = parent->padding;
             current->rect.y = parent->rect.h - parent->padding;
-            parent->rect.w = C4_FMax(parent->rect.w, current->rect.w + parent->padding * 2.f);
+            parent->rect.w = SDL_max(parent->rect.w, current->rect.w + parent->padding * 2.f);
             parent->rect.h += current->rect.h + parent->spacing;
         }
         current = current->nextSibling;

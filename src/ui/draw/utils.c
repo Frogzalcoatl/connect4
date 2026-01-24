@@ -1,5 +1,4 @@
 #include "Connect4/ui/draw/utils.h"
-#include <math.h>
 #include <assert.h>
 
 SDL_FPoint C4_UI_RotatePoint(SDL_FPoint point, SDL_FPoint center, float degrees) {
@@ -7,8 +6,8 @@ SDL_FPoint C4_UI_RotatePoint(SDL_FPoint point, SDL_FPoint center, float degrees)
         return point;
     }
     float radians = degrees * ((float)M_PI / 180.f);
-    float sineVal = sinf(radians);
-    float cosineVal = cosf(radians);
+    float sineVal = SDL_sinf(radians);
+    float cosineVal = SDL_cosf(radians);
     float localX = point.x - center.x;
     float localY = point.y - center.y;
     float rotatedX = (localX * cosineVal) - (localY * sineVal);

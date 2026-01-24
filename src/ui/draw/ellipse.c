@@ -50,8 +50,8 @@ void C4_UI_DrawEllipse(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState
     for (int i = 0; i < segments; i++) {
         const float angle = (float)i / (float)segments * 2.0f * (float)M_PI;
         
-        float vertexX = centerX + radiusX * cosf(angle);
-        float vertexY = centerY + radiusY * sinf(angle);
+        float vertexX = centerX + radiusX * SDL_cosf(angle);
+        float vertexY = centerY + radiusY * SDL_sinf(angle);
 
         vertexCache[i + 1] = (SDL_Vertex){
             .position = {vertexX, vertexY},
@@ -117,8 +117,8 @@ void C4_UI_DrawEllipseBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_Sty
     for (int i = 0; i <= segments; i++) {
         float angle = (float)(i % segments) / (float)segments * 2.0f * (float)M_PI;
         
-        float angleCos = cosf(angle);
-        float angleSin = sinf(angle);
+        float angleCos = SDL_cosf(angle);
+        float angleSin = SDL_sinf(angle);
 
         float pointX = centerX + radiusX * angleCos;
         float pointY = centerY + radiusY * angleSin;

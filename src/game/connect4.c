@@ -182,8 +182,8 @@ static void C4_Game_WindowSetup(C4_Game* game) {
 
     const SDL_DisplayMode* mode = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
     // In case the user's monitor size is smaller than 800x600 for whatever reason
-    int initialWindowWidth = C4_Min(mode->w, 800);
-    int initialWindowHeight = C4_Min(mode->h, 600);
+    int initialWindowWidth = SDL_min(mode->w, 800);
+    int initialWindowHeight = SDL_min(mode->h, 600);
 
     game->window = SDL_CreateWindow("Connect4", initialWindowWidth, initialWindowHeight, windowFlags);
     if (!game->window) {

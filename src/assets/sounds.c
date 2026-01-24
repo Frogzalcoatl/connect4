@@ -1,6 +1,5 @@
 #include "Connect4/assets/sounds.h"
 #include "Connect4/tools/virtualFileSystem.h"
-#include <math.h>
 #include "Connect4/game/consoleOutput.h"
 #include <assert.h>
 
@@ -279,5 +278,5 @@ float C4_GetBPMBounce(C4_SoundSystem* soundSystem, float bpm) {
     
     double frequency = (bpm / 60.0) * M_PI * 2.0;
     
-    return (float)fabs(sin(position * frequency / 2.0)); 
+    return (float)SDL_fabs(SDL_sin(position * frequency / 2.0)); 
 }

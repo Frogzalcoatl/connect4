@@ -20,7 +20,7 @@ void C4_Board_SetSize(C4_Board* board, uint8_t width, uint8_t height) {
         );
     }
 
-    size_t newBufferSize = (size_t)C4_Max((int)width, (int)height);
+    size_t newBufferSize = (size_t)SDL_max((int)width, (int)height);
     C4_SlotState* newCellCheckBuffer = SDL_calloc(newBufferSize, sizeof(C4_SlotState));
     if (!newCellCheckBuffer) {
         C4_FatalError(
@@ -164,7 +164,7 @@ static void C4_Board_UpdateCellCheckBuffer(C4_Board* board, C4_Board_RowAxis axi
     assert(board);
     
     // Sets all values of cellCheckBuffer to zero.
-    SDL_memset(board->cellCheckBuffer, 0, (size_t)C4_Max((int)board->width, (int)board->height) * sizeof(C4_SlotState));
+    SDL_memset(board->cellCheckBuffer, 0, (size_t)SDL_max((int)board->width, (int)board->height) * sizeof(C4_SlotState));
     size_t bufferIndex = 0;
     switch (axis) {
         case C4_Board_RowAxis_NorthSouth: {
@@ -339,5 +339,5 @@ bool C4_Board_IsFull(C4_Board* board) {
 }
 
 uint8_t C4_Board_GetMaxAmountToWin(uint8_t width, uint8_t height) {
-    return (uint8_t)C4_Max(width, height);
+    return (uint8_t)SDL_max(width, height);
 }

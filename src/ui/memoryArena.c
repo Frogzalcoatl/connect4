@@ -50,7 +50,7 @@ void* C4_Arena_Alloc(C4_MemoryArena* arena, size_t size) {
         arena->currentBlock == NULL || 
        (arena->currentBlock->offset + alignedSize) > arena->currentBlock->capacity
     ) {
-        size_t newSize = C4_ULLMax(arena->defaultBlockSize, alignedSize);
+        size_t newSize = SDL_max(arena->defaultBlockSize, alignedSize);
         
         C4_ArenaBlock* newBlock = C4_Arena_CreateBlock(newSize);
         
