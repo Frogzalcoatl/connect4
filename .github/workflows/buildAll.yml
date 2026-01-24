@@ -16,10 +16,13 @@ jobs:
             matrix:
                 include:
                     - preset: windows-msvc
+                      build_preset: msvc-release
                       os: windows-2022
                     - preset: linux-gcc
+                      build_preset: linux-gcc-release
                       os: ubuntu-latest
                     - preset: macos-clang
+                      build_preset: macos-clang-release
                       os: macos-latest
                     - preset: android
                       os: ubuntu-latest
@@ -67,7 +70,7 @@ jobs:
 
             - name: Build
               if: matrix.preset != 'android'
-              run: cmake --build --preset ${{ matrix.preset }} --config Release
+              run: cmake --build --preset ${{ matrix.build_preset }}
 
             # --- BUILD (Android) ---
             - name: Build Android APK

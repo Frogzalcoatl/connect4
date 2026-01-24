@@ -18,6 +18,7 @@ jobs:
             matrix:
                 include:
                     - preset: windows-msvc
+                      build_preset: msvc-release
                       os: windows-2022
 
         steps:
@@ -41,7 +42,7 @@ jobs:
 
             - name: Build
               if: matrix.preset != 'android'
-              run: cmake --build --preset ${{ matrix.preset }} --config Release
+              run: cmake --build --preset msvc-release
 
             # --- ARTIFACT PREPARATION ---
             - name: Prepare Artifacts
