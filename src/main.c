@@ -1,5 +1,6 @@
 #include "Connect4/game/connect4.h"
 #include "Connect4/game/consoleOutput.h"
+#include "Connect4/instanceManager/index.h"
 #include "SDL3/SDL_main.h"
 
 #ifdef _WIN32
@@ -11,9 +12,9 @@ int main(int argc, char *argv[]) {
     (void)argc;
     (void)argv;
 
-    #ifdef _WIN32
-        CreateMutex(NULL, TRUE, "Global\\1efdd983-4a0e-42d4-9183-f748b0f799f0");
-    #endif
+    if (C4_IsAnotherInstanceRunning()) {
+        return 1;
+    }
 
     Connect4_Init_Dependencies();
 
