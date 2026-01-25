@@ -84,6 +84,19 @@ jobs:
               run: cmake --build --preset ${{ matrix.build_preset }}
 
             # --- BUILD (Android) ---
+            - name: Decode Keystore
+              if: matrix.preset == 'android'
+              env:
+                  ANDROID_DEBUG_KEYSTORE_BASE64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
+              run: |
+                  cd android/app
+                  if [ -n "$ANDROID_DEBUG_KEYSTORE_BASE64" ]; then
+                    echo "Decoding custom debug keystore..."
+                    echo "$ANDROID_DEBUG_KEYSTORE_BASE64" | base64 --decode > debug.keystore
+                  else
+                    echo "Secret is empty (likely a fork). Using default Android debug keystore."
+                  fi
+
             - name: Build Android APK
               if: matrix.preset == 'android'
               run: |

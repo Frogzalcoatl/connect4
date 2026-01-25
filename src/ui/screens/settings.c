@@ -17,7 +17,7 @@ static void C4_SettingsScreen_OnEnter(C4_UI_Screen* screen) {
 
 static void C4_SettingsScreen_HandleWindowResize(C4_UI_Screen* screen) {
     assert(screen && screen->data);
-
+    (void)screen;
 }
 
 static void C4_SettingsScreen_Init(C4_UI_Screen* screen, C4_Game* game);
