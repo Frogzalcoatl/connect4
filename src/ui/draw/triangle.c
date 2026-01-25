@@ -28,7 +28,7 @@ void C4_UI_DrawTriangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleStat
     SDL_RenderGeometry(renderer, NULL, vertices, 3, NULL, 0);
 }
 
-void C4_UI_DrawTriangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirror mirror, SDL_Renderer* renderer, float UIScale) {
+void C4_UI_DrawTriangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirror mirror, SDL_Renderer* renderer, float uiScale) {
     assert(shape && styleState && renderer);
     assert(mirror >= C4_UI_Mirror_None && mirror < C4_UI_Mirror_Count);
 
@@ -36,7 +36,7 @@ void C4_UI_DrawTriangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_St
         return;
     }
 
-    float bw = ceilf(shape->borderWidth * UIScale);
+    float bw = ceilf(shape->borderWidth * uiScale);
     if (bw <= 0) {
         bw = 1;
     }

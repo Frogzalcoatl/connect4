@@ -47,7 +47,7 @@ void C4_UI_Node_CalculateLayout(C4_UI_Node* node, float scale, float parentX, fl
     }
 }
 
-void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer, float UIScale) {
+void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer, float uiScale) {
     assert(node);
 
     C4_UI_Interaction* activeInput = &node->input;
@@ -69,17 +69,17 @@ void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer, float UIScale) {
 
     switch (node->type) {
         case C4_UI_Type_Shape: {
-            C4_UI_DrawShape(node->absoluteRect, &node->shape, currentStyle, node->mirror, renderer, UIScale);
+            C4_UI_DrawShape(node->absoluteRect, &node->shape, currentStyle, node->mirror, renderer, uiScale);
         }; break;
         case C4_UI_Type_Text: {
-            C4_UI_DrawText(node->absoluteRect, &node->text, currentStyle, node->mirror, renderer, UIScale);
+            C4_UI_DrawText(node->absoluteRect, &node->text, currentStyle, node->mirror, renderer, uiScale);
         }; break;
         default: break;
     }
 
     C4_UI_Node* child = node->firstChild;
     while (child) {
-        C4_UI_Node_Draw(child, renderer, UIScale);
+        C4_UI_Node_Draw(child, renderer, uiScale);
         child = child->nextSibling;
     }
 }
@@ -269,8 +269,8 @@ C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) 
         SDL_Color color = config->style->inactive.text;
         TTF_SetTextColor(node->text.textObject, color.r, color.g, color.b, color.a);
 
-        if (config->text->UIScale <= 0.1f) {
-            config->text->UIScale = 0.1f;
+        if (config->text->uiScale <= 0.1f) {
+            config->text->uiScale = 0.1f;
         }
 
         C4_UI_Node_UpdateTextRect(node);
@@ -312,8 +312,9 @@ C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) 
     node->inheritState = false;
     node->padding = 0;
     node->spacing = 0;
-    node->direction = C4_UI_Direction_Vertical;
+    node->direction = C4_UI_Direction_None;
     node->childrenAlign = C4_UI_Align_TopLeft;
+    node->selfAlign = C4_UI_Align_None;
     node->mirror = C4_UI_Mirror_None;
 
     node->navUp = NULL;
@@ -381,7 +382,10 @@ static void C4_UI_AlignHelper(
 
 void C4_UI_Node_AlignChildren(C4_UI_Node* node, C4_UI_Axis axis) {
     assert(node);
-    assert(axis > C4_UI_Axis_None && axis < C4_UI_Axis_Count);
+
+    if (node->childrenAlign == C4_UI_Align_None) {
+        return;
+    }
     
     float minChildX = node->padding;
     float minChildY = node->padding;
@@ -476,38 +480,24 @@ void C4_UI_Node_ClampToWindow(C4_UI_Node* node, unsigned int windowWidth, unsign
     }
 }
 
-void C4_UI_CenterInWindow(C4_UI_Node* node, C4_UI_Axis axis, unsigned int windowWidth, unsigned int windowHeight) {
+void C4_UI_Node_AlignInParent(C4_UI_Node* node, SDL_FRect parentRect) {
     assert(node);
-    assert(axis > C4_UI_Axis_None && axis < C4_UI_Axis_Count);
-
-    SDL_FRect* rect = &node->rect;
-
-    if (axis == C4_UI_Axis_X || axis == C4_UI_Axis_XY) {
-        rect->x = (windowWidth / 2.f) - (rect->w / 2.f);
+    
+    if (node->selfAlign == C4_UI_Align_None) {
+        return;
     }
-
-    if (axis == C4_UI_Axis_Y || axis == C4_UI_Axis_XY) {
-        rect->y = (windowHeight / 2.f) - (rect->h / 2.f);
-    }
-
-    C4_UI_Node_ClampToWindow(node, windowWidth, windowHeight);
-}
-
-void C4_UI_AlignInWindow(C4_UI_Node* node, C4_UI_Align align, unsigned int windowWidth, unsigned int windowHeight) {
-    assert(node);
-    assert(align >= C4_UI_Align_TopLeft && align < C4_UI_Align_Count);
 
     SDL_FPoint newPos;
     C4_UI_AlignHelper(
         &newPos,
         node->rect,
-        align,
-        0.f,
-        0.f,
-        (float)windowWidth,
-        (float)windowHeight,
-        windowWidth / 2.f,
-        windowHeight / 2.f
+        node->selfAlign,
+        parentRect.x,
+        parentRect.y,
+        (float)parentRect.w,
+        (float)parentRect.h,
+        parentRect.x + (parentRect.w / 2.f),
+        parentRect.y + (parentRect.h / 2.f)
     );
     node->rect.x = newPos.x;
     node->rect.y = newPos.y;
@@ -522,5 +512,37 @@ void C4_UI_Node_Reset(C4_UI_Node* node) {
     while (child) {
         C4_UI_Node_Reset(child);
         child = child->nextSibling;
+    }
+}
+
+void C4_UI_Node_RefreshLayout(C4_UI_Node* node, SDL_FRect parentRect) {
+    if (!node) {
+        return;
+    }
+
+    SDL_FRect internalRect = {0.f, 0.f, node->rect.w, node->rect.h};
+
+    C4_UI_Node* child = node->firstChild;
+    while (child) {
+        C4_UI_Node_RefreshLayout(child, internalRect);
+        child = child->nextSibling;
+    }
+
+    if (node->direction != C4_UI_Direction_None) {
+        C4_UI_Node_ApplyChildSpacing(node);
+    }
+
+    C4_UI_Axis childrenAlignAxis;
+    if (node->direction == C4_UI_Direction_Vertical) {
+        childrenAlignAxis = C4_UI_Axis_X;
+    } else if (node->direction == C4_UI_Direction_Horizontal) {
+        childrenAlignAxis = C4_UI_Axis_Y;
+    } else {
+        childrenAlignAxis = C4_UI_Axis_XY;
+    }
+    C4_UI_Node_AlignChildren(node, childrenAlignAxis);
+
+    if (node->selfAlign != C4_UI_Align_None) {
+        C4_UI_Node_AlignInParent(node, parentRect);
     }
 }

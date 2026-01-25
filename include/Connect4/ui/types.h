@@ -2,6 +2,7 @@
 #include "SDL3_ttf/SDL_ttf.h"
 
 typedef enum C4_UI_Align {
+    C4_UI_Align_None,
     C4_UI_Align_TopLeft,
     C4_UI_Align_Top,
     C4_UI_Align_TopRight,
@@ -48,6 +49,7 @@ typedef struct C4_UI_Data_Shape {
 } C4_UI_Data_Shape;
 
 typedef enum C4_UI_Direction {
+    C4_UI_Direction_None,
     C4_UI_Direction_Horizontal,
     C4_UI_Direction_Vertical
 } C4_UI_Direction;

@@ -3,6 +3,7 @@
 #include "Connect4/physics/intersection.h"
 #include "Connect4/ui/cursorStyle.h"
 #include "Connect4/game/consoleOutput.h"
+#include "Connect4/ui/window.h"
 #include <assert.h>
 #include <stdlib.h>
 
@@ -50,12 +51,12 @@ void C4_UI_Canvas_Destroy(C4_UI_Canvas* canvas) {
     C4_Arena_Destroy(&canvas->arena);
 }
 
-void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float UIScale) {
+void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float uiScale) {
     assert(canvas && canvas->renderer);
     
     C4_UI_Node* current = canvas->root;
     while (current) {
-        C4_UI_Node_Draw(current, canvas->renderer, UIScale);
+        C4_UI_Node_Draw(current, canvas->renderer, uiScale);
         current = current->nextSibling;
     }
 }
@@ -305,7 +306,7 @@ void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Window* window, SDL_Even
     }
 }
 
-void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime, float UIScale) {
+void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime, float uiScale) {
     assert(canvas);
 
     if (deltaTime <= 0.f) {
@@ -325,7 +326,7 @@ void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime, float UIScale) {
     
     current = canvas->root;
     while (current) {
-        C4_UI_Node_CalculateLayout(current, UIScale, canvas->offsetX, canvas->offsetY);
+        C4_UI_Node_CalculateLayout(current, uiScale, canvas->offsetX, canvas->offsetY);
         current = current->nextSibling;
     }
 }
@@ -349,5 +350,29 @@ void C4_UI_Canvas_AddNode(C4_UI_Canvas* canvas, C4_UI_Node* node) {
         node->nextSibling = NULL;
     } else {
         C4_UI_Node_PushNode(canvas->root, node);
+    }
+}
+
+void C4_UI_Canvas_HandleWindowResize(C4_UI_Canvas* canvas, SDL_Window* window, float uiScale) {
+    assert(canvas && window);
+
+    int windowWidth, windowHeight;
+    C4_Window_GetScaledSize(window, uiScale, &windowWidth, &windowHeight);
+
+    if (windowWidth <= 0 || windowHeight <= 0) {
+        return;
+    }
+
+    SDL_FRect scaledWindowRect = (SDL_FRect){0.f, 0.f, (float)windowWidth, (float)windowHeight};
+    C4_UI_Node* current = canvas->root;
+    while (current) {
+        C4_UI_Node_RefreshLayout(current, scaledWindowRect);
+        current = current->nextSibling;
+    }
+
+    current = canvas->root;
+    while (current) {
+        C4_UI_Node_CalculateLayout(current, uiScale, canvas->offsetX, canvas->offsetY);
+        current = current->nextSibling;
     }
 }

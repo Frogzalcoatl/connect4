@@ -133,8 +133,8 @@ void C4_SoundSystem_PlaySound(C4_SoundSystem* soundSystem, C4_SoundEffect soundI
     if (!soundSystem->loadedSounds[soundID]) {
         C4_Warn(
             SDL_LOG_CATEGORY_AUDIO,
-            "Attempted to play unloaded sound id: %d",
-            soundID
+            "Attempted to play unloaded sound: %s",
+            SOUND_ASSETS[soundID]
         );
         return;
     }

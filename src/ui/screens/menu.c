@@ -5,6 +5,7 @@
 #include "Connect4/ui/utils.h"
 #include "Connect4/assets/fonts.h"
 #include "Connect4/game/consoleOutput.h"
+#include "Connect4/ui/window.h"
 #include <assert.h>
 
 typedef struct {
@@ -14,32 +15,12 @@ typedef struct {
     C4_UI_Node* title;
 } C4_MenuScreenData;
 
-static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutType layout) {
+static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen) {
     assert (screen && screen->data);
 
     C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
-    C4_Game* game = data->game;
 
-    switch (layout) {
-        case C4_UI_LayoutType_Wide: {
-            
-        }; break;
-        case C4_UI_LayoutType_Tall: {
-
-        }; break;
-        default: break;
-    }
-
-    SDL_FPoint refWindowDim = C4_GetReferenceWindowDimensions(game->windowWidth, game->windowHeight, game->UIScale);
-
-    C4_UI_Buttons_SetChildrenButtonSizes(data->buttons, SDL_min(refWindowDim.x - 60, 800.f), 100.f);
-    C4_UI_CenterInWindow(data->buttons, C4_UI_Axis_XY, (unsigned int)refWindowDim.x, (unsigned int)refWindowDim.y);
-    C4_UI_Node_AlignChildren(data->buttons, C4_UI_Axis_X);
-
-    C4_UI_AlignInWindow(data->controllerInfo, C4_UI_Align_BottomLeft, (unsigned int)refWindowDim.x, (unsigned int)refWindowDim.y);
-
-    // float bounceMultiplier = C4_GetBPMBounce(85);
-    C4_UI_CenterInWindow(data->title, C4_UI_Axis_X, (unsigned int)refWindowDim.x, (unsigned int)refWindowDim.y);
+    C4_UI_Canvas_HandleWindowResize(&screen->canvas, data->game->window, data->game->uiScale);
 }
 
 static void UpdateControllerText(C4_MenuScreenData* data) {
@@ -74,8 +55,6 @@ static void UpdateControllerText(C4_MenuScreenData* data) {
     strcat(displayText, activeController);
     
     C4_UI_Node_SetTextString(data->controllerInfo, displayText);
-    SDL_FPoint refWindowDim = C4_GetReferenceWindowDimensions(data->game->windowWidth, data->game->windowHeight, data->game->UIScale);
-    C4_UI_AlignInWindow(data->controllerInfo, C4_UI_Align_BottomLeft, (unsigned int)refWindowDim.x, (unsigned int)refWindowDim.y);
 }
 
 static void C4_MenuScreen_CloseWindow(void* context) {
@@ -147,7 +126,7 @@ static void C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     //SDL_Renderer* renderer = game->renderer;
 
     data->game = game;
-    float UIScale = game->UIScale;
+    float UIScale = game->uiScale;
 
     data->title = C4_UI_Node_Create(
         &canvas->arena, &(C4_UI_Node_Config) {
@@ -156,13 +135,14 @@ static void C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
             .text = &(C4_UI_Data_Text_Config) {
                 .posX = 0.f,
                 .posY = 0.f,
-                .UIScale = UIScale,
+                .uiScale = UIScale,
                 .text = "Connect4",
                 .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 200.f, TTF_STYLE_BOLD),
                 .textEngine = game->textEngine
             }
         }
     );
+    data->title->selfAlign = C4_UI_Align_Top;
     C4_UI_Canvas_AddNode(canvas, data->title);
 
     #define BUTTON_COUNT 4
@@ -178,7 +158,7 @@ static void C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
         &(C4_UI_Button_Config){
             .style = &C4_UI_THEME_DEFAULT.style,
             .rect = (SDL_FRect){0.f, 0.f, 0.f, 0.f},
-            .UIScale = UIScale,
+            .uiScale = UIScale,
             .shapeType = C4_UI_ShapeType_Rectangle,
             .borderWidth = C4_UI_THEME_DEFAULT.borderWidth,
             .text = "",
@@ -192,7 +172,7 @@ static void C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
         &canvas->arena, &(C4_UI_Buttons_Config){
             .posX = 0.f,
             .posY = 0.f,
-            .UIScale = UIScale,
+            .uiScale = UIScale,
             .direction = C4_UI_Direction_Vertical,
             .spacing = 25.f,
             .padding = 25.f,
@@ -205,6 +185,8 @@ static void C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
         .rotationDegrees = 0,
         .type = C4_UI_ShapeType_Rectangle
     };
+    C4_UI_Buttons_SetChildrenButtonSizes(data->buttons, 800.f, 100.0f);
+    data->buttons->selfAlign = C4_UI_Align_Center;
     data->buttons->input.OnCancel = C4_MenuScreen_CloseWindow;
     data->buttons->lastChild->input.OnPress = C4_MenuScreen_CloseWindowAndTask;
     C4_UI_Canvas_AddNode(canvas, data->buttons);
@@ -223,6 +205,7 @@ static void C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
             }
         }
     );
+    data->controllerInfo->selfAlign = C4_UI_Align_BottomLeft;
     C4_UI_Canvas_AddNode(canvas, data->controllerInfo);
     
     UpdateControllerText(data);

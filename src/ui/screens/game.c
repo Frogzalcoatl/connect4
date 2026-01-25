@@ -13,22 +13,12 @@ static void C4_GameScreen_OnEnter(C4_UI_Screen* screen) {
     (void)screen;
 }
 
-void C4_GameScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutType layout) {
+void C4_GameScreen_HandleWindowResize(C4_UI_Screen* screen) {
     assert(screen && screen->data);
     (void)screen;
     //C4_GameScreenData* gameData = (C4_GameScreenData*)screen->data;
     //C4_Game* game = gameData->game;
     //SDL_Renderer* renderer = game->renderer;
-
-    switch (layout) {
-        case C4_UI_LayoutType_Wide: {
-            
-        }; break;
-        case C4_UI_LayoutType_Tall: {
-            
-        }; break;
-        default: break;
-    }
 }
 
 //static void C4_GameScreen_ResetGame(C4_GameScreenData* gameData) {
@@ -69,5 +59,5 @@ void C4_GameScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
 
     data->game = game;
 
-    screen->HandleWindowResize(screen, game->currentLayout);
+    screen->HandleWindowResize(screen);
 }

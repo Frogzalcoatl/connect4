@@ -2,7 +2,7 @@
 #include "Connect4/ui/node.h"
 #include "Connect4/ui/canvas.h"
 
-C4_UI_Node* C4_UI_Notification_AddContainerToCanvas(C4_UI_Canvas* canvas, C4_UI_Align notificationAlign, float UIScale);
+C4_UI_Node* C4_UI_Notification_AddContainerToCanvas(C4_UI_Canvas* canvas, C4_UI_Align notificationAlign, float uiScale);
 
 typedef struct C4_UI_Notification_Send_Config {
     C4_UI_Node* containerNode;

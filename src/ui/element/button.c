@@ -18,6 +18,7 @@ C4_UI_Node* C4_UI_Button_Create(C4_MemoryArena* arena, C4_UI_Button_Config* conf
     background->input.isFocusable = true;
     background->input.isActive = true;
     background->childrenAlign = C4_UI_Align_Center;
+    background->direction = C4_UI_Direction_None;
     background->input.sounds.onHover = C4_SoundEffect_ButtonHover;
     background->input.sounds.onPress = C4_SoundEffect_ButtonClick;
 
@@ -28,7 +29,7 @@ C4_UI_Node* C4_UI_Button_Create(C4_MemoryArena* arena, C4_UI_Button_Config* conf
             .text = &(C4_UI_Data_Text_Config){
                 .posX = 0.f,
                 .posY = 0.f,
-                .UIScale = config->UIScale,
+                .uiScale = config->uiScale,
                 .font = config->font,
                 .text = config->text,
                 .textEngine = config->textEngine
@@ -38,8 +39,6 @@ C4_UI_Node* C4_UI_Button_Create(C4_MemoryArena* arena, C4_UI_Button_Config* conf
     text->inheritState = true;
 
     C4_UI_Node_AttachChild(background, text);
-
-    C4_UI_Node_AlignChildren(background, C4_UI_Axis_XY);
     
     return background; 
 }
@@ -60,7 +59,7 @@ C4_UI_Node* C4_UI_Buttons_Create(C4_MemoryArena* arena, C4_UI_Buttons_Config* co
     container->childrenAlign = C4_UI_Align_Center;
 
     for (size_t i = 0; i < config->buttonsArrSize; i++) {
-        config->buttonsArr[i].UIScale = config->UIScale; 
+        config->buttonsArr[i].uiScale = config->uiScale; 
         C4_UI_Node* btn = C4_UI_Button_Create(arena, &config->buttonsArr[i]);
         
         C4_UI_Node_AttachChild(container, btn);

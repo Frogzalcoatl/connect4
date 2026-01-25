@@ -27,7 +27,7 @@ void Connect4_ConnectScancodesToInputVerbs(void) {
     C4_Input_ConnectScancodeToVerb(C4_INPUT_VERB_CONFIRM, SDL_SCANCODE_SPACE);
 }
 
-static bool C4_AddMappingFromVFS(const char* filePath) {
+static bool C4_AddMappingsFromVFS(const char* filePath) {
     assert(filePath);
     
     size_t len;
@@ -81,7 +81,7 @@ void Connect4_Init_Dependencies(void) {
     C4_Input_Init();
 
     const char controllerDbPath[] = "assets/gamecontrollerdb.txt";
-    if (!C4_AddMappingFromVFS(controllerDbPath)) {
+    if (!C4_AddMappingsFromVFS(controllerDbPath)) {
         C4_Warn(
             SDL_LOG_CATEGORY_APPLICATION,
             "Unable to add gamepad mappings from file: %s",
@@ -119,24 +119,25 @@ void Connect4_Quit_Dependencies(void) {
     C4_Log("Quit SDL");
 }
 
-static void C4_Game_RecalculateScale(C4_Game* game) {
+static void C4_Game_RecalculateUIScale(C4_Game* game, int windowWidth, int windowHeight) {
     assert(game);
 
     const float REFERENCE_HEIGHT = 1080.0f;
     const float REFERENCE_WIDTH = 1920.f;
-    float scaleW = (float)game->windowWidth / REFERENCE_WIDTH;
-    float scaleH = (float)game->windowHeight / REFERENCE_HEIGHT;
 
-    if (game->windowWidth < game->windowHeight) {
-        game->UIScale = scaleW;
+    float scaleW = (float)windowWidth / REFERENCE_WIDTH;
+    float scaleH = (float)windowHeight / REFERENCE_HEIGHT;
+
+    if (windowWidth < windowHeight) {
+        game->uiScale = scaleW;
     } else {
-        game->UIScale = scaleH;
+        game->uiScale = scaleH;
     }
 
-    game->UIScale *= game->userScalePreference;
+    game->uiScale *= game->userScalePreference;
 
-    if (game->UIScale < 0.1f) {
-        game->UIScale = 0.1f;
+    if (game->uiScale < 0.1f) {
+        game->uiScale = 0.1f;
     }
 }
 /*
@@ -145,28 +146,13 @@ static void C4_Game_SetUserScale(C4_Game* game, float newScale) {
 
     game->userScalePreference = newScale;
     
-    C4_Game_RecalculateScale(game);
+    C4_Game_RecalculateUIScale(game);
 
     if (game->currentScreen && game->currentScreen->HandleWindowResize) {
         game->currentScreen->HandleWindowResize(game->currentScreen, game->currentLayout);
     }
 }
 */
-SDL_FPoint C4_GetReferenceWindowDimensions(unsigned int w, unsigned int h, float UIScale) {
-    float width = w / UIScale;
-    float height = h / UIScale;
-    return (SDL_FPoint){width, height};
-}
-
-static void C4_Game_UpdateWindowProperties(C4_Game* game, unsigned int windowWidth, unsigned int windowHeight) {
-    assert(game);
-
-    game->currentLayout = C4_UI_GetCurrentLayout(windowWidth, windowHeight);
-    game->windowWidth = windowWidth;
-    game->windowHeight = windowHeight;
-    
-    C4_Game_RecalculateScale(game);
-}
 
 static void C4_Game_WindowSetup(C4_Game* game) {
     assert(game);
@@ -192,7 +178,6 @@ static void C4_Game_WindowSetup(C4_Game* game) {
 
     int windowWidth, windowHeight;
     SDL_GetWindowSizeInPixels(game->window, &windowWidth, &windowHeight);
-    C4_Game_UpdateWindowProperties(game, windowWidth, windowHeight);
 
     C4_Log("SDL window setup complete");
 }
@@ -232,7 +217,7 @@ static void C4_Game_SetScreen(C4_Game* game, C4_ScreenType type) {
     C4_UI_Canvas_ResetInteractions(&game->currentScreen->canvas);
     SDL_SetCursor(C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT));
     if (game->currentScreen->HandleWindowResize) {
-        game->currentScreen->HandleWindowResize(game->currentScreen, game->currentLayout);
+        game->currentScreen->HandleWindowResize(game->currentScreen);
     }
 
     if (game->currentScreenType == C4_ScreenType_Menu) {
@@ -349,9 +334,9 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
         } else if (eventSDL->type == SDL_EVENT_WINDOW_RESIZED) {
             unsigned int windowWidth = eventSDL->window.data1;
             unsigned int windowHeight = eventSDL->window.data2;
-            C4_Game_UpdateWindowProperties(game, windowWidth, windowHeight);
+            C4_Game_RecalculateUIScale(game, windowWidth, windowHeight);
             if (game->currentScreen->HandleWindowResize) {
-                game->currentScreen->HandleWindowResize(game->currentScreen, game->currentLayout);
+                game->currentScreen->HandleWindowResize(game->currentScreen);
             }
         }
         SDL_ConvertEventToRenderCoordinates(game->renderer, eventSDL);
@@ -401,14 +386,14 @@ void C4_Game_Run(C4_Game* game) {
         C4_Game_HandleEvents(game, &eventSDL, &eventC4);
 
         if (game->currentScreen->Update) {
-            game->currentScreen->Update(game->currentScreen, deltaTime, game->UIScale);
+            game->currentScreen->Update(game->currentScreen, deltaTime, game->uiScale);
         }
 
         SDL_SetRenderDrawColor(game->renderer, C4_WINDOW_BG_COLOR.r, C4_WINDOW_BG_COLOR.g, C4_WINDOW_BG_COLOR.b, C4_WINDOW_BG_COLOR.a);
         SDL_RenderClear(game->renderer);
 
         if (game->currentScreen->Draw) {
-            game->currentScreen->Draw(game->currentScreen, game->UIScale);
+            game->currentScreen->Draw(game->currentScreen, game->uiScale);
         }
 
         SDL_RenderPresent(game->renderer);

@@ -15,21 +15,8 @@ static void C4_SettingsScreen_OnEnter(C4_UI_Screen* screen) {
     //C4_SettingsScreenData* data = (C4_SettingsScreenData*)screen->data;
 }
 
-static void C4_SettingsScreen_HandleWindowResize(C4_UI_Screen* screen, C4_UI_LayoutType layout) {
+static void C4_SettingsScreen_HandleWindowResize(C4_UI_Screen* screen) {
     assert(screen && screen->data);
-    assert(layout > C4_UI_LayoutType_None && layout < C4_UI_LayoutType_Count);
-    (void)screen;
-    //C4_SettingsScreenData* data = (C4_SettingsScreenData*)screen->data;
-
-    switch (layout) {
-        case C4_UI_LayoutType_Wide: {
-            
-        }; break;
-        case C4_UI_LayoutType_Tall: {
-
-        }; break;
-        default: break;
-    }
 
 }
 
@@ -67,5 +54,5 @@ static void C4_SettingsScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
 
     data->game = game;
 
-    screen->HandleWindowResize(screen, game->currentLayout);
+    screen->HandleWindowResize(screen);
 }

@@ -183,7 +183,7 @@ void* C4_VFS_ReadFile(const char* filename, size_t* outSize) {
     }
 
     if (!vfs.entries) {
-        C4_Warn(SDL_LOG_CATEGORY_APPLICATION, "Unable to access .dat file entries. Attempting to reinitialize dat file");
+        C4_Warn(SDL_LOG_CATEGORY_APPLICATION, "Unable to access .dat file entries");
         return NULL;
     }
 

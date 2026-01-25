@@ -65,8 +65,8 @@ TTF_Font* C4_GetFont(C4_FontAsset assetID, float ptSize, TTF_FontStyleFlags styl
     if (!rawData) {
         C4_FatalError(
             C4_ErrorCode_GenericRuntimeError,
-            "Unable get load font data for asset id: %d",
-            assetID
+            "Unable get load font %s",
+            FONT_ASSET_PATHS[assetID]
         );
     }
 

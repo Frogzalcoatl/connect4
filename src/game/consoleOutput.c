@@ -42,7 +42,7 @@ static const char* ERROR_MESSAGES[C4_ErrorCode_Count] = {
     "Connect4.dat is invalid. Please try redownloading.",
     "System Out of Memory.",
     "Runtime error.",
-    "Unable to create game structure."
+    "Unable to initialize internal game structure."
 };
 
 void C4_FatalError(C4_ErrorCode code, const char* format, ...) {

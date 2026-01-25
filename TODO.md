@@ -1,6 +1,6 @@
 # TODO
 
-* Clean up the ui element declaration. It feels weird to have to do scaling calculations in menu.c. Maybe it should all be handled in the other non screen files?
+* Fix OnCancel to use the same logic as runbackbutton or whatever its called.
 * Simplify ui element configs. Maybe even try to get the functions to only a few parameters and not even use config structs
 * Add border radius. Store properties in the same way css does.
 * Implement SDL_image

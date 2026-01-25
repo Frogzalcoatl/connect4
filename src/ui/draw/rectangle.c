@@ -31,7 +31,7 @@ void C4_UI_DrawRectangle(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleSta
     SDL_RenderGeometry(renderer, NULL, vertices, 4, indices, 6);
 }
 
-void C4_UI_DrawRectangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirror mirror, SDL_Renderer* renderer, float UIScale) {
+void C4_UI_DrawRectangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_StyleState* styleState, C4_UI_Mirror mirror, SDL_Renderer* renderer, float uiScale) {
     assert(shape && styleState && renderer);
     assert(mirror >= C4_UI_Mirror_None && mirror < C4_UI_Mirror_Count);
 
@@ -39,7 +39,7 @@ void C4_UI_DrawRectangleBorders(SDL_FRect rect, C4_UI_Data_Shape* shape, C4_UI_S
         return;
     }
 
-    int scaledBorderWidth = (int)(shape->borderWidth * UIScale);
+    int scaledBorderWidth = (int)(shape->borderWidth * uiScale);
     if (scaledBorderWidth <= 0) {
         scaledBorderWidth = 1; 
     }
