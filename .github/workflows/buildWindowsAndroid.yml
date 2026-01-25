@@ -30,6 +30,7 @@ jobs:
               uses: actions/checkout@v4
               with:
                   submodules: true
+                  fetch-depth: 0
 
             # Export GitHub Actions cache for vcpkg
             - name: Export GitHub Actions cache environment variables
@@ -48,6 +49,12 @@ jobs:
                   java-version: "17"
 
             # --- CONFIGURE & BUILD (Windows) ---
+            - name: Setup CMake (Non-Android Only)
+              if: matrix.preset != 'android'
+              uses: jwlawson/actions-setup-cmake@v2
+              with:
+                  cmake-version: "3.31.x"
+
             - name: Configure CMake
               if: matrix.preset != 'android'
               run: cmake --preset ${{ matrix.preset }} -DCMAKE_BUILD_TYPE=Release
