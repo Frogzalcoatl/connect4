@@ -1,6 +1,8 @@
 #pragma once
 #include <stdio.h>
 
+void C4_InitLogs(void);
+
 #if defined(__GNUC__) || defined(__clang__)
     #if defined(__MINGW32__)
         #define C4_PRINTF_CHECK(fmt_idx, args_idx) __attribute__((format(gnu_printf, fmt_idx, args_idx)))

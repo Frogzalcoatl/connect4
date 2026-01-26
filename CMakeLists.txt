@@ -1,6 +1,5 @@
 # Needed ai for this ngl
 
-# Fix Cmake 4.x strictness
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 
 cmake_minimum_required(VERSION 3.22)
@@ -11,12 +10,15 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # SDL_Mixer Config
+
 # Build Type
 set(SDLMIXER_SHARED OFF CACHE BOOL "Force static" FORCE)
 set(SDLMIXER_STATIC ON  CACHE BOOL "Force static" FORCE)
 set(SDLMIXER_VENDORED ON CACHE BOOL "Use vendored deps" FORCE)
+
 # Enabled Formats
 set(SDLMIXER_OGG ON CACHE BOOL "Enable OGG" FORCE)
+
 # Disabled Formats (Keep lightweight)
 set(SDLMIXER_FLAC OFF CACHE BOOL "Disable FLAC" FORCE)
 set(SDLMIXER_MIDI OFF CACHE BOOL "Disable MIDI" FORCE)
@@ -26,6 +28,7 @@ set(SDLMIXER_OPUS OFF CACHE BOOL "Disable OPUS" FORCE)
 set(SDLMIXER_GME  OFF CACHE BOOL "Disable Game Music Emu" FORCE)
 set(SDLMIXER_XMP  OFF CACHE BOOL "Disable XMP" FORCE)
 set(SDLMIXER_WAVPACK OFF CACHE BOOL "Disable WavPack" FORCE)
+
 # Advanced Optimizations (Optional, good for Android)
 option(USE_ASSEMBLY_OPTIMIZATIONS "Enable YASM assembly optimizations" OFF)
 if(USE_ASSEMBLY_OPTIMIZATIONS)
@@ -35,6 +38,7 @@ else()
     set(SDLMIXER_MP3_MPG123 OFF CACHE BOOL "Disable mpg123" FORCE)
     set(SDLMIXER_MP3_MINIMP3 ON  CACHE BOOL "Enable minimp3" FORCE)
 endif()
+
 # Explicitly disable libflac to avoid searching for YASM/NASM
 set(SDLMIXER_FLAC_LIBFLAC OFF CACHE BOOL "Disable libflac" FORCE)
 

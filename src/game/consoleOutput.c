@@ -5,32 +5,60 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-void C4_Log(const char* format, ...) {
+void GetCurrentTimeStrings(char* buffer, size_t bufferSize) {
+    SDL_Time ticks;
+    SDL_DateTime dt;
 
-    char text[2048] = "";
+    if (SDL_GetCurrentTime(&ticks) && SDL_TimeToDateTime(ticks, &dt, true)) {
+        SDL_snprintf(buffer, bufferSize, "%02d:%02d:%02d", dt.hour, dt.minute, dt.second);
+    } else {
+        SDL_snprintf(buffer, bufferSize, "00:00:00");
+    }
+}
 
-    if (format && *format != '\0') {
-        va_list args;
-        va_start(args, format);
-        vsnprintf(text, sizeof(text), format, args);
-        va_end(args);
+static void C4_LogOutputFunction(void *userdata, int category, SDL_LogPriority priority, const char *message) {
+    (void)userdata;
+    
+    char timeStr[32];
+    GetCurrentTimeStrings(timeStr, sizeof(timeStr));
+
+    const char* priorityStr;
+    switch (priority) {
+        case SDL_LOG_PRIORITY_WARN:  priorityStr = "WARN";  break;
+        case SDL_LOG_PRIORITY_ERROR: priorityStr = "ERROR"; break;
+        default:                     priorityStr = "INFO";  break;
     }
 
-    SDL_Log("[INFO] %s", text);
+    const char* catStr;
+    switch (category) {
+        case SDL_LOG_CATEGORY_SYSTEM: catStr = "SYSTEM"; break;
+        case SDL_LOG_CATEGORY_AUDIO: catStr = "AUDIO"; break;
+        case SDL_LOG_CATEGORY_INPUT: catStr = "INPUT"; break;
+        default: catStr = "APP"; break;
+    }
+
+    fprintf(stdout, "[%s] [%s/%s]: %s\n", timeStr, catStr, priorityStr, message);
+    fflush(stdout);
+}
+
+void C4_InitLogs(void) {
+    SDL_SetLogOutputFunction(C4_LogOutputFunction, NULL);
+}
+
+void C4_Log(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    // SDL_LogMessageV sends the log through the output function above
+    SDL_LogMessageV(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, format, args);
+    va_end(args);
 }
 
 void C4_Warn(SDL_LogCategory category, const char* format, ...) {
-
-    char text[2048] = "";
-
-    if (format && *format != '\0') {
-        va_list args;
-        va_start(args, format);
-        vsnprintf(text, sizeof(text), format, args);
-        va_end(args);
-    }
-
-    SDL_LogWarn(category, "[WARN] %s", text);
+    va_list args;
+    va_start(args, format);
+    SDL_LogMessageV(category, SDL_LOG_PRIORITY_WARN, format, args);
+    va_end(args);
 }
 
 static const char* ERROR_MESSAGES[C4_ErrorCode_Count] = {
