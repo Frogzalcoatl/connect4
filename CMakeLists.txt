@@ -189,7 +189,7 @@ else()
     set(PLATFORM_SRCS "")
 
     if(WIN32)
-        set(ICON_RC resources/icon.rc)
+        set(ICON_RC resources/connect4.rc)
         list(APPEND PLATFORM_SRCS ${ICON_RC})
     elseif(APPLE)
         set(ICON_MACOS resources/icon.icns)
@@ -219,6 +219,11 @@ if(APPLE)
     set_target_properties(${EXE_NAME} PROPERTIES
         MACOSX_BUNDLE_ICON_FILE "icon.icns"
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.frogzalcoatl.${EXE_NAME}"
+        MACOSX_BUNDLE_BUNDLE_NAME "Connect4"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${GAME_VERSION}"
+        MACOSX_BUNDLE_BUNDLE_VERSION "${GAME_VERSION}"
+        MACOSX_BUNDLE_COPYRIGHT "Copyright © 2026 Frogzalcoatl. GPLv3."
+        MACOSX_BUNDLE_INFO_PLIST_VERSION "${GAME_VERSION}"
     )
 endif()
 
@@ -358,13 +363,24 @@ else()
     )
 endif()
 
-# --- CPACK CONFIGURATION ---
 install(TARGETS ${EXE_NAME} 
     BUNDLE  DESTINATION .
     RUNTIME DESTINATION .
 )
 install(FILES "${MASTER_DAT_PATH}" DESTINATION .)
 
+if(UNIX AND NOT APPLE AND NOT ANDROID)
+    # Install the .desktop file
+    install(FILES "resources/connect4.desktop" DESTINATION "share/applications")
+    
+    # Install the Icon (Linux looks in share/icons/hicolor/...)
+    install(FILES "resources/icon.png" DESTINATION "share/icons/hicolor/512x512/apps" RENAME "resources/icon-desktop-512x512.png")
+    
+    # Install AppStream metadata
+    install(FILES "resources/com.frogzalcoatl.connect4.metainfo.xml" DESTINATION "share/metainfo")
+endif()
+
+# --- CPACK CONFIGURATION ---
 set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
 set(CPACK_PACKAGE_VENDOR "Frogzalcoatl")
 set(CPACK_PACKAGE_VERSION "${GAME_VERSION}")
@@ -377,7 +393,7 @@ if(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_DMG_VOLUME_NAME "${PROJECT_NAME}")
     set(CPACK_BUNDLE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/resources/icon.icns")
-elseif(UNIX AND NOT APPLE)
+elseif(UNIX AND NOT APPLE AND NOT ANDROID)
     # Generate both DEB, RPM and a generic Tarball for Arch/others
     set(CPACK_GENERATOR "DEB;RPM;TGZ")
 

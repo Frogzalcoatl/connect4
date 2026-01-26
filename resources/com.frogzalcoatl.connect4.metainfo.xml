@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.frogzalcoatl.connect4</id>
+  <name>Connect4</name>
+  <summary>Classic board game in SDL3</summary>
+  <developer_name>Frogzalcoatl</developer_name>
+  <description>
+    <p>The classic Connect4 board game using SDL3.</p>
+  </description>
+</component>

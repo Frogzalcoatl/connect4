@@ -1,0 +1,31 @@
+#include <winres.h>
+
+1 ICON "icon.ico"
+1 VERSIONINFO
+FILEVERSION 1,0,0,0
+PRODUCTVERSION 1,0,0,0
+FILEOS 0x40004L // Built for Windows NT
+FILETYPE 0x1L // This is an App
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "Frogzalcoatl"
+            VALUE "FileDescription", "Connect4 board game (SDL3)"
+            VALUE "FileVersion", "1.0"
+            VALUE "InternalName", "Connect4"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Frogzalcoatl. GPLv3."
+            VALUE "OriginalFilename", "Connect4.exe"
+            VALUE "ProductName", "Connect4"
+            VALUE "ProductVersion", "1.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        // This 'links' the OS to the 040904B0 block above
+        // 0x409 (Hex) = 1033 (Decimal) = English (United States).
+        // 1200 (Decimal) = 0x04B0 (Hex) = Unicode.
+        VALUE "Translation", 0x409, 1200
+    END
+END

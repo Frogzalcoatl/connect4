@@ -26,7 +26,7 @@ static void C4_LogOutputFunction(void *userdata, int category, SDL_LogPriority p
     switch (priority) {
         case SDL_LOG_PRIORITY_WARN:  priorityStr = "WARN";  break;
         case SDL_LOG_PRIORITY_ERROR: priorityStr = "ERROR"; break;
-        default:                     priorityStr = "INFO";  break;
+        default: priorityStr = "INFO";  break;
     }
 
     const char* catStr;

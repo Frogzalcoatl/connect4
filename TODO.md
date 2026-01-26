@@ -1,5 +1,6 @@
 # TODO
 
+* Fix button logic. Whilepressed doesnt seem to be working properly. Also check on other callback types
 * Fix OnCancel to use the same logic as runbackbutton or whatever its called.
 * Simplify ui element configs. Maybe even try to get the functions to only a few parameters and not even use config structs
 * Add border radius. Store properties in the same way css does.

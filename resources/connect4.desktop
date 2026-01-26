@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Connect4
+Comment=Connect4 board game using SDL3
+Exec=Connect4
+Icon=connect4
+Terminal=false
+Categories=Game;BoardGame;
