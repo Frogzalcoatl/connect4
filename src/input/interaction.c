@@ -12,12 +12,11 @@ void C4_UI_Interaction_Update(C4_UI_Interaction* input, float deltaTime) {
     assert(deltaTime >= 0.0f);
     
     if (!input->isActive) {
-        input->isPressed = false;
-        input->isHovered = false;
-        input->isRepeating = false;
-        input->timing.pressTimer = 0.f;
+        C4_UI_Interaction_Reset(input);
+        return;
     }
-    if (!input->isPressed || !input->WhilePressed) {
+
+    if (!input->isPressed || !input->WhilePressed || !input->isHovered) {
         input->timing.pressTimer = 0.f;
         input->isRepeating = false;
         return;
@@ -134,6 +133,8 @@ bool C4_UI_Interaction_HandleMouseEvents(
     } else if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
         if (mouseButton == SDL_BUTTON_LEFT && input->isHovered) {
             input->isPressed = true;
+            input->timing.pressTimer = 0.f;
+            input->isRepeating = false;
             if (input->OnPress) {
                 input->OnPress(input->context);
             }
@@ -176,4 +177,5 @@ void C4_UI_Interaction_Reset(C4_UI_Interaction* input) {
     input->isHovered = false;
     input->isPressed = false;
     input->isRepeating = false;
+    input->timing.pressTimer = 0.f;
 }
