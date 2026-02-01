@@ -15,8 +15,8 @@ This project uses **vcpkg** for desktop dependencies. It is included as a git su
 git submodule update --init --recursive
 ```
 2. **Bootstrap vcpkg** (This creates the actual vcpkg executable)
-    * **Windows:** `.\vcpkg\bootstrap-vcpkg.bat`
-    * **Mac/Linux:** `./vcpkg/bootstrap-vcpkg.sh`
+    * **Windows:** `.\vcpkg\bootstrap-vcpkg.bat -disableMetrics`
+    * **Mac/Linux:** `./vcpkg/bootstrap-vcpkg.sh -disableMetrics`
 
 ## Platform Specific Dependencies
 
