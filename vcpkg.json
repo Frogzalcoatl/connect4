@@ -16,7 +16,8 @@
         {
             "name": "discord-rpc",
             "platform": "!android"
-        }
+        },
+        "sdl3-mixer"
     ],
-    "builtin-baseline": "4e39a8622e56a113c89228e4e13944dce8654da7"
+    "builtin-baseline": "44819aa2a6c10e56065e2b0330e7d6c89d1d2574"
 }

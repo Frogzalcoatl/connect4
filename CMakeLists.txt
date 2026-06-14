@@ -131,6 +131,7 @@ else()
     find_package(SDL3 CONFIG REQUIRED)
     find_package(SDL3_image CONFIG REQUIRED)
     find_package(SDL3_ttf CONFIG REQUIRED)
+    find_package(SDL3_mixer CONFIG REQUIRED)
     
     # Discord RPC (Desktop Only)
     find_path(DISCORD_INCLUDE_DIR discord_rpc.h)
@@ -143,21 +144,6 @@ else()
             INTERFACE_INCLUDE_DIRECTORIES "${DISCORD_INCLUDE_DIR}"
         )
     endif()
-
-    # --- SDL3_mixer (Desktop Hybrid) ---
-    # Note: Configuration is already done at the top of the file!
-    
-    # Silence Deprecation Warnings for Mixer
-    set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
-    set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS ON CACHE BOOL "" FORCE)
-
-    include(FetchContent)
-    FetchContent_Declare(SDL3_mixer
-        GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
-        GIT_TAG prerelease-3.1.2 
-        GIT_SHALLOW OFF
-    )
-    FetchContent_MakeAvailable(SDL3_mixer)
 endif()
 
 # SILENCE WARNINGS (Mixer dependencies)
