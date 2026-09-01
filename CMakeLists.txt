@@ -1,407 +1,291 @@
-# Needed ai for this ngl
+cmake_minimum_required(VERSION 3.26)
 
-set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+# Vcpkg implementation influenced by AI
+# Check if the developer has a global vcpkg defined in their environment variables
+if(DEFINED ENV{VCPKG_ROOT})
+    set(VCPKG_DIR "$ENV{VCPKG_ROOT}")
+    message(STATUS "[vcpkg] Using global installation found in environment: ${VCPKG_DIR}")
+else()
+    # Fallback to local bootstrapping if no global vcpkg is found
+    set(VCPKG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.vcpkg")
+    if(NOT EXISTS "${VCPKG_DIR}/vcpkg" AND NOT EXISTS "${VCPKG_DIR}/vcpkg.exe")
+        message(STATUS "[vcpkg] Global VCPKG_ROOT not found. Bootstrapping local vcpkg...")
+        # Depth 1 means only cloning the latest commit without the entire repository history
+        execute_process(
+            COMMAND git clone --depth 1 https://github.com/microsoft/vcpkg.git "${VCPKG_DIR}"
+            RESULT_VARIABLE CLONE_RESULT
+        )
+        if(NOT CLONE_RESULT EQUAL 0)
+            message(FATAL_ERROR "Failed to clone vcpkg repository.")
+        endif()
+        if(WIN32)
+            execute_process(
+                COMMAND "${VCPKG_DIR}/bootstrap-vcpkg.bat" -disableMetrics
+                WORKING_DIRECTORY "${VCPKG_DIR}"
+                RESULT_VARIABLE BOOTSTRAP_RESULT
+            )
+        else()
+            execute_process(
+                COMMAND sh "${VCPKG_DIR}/bootstrap-vcpkg.sh" -disableMetrics
+                WORKING_DIRECTORY "${VCPKG_DIR}"
+                RESULT_VARIABLE BOOTSTRAP_RESULT
+            )
+        endif()
+        if(NOT BOOTSTRAP_RESULT EQUAL 0)
+            message(FATAL_ERROR "Failed to bootstrap vcpkg compiler.")
+        endif()
+    else()
+        message(STATUS "[vcpkg] Using existing local installation: ${VCPKG_DIR}")
+    endif()
+endif()
+set(CMAKE_TOOLCHAIN_FILE "${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
 
-cmake_minimum_required(VERSION 3.22)
-project(Connect4 LANGUAGES C CXX)
+# Static lib setup
+cmake_policy(SET CMP0091 NEW)
+# $<$<CONFIG:Debug>:Debug> Explanation
+# In Debug: Becomes "MultiThreadedDebug" (/MTd).
+# In Release: Becomes "MultiThreaded" (/MT).
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
-set(GAME_VERSION 1.0)
+# Project/Executable file name Here:
+project(Connect4 C CXX)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# SDL_Mixer Config
+# Compile definition cmake var initialization
+set(ASSETS_FOLDER_NAME "assets")
+set(PACK_FILE_NAME "${PROJECT_NAME}.dat")
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg.json" VCPKG_JSON_DATA)
+string(JSON GAME_VERSION GET "${VCPKG_JSON_DATA}" "version")
+message(STATUS "Configuring ${PROJECT_NAME} - Version: ${GAME_VERSION}")
 
-# Build Type
-set(SDLMIXER_SHARED OFF CACHE BOOL "Force static" FORCE)
-set(SDLMIXER_STATIC ON  CACHE BOOL "Force static" FORCE)
-set(SDLMIXER_VENDORED ON CACHE BOOL "Use vendored deps" FORCE)
-
-# Enabled Formats
-set(SDLMIXER_OGG ON CACHE BOOL "Enable OGG" FORCE)
-
-# Disabled Formats (Keep lightweight)
-set(SDLMIXER_FLAC OFF CACHE BOOL "Disable FLAC" FORCE)
-set(SDLMIXER_MIDI OFF CACHE BOOL "Disable MIDI" FORCE)
-set(SDLMIXER_MP3 OFF CACHE BOOL "Disable MP3" FORCE)
-set(SDLMIXER_MOD  OFF CACHE BOOL "Disable MOD"  FORCE)
-set(SDLMIXER_OPUS OFF CACHE BOOL "Disable OPUS" FORCE)
-set(SDLMIXER_GME  OFF CACHE BOOL "Disable Game Music Emu" FORCE)
-set(SDLMIXER_XMP  OFF CACHE BOOL "Disable XMP" FORCE)
-set(SDLMIXER_WAVPACK OFF CACHE BOOL "Disable WavPack" FORCE)
-
-# Advanced Optimizations (Optional, good for Android)
-option(USE_ASSEMBLY_OPTIMIZATIONS "Enable YASM assembly optimizations" OFF)
-if(USE_ASSEMBLY_OPTIMIZATIONS)
-    set(SDLMIXER_MP3_MPG123 ON CACHE BOOL "Enable mpg123" FORCE)
-    set(SDLMIXER_MP3_MINIMP3 OFF CACHE BOOL "Disable minimp3" FORCE)
-else()
-    set(SDLMIXER_MP3_MPG123 OFF CACHE BOOL "Disable mpg123" FORCE)
-    set(SDLMIXER_MP3_MINIMP3 ON  CACHE BOOL "Enable minimp3" FORCE)
+# Libraries
+find_package(SDL3 REQUIRED)
+find_package(SDL3_image REQUIRED)
+find_package(SDL3_ttf REQUIRED)
+find_package(SDL3_mixer REQUIRED)
+set(USE_DISCORD_RPC FALSE)
+if(WIN32 OR (APPLE AND NOT IOS) OR LINUX)
+    set(USE_DISCORD_RPC TRUE)
 endif()
-
-# Explicitly disable libflac to avoid searching for YASM/NASM
-set(SDLMIXER_FLAC_LIBFLAC OFF CACHE BOOL "Disable libflac" FORCE)
-
-# --- DEPENDENCY STRATEGY ---
-if(ANDROID)
-    # ANDROID: Build dependencies from source
-    message(STATUS "Android build detected: Fetching dependencies from source...")
-    
-    set(OLD_CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
-    set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-
-    if(MSVC)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W0")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W0")
-    else()
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
-    endif()
-    
-    include(FetchContent)
-
-    FetchContent_Declare(SDL3
-        GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-        GIT_TAG release-3.4.0
-        GIT_SHALLOW OFF
-    )
-    FetchContent_MakeAvailable(SDL3)
-
-    # DISABLE complex formats that require external tools (like NASM)
-    set(SDLIMAGE_AVIF OFF CACHE BOOL "Disable AVIF to avoid NASM dependency" FORCE)
-    
-    # Disable heavy formats (slow build)
-    set(SDLIMAGE_JXL  OFF CACHE BOOL "Disable JXL to speed up build" FORCE)
-    set(SDLIMAGE_WEBP OFF CACHE BOOL "Disable WEBP to speed up build" FORCE)
-    set(SDLIMAGE_TIF  OFF CACHE BOOL "Disable TIFF to speed up build" FORCE)
-    
-    # Disable other uneeded formats
-    set(SDLIMAGE_BMP  OFF CACHE BOOL "Disable BMP"  FORCE)
-    set(SDLIMAGE_GIF  OFF CACHE BOOL "Disable GIF"  FORCE)
-    set(SDLIMAGE_JPG  OFF CACHE BOOL "Disable JPG"  FORCE)
-    set(SDLIMAGE_LBM  OFF CACHE BOOL "Disable LBM"  FORCE)
-    set(SDLIMAGE_PCX  OFF CACHE BOOL "Disable PCX"  FORCE)
-    set(SDLIMAGE_PNM  OFF CACHE BOOL "Disable PNM"  FORCE)
-    set(SDLIMAGE_QOI  OFF CACHE BOOL "Disable QOI"  FORCE)
-    set(SDLIMAGE_STB  OFF CACHE BOOL "Disable STB"  FORCE)
-    set(SDLIMAGE_TGA  OFF CACHE BOOL "Disable TGA"  FORCE)
-    set(SDLIMAGE_XCF  OFF CACHE BOOL "Disable XCF"  FORCE)
-    set(SDLIMAGE_XPM  OFF CACHE BOOL "Disable XPM"  FORCE)
-    set(SDLIMAGE_XV   OFF CACHE BOOL "Disable XV"   FORCE)
-    
-    # Enabled formats
-    set(SDLIMAGE_PNG ON CACHE BOOL "Enable PNG" FORCE)
-    set(SDLIMAGE_SVG ON CACHE BOOL "Enable SVG" FORCE)
-    
-    FetchContent_Declare(SDL3_image
-        GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
-        GIT_TAG release-3.2.0
-        GIT_SHALLOW OFF
-    )
-    FetchContent_MakeAvailable(SDL3_image)
-
-    set(SDLTTF_VENDORED ON CACHE BOOL "" FORCE)
-    FetchContent_Declare(SDL3_ttf
-        GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
-        GIT_TAG release-3.2.0
-        GIT_SHALLOW OFF
-    )
-    FetchContent_MakeAvailable(SDL3_ttf)
-    
-    FetchContent_Declare(SDL3_mixer
-        GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
-        GIT_TAG prerelease-3.1.2
-        GIT_SHALLOW OFF
-    )
-    FetchContent_MakeAvailable(SDL3_mixer)
-
-    set(CMAKE_C_FLAGS ${OLD_CMAKE_C_FLAGS})
-    set(CMAKE_CXX_FLAGS ${OLD_CMAKE_CXX_FLAGS})
-    
-else()
-    # DESKTOP: Use vcpkg for most, Manual Fetch for Mixer
-    message(STATUS "Desktop build detected: Using vcpkg...")
-
-    if(NOT ANDROID)
-        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-        set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-    endif()
-
-    find_package(SDL3 CONFIG REQUIRED)
-    find_package(SDL3_image CONFIG REQUIRED)
-    find_package(SDL3_ttf CONFIG REQUIRED)
-    find_package(SDL3_mixer CONFIG REQUIRED)
-    
-    # Discord RPC (Desktop Only)
-    find_path(DISCORD_INCLUDE_DIR discord_rpc.h)
-    find_library(DISCORD_LIBRARY NAMES discord-rpc)
-
-    if(DISCORD_INCLUDE_DIR AND DISCORD_LIBRARY)
-        add_library(discord-rpc::discord-rpc STATIC IMPORTED)
-        set_target_properties(discord-rpc::discord-rpc PROPERTIES
-            IMPORTED_LOCATION "${DISCORD_LIBRARY}"
-            INTERFACE_INCLUDE_DIRECTORIES "${DISCORD_INCLUDE_DIR}"
-        )
-    endif()
-endif()
-
-# SILENCE WARNINGS (Mixer dependencies)
-foreach(target SDL3_mixer SDL3_mixer-static SDL3_mixer-shared ogg vorbis vorbisenc vorbisfile opus)
-    if(TARGET ${target})
-        if(MSVC)
-            target_compile_options(${target} PRIVATE /W0)
+if(USE_DISCORD_RPC)
+    find_path(DISCORD_INCLUDE_DIR NAMES discord_rpc.h)
+    # Discord rpc static lib implementation influenced by AI
+    if(DISCORD_INCLUDE_DIR)
+        # Get the root installation directory of the triplet (the parent of /include)
+        get_filename_component(DISCORD_ROOT "${DISCORD_INCLUDE_DIR}/.." ABSOLUTE)
+        # Construct the platform-independent library filename (e.g. "discord-rpc.lib" or "libdiscord-rpc.a")
+        set(DISCORD_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}discord-rpc${CMAKE_STATIC_LIBRARY_SUFFIX}")
+        # Directly construct the Release and Debug absolute paths
+        set(DISCORD_LIBRARY_RELEASE "${DISCORD_ROOT}/lib/${DISCORD_LIB_NAME}")
+        set(DISCORD_LIBRARY_DEBUG "${DISCORD_ROOT}/debug/lib/${DISCORD_LIB_NAME}")
+        # Print paths to the output during configuration for easy verification
+        message(STATUS "[Discord-RPC] Found header at: ${DISCORD_INCLUDE_DIR}")
+        message(STATUS "[Discord-RPC] Release library: ${DISCORD_LIBRARY_RELEASE}")
+        message(STATUS "[Discord-RPC] Debug library:   ${DISCORD_LIBRARY_DEBUG}")
+        if(EXISTS "${DISCORD_LIBRARY_RELEASE}" AND EXISTS "${DISCORD_LIBRARY_DEBUG}")
+            add_library(discord-rpc::discord-rpc STATIC IMPORTED)
+            set_target_properties(discord-rpc::discord-rpc PROPERTIES
+                INTERFACE_INCLUDE_DIRECTORIES "${DISCORD_INCLUDE_DIR}"
+                IMPORTED_CONFIGURATIONS "RELEASE;DEBUG"
+                IMPORTED_LOCATION_RELEASE "${DISCORD_LIBRARY_RELEASE}"
+                IMPORTED_LOCATION_DEBUG "${DISCORD_LIBRARY_DEBUG}"
+            )
+        elseif(EXISTS "${DISCORD_LIBRARY_RELEASE}")
+            # Fallback if only Release is available
+            add_library(discord-rpc::discord-rpc STATIC IMPORTED)
+            set_target_properties(discord-rpc::discord-rpc PROPERTIES
+                INTERFACE_INCLUDE_DIRECTORIES "${DISCORD_INCLUDE_DIR}"
+                IMPORTED_LOCATION "${DISCORD_LIBRARY_RELEASE}"
+            )
         else()
-            target_compile_options(${target} PRIVATE -w)
+            message(WARNING "[Discord-RPC] Could not locate the library file: ${DISCORD_LIBRARY_RELEASE}")
         endif()
     endif()
-endforeach()
+endif()
 
-# --- SOURCES ---
+# Source C Files
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.c")
-list(FILTER SOURCES EXCLUDE REGEX ".*packer.c$")
 
-set(PLATFORM_LIBS "")
-
-if(ANDROID)
-    # Android requires a shared library named 'main'
-    add_library(main SHARED ${SOURCES})
-    set(EXE_NAME main)
-    # Android specific system libs
-    list(APPEND PLATFORM_LIBS m log android)
+if (ANDROID)
+    list(APPEND SOURCES src/system/Android.cpp)
+    add_library(${PROJECT_NAME} SHARED ${SOURCES})
 else()
-    # Desktop Build
-    set(EXE_NAME ${PROJECT_NAME})
-    set(PLATFORM_SRCS "")
-
-    if(WIN32)
-        set(ICON_RC resources/connect4.rc)
-        list(APPEND PLATFORM_SRCS ${ICON_RC})
-    elseif(APPLE)
-        set(ICON_MACOS resources/icon.icns)
-        list(APPEND PLATFORM_SRCS ${ICON_MACOS})
-        set_source_files_properties(${ICON_MACOS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-    endif()
-
-    add_executable(${EXE_NAME} MACOSX_BUNDLE ${SOURCES} ${PLATFORM_SRCS})
+    add_executable(${PROJECT_NAME} ${SOURCES})
 endif()
 
-# --- COMPILER OPTIONS ---
+target_include_directories(${PROJECT_NAME} PRIVATE src)
+add_subdirectory(libs/vfs)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    SDL3::SDL3
+    SDL3_image::SDL3_image
+    SDL3_ttf::SDL3_ttf
+    SDL3_mixer::SDL3_mixer
+    VirtualFileSystem
+)
+if(USE_DISCORD_RPC AND TARGET discord-rpc::discord-rpc)
+    target_link_libraries(${PROJECT_NAME} PRIVATE discord-rpc::discord-rpc)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_DISCORD_RPC)
+endif()
+
+# I like strict compilers
 if(MSVC)
-    target_compile_options(${EXE_NAME} PRIVATE /W4)
-    target_compile_definitions(${EXE_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
+    target_compile_options(${PROJECT_NAME} PRIVATE 
+        /W4
+        $<$<CONFIG:Release>:/WX> # Warnings as errors only in release
+    )
 else()
-    target_compile_options(${EXE_NAME} PRIVATE -Wall -Wextra -pedantic)
-    if (CMAKE_C_COMPILER_ID MATCHES "Clang")
-        target_compile_options(${EXE_NAME} PRIVATE -Wno-newline-eof -Wno-deprecated-declarations)
-    endif()
-endif()
-
-if(WIN32)
-    set_target_properties(${EXE_NAME} PROPERTIES WIN32_EXECUTABLE "$<NOT:$<CONFIG:Debug>>")
-endif()
-
-if(APPLE)
-    set_target_properties(${EXE_NAME} PROPERTIES
-        MACOSX_BUNDLE_ICON_FILE "icon.icns"
-        MACOSX_BUNDLE_GUI_IDENTIFIER "com.frogzalcoatl.${EXE_NAME}"
-        MACOSX_BUNDLE_BUNDLE_NAME "Connect4"
-        MACOSX_BUNDLE_SHORT_VERSION_STRING "${GAME_VERSION}"
-        MACOSX_BUNDLE_BUNDLE_VERSION "${GAME_VERSION}"
-        MACOSX_BUNDLE_COPYRIGHT "Copyright © 2026 Frogzalcoatl. GPLv3."
-        MACOSX_BUNDLE_INFO_PLIST_VERSION "${GAME_VERSION}"
+    target_compile_options(${PROJECT_NAME} PRIVATE 
+        -Wall 
+        -Wextra 
+        -Wconversion
+        $<$<CONFIG:Release>:-Werror> # Warnings as errors only in release
     )
 endif()
 
-# Sanitizers (Linux/Mac only, Disable for MinGW)
-if(NOT MSVC AND NOT MINGW AND NOT ANDROID)
-    target_compile_options(${EXE_NAME} PRIVATE $<$<CONFIG:Debug>:-fsanitize=address,undefined>)
-    target_link_options(${EXE_NAME} PRIVATE $<$<CONFIG:Debug>:-fsanitize=address,undefined>)
-endif()
-
-# --- LINKING ---
-if(ANDROID)
-    # On Android, jni.h is part of the system sysroot so it doesnt need to be found
-    message(STATUS "Android: Using NDK JNI headers")
-    # No action needed for the build, but for IntelliSense:
-    target_include_directories(${EXE_NAME} PRIVATE ${CMAKE_SYSROOT}/usr/include)
-else()
-    # On Desktop, finding the installed Java JDK is required
-    find_package(JNI)
-    if(JNI_FOUND)
-        target_include_directories(${EXE_NAME} PRIVATE ${JNI_INCLUDE_DIRS})
-    endif()
-endif()
-
-if(TARGET SDL3_mixer AND NOT TARGET SDL3_mixer::SDL3_mixer)
-    add_library(SDL3_mixer::SDL3_mixer ALIAS SDL3_mixer)
-endif()
-
-target_link_libraries(${EXE_NAME} PRIVATE 
-    SDL3::SDL3 
-    SDL3_image::SDL3_image 
-    SDL3_mixer::SDL3_mixer
-    SDL3_ttf::SDL3_ttf
-    ${PLATFORM_LIBS}
+target_compile_definitions(${PROJECT_NAME} PRIVATE _USE_MATH_DEFINES)
+target_compile_definitions(${PROJECT_NAME} PRIVATE 
+    GameVersion="${GAME_VERSION}"
+    AssetsFolderName="${ASSETS_FOLDER_NAME}"
+    PackFileName="${PACK_FILE_NAME}"
 )
 
 if(NOT ANDROID)
-    target_link_libraries(${EXE_NAME} PRIVATE discord-rpc::discord-rpc)
-    target_compile_definitions(${EXE_NAME} PRIVATE USE_DISCORD)
-endif()
-
-target_include_directories(${EXE_NAME} PUBLIC 
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_BINARY_DIR}/generated
-)
-
-target_compile_definitions(${EXE_NAME} PRIVATE _USE_MATH_DEFINES)
-
-# --- ASSET PACKER TOOL ---
-set(PACKER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src/tools")
-set(MASTER_DAT_NAME ${CMAKE_PROJECT_NAME})
-set(MASTER_DAT_PATH "${CMAKE_BINARY_DIR}/${MASTER_DAT_NAME}.dat")
-set(LIST_FILE_PATH "${CMAKE_BINARY_DIR}/assets_list.txt")
-
-# Helper to determine warning silence flag
-if(MSVC)
-    set(SILENCE_WARNING_FLAG "/W0")
-else()
-    set(SILENCE_WARNING_FLAG "-w")
-endif()
-
-# Always generate the header and asset list (needed for compilation/packing)
-set(GENERATED_HEADER_PATH "${CMAKE_BINARY_DIR}/generated/${CMAKE_PROJECT_NAME}/dat.h")
-file(WRITE "${GENERATED_HEADER_PATH}" "// Auto-generated.\n#pragma once\n\n#define MASTER_DAT_PATH \"${MASTER_DAT_NAME}.dat\"\n#define GAME_VERSION ${GAME_VERSION}")
-
-file(GLOB_RECURSE RAW_ASSETS "${CMAKE_SOURCE_DIR}/assets/*")
-set(ASSET_LIST_TEXT "")
-foreach(entry ${RAW_ASSETS})
-    if(NOT IS_DIRECTORY ${entry})
-        file(RELATIVE_PATH rel_path "${CMAKE_SOURCE_DIR}" "${entry}")
-        string(APPEND ASSET_LIST_TEXT "${rel_path}\n")
+    if(WIN32)
+        set_target_properties(${PROJECT_NAME} PROPERTIES 
+            WIN32_EXECUTABLE $<CONFIG:Release>
+        )
     endif()
-endforeach()
-file(WRITE "${LIST_FILE_PATH}" "${ASSET_LIST_TEXT}")
-
-if(CMAKE_CROSSCOMPILING)
-    # ANDROID CASE: Compile Packer for the Host machine
+    add_custom_target(copy_assets
+        COMMAND ${CMAKE_COMMAND} -E remove -f "$<TARGET_FILE_DIR:${PROJECT_NAME}>/${PACK_FILE_NAME}"
+        COMMAND ${CMAKE_COMMAND} -E remove_directory "$<TARGET_FILE_DIR:${PROJECT_NAME}>/${ASSETS_FOLDER_NAME}"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+                "${CMAKE_CURRENT_SOURCE_DIR}/${ASSETS_FOLDER_NAME}"
+                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/${ASSETS_FOLDER_NAME}"
+        DEPENDS ${PROJECT_NAME}
+        COMMENT "VFS (Desktop): Copying raw assets directory next to executable and removing old pack file..."
+        VERBATIM
+    )
+    add_custom_target(pack_assets ALL
+        COMMAND ${CMAKE_COMMAND} -E remove_directory "$<TARGET_FILE_DIR:${PROJECT_NAME}>/${ASSETS_FOLDER_NAME}"
+        COMMAND $<TARGET_FILE:Packer>
+                "${CMAKE_CURRENT_SOURCE_DIR}/${ASSETS_FOLDER_NAME}"
+                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/${PACK_FILE_NAME}"
+                "${GAME_VERSION}"
+        DEPENDS ${PROJECT_NAME} Packer
+        COMMENT "VFS (Desktop): Packing assets archive next to executable and removing raw assets..."
+        VERBATIM
+    )
+    add_custom_target(run
+        COMMAND $<TARGET_FILE:${PROJECT_NAME}>
+        WORKING_DIRECTORY $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        DEPENDS ${PROJECT_NAME} pack_assets
+        COMMENT "Executing ${PROJECT_NAME}..."
+        USES_TERMINAL
+    )
+else()
+    # Android crosscompiling implementation influenced by AI
+    set(ANDROID_PROJ_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android-project")
+    set(ANDROID_PROJ_DIR_MAIN "${ANDROID_PROJ_DIR}/app/src/main")
+    set(ANDROID_JNILIBS_DIR "${ANDROID_PROJ_DIR_MAIN}/jniLibs/${CMAKE_ANDROID_ARCH_ABI}")
+    set(ANDROID_ASSETS_DIR "${ANDROID_PROJ_DIR_MAIN}/assets")
+    # Map CMAKE_ANDROID_ARCH_ABI to the corresponding output directory name
+    if(CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a")
+        set(ANDROID_OUTPUT_DIR "android-arm64")
+    elseif(CMAKE_ANDROID_ARCH_ABI STREQUAL "x86_64")
+        set(ANDROID_OUTPUT_DIR "android-x86_64")
+    else()
+        set(ANDROID_OUTPUT_DIR "android-${CMAKE_ANDROID_ARCH_ABI}")
+    endif()
+    # Explicitly direct the output folder to be inside the build/<arch>/bin directory
+    set(ANDROID_BIN_DEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build/${ANDROID_OUTPUT_DIR}/bin")
+    if(CMAKE_HOST_WIN32)
+        set(GRADLE_CMD "gradlew.bat")
+    else()
+        set(GRADLE_CMD "./gradlew")
+    endif()
+    if(CMAKE_HOST_UNIX)
+        set(CHMOD_COMMAND COMMAND chmod +x "${ANDROID_PROJ_DIR}/${GRADLE_CMD}")
+    else()
+        set(CHMOD_COMMAND)
+    endif()
+    set(PREPARE_JNILIBS_COMMANDS
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${ANDROID_PROJ_DIR_MAIN}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${ANDROID_JNILIBS_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                "$<TARGET_FILE:${PROJECT_NAME}>" 
+                "${ANDROID_JNILIBS_DIR}/$<TARGET_FILE_NAME:${PROJECT_NAME}>"
+    )
+    set(GRADLE_COMMANDS
+        ${CHMOD_COMMAND}
+        COMMAND "${ANDROID_PROJ_DIR}/${GRADLE_CMD}" "assemble$<IF:$<CONFIG:Debug>,Debug,Release>"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${ANDROID_BIN_DEST_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${ANDROID_PROJ_DIR}/app/build/outputs/apk/$<IF:$<CONFIG:Debug>,debug/app-debug.apk,release/app-release-unsigned.apk>"
+                "${ANDROID_BIN_DEST_DIR}/$<IF:$<CONFIG:Debug>,app-debug.apk,app-release-unsigned.apk>"
+    )
     include(ExternalProject)
     set(HOST_BUILD_DIR "${CMAKE_BINARY_DIR}/host_packer_build")
-    set(PACKER_TOOL "${HOST_BUILD_DIR}/packer")
+    # Setup the host compiler arguments
+    set(HOST_CMAKE_ARGS 
+        "-DCMAKE_BUILD_TYPE=Release"
+        "-DHOST_BUILD=ON"
+        "-DCMAKE_TOOLCHAIN_FILE=" # Clear the parent's Android cross-compiling toolchain
+        "-DVCPKG_MANIFEST_MODE=OFF" # Prevent host packer from processing your game's vcpkg.json
+    )
+    # Use single-config Ninja for the host tool to avoid complex configuration subdirectories
+    set(HOST_GENERATOR CMAKE_GENERATOR "Ninja")
     if(CMAKE_HOST_WIN32)
-        set(PACKER_TOOL "${HOST_BUILD_DIR}/packer.exe")
+        set(PACKER_TOOL "${HOST_BUILD_DIR}/Packer.exe")
+    else()
+        set(PACKER_TOOL "${HOST_BUILD_DIR}/Packer")
     endif()
-
+    # Spawns a background compiler targeting your Desktop environment to build Packer
     ExternalProject_Add(host_packer_project
-        SOURCE_DIR ${PACKER_SOURCE_DIR}
-        BINARY_DIR ${HOST_BUILD_DIR}
-        CMAKE_ARGS 
-            "-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${HOST_BUILD_DIR}"
-            "-DCMAKE_BUILD_TYPE=Release"
-            "-DCMAKE_C_FLAGS=${SILENCE_WARNING_FLAG}"
+        SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libs/vfs"
+        BINARY_DIR "${HOST_BUILD_DIR}"
+        ${HOST_GENERATOR}
+        CMAKE_ARGS ${HOST_CMAKE_ARGS}
         INSTALL_COMMAND ""
-        BUILD_ALWAYS 1
     )
-    set(PACKER_DEPENDS host_packer_project)
-else()
-    # DESKTOP CASE: Build Packer normally
-    add_subdirectory(src/tools)
-    if(TARGET packer)
-        set_target_properties(packer PROPERTIES 
-            # This trick ($<1:...>) prevents multi-config generators from appending /Debug or /Release
-            RUNTIME_OUTPUT_DIRECTORY "$<1:${CMAKE_BINARY_DIR}/tools>"
-        )
-        if(MSVC)
-            target_compile_options(packer PRIVATE /W0)
-            target_compile_definitions(packer PRIVATE _CRT_SECURE_NO_WARNINGS)
-        else()
-            target_compile_options(packer PRIVATE -w)
-        endif()
-    endif()
-    set(PACKER_TOOL $<TARGET_FILE:packer>)
-    set(PACKER_DEPENDS packer)
-endif()
-
-# --- ASSET EXECUTION LOGIC (Post-Build) ---
-
-if(ANDROID)
-    # Android: Always use the packer
-    add_dependencies(${EXE_NAME} host_packer_project)
-    add_custom_command(TARGET ${EXE_NAME} POST_BUILD
-        COMMAND ${PACKER_TOOL} "${LIST_FILE_PATH}" "${MASTER_DAT_PATH}" "${GAME_VERSION}"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${MASTER_DAT_PATH}" "${CMAKE_SOURCE_DIR}/android/app/src/main/assets/${MASTER_DAT_NAME}.dat"
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Packing assets for Android..."
+    add_custom_target(copy_assets
+        COMMAND ${CMAKE_COMMAND} -E remove_directory "${ANDROID_ASSETS_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${ANDROID_ASSETS_DIR}"
+        # Setup libs and copy .so files
+        ${PREPARE_JNILIBS_COMMANDS}
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+                "${CMAKE_CURRENT_SOURCE_DIR}/${ASSETS_FOLDER_NAME}"
+                "${ANDROID_ASSETS_DIR}"
+        # Compile APK with Gradle
+        ${GRADLE_COMMANDS}
+        WORKING_DIRECTORY "${ANDROID_PROJ_DIR}"
+        DEPENDS ${PROJECT_NAME}
+        COMMENT "VFS: Packaging raw assets folder and compiling APK..."
+        VERBATIM
     )
-else()
-    # Desktop: Logic depends on Build Preset
-    add_custom_command(TARGET ${EXE_NAME} POST_BUILD
-        # 1. RELEASE/OTHER: Run Packer
-        COMMAND $<$<NOT:$<CONFIG:Debug>>:${PACKER_TOOL}> $<$<NOT:$<CONFIG:Debug>>:${LIST_FILE_PATH}> $<$<NOT:$<CONFIG:Debug>>:${MASTER_DAT_PATH}> $<$<NOT:$<CONFIG:Debug>>:${GAME_VERSION}>
-        COMMAND $<$<NOT:$<CONFIG:Debug>>:${CMAKE_COMMAND}> -E copy_if_different $<$<NOT:$<CONFIG:Debug>>:${MASTER_DAT_PATH}> "$<TARGET_FILE_DIR:${EXE_NAME}>/${MASTER_DAT_NAME}.dat"
-        
-        # 2. DEBUG: Copy raw folder instead
-        COMMAND $<$<CONFIG:Debug>:${CMAKE_COMMAND}> -E copy_directory "${CMAKE_SOURCE_DIR}/assets" "$<TARGET_FILE_DIR:${EXE_NAME}>/assets"
-        
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Processing assets for $<CONFIG>..."
+    add_custom_target(pack_assets ALL
+        COMMAND ${CMAKE_COMMAND} -E remove_directory "${ANDROID_ASSETS_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${ANDROID_ASSETS_DIR}"
+        ${PREPARE_JNILIBS_COMMANDS}
+        # Execute the compiled Host Packer to write the pack file inside the assets folder
+        COMMAND "${PACKER_TOOL}" 
+                "${CMAKE_CURRENT_SOURCE_DIR}/${ASSETS_FOLDER_NAME}" 
+                "${ANDROID_ASSETS_DIR}/${PACK_FILE_NAME}" 
+                "${GAME_VERSION}"
+        ${GRADLE_COMMANDS}
+        WORKING_DIRECTORY "${ANDROID_PROJ_DIR}"
+        DEPENDS ${PROJECT_NAME} host_packer_project
+        COMMENT "VFS: Building host Packer, packing assets bundle, and compiling APK..."
+        VERBATIM
+    )
+    add_custom_target(install_and_run
+        COMMAND adb install -r "${ANDROID_BIN_DEST_DIR}/$<IF:$<CONFIG:Debug>,app-debug.apk,app-release-unsigned.apk>"
+        COMMAND adb shell am start -n "com.frogzalcoatl.platformer/org.libsdl.app.SDLActivity"
+        DEPENDS pack_assets
+        COMMENT "VFS: Deploying APK and launching..."
+        USES_TERMINAL
+        VERBATIM
     )
 endif()
-
-install(TARGETS ${EXE_NAME} 
-    BUNDLE  DESTINATION .
-    RUNTIME DESTINATION .
-)
-install(FILES "${MASTER_DAT_PATH}" DESTINATION .)
-
-if(UNIX AND NOT APPLE AND NOT ANDROID)
-    # Install the .desktop file
-    install(FILES "resources/connect4.desktop" DESTINATION "share/applications")
-    
-    # Install the Icon (Linux looks in share/icons/hicolor/...)
-    install(FILES "resources/icon.png" DESTINATION "share/icons/hicolor/512x512/apps" RENAME "resources/icon-desktop-512x512.png")
-    
-    # Install AppStream metadata
-    install(FILES "resources/com.frogzalcoatl.connect4.metainfo.xml" DESTINATION "share/metainfo")
-endif()
-
-# --- CPACK CONFIGURATION ---
-set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
-set(CPACK_PACKAGE_VENDOR "Frogzalcoatl")
-set(CPACK_PACKAGE_VERSION "${GAME_VERSION}")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-
-set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-v${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_VENDOR}-${CPACK_PACKAGE_NAME}")
-
-if(APPLE)
-    set(CPACK_GENERATOR "DragNDrop")
-    set(CPACK_DMG_VOLUME_NAME "${PROJECT_NAME}")
-    set(CPACK_BUNDLE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/resources/icon.icns")
-elseif(UNIX AND NOT APPLE AND NOT ANDROID)
-    # Generate both DEB, RPM and a generic Tarball for Arch/others
-    set(CPACK_GENERATOR "DEB;RPM;TGZ")
-
-    # DEB Specifics (Ubuntu/Debian)
-    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Frogzalcoatl <frogzalcoatl@gmail.com>")
-    set(CPACK_DEBIAN_PACKAGE_SECTION "games")
-    # Tell Linux it needs SDL3 installed to run
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libsdl3, libsdl3-image, libsdl3-mixer") 
-
-    # RPM Specifics (Fedora)
-    set(CPACK_RPM_PACKAGE_LICENSE "MIT")
-    set(CPACK_RPM_PACKAGE_GROUP "Amusements/Games")
-    set(CPACK_RPM_PACKAGE_REQUIRES "sdl3, sdl3_image, sdl3_mixer")
-elseif(WIN32)
-    # Using Inno Setup for the actual EXE installer. This just creates a zip folder. See .vscode/tasks.json
-    install(CODE "
-        file(GLOB DLLS \"${CMAKE_BINARY_DIR}/bin/\${CMAKE_INSTALL_CONFIG_NAME}/*.dll\")
-        if(DLLS)
-            file(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}\" TYPE SHARED_LIBRARY FILES \${DLLS})
-        endif()
-    ")
-    set(CPACK_GENERATOR "ZIP")
-endif()
-
-include(CPack)

@@ -17,7 +17,16 @@
             "name": "discord-rpc",
             "platform": "!android"
         },
-        "sdl3-mixer"
+        {
+            "name": "sdl3-mixer",
+            "features": [
+                "libvorbis"
+            ]
+        },
+        {
+            "name": "discord-rpc",
+            "platform": "!android"
+        }
     ],
-    "builtin-baseline": "44819aa2a6c10e56065e2b0330e7d6c89d1d2574"
+    "builtin-baseline": "e861f04798ca54fa70ff906b5e43e5fc99b7f406"
 }
