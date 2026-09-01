@@ -225,6 +225,9 @@ static void C4_Game_SetScreen(C4_Game* game, C4_ScreenType type) {
     } else if (game->currentScreenType == C4_ScreenType_Game) {
         C4_Discord_UpdateStatus("In Multiplayer", NULL);
     }
+
+    // Reset controller whilepressed
+    game->currentScreen->canvas.focusedNode = NULL;
 }
 
 C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountToWin) {

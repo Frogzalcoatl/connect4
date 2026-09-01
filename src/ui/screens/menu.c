@@ -69,6 +69,11 @@ static void C4_MenuScreen_CloseWindowAndTask(void* context) {
     C4_Log("Ran window close callback with android remove task");
 }
 
+static void C4_MenuScreen_Button_Play(void* context) {
+    (void)context;
+    C4_PushEvent_ScreenChange(C4_ScreenType_Game);
+}
+
 static void C4_MenuScreen_HandleEvent(C4_UI_Screen* screen, SDL_Window* window, SDL_Event* event) {
     assert (screen && screen->data && window && event);
 
@@ -187,6 +192,7 @@ static void C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     };
     C4_UI_Buttons_SetChildrenButtonSizes(data->buttons, 800.f, 100.0f);
     data->buttons->selfAlign = C4_UI_Align_Center;
+    data->buttons->firstChild->nextSibling->input.OnPress = C4_MenuScreen_Button_Play;
     data->buttons->input.OnCancel = C4_MenuScreen_CloseWindow;
     data->buttons->lastChild->input.OnPress = C4_MenuScreen_CloseWindowAndTask;
     C4_UI_Canvas_AddNode(canvas, data->buttons);
