@@ -1,43 +1,16 @@
 cmake_minimum_required(VERSION 3.26)
 
-# Vcpkg implementation influenced by AI
-# Check if the developer has a global vcpkg defined in their environment variables
 if(DEFINED ENV{VCPKG_ROOT})
     set(VCPKG_DIR "$ENV{VCPKG_ROOT}")
     message(STATUS "[vcpkg] Using global installation found in environment: ${VCPKG_DIR}")
 else()
-    # Fallback to local bootstrapping if no global vcpkg is found
     set(VCPKG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.vcpkg")
-    if(NOT EXISTS "${VCPKG_DIR}/vcpkg" AND NOT EXISTS "${VCPKG_DIR}/vcpkg.exe")
-        message(STATUS "[vcpkg] Global VCPKG_ROOT not found. Bootstrapping local vcpkg...")
-        # Depth 1 means only cloning the latest commit without the entire repository history
-        execute_process(
-            COMMAND git clone --depth 1 https://github.com/microsoft/vcpkg.git "${VCPKG_DIR}"
-            RESULT_VARIABLE CLONE_RESULT
-        )
-        if(NOT CLONE_RESULT EQUAL 0)
-            message(FATAL_ERROR "Failed to clone vcpkg repository.")
-        endif()
-        if(WIN32)
-            execute_process(
-                COMMAND "${VCPKG_DIR}/bootstrap-vcpkg.bat" -disableMetrics
-                WORKING_DIRECTORY "${VCPKG_DIR}"
-                RESULT_VARIABLE BOOTSTRAP_RESULT
-            )
-        else()
-            execute_process(
-                COMMAND sh "${VCPKG_DIR}/bootstrap-vcpkg.sh" -disableMetrics
-                WORKING_DIRECTORY "${VCPKG_DIR}"
-                RESULT_VARIABLE BOOTSTRAP_RESULT
-            )
-        endif()
-        if(NOT BOOTSTRAP_RESULT EQUAL 0)
-            message(FATAL_ERROR "Failed to bootstrap vcpkg compiler.")
-        endif()
-    else()
-        message(STATUS "[vcpkg] Using existing local installation: ${VCPKG_DIR}")
-    endif()
 endif()
+
+if(NOT EXISTS "${VCPKG_DIR}/vcpkg" AND NOT EXISTS "${VCPKG_DIR}/vcpkg.exe")
+    message(FATAL_ERROR "Vcpkg installation not found at '${VCPKG_DIR}'. Please run the setup script for your platform first.")
+endif()
+
 set(CMAKE_TOOLCHAIN_FILE "${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
 
 # Static lib setup
@@ -52,15 +25,6 @@ project(Connect4 C CXX)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
-
-# Automatically copy compile_commands.json to the project root for clangd
-if(EXISTS "${CMAKE_BINARY_DIR}/compile_commands.json")
-    file(COPY_FILE
-        "${CMAKE_BINARY_DIR}/compile_commands.json"
-        "${CMAKE_SOURCE_DIR}/compile_commands.json"
-        ONLY_IF_DIFFERENT
-    )
-endif()
 
 # Compile definition cmake var initialization
 set(ASSETS_FOLDER_NAME "assets")
@@ -114,42 +78,7 @@ if(USE_DISCORD_RPC)
     endif()
 endif()
 
-# Source C Files
-set(SOURCES
-    src/android/quit.c
-    src/assets/fonts.c
-    src/assets/sounds.c
-    src/discord-rpc/index.c
-    src/game/board.c
-    src/game/connect4.c
-    src/game/consoleOutput.c
-    src/game/events.c
-    src/input/gamepad.c
-    src/input/interaction.c
-    src/instanceManager/index.c
-    src/instanceManager/posix.c
-    src/instanceManager/windows.c
-    src/physics/intersection.c
-    src/ui/draw/ellipse.c
-    src/ui/draw/rectangle.c
-    src/ui/draw/shapes.c
-    src/ui/draw/text.c
-    src/ui/draw/triangle.c
-    src/ui/draw/utils.c
-    src/ui/element/board.c
-    src/ui/element/button.c
-    src/ui/screens/game.c
-    src/ui/screens/menu.c
-    src/ui/screens/screen.c
-    src/ui/screens/settings.c
-    src/ui/canvas.c
-    src/ui/cursorStyle.c
-    src/ui/memoryArena.c
-    src/ui/node.c
-    src/ui/utils.c
-    src/ui/window.c
-    src/main.c
-)
+
 
 if (ANDROID)
     add_library(${PROJECT_NAME} SHARED ${SOURCES})

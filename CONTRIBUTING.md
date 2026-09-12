@@ -48,13 +48,17 @@ brew install cmake ninja
 
 * Install the SDL3 build dependencies [here](https://wiki.libsdl.org/SDL3/README-linux).
 
+### 3. Setup
+Run `setup.sh` (or `setup.bat` on windows) to create a compile_commands.json symlink for the clang language server, and clone Vcpkg locally if not installed globally.
+
 ## Building the Project
-Use a preset listed in [CMakePresets.json](https://github.com/Frogzalcoatl/connect4/blob/main/CMakePresets.json).
+See commands in `.vscode/tasks.json`. 
+They use a preset listed in [CMakePresets.json](https://github.com/Frogzalcoatl/connect4/blob/main/CMakePresets.json).
 ```
 cmake --preset windows
 cmake --build build/windows --target run
 ```
-Appending `--target run` is not required but opens the executable after building.
+Appending `--target run` is not required but runs the executable after building.
 
 # Android Crosscompiling
 ## Prerequisites
