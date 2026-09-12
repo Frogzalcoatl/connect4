@@ -1,18 +1,18 @@
 #include "Connect4/ui/memoryArena.h"
-#include "SDL3/SDL.h"
-#include "Connect4/ui/utils.h"
-#include "Connect4/game/consoleOutput.h"
+#include "Connect4/system/consoleOutput.h"
+#include <SDL3/SDL.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-// CPU pointer size (8 bytes on 64-bit). 
+// CPU pointer size (8 bytes on 64-bit).
 // Accessing memory at non-multiple addresses can cause CPU issues.
 #define C4_PTR_SIZE sizeof(void*)
- 
+
 // This is good for SIMD operations.
 // Those are smth fancy about using special hardware stuf like "SSE" and "AVX"
-// I dont think thats something im gonna use but ai suggested this line to be compatible with that so might as well
+// I dont think thats something im gonna use but ai suggested this line to be compatible with that
+// so might as well
 #define C4_ALIGNMENT (C4_PTR_SIZE * 2)
 
 // Bitmask used to clear the lower bits of an address.
@@ -31,7 +31,9 @@ void C4_Arena_Init(C4_MemoryArena* arena, size_t blockSize) {
 static C4_ArenaBlock* C4_Arena_CreateBlock(size_t size) {
     C4_ArenaBlock* block = SDL_malloc(sizeof(C4_ArenaBlock) + size);
     if (!block) {
-        C4_FatalError(C4_ErrorCode_OutOfMemory, "Failed to allocate new arena block of size: %zu", size);
+        C4_FatalError(
+            C4_ErrorCode_OutOfMemory, "Failed to allocate new arena block of size: %zu", size
+        );
     }
 
     block->next = NULL;
@@ -46,14 +48,12 @@ void* C4_Arena_Alloc(C4_MemoryArena* arena, size_t size) {
 
     size_t alignedSize = C4_ALIGN_UP(size);
 
-    if (
-        arena->currentBlock == NULL || 
-       (arena->currentBlock->offset + alignedSize) > arena->currentBlock->capacity
-    ) {
+    if (arena->currentBlock == NULL ||
+        (arena->currentBlock->offset + alignedSize) > arena->currentBlock->capacity) {
         size_t newSize = SDL_max(arena->defaultBlockSize, alignedSize);
-        
+
         C4_ArenaBlock* newBlock = C4_Arena_CreateBlock(newSize);
-        
+
         if (arena->currentBlock) {
             arena->currentBlock->next = newBlock;
         } else {
@@ -64,10 +64,10 @@ void* C4_Arena_Alloc(C4_MemoryArena* arena, size_t size) {
 
     void* ptr = arena->currentBlock->memory + arena->currentBlock->offset;
     arena->currentBlock->offset += alignedSize;
-    
+
     // Clear memory to zero
     SDL_memset(ptr, 0, alignedSize);
-    
+
     return ptr;
 }
 
@@ -90,11 +90,11 @@ void C4_Arena_LogMemoryUsage(C4_MemoryArena* arena) {
     double totalCapacityMB = totalCapacity / MB;
 
     if (totalMB == 0.f) {
-        C4_Log("Arena Memory: 0MB / %.3fMB", totalCapacityMB); 
+        C4_Log("Arena Memory: 0MB / %.3fMB", totalCapacityMB);
     } else if (totalMB < 0.001f) {
-        C4_Log("Arena Memory: < 0.001MB / %.3fMB", totalCapacityMB);   
+        C4_Log("Arena Memory: < 0.001MB / %.3fMB", totalCapacityMB);
     } else {
-        C4_Log("Arena Memory: %.3fMB / %.3fMB", totalMB, totalCapacityMB); 
+        C4_Log("Arena Memory: %.3fMB / %.3fMB", totalMB, totalCapacityMB);
     }
 }
 
@@ -115,7 +115,7 @@ void C4_Arena_Destroy(C4_MemoryArena* arena) {
 
 C4_ArenaTemp C4_Arena_BeginTemp(C4_MemoryArena* arena) {
     assert(arena);
-    
+
     return (C4_ArenaTemp){
         .arena = arena,
         .block = arena->currentBlock,
@@ -125,9 +125,9 @@ C4_ArenaTemp C4_Arena_BeginTemp(C4_MemoryArena* arena) {
 
 void C4_Arena_EndTemp(C4_ArenaTemp* temp) {
     assert(temp);
-    
+
     temp->arena->currentBlock = temp->block;
-    
+
     if (temp->arena->currentBlock) {
         temp->arena->currentBlock->offset = temp->offset;
     }

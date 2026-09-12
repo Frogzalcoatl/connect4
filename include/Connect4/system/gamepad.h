@@ -1,5 +1,5 @@
 #pragma once
-#include "SDL3/SDL.h"
+#include <SDL3/SDL.h>
 
 typedef enum C4_InputVerb {
     C4_INPUT_VERB_NONE,

@@ -1,7 +1,8 @@
 #pragma once
-#include "SDL3/SDL.h"
-#include <math.h>
 #include "Connect4/ui/types.h"
+#include <SDL3/SDL.h>
+#include <math.h>
+
 
 SDL_FPoint C4_UI_RotatePoint(SDL_FPoint point, SDL_FPoint center, float degrees);
 SDL_FPoint C4_UI_MirrorPoint(SDL_FPoint point, SDL_FPoint center, C4_UI_Mirror mirror);

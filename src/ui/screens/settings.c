@@ -1,9 +1,6 @@
 #include "Connect4/ui/screens/settings.h"
-#include "Connect4/game/events.h"
-#include "Connect4/constants.h"
-#include "Connect4/game/consoleOutput.h"
+#include "Connect4/system/consoleOutput.h"
 #include <assert.h>
-#include <stdio.h>
 
 typedef struct {
     C4_Game* game;
@@ -12,7 +9,7 @@ typedef struct {
 static void C4_SettingsScreen_OnEnter(C4_UI_Screen* screen) {
     assert(screen && screen->data);
     (void)screen;
-    //C4_SettingsScreenData* data = (C4_SettingsScreenData*)screen->data;
+    // C4_SettingsScreenData* data = (C4_SettingsScreenData*)screen->data;
 }
 
 static void C4_SettingsScreen_HandleWindowResize(C4_UI_Screen* screen) {
@@ -32,7 +29,9 @@ C4_UI_Screen* C4_SettingsScreen_Create(C4_Game* game) {
 
     screen->data = SDL_calloc(1, sizeof(C4_SettingsScreenData));
     if (!screen->data) {
-        C4_FatalError(C4_ErrorCode_OutOfMemory, "Unable to allocate memory for settings screen data");
+        C4_FatalError(
+            C4_ErrorCode_OutOfMemory, "Unable to allocate memory for settings screen data"
+        );
     }
 
     screen->HandleWindowResize = C4_SettingsScreen_HandleWindowResize;
@@ -48,9 +47,9 @@ C4_UI_Screen* C4_SettingsScreen_Create(C4_Game* game) {
 static void C4_SettingsScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     assert(screen && screen->data && game && game->renderer);
 
-    //C4_UI_Canvas* canvas = &screen->canvas;
+    // C4_UI_Canvas* canvas = &screen->canvas;
     C4_SettingsScreenData* data = (C4_SettingsScreenData*)screen->data;
-    //SDL_Renderer* renderer = game->renderer;
+    // SDL_Renderer* renderer = game->renderer;
 
     data->game = game;
 

@@ -1,7 +1,6 @@
 #pragma once
 #include "Connect4/ui/memoryArena.h"
 #include "Connect4/ui/node.h"
-#include "SDL3/SDL.h"
 
 typedef struct C4_UI_Canvas {
     SDL_Renderer* renderer;
@@ -15,7 +14,13 @@ typedef struct C4_UI_Canvas {
     float offsetY;
 } C4_UI_Canvas;
 
-void C4_UI_Canvas_Init(C4_UI_Canvas* canvas, SDL_Renderer* renderer, TTF_TextEngine* textEngine, float offsetX, float offsetY);
+void C4_UI_Canvas_Init(
+    C4_UI_Canvas* canvas,
+    SDL_Renderer* renderer,
+    TTF_TextEngine* textEngine,
+    float offsetX,
+    float offsetY
+);
 void C4_UI_Canvas_Destroy(C4_UI_Canvas* canvas);
 void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float uiScale);
 void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Window* window, SDL_Event* event);

@@ -1,10 +1,9 @@
 #include "Connect4/ui/utils.h"
-#include "SDL3/SDL.h"
-#include "Connect4/game/consoleOutput.h"
+#include "Connect4/system/consoleOutput.h"
+#include <assert.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include <assert.h>
 
 // Vibe debugged ah function. Mine was extremely broken
 // Remember to free values returned by this func
@@ -62,7 +61,7 @@ char* C4_JoinStrings(const char* strings[], size_t count, const char* separator)
         size_t len = strlen(strings[i]);
         memcpy(pointer, strings[i], len);
         pointer += len;
-        
+
         hasAddedFirst = true;
     }
 

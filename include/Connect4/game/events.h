@@ -1,8 +1,8 @@
 #pragma once
-#include <stdbool.h>
-#include "Connect4/ui/screens/screen.h"
 #include "Connect4/assets/sounds.h"
-#include "Connect4/game/board.h"
+#include "Connect4/ui/screens/screen.h"
+#include <stdbool.h>
+
 
 typedef enum C4_EventType {
     C4_EVENT_NONE,
@@ -17,12 +17,25 @@ typedef enum C4_EventType {
 typedef struct C4_Event {
     C4_EventType type;
     union {
-        struct { C4_ScreenType type; } screenChange;
-        struct { bool androidRemoveTask; } closeWindow;
-        struct { SDL_SystemCursor type; } setCursor;
-        struct { C4_SoundEffect id; } playSound;
-        struct { C4_MusicTrack id; } playMusic;
-        struct { C4_AudioTrack track; float level; } setVolume;
+        struct {
+            C4_ScreenType type;
+        } screenChange;
+        struct {
+            bool androidRemoveTask;
+        } closeWindow;
+        struct {
+            SDL_SystemCursor type;
+        } setCursor;
+        struct {
+            C4_SoundEffect id;
+        } playSound;
+        struct {
+            C4_MusicTrack id;
+        } playMusic;
+        struct {
+            C4_AudioTrack track;
+            float level;
+        } setVolume;
     };
 } C4_Event;
 

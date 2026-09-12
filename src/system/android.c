@@ -1,13 +1,12 @@
-#include "Connect4/android/quit.h"
-#include "SDL3/SDL.h"
+#include "Connect4/system/android.h"
 
 #if SDL_PLATFORM_ANDROID
-    #include <jni.h>
+#include <jni.h>
 #endif
 
 void Android_QuitTask(bool removeTask) {
 #if SDL_PLATFORM_ANDROID
-    JNIEnv *env = (JNIEnv *)SDL_GetAndroidJNIEnv();
+    JNIEnv* env = (JNIEnv*)SDL_GetAndroidJNIEnv();
     if (!env) {
         return;
     }

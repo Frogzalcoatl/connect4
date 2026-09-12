@@ -1,5 +1,5 @@
 #include "Connect4/ui/cursorStyle.h"
-#include "Connect4/game/consoleOutput.h"
+#include "Connect4/system/consoleOutput.h"
 #include <assert.h>
 #include <stddef.h>
 
@@ -21,10 +21,7 @@ SDL_Cursor* C4_GetSystemCursor(SDL_SystemCursor type) {
     if (type != SDL_SYSTEM_CURSOR_DEFAULT) {
         return C4_GetSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
     }
-    C4_Warn(
-        SDL_LOG_CATEGORY_APPLICATION,
-        "Unable to create system cursor"
-    );
+    C4_Warn(SDL_LOG_CATEGORY_APPLICATION, "Unable to create system cursor");
     return NULL;
 }
 

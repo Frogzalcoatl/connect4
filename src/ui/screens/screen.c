@@ -1,5 +1,5 @@
 #include "Connect4/ui/screens/screen.h"
-#include "Connect4/game/consoleOutput.h"
+#include "Connect4/system/consoleOutput.h"
 #include <assert.h>
 
 void C4_Screen_Update_Default(C4_UI_Screen* screen, float deltaTime, float UIScale) {
@@ -45,7 +45,7 @@ C4_UI_Screen* C4_Screen_Create(SDL_Renderer* renderer, TTF_TextEngine* textEngin
     screen->Draw = C4_Screen_Draw_Default;
     screen->HandleEvent = C4_UI_Screen_HandleEvent_Default;
     screen->Destroy = C4_UI_Screen_Destroy_Default;
-    
+
     // These are specific to each screen
     screen->OnEnter = NULL;
     screen->HandleWindowResize = NULL;

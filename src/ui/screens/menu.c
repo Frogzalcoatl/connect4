@@ -1,11 +1,10 @@
 #include "Connect4/ui/screens/menu.h"
+#include "Connect4/assets/fonts.h"
 #include "Connect4/game/events.h"
-#include "Connect4/constants.h"
+#include "Connect4/system/consoleOutput.h"
+#include "Connect4/system/constants.h"
 #include "Connect4/ui/element/button.h"
 #include "Connect4/ui/utils.h"
-#include "Connect4/assets/fonts.h"
-#include "Connect4/game/consoleOutput.h"
-#include "Connect4/ui/window.h"
 #include <assert.h>
 
 typedef struct {
@@ -16,7 +15,7 @@ typedef struct {
 } C4_MenuScreenData;
 
 static void C4_MenuScreen_HandleWindowResize(C4_UI_Screen* screen) {
-    assert (screen && screen->data);
+    assert(screen && screen->data);
 
     C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
 
@@ -27,11 +26,11 @@ static void UpdateControllerText(C4_MenuScreenData* data) {
     assert(data);
 
     char displayText[2048] = "Controllers:\n";
-    char* controllerArr[8] = {0}; 
-    
+    char* controllerArr[8] = {0};
+
     C4_Gamepad_GetNames(controllerArr, 8);
     char* controllerText = C4_JoinStrings((const char**)controllerArr, 8, "\n");
-    
+
     if (controllerText && *controllerText != '\0') {
         strcat(displayText, controllerText);
     } else {
@@ -53,7 +52,7 @@ static void UpdateControllerText(C4_MenuScreenData* data) {
     char activeController[128];
     C4_Gamepad_GetActiveName(activeController, sizeof(activeController));
     strcat(displayText, activeController);
-    
+
     C4_UI_Node_SetTextString(data->controllerInfo, displayText);
 }
 
@@ -75,16 +74,13 @@ static void C4_MenuScreen_Button_Play(void* context) {
 }
 
 static void C4_MenuScreen_HandleEvent(C4_UI_Screen* screen, SDL_Window* window, SDL_Event* event) {
-    assert (screen && screen->data && window && event);
+    assert(screen && screen->data && window && event);
 
     C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
 
     C4_UI_Screen_HandleEvent_Default(screen, window, event);
 
-    if (
-        event->type == SDL_EVENT_GAMEPAD_ADDED ||
-        event->type == SDL_EVENT_GAMEPAD_REMOVED
-    ) {
+    if (event->type == SDL_EVENT_GAMEPAD_ADDED || event->type == SDL_EVENT_GAMEPAD_REMOVED) {
         UpdateControllerText(data);
     }
 }
@@ -101,7 +97,7 @@ static void C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game);
 
 C4_UI_Screen* C4_MenuScreen_Create(C4_Game* game) {
     assert(game);
-    
+
     C4_UI_Screen* screen = C4_Screen_Create(game->renderer, game->textEngine);
     if (!screen) {
         C4_FatalError(C4_ErrorCode_OutOfMemory, "Unable to allocate memory for menu screen");
@@ -128,16 +124,17 @@ static void C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
 
     C4_UI_Canvas* canvas = &screen->canvas;
     C4_MenuScreenData* data = (C4_MenuScreenData*)screen->data;
-    //SDL_Renderer* renderer = game->renderer;
+    // SDL_Renderer* renderer = game->renderer;
 
     data->game = game;
     float UIScale = game->uiScale;
 
     data->title = C4_UI_Node_Create(
-        &canvas->arena, &(C4_UI_Node_Config) {
+        &canvas->arena,
+        &(C4_UI_Node_Config){
             .type = C4_UI_Type_Text,
             .style = &C4_UI_THEME_DEFAULT.style,
-            .text = &(C4_UI_Data_Text_Config) {
+            .text = &(C4_UI_Data_Text_Config){
                 .posX = 0.f,
                 .posY = 0.f,
                 .uiScale = UIScale,
@@ -150,13 +147,8 @@ static void C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     data->title->selfAlign = C4_UI_Align_Top;
     C4_UI_Canvas_AddNode(canvas, data->title);
 
-    #define BUTTON_COUNT 4
-    char* BUTTON_STRINGS[BUTTON_COUNT] = {
-        "Singleplayer",
-        "Multiplayer",
-        "Settings",
-        "Quit"
-    };
+#define BUTTON_COUNT 4
+    char* BUTTON_STRINGS[BUTTON_COUNT] = {"Singleplayer", "Multiplayer", "Settings", "Quit"};
 
     C4_UI_Button_Config buttonConfigs[BUTTON_COUNT];
     C4_UI_Buttons_CreateConfigArr(
@@ -170,11 +162,14 @@ static void C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
             .font = C4_GetFont(C4_FONT_ASSET_MONOCRAFT, 48.f, TTF_STYLE_BOLD),
             .textEngine = game->textEngine
         },
-        BUTTON_STRINGS, BUTTON_COUNT, buttonConfigs
+        BUTTON_STRINGS,
+        BUTTON_COUNT,
+        buttonConfigs
     );
 
     data->buttons = C4_UI_Buttons_Create(
-        &canvas->arena, &(C4_UI_Buttons_Config){
+        &canvas->arena,
+        &(C4_UI_Buttons_Config){
             .posX = 0.f,
             .posY = 0.f,
             .uiScale = UIScale,
@@ -186,9 +181,7 @@ static void C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
         }
     );
     data->buttons->shape = (C4_UI_Data_Shape){
-        .borderWidth = 3,
-        .rotationDegrees = 0,
-        .type = C4_UI_ShapeType_Rectangle
+        .borderWidth = 3, .rotationDegrees = 0, .type = C4_UI_ShapeType_Rectangle
     };
     C4_UI_Buttons_SetChildrenButtonSizes(data->buttons, 800.f, 100.0f);
     data->buttons->selfAlign = C4_UI_Align_Center;
@@ -213,6 +206,6 @@ static void C4_MenuScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     );
     data->controllerInfo->selfAlign = C4_UI_Align_BottomLeft;
     C4_UI_Canvas_AddNode(canvas, data->controllerInfo);
-    
+
     UpdateControllerText(data);
 }

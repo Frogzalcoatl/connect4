@@ -1,13 +1,18 @@
 #include "Connect4/ui/canvas.h"
 #include "Connect4/game/events.h"
-#include "Connect4/physics/intersection.h"
+#include "Connect4/system/consoleOutput.h"
 #include "Connect4/ui/cursorStyle.h"
-#include "Connect4/game/consoleOutput.h"
+#include "Connect4/ui/intersection.h"
 #include "Connect4/ui/window.h"
 #include <assert.h>
-#include <stdlib.h>
 
-void C4_UI_Canvas_Init(C4_UI_Canvas* canvas, SDL_Renderer* renderer, TTF_TextEngine* textEngine, float offsetX, float offsetY) {
+void C4_UI_Canvas_Init(
+    C4_UI_Canvas* canvas,
+    SDL_Renderer* renderer,
+    TTF_TextEngine* textEngine,
+    float offsetX,
+    float offsetY
+) {
     assert(canvas && renderer && textEngine);
 
     canvas->root = NULL;
@@ -53,7 +58,7 @@ void C4_UI_Canvas_Destroy(C4_UI_Canvas* canvas) {
 
 void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float uiScale) {
     assert(canvas && canvas->renderer);
-    
+
     C4_UI_Node* current = canvas->root;
     while (current) {
         C4_UI_Node_Draw(current, canvas->renderer, uiScale);
@@ -92,7 +97,7 @@ static bool C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event)
     assert(canvas);
 
     C4_UI_Node* current = canvas->focusedNode;
-    
+
     while (current) {
         if (C4_UI_Interaction_HandleAction(&current->input, event)) {
             return true;
@@ -110,10 +115,7 @@ static bool C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event)
             C4_UI_Node* result = C4_UI_Node_FindFocusable(current);
             if (result) {
                 C4_UI_Canvas_SetFocus(canvas, result);
-                if (
-                    event.verb == C4_INPUT_VERB_CANCEL &&
-                    event.state == C4_INPUT_STATE_PRESSED
-                ) {
+                if (event.verb == C4_INPUT_VERB_CANCEL && event.state == C4_INPUT_STATE_PRESSED) {
                     if (C4_UI_Canvas_HandleAction(canvas, event)) {
                         return true;
                     }
@@ -127,38 +129,39 @@ static bool C4_UI_Canvas_HandleAction(C4_UI_Canvas* canvas, C4_InputEvent event)
 
     C4_UI_Node* focusedNode = canvas->focusedNode;
     switch (event.verb) {
-        case C4_INPUT_VERB_NAV_UP: {
-            if (focusedNode->navUp) {
-                C4_UI_Canvas_SetFocus(canvas, focusedNode->navUp);
-                return true;
-            }
-        }; break;
-        case C4_INPUT_VERB_NAV_DOWN: {
-            if (focusedNode->navDown) {
-                C4_UI_Canvas_SetFocus(canvas, focusedNode->navDown);
-                return true;
-            }
-        }; break;
-        case C4_INPUT_VERB_NAV_RIGHT: {
-            if (focusedNode->navRight) {
-                C4_UI_Canvas_SetFocus(canvas, focusedNode->navRight);
-                return true;
-            }
-        }; break;
-        case C4_INPUT_VERB_NAV_LEFT: {
-            if (focusedNode->navLeft) {
-                C4_UI_Canvas_SetFocus(canvas, focusedNode->navLeft);
-                return true;
-            }
-        }; break;
-        default: break;
+    case C4_INPUT_VERB_NAV_UP: {
+        if (focusedNode->navUp) {
+            C4_UI_Canvas_SetFocus(canvas, focusedNode->navUp);
+            return true;
+        }
+    }; break;
+    case C4_INPUT_VERB_NAV_DOWN: {
+        if (focusedNode->navDown) {
+            C4_UI_Canvas_SetFocus(canvas, focusedNode->navDown);
+            return true;
+        }
+    }; break;
+    case C4_INPUT_VERB_NAV_RIGHT: {
+        if (focusedNode->navRight) {
+            C4_UI_Canvas_SetFocus(canvas, focusedNode->navRight);
+            return true;
+        }
+    }; break;
+    case C4_INPUT_VERB_NAV_LEFT: {
+        if (focusedNode->navLeft) {
+            C4_UI_Canvas_SetFocus(canvas, focusedNode->navLeft);
+            return true;
+        }
+    }; break;
+    default:
+        break;
     }
     return false;
 }
 
 void C4_UI_Canvas_RunBackButton(C4_UI_Canvas* canvas) {
     assert(canvas);
-    
+
     C4_UI_Node* current = canvas->focusedNode;
     if (!current) {
         C4_UI_Node* search = canvas->root;
@@ -194,14 +197,11 @@ void C4_UI_Canvas_RunBackButton(C4_UI_Canvas* canvas) {
 static void C4_UI_Canvas_HandleMouseEvents(C4_UI_Canvas* canvas, SDL_Event* event) {
     assert(canvas && event);
 
-    if (
-        event->type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
-        event->button.button == SDL_BUTTON_X1
-    ) {
+    if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN && event->button.button == SDL_BUTTON_X1) {
         C4_UI_Canvas_RunBackButton(canvas);
         return;
     }
-    
+
     C4_UI_Node* current = canvas->root;
     while (current) {
         if (C4_UI_Node_HandleMouseEvents(current, event)) {
@@ -218,15 +218,15 @@ static C4_UI_Node* C4_UI_Node_FindHoveredInteraction(C4_UI_Node* node, SDL_FPoin
     C4_UI_ShapeType shape;
     while (child) {
         shape = node->type == C4_UI_Type_Shape ? node->shape.type : C4_UI_ShapeType_Rectangle;
-        if (
-            C4_IsPointInsideShape(shape, mousePos, child->absoluteRect, child->shape.rotationDegrees, child->mirror)
-        ) {
+        if (C4_IsPointInsideShape(
+                shape, mousePos, child->absoluteRect, child->shape.rotationDegrees, child->mirror
+            )) {
             return child;
         }
         child = child->prevSibling;
     }
     return NULL;
-} 
+}
 
 static C4_UI_Node* C4_UI_Canvas_FindHoveredInteraction(C4_UI_Canvas* canvas) {
     assert(canvas);
@@ -283,10 +283,7 @@ static void C4_UI_Canvas_SetFocusedNodeBasedOnMousePos(C4_UI_Canvas* canvas) {
 void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Window* window, SDL_Event* event) {
     assert(canvas && window && event);
 
-    if (
-        event->type == SDL_EVENT_KEY_DOWN &&
-        event->key.scancode == SDL_SCANCODE_AC_BACK
-    ) {
+    if (event->type == SDL_EVENT_KEY_DOWN && event->key.scancode == SDL_SCANCODE_AC_BACK) {
         C4_UI_Canvas_RunBackButton(canvas);
         return;
     }
@@ -300,8 +297,7 @@ void C4_UI_Canvas_HandleEvent(C4_UI_Canvas* canvas, SDL_Window* window, SDL_Even
         }
         C4_UI_Canvas_SetFocusedNodeBasedOnMousePos(canvas);
     } else if (
-        event->type == SDL_EVENT_MOUSE_MOTION ||
-        event->type == SDL_EVENT_MOUSE_BUTTON_DOWN || 
+        event->type == SDL_EVENT_MOUSE_MOTION || event->type == SDL_EVENT_MOUSE_BUTTON_DOWN ||
         event->type == SDL_EVENT_MOUSE_BUTTON_UP
     ) {
         if (SDL_CursorVisible()) {
@@ -329,7 +325,7 @@ void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime, float uiScale) {
         C4_UI_Node_Update(current, deltaTime);
         current = current->nextSibling;
     }
-    
+
     current = canvas->root;
     while (current) {
         C4_UI_Node_CalculateLayout(current, uiScale, canvas->offsetX, canvas->offsetY);
@@ -339,7 +335,7 @@ void C4_UI_Canvas_Update(C4_UI_Canvas* canvas, float deltaTime, float uiScale) {
 
 void C4_UI_Canvas_ResetInteractions(C4_UI_Canvas* canvas) {
     assert(canvas);
-    
+
     C4_UI_Node* current = canvas->root;
     while (current) {
         C4_UI_Node_Reset(current);

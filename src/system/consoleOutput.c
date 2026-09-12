@@ -1,9 +1,10 @@
-#include "SDL3/SDL.h"
-#include "Connect4/game/consoleOutput.h"
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
+#include "Connect4/system/consoleOutput.h"
+#include <SDL3/SDL.h>
 #include <stdarg.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 
 void GetCurrentTimeStrings(char* buffer, size_t bufferSize) {
     SDL_Time ticks;
@@ -16,25 +17,40 @@ void GetCurrentTimeStrings(char* buffer, size_t bufferSize) {
     }
 }
 
-static void C4_LogOutputFunction(void *userdata, int category, SDL_LogPriority priority, const char *message) {
+static void
+C4_LogOutputFunction(void* userdata, int category, SDL_LogPriority priority, const char* message) {
     (void)userdata;
-    
+
     char timeStr[32];
     GetCurrentTimeStrings(timeStr, sizeof(timeStr));
 
     const char* priorityStr;
     switch (priority) {
-        case SDL_LOG_PRIORITY_WARN:  priorityStr = "WARN";  break;
-        case SDL_LOG_PRIORITY_ERROR: priorityStr = "ERROR"; break;
-        default: priorityStr = "INFO";  break;
+    case SDL_LOG_PRIORITY_WARN:
+        priorityStr = "WARN";
+        break;
+    case SDL_LOG_PRIORITY_ERROR:
+        priorityStr = "ERROR";
+        break;
+    default:
+        priorityStr = "INFO";
+        break;
     }
 
     const char* catStr;
     switch (category) {
-        case SDL_LOG_CATEGORY_SYSTEM: catStr = "SYSTEM"; break;
-        case SDL_LOG_CATEGORY_AUDIO: catStr = "AUDIO"; break;
-        case SDL_LOG_CATEGORY_INPUT: catStr = "INPUT"; break;
-        default: catStr = "APP"; break;
+    case SDL_LOG_CATEGORY_SYSTEM:
+        catStr = "SYSTEM";
+        break;
+    case SDL_LOG_CATEGORY_AUDIO:
+        catStr = "AUDIO";
+        break;
+    case SDL_LOG_CATEGORY_INPUT:
+        catStr = "INPUT";
+        break;
+    default:
+        catStr = "APP";
+        break;
     }
 
     fprintf(stdout, "[%s] [%s/%s]: %s\n", timeStr, catStr, priorityStr, message);
@@ -80,7 +96,7 @@ void C4_FatalError(C4_ErrorCode code, const char* format, ...) {
     }
 
     char details[1024] = "";
-    
+
     if (format && *format != '\0') {
         va_list args;
         va_start(args, format);
@@ -99,12 +115,7 @@ void C4_FatalError(C4_ErrorCode code, const char* format, ...) {
 
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", finalMessage);
 
-    SDL_ShowSimpleMessageBox(
-        SDL_MESSAGEBOX_ERROR,
-        "Connect4 Fatal Error",
-        finalMessage,
-        NULL
-    );
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Connect4 Fatal Error", finalMessage, NULL);
 
     exit(EXIT_FAILURE);
 }

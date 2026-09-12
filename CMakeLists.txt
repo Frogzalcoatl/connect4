@@ -78,7 +78,39 @@ if(USE_DISCORD_RPC)
     endif()
 endif()
 
-
+set(SOURCES
+    src/assets/fonts.c
+    src/assets/sounds.c
+    src/game/board.c
+    src/game/connect4.c
+    src/system/android.c
+    src/system/consoleOutput.c
+    src/system/discordRpc.c
+    src/system/events.c
+    src/system/gamepad.c
+    src/system/instanceManager.c
+    src/system/interaction.c
+    src/ui/draw/ellipse.c
+    src/ui/draw/rectangle.c
+    src/ui/draw/shapes.c
+    src/ui/draw/text.c
+    src/ui/draw/triangle.c
+    src/ui/draw/utils.c
+    src/ui/element/board.c
+    src/ui/element/button.c
+    src/ui/screens/game.c
+    src/ui/screens/menu.c
+    src/ui/screens/screen.c
+    src/ui/screens/settings.c
+    src/ui/canvas.c
+    src/ui/cursorStyle.c
+    src/ui/intersection.c
+    src/ui/memoryArena.c
+    src/ui/node.c
+    src/ui/utils.c
+    src/ui/window.c
+    src/main.c
+)
 
 if (ANDROID)
     add_library(${PROJECT_NAME} SHARED ${SOURCES})

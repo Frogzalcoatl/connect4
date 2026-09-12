@@ -1,20 +1,18 @@
 #include "Connect4/ui/node.h"
+#include "Connect4/system/consoleOutput.h"
 #include "Connect4/ui/draw/shapes.h"
 #include "Connect4/ui/draw/text.h"
-#include "Connect4/ui/utils.h"
 #include "Connect4/ui/memoryArena.h"
-#include "Connect4/game/consoleOutput.h"
 #include <assert.h>
 #include <stdlib.h>
+
 
 void C4_UI_Node_CleanupResources(C4_UI_Node* node) {
     if (!node) {
         return;
     }
 
-    if (
-        node->type == C4_UI_Type_Text
-    ) {
+    if (node->type == C4_UI_Type_Text) {
         if (node->text.textObject) {
             TTF_DestroyText(node->text.textObject);
             node->text.textObject = NULL;
@@ -51,7 +49,7 @@ void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer, float uiScale) {
     assert(node);
 
     C4_UI_Interaction* activeInput = &node->input;
-    
+
     if (node->inheritState && node->parent) {
         activeInput = &node->parent->input;
     }
@@ -68,13 +66,18 @@ void C4_UI_Node_Draw(C4_UI_Node* node, SDL_Renderer* renderer, float uiScale) {
     }
 
     switch (node->type) {
-        case C4_UI_Type_Shape: {
-            C4_UI_DrawShape(node->absoluteRect, &node->shape, currentStyle, node->mirror, renderer, uiScale);
-        }; break;
-        case C4_UI_Type_Text: {
-            C4_UI_DrawText(node->absoluteRect, &node->text, currentStyle, node->mirror, renderer, uiScale);
-        }; break;
-        default: break;
+    case C4_UI_Type_Shape: {
+        C4_UI_DrawShape(
+            node->absoluteRect, &node->shape, currentStyle, node->mirror, renderer, uiScale
+        );
+    }; break;
+    case C4_UI_Type_Text: {
+        C4_UI_DrawText(
+            node->absoluteRect, &node->text, currentStyle, node->mirror, renderer, uiScale
+        );
+    }; break;
+    default:
+        break;
     }
 
     C4_UI_Node* child = node->firstChild;
@@ -110,7 +113,7 @@ bool C4_UI_Node_HandleAction(C4_UI_Node* node, C4_InputEvent event) {
 
     C4_UI_Node* child = node->firstChild;
     while (child) {
-        if (C4_UI_Node_HandleAction(child, event)) { 
+        if (C4_UI_Node_HandleAction(child, event)) {
             return true;
         }
         child = child->nextSibling;
@@ -121,7 +124,7 @@ bool C4_UI_Node_HandleAction(C4_UI_Node* node, C4_InputEvent event) {
 
 bool C4_UI_Node_HandleMouseEvents(C4_UI_Node* node, SDL_Event* event) {
     assert(node && event);
-        
+
     C4_UI_Node* child = node->lastChild;
     while (child) {
         if (C4_UI_Node_HandleMouseEvents(child, event)) {
@@ -130,18 +133,21 @@ bool C4_UI_Node_HandleMouseEvents(C4_UI_Node* node, SDL_Event* event) {
         child = child->prevSibling;
     }
 
-    C4_UI_ShapeType shapeType = node->type == C4_UI_Type_Shape ? node->shape.type : C4_UI_ShapeType_Rectangle;
+    C4_UI_ShapeType shapeType =
+        node->type == C4_UI_Type_Shape ? node->shape.type : C4_UI_ShapeType_Rectangle;
 
     float rotationDegrees = node->type == C4_UI_Type_Shape ? node->shape.rotationDegrees : 0.f;
 
-    return C4_UI_Interaction_HandleMouseEvents(&node->input, event, shapeType, node->absoluteRect, rotationDegrees, node->mirror);
+    return C4_UI_Interaction_HandleMouseEvents(
+        &node->input, event, shapeType, node->absoluteRect, rotationDegrees, node->mirror
+    );
 }
 
 void C4_UI_Node_Update(C4_UI_Node* node, float deltaTime) {
     assert(node);
 
     C4_UI_Interaction_Update(&node->input, deltaTime);
-    
+
     C4_UI_Node* child = node->firstChild;
     while (child) {
         C4_UI_Node_Update(child, deltaTime);
@@ -198,7 +204,7 @@ void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString) {
     node->text.storage = SDL_strdup(newString);
 
     TTF_SetTextString(node->text.textObject, node->text.storage, 0);
-    
+
     if (node->parent) {
         C4_UI_Node_AlignChildren(node->parent, C4_UI_Axis_XY);
     }
@@ -207,13 +213,9 @@ void C4_UI_Node_SetTextString(C4_UI_Node* node, const char* newString) {
 
 void C4_UI_Node_ChangeFont(C4_UI_Node* node, TTF_Font* newFont) {
     assert(node && node->text.textObject && node->type == C4_UI_Type_Text);
-    
+
     if (!TTF_SetTextFont(node->text.textObject, newFont)) {
-        C4_Warn(
-            SDL_LOG_CATEGORY_APPLICATION,
-            "Failed to set text font: %s",
-            SDL_GetError()
-        );
+        C4_Warn(SDL_LOG_CATEGORY_APPLICATION, "Failed to set text font: %s", SDL_GetError());
     } else {
         node->text.font = newFont;
     }
@@ -222,13 +224,9 @@ void C4_UI_Node_ChangeFont(C4_UI_Node* node, TTF_Font* newFont) {
 
 void C4_UI_Node_SetTextWrap(C4_UI_Node* node, int widthInPixels) {
     assert(node && node->text.textObject && node->type == C4_UI_Type_Text);
-    
+
     if (!TTF_SetTextWrapWidth(node->text.textObject, widthInPixels)) {
-        C4_Warn(
-            SDL_LOG_CATEGORY_APPLICATION,
-            "Failed to set text wrap width: %s",
-            SDL_GetError()
-        );
+        C4_Warn(SDL_LOG_CATEGORY_APPLICATION, "Failed to set text wrap width: %s", SDL_GetError());
     }
     C4_UI_Node_UpdateTextRect(node);
 }
@@ -238,22 +236,19 @@ C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) 
 
     C4_UI_Node* node = C4_Arena_Alloc(arena, sizeof(C4_UI_Node));
     if (!node) {
-        C4_FatalError(
-            C4_ErrorCode_OutOfMemory, 
-            "Unable to allocate memory for ui node"
-        );
+        C4_FatalError(C4_ErrorCode_OutOfMemory, "Unable to allocate memory for ui node");
     }
 
     node->type = config->type;
 
     if (node->type == C4_UI_Type_Shape) {
         assert(config->shape);
-        
+
         node->shape.type = config->shape->type;
         node->shape.rotationDegrees = 0.0f;
         node->shape.borderWidth = config->shape->borderWidth;
         node->rect = config->shape->rect;
-        
+
     } else if (node->type == C4_UI_Type_Text) {
         assert(config->text);
 
@@ -294,17 +289,16 @@ C4_UI_Node* C4_UI_Node_Create(C4_MemoryArena* arena, C4_UI_Node_Config* config) 
         .OnRelease = NULL,
         .OnCancel = NULL,
         .context = NULL,
-        .sounds = (C4_UI_Interaction_Sounds){
-          .onHover = C4_SoundEffect_None,
-          .whilePressed = C4_SoundEffect_None,
-          .onPress = C4_SoundEffect_None,
-          .onRelease = C4_SoundEffect_None,
-          .onCancel = C4_SoundEffect_None
-        },
+        .sounds =
+            (C4_UI_Interaction_Sounds){
+                .onHover = C4_SoundEffect_None,
+                .whilePressed = C4_SoundEffect_None,
+                .onPress = C4_SoundEffect_None,
+                .onRelease = C4_SoundEffect_None,
+                .onCancel = C4_SoundEffect_None
+            },
         .timing = (C4_UI_Interaction_WhilePressedTiming){
-            .delay = 0.5f,
-            .interval = 0.1f,
-            .pressTimer = 0.f
+            .delay = 0.5f, .interval = 0.1f, .pressTimer = 0.f
         }
     };
 
@@ -340,43 +334,44 @@ static void C4_UI_AlignHelper(
     assert(alignType >= C4_UI_Align_TopLeft && alignType < C4_UI_Align_Count);
 
     switch (alignType) {
-        case C4_UI_Align_TopLeft: {
-            newPos->x = minChildX;
-            newPos->y = minChildY;
-        }; break;
-        case C4_UI_Align_Top: {
-            newPos->x = parentCenterX - rect.w / 2.f;
-            newPos->y = minChildY;
-        }; break;
-        case C4_UI_Align_TopRight: {
-            newPos->x = maxChildX - rect.w;
-            newPos->y = minChildY;
-        }; break;
-        case C4_UI_Align_CenterLeft: {
-            newPos->x = minChildX;
-            newPos->y = parentCenterY - rect.h / 2.f;
-        }; break;
-        case C4_UI_Align_Center: {
-            newPos->x = parentCenterX - rect.w / 2.f;
-            newPos->y = parentCenterY - rect.h / 2.f;
-        }; break;
-        case C4_UI_Align_CenterRight: {
-            newPos->x = maxChildX - rect.w;
-            newPos->y = parentCenterY - rect.h / 2.f;
-        }; break;
-        case C4_UI_Align_BottomLeft: {
-            newPos->x = minChildX;
-            newPos->y = maxChildY - rect.h;
-        }; break;
-        case C4_UI_Align_Bottom: {
-            newPos->x = parentCenterX - rect.w / 2.f;
-            newPos->y = maxChildY - rect.h;
-        }; break;
-        case C4_UI_Align_BottomRight: {
-            newPos->x = maxChildX - rect.w;
-            newPos->y = maxChildY - rect.h;
-        }; break;
-        default: break;
+    case C4_UI_Align_TopLeft: {
+        newPos->x = minChildX;
+        newPos->y = minChildY;
+    }; break;
+    case C4_UI_Align_Top: {
+        newPos->x = parentCenterX - rect.w / 2.f;
+        newPos->y = minChildY;
+    }; break;
+    case C4_UI_Align_TopRight: {
+        newPos->x = maxChildX - rect.w;
+        newPos->y = minChildY;
+    }; break;
+    case C4_UI_Align_CenterLeft: {
+        newPos->x = minChildX;
+        newPos->y = parentCenterY - rect.h / 2.f;
+    }; break;
+    case C4_UI_Align_Center: {
+        newPos->x = parentCenterX - rect.w / 2.f;
+        newPos->y = parentCenterY - rect.h / 2.f;
+    }; break;
+    case C4_UI_Align_CenterRight: {
+        newPos->x = maxChildX - rect.w;
+        newPos->y = parentCenterY - rect.h / 2.f;
+    }; break;
+    case C4_UI_Align_BottomLeft: {
+        newPos->x = minChildX;
+        newPos->y = maxChildY - rect.h;
+    }; break;
+    case C4_UI_Align_Bottom: {
+        newPos->x = parentCenterX - rect.w / 2.f;
+        newPos->y = maxChildY - rect.h;
+    }; break;
+    case C4_UI_Align_BottomRight: {
+        newPos->x = maxChildX - rect.w;
+        newPos->y = maxChildY - rect.h;
+    }; break;
+    default:
+        break;
     }
 }
 
@@ -386,12 +381,12 @@ void C4_UI_Node_AlignChildren(C4_UI_Node* node, C4_UI_Axis axis) {
     if (node->childrenAlign == C4_UI_Align_None) {
         return;
     }
-    
+
     float minChildX = node->padding;
     float minChildY = node->padding;
     float maxChildX = node->rect.w - node->padding;
     float maxChildY = node->rect.h - node->padding;
-    
+
     float parentCenterX = node->rect.w / 2.f;
     float parentCenterY = node->rect.h / 2.f;
 
@@ -458,7 +453,9 @@ void C4_UI_Node_ApplyChildSpacing(C4_UI_Node* parent) {
     }
 }
 
-void C4_UI_Node_ClampToWindow(C4_UI_Node* node, unsigned int windowWidth, unsigned int windowHeight) {
+void C4_UI_Node_ClampToWindow(
+    C4_UI_Node* node, unsigned int windowWidth, unsigned int windowHeight
+) {
     assert(node);
 
     SDL_FRect* rect = &node->rect;
@@ -482,7 +479,7 @@ void C4_UI_Node_ClampToWindow(C4_UI_Node* node, unsigned int windowWidth, unsign
 
 void C4_UI_Node_AlignInParent(C4_UI_Node* node, SDL_FRect parentRect) {
     assert(node);
-    
+
     if (node->selfAlign == C4_UI_Align_None) {
         return;
     }

@@ -1,22 +1,20 @@
 #include "Connect4/game/connect4.h"
-#include "Connect4/ui/cursorStyle.h"
 #include "Connect4/assets/fonts.h"
-#include "Connect4/constants.h"
-#include "Connect4/ui/screens/menu.h"
-#include "Connect4/ui/screens/game.h"
-#include "Connect4/ui/screens/settings.h"
 #include "Connect4/assets/sounds.h"
 #include "Connect4/game/events.h"
-#include "Connect4/discord-rpc/index.h"
-#include "Connect4/android/quit.h"
-#include "Connect4/ui/utils.h"
-#include "Connect4/input/gamepad.h"
+#include "Connect4/system/consoleOutput.h"
+#include "Connect4/system/constants.h"
+#include "Connect4/system/discordRpc.h"
+#include "Connect4/system/gamepad.h"
 #include "Connect4/tools/virtualFileSystem.h"
-#include "Connect4/dat.h"
-#include "Connect4/game/consoleOutput.h"
+#include "Connect4/ui/cursorStyle.h"
+#include "Connect4/ui/screens/game.h"
+#include "Connect4/ui/screens/menu.h"
+#include "Connect4/ui/screens/settings.h"
+#include <assert.h>
 #include <stdlib.h>
 #include <time.h>
-#include <assert.h>
+
 
 void Connect4_ConnectScancodesToInputVerbs(void) {
     // Arrow keys, enter, and esc are already setup by default
@@ -29,7 +27,7 @@ void Connect4_ConnectScancodesToInputVerbs(void) {
 
 static bool C4_AddMappingsFromVFS(const char* filePath) {
     assert(filePath);
-    
+
     size_t len;
     void* rawData = C4_VFS_ReadFile(filePath, &len);
     if (!rawData) {
@@ -67,7 +65,7 @@ void Connect4_Init_Dependencies(void) {
     }
 
     C4_VFS_Init(fullDatPath);
-    
+
     if (!TTF_Init()) {
         C4_FatalError(C4_ErrorCode_DependencyErrorTTF, "%s", SDL_GetError());
     }
@@ -145,7 +143,7 @@ static void C4_Game_SetUserScale(C4_Game* game, float newScale) {
     assert(game);
 
     game->userScalePreference = newScale;
-    
+
     C4_Game_RecalculateUIScale(game);
 
     if (game->currentScreen && game->currentScreen->HandleWindowResize) {
@@ -158,20 +156,21 @@ static void C4_Game_WindowSetup(C4_Game* game) {
     assert(game);
 
     SDL_WindowFlags windowFlags;
-    #if SDL_PLATFORM_ANDROID || SDL_PLATFORM_IOS
-        windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN;
-        game->isFullscreen = true;
-    #else
-        windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED;
-        game->isFullscreen = false;
-    #endif
+#if SDL_PLATFORM_ANDROID || SDL_PLATFORM_IOS
+    windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN;
+    game->isFullscreen = true;
+#else
+    windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED;
+    game->isFullscreen = false;
+#endif
 
     const SDL_DisplayMode* mode = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
     // In case the user's monitor size is smaller than 800x600 for whatever reason
     int initialWindowWidth = SDL_min(mode->w, 800);
     int initialWindowHeight = SDL_min(mode->h, 600);
 
-    game->window = SDL_CreateWindow("Connect4", initialWindowWidth, initialWindowHeight, windowFlags);
+    game->window =
+        SDL_CreateWindow("Connect4", initialWindowWidth, initialWindowHeight, windowFlags);
     if (!game->window) {
         C4_FatalError(C4_ErrorCode_RipConnect4Struct, "Unable to set up SDL window");
     }
@@ -193,11 +192,7 @@ static void C4_Game_CreateScreens(C4_Game* game) {
     for (size_t i = 0; i < C4_ScreenType_ScreenCount; i++) {
         game->screens[i] = C4_ScreenCreationArray[i](game);
         if (!game->screens[i]) {
-            C4_FatalError(
-                C4_ErrorCode_RipConnect4Struct,
-                "Unable to create screen index: %zu",
-                i
-            );
+            C4_FatalError(C4_ErrorCode_RipConnect4Struct, "Unable to create screen index: %zu", i);
         }
     }
 
@@ -243,9 +238,7 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
     game->renderer = SDL_CreateRenderer(game->window, NULL);
     if (!game->renderer) {
         C4_FatalError(
-            C4_ErrorCode_RipConnect4Struct,
-            "Unable to create SDL renderer: %s",
-            SDL_GetError()
+            C4_ErrorCode_RipConnect4Struct, "Unable to create SDL renderer: %s", SDL_GetError()
         );
     }
     SDL_SetRenderVSync(game->renderer, 1);
@@ -254,9 +247,7 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
     game->textEngine = TTF_CreateRendererTextEngine(game->renderer);
     if (!game->textEngine) {
         C4_FatalError(
-            C4_ErrorCode_RipConnect4Struct,
-            "Unable to create SDL text engine: %s",
-            SDL_GetError()
+            C4_ErrorCode_RipConnect4Struct, "Unable to create SDL text engine: %s", SDL_GetError()
         );
     }
     C4_Log("SDL_ttf text engine setup complete");
@@ -264,13 +255,11 @@ C4_Game* C4_Game_Create(uint8_t boardWidth, uint8_t boardHeight, uint8_t amountT
     // Game can still function if the soundsystem is null. Just no audio rip
     game->soundSystem = C4_SoundSystem_Create();
     if (!game->soundSystem) {
-        const char audioWarning[] = "Unable to initialize sound system. Application will continue without audio.";
+        const char audioWarning[] =
+            "Unable to initialize sound system. Application will continue without audio.";
         C4_Warn(SDL_LOG_CATEGORY_AUDIO, audioWarning);
         SDL_ShowSimpleMessageBox(
-            SDL_MESSAGEBOX_WARNING,
-            "Connect4 Warning",
-            audioWarning,
-            game->window
+            SDL_MESSAGEBOX_WARNING, "Connect4 Warning", audioWarning, game->window
         );
     }
     C4_SoundSystem_SetVolume(game->soundSystem, C4_AudioTrack_Music, 0.3f);
@@ -349,28 +338,31 @@ static void C4_Game_HandleEvents(C4_Game* game, SDL_Event* eventSDL, C4_Event* e
     }
     while (C4_PollEvent(eventC4)) {
         switch (eventC4->type) {
-            case C4_EVENT_CLOSE_WINDOW: {
-                game->running = false;
-                #ifdef SDL_PLATFORM_ANDROID
-                    Android_QuitTask(eventC4->closeWindow.androidRemoveTask);
-                #endif
-            }; break;
-            case C4_EVENT_SCREEN_CHANGE: {
-                C4_Game_SetScreen(game, eventC4->screenChange.type);
-            }; break;
-            case C4_EVENT_SET_CURSOR: {
-                SDL_SetCursor(C4_GetSystemCursor(eventC4->setCursor.type));
-            }; break;
-            case C4_EVENT_PLAY_SOUND: {
-                C4_SoundSystem_PlaySound(game->soundSystem, eventC4->playSound.id);
-            }; break;
-            case C4_EVENT_PLAY_MUSIC: {
-                C4_SoundSystem_PlayMusic(game->soundSystem, eventC4->playMusic.id);
-            }; break;
-            case C4_EVENT_SET_VOLUME: {
-                C4_SoundSystem_SetVolume(game->soundSystem, eventC4->setVolume.track, eventC4->setVolume.level);
-            }; break;
-            default: break;
+        case C4_EVENT_CLOSE_WINDOW: {
+            game->running = false;
+#ifdef SDL_PLATFORM_ANDROID
+            Android_QuitTask(eventC4->closeWindow.androidRemoveTask);
+#endif
+        }; break;
+        case C4_EVENT_SCREEN_CHANGE: {
+            C4_Game_SetScreen(game, eventC4->screenChange.type);
+        }; break;
+        case C4_EVENT_SET_CURSOR: {
+            SDL_SetCursor(C4_GetSystemCursor(eventC4->setCursor.type));
+        }; break;
+        case C4_EVENT_PLAY_SOUND: {
+            C4_SoundSystem_PlaySound(game->soundSystem, eventC4->playSound.id);
+        }; break;
+        case C4_EVENT_PLAY_MUSIC: {
+            C4_SoundSystem_PlayMusic(game->soundSystem, eventC4->playMusic.id);
+        }; break;
+        case C4_EVENT_SET_VOLUME: {
+            C4_SoundSystem_SetVolume(
+                game->soundSystem, eventC4->setVolume.track, eventC4->setVolume.level
+            );
+        }; break;
+        default:
+            break;
         }
     }
 }
@@ -392,7 +384,13 @@ void C4_Game_Run(C4_Game* game) {
             game->currentScreen->Update(game->currentScreen, deltaTime, game->uiScale);
         }
 
-        SDL_SetRenderDrawColor(game->renderer, C4_WINDOW_BG_COLOR.r, C4_WINDOW_BG_COLOR.g, C4_WINDOW_BG_COLOR.b, C4_WINDOW_BG_COLOR.a);
+        SDL_SetRenderDrawColor(
+            game->renderer,
+            C4_WINDOW_BG_COLOR.r,
+            C4_WINDOW_BG_COLOR.g,
+            C4_WINDOW_BG_COLOR.b,
+            C4_WINDOW_BG_COLOR.a
+        );
         SDL_RenderClear(game->renderer);
 
         if (game->currentScreen->Draw) {

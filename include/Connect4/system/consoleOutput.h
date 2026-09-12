@@ -1,16 +1,16 @@
 #pragma once
-#include <stdio.h>
+#include <SDL3/SDL.h>
 
 void C4_InitLogs(void);
 
 #if defined(__GNUC__) || defined(__clang__)
-    #if defined(__MINGW32__)
-        #define C4_PRINTF_CHECK(fmt_idx, args_idx) __attribute__((format(gnu_printf, fmt_idx, args_idx)))
-    #else
-        #define C4_PRINTF_CHECK(fmt_idx, args_idx) __attribute__((format(printf, fmt_idx, args_idx)))
-    #endif
+#if defined(__MINGW32__)
+#define C4_PRINTF_CHECK(fmt_idx, args_idx) __attribute__((format(gnu_printf, fmt_idx, args_idx)))
 #else
-    #define C4_PRINTF_CHECK(fmt_idx, args_idx)
+#define C4_PRINTF_CHECK(fmt_idx, args_idx) __attribute__((format(printf, fmt_idx, args_idx)))
+#endif
+#else
+#define C4_PRINTF_CHECK(fmt_idx, args_idx)
 #endif
 
 void C4_Log(const char* format, ...) C4_PRINTF_CHECK(1, 2);

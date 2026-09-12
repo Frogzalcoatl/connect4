@@ -1,7 +1,7 @@
 #pragma once
-#include "SDL3/SDL.h"
 #include "Connect4/ui/canvas.h"
-#include <stdlib.h>
+#include <SDL3/SDL.h>
+
 
 typedef enum C4_ScreenType {
     C4_ScreenType_Menu,

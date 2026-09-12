@@ -1,9 +1,10 @@
 #pragma once
-#include "SDL3/SDL.h"
-#include "SDL3_ttf/SDL_ttf.h"
+#include "Connect4/assets/sounds.h"
 #include "Connect4/game/board.h"
-#include "Connect4/ui/canvas.h"
 #include "Connect4/ui/screens/screen.h"
+#include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
+
 
 void Connect4_Init_Dependencies(void);
 void Connect4_Quit_Dependencies(void);

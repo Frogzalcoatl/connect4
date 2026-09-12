@@ -1,6 +1,6 @@
 #include "Connect4/game/events.h"
-#include "Connect4/game/consoleOutput.h"
-#include "SDL3/SDL.h"
+#include "Connect4/system/consoleOutput.h"
+#include <SDL3/SDL.h>
 #include <assert.h>
 
 #define C4_EVENT_QUEUE_SIZE 256

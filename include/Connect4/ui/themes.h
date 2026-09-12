@@ -1,5 +1,5 @@
 #pragma once
-#include "SDL3/SDL.h"
+#include <SDL3/SDL.h>
 
 typedef struct C4_UI_StyleState {
     SDL_Color background;

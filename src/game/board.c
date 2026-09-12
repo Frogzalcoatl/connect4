@@ -1,11 +1,10 @@
-#include "SDL3/SDL.h"
 #include "Connect4/game/board.h"
-#include "Connect4/ui/utils.h"
-#include "Connect4/game/consoleOutput.h"
+#include "Connect4/system/consoleOutput.h"
+#include <SDL3/SDL.h>
+#include <assert.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 void C4_Board_SetSize(C4_Board* board, uint8_t width, uint8_t height) {
     assert(board);
@@ -77,7 +76,7 @@ void C4_Board_Destroy(C4_Board* board) {
 
 void C4_Board_Reset(C4_Board* board) {
     assert(board);
-    
+
     for (size_t i = 0; i < board->width * board->height; i++) {
         board->cells[i] = C4_SlotState_Empty;
     }
@@ -86,7 +85,7 @@ void C4_Board_Reset(C4_Board* board) {
 
 C4_SlotState C4_Board_GetSlot(C4_Board* board, uint8_t x, uint8_t y) {
     assert(board);
-    assert (x < board->width && y < board->height);
+    assert(x < board->width && y < board->height);
 
     return board->cells[board->width * y + x];
 }
@@ -103,9 +102,9 @@ bool C4_Board_SetSlot(C4_Board* board, uint8_t x, uint8_t y, C4_SlotState state)
 
 static void C4_Board_SwapCurrentPlayer(C4_Board* board) {
     assert(board);
-    
-    board->currentPlayer = board->currentPlayer == C4_SlotState_Player1 ?
-        C4_SlotState_Player2 : C4_SlotState_Player1;
+
+    board->currentPlayer =
+        board->currentPlayer == C4_SlotState_Player1 ? C4_SlotState_Player2 : C4_SlotState_Player1;
 }
 
 // Returns index of move. -1 if move is invalid.
@@ -113,11 +112,8 @@ int C4_Board_DoMove(C4_Board* board, uint8_t inColumn) {
     assert(board);
 
     // If column is full returns -1.
-    if (
-        board->cells[inColumn] != C4_SlotState_Empty ||
-        board->currentPlayer == C4_SlotState_Empty ||
-        inColumn >= board->width
-    ) {
+    if (board->cells[inColumn] != C4_SlotState_Empty ||
+        board->currentPlayer == C4_SlotState_Empty || inColumn >= board->width) {
         return -1;
     }
     for (size_t row = board->height - 1; row < board->height; row--) {
@@ -132,10 +128,14 @@ int C4_Board_DoMove(C4_Board* board, uint8_t inColumn) {
 
 char C4_Board_GetCharForState(C4_SlotState state) {
     switch (state) {
-        case C4_SlotState_Player1: return 'X';
-        case C4_SlotState_Player2: return 'O';
-        case C4_SlotState_Empty: return '.';
-        default: return '?';
+    case C4_SlotState_Player1:
+        return 'X';
+    case C4_SlotState_Player2:
+        return 'O';
+    case C4_SlotState_Empty:
+        return '.';
+    default:
+        return '?';
     }
 }
 /*
@@ -153,7 +153,7 @@ static void C4_Board_PrintCellCheckBuffer(C4_Board* board) {
     for (size_t i = 0; i < board->cellCheckCount; i++) {
         str[i * 2] = C4_Board_GetCharForState(board->cellCheckBuffer[i]);
         str[i * 2 + 1] = ' ';
-        
+
     }
     str[strSize - 1] = '\0';
     C4_Log("%s", str);
@@ -162,84 +162,85 @@ static void C4_Board_PrintCellCheckBuffer(C4_Board* board) {
 */
 static void C4_Board_UpdateCellCheckBuffer(C4_Board* board, C4_Board_RowAxis axis, size_t atIndex) {
     assert(board);
-    
+
     // Sets all values of cellCheckBuffer to zero.
-    SDL_memset(board->cellCheckBuffer, 0, (size_t)SDL_max((int)board->width, (int)board->height) * sizeof(C4_SlotState));
+    SDL_memset(
+        board->cellCheckBuffer,
+        0,
+        (size_t)SDL_max((int)board->width, (int)board->height) * sizeof(C4_SlotState)
+    );
     size_t bufferIndex = 0;
     switch (axis) {
-        case C4_Board_RowAxis_NorthSouth: {
-            size_t topIndex = atIndex % board->width;
-            for (size_t boardIndex = topIndex; boardIndex < (board->width * board->height); boardIndex += board->width) {
-                board->cellCheckBuffer[bufferIndex] = board->cells[boardIndex];
-                bufferIndex++;
+    case C4_Board_RowAxis_NorthSouth: {
+        size_t topIndex = atIndex % board->width;
+        for (size_t boardIndex = topIndex; boardIndex < (board->width * board->height);
+             boardIndex += board->width) {
+            board->cellCheckBuffer[bufferIndex] = board->cells[boardIndex];
+            bufferIndex++;
+        }
+        board->cellCheckCount = board->height;
+    }; break;
+    case C4_Board_RowAxis_EastWest: {
+        size_t leftestIndex = atIndex - (atIndex % board->width);
+        size_t rightestIndex = leftestIndex + board->width - 1;
+        for (size_t boardIndex = leftestIndex; boardIndex < rightestIndex + 1; boardIndex++) {
+            board->cellCheckBuffer[bufferIndex] = board->cells[boardIndex];
+            bufferIndex++;
+        }
+        board->cellCheckCount = board->width;
+    }; break;
+    case C4_Board_RowAxis_NorthEastSouthWest: {
+        size_t northEastestIndex = 0;
+        for (size_t i = atIndex; i < (board->width * board->height); i -= (board->width - 1)) {
+            northEastestIndex = i;
+            size_t nextIndex = i - (board->width - 1);
+            // If this is true, the diagonal row has hit the right wall, meaning the loop should
+            // end.
+            if (nextIndex % board->width < i % board->width ||
+                nextIndex >= (board->width * board->height)) {
+                break;
             }
-            board->cellCheckCount = board->height;
-        }; break;
-        case C4_Board_RowAxis_EastWest: {
-            size_t leftestIndex = atIndex - (atIndex % board->width);
-            size_t rightestIndex = leftestIndex + board->width - 1;
-            for (size_t boardIndex = leftestIndex; boardIndex < rightestIndex + 1; boardIndex++) {
-                board->cellCheckBuffer[bufferIndex] = board->cells[boardIndex];
-                bufferIndex++;
+        }
+        board->cellCheckCount = 0;
+        for (size_t boardIndex = northEastestIndex; boardIndex < (board->width * board->height);
+             boardIndex += (board->width - 1)) {
+            board->cellCheckBuffer[bufferIndex] = board->cells[boardIndex];
+            bufferIndex++;
+            board->cellCheckCount++;
+            // Since this loop increments by width - 1, if boardIndex is the bottom left index of
+            // the board, nextIndex would be the bottom right corner of the board, which should not
+            // be included in the diagonal row.
+            size_t nextIndex = boardIndex + (board->width - 1);
+            if (nextIndex >= (board->width * board->height) ||
+                nextIndex % board->width > boardIndex % board->width) {
+                break;
             }
-            board->cellCheckCount = board->width;
-        }; break;
-        case C4_Board_RowAxis_NorthEastSouthWest: {
-            size_t northEastestIndex = 0;
-            for (size_t i = atIndex; i < (board->width * board->height); i -= (board->width - 1)) {
-                northEastestIndex = i;
-                size_t nextIndex = i - (board->width - 1);
-                // If this is true, the diagonal row has hit the right wall, meaning the loop should end.
-                if (
-                    nextIndex % board->width < i % board->width ||
-                    nextIndex >= (board->width * board->height)
-                ) {
-                    break;
-                }
+        }
+    }; break;
+    case C4_Board_RowAxis_NorthWestSouthEast: {
+        size_t northWestestIndex = 0;
+        for (size_t i = atIndex; i < (board->width * board->height); i -= (board->width + 1)) {
+            northWestestIndex = i;
+            size_t nextIndex = i - (board->width + 1);
+            // If this is true, the diagonal row has hit the left wall, meaning the loop should end.
+            if (nextIndex % board->width > i % board->width ||
+                nextIndex >= (board->width * board->height)) {
+                break;
             }
-            board->cellCheckCount = 0;
-            for (size_t boardIndex = northEastestIndex; boardIndex < (board->width * board->height); boardIndex += (board->width - 1)) {
-                board->cellCheckBuffer[bufferIndex] = board->cells[boardIndex];
-                bufferIndex++;
-                board->cellCheckCount++;
-                // Since this loop increments by width - 1, if boardIndex is the bottom left index of the board,
-                // nextIndex would be the bottom right corner of the board, which should not be included in the diagonal row.
-                size_t nextIndex = boardIndex + (board->width - 1);
-                if (
-                    nextIndex >= (board->width * board->height) || 
-                    nextIndex % board->width > boardIndex % board->width
-                ) {
-                    break;
-                }
+        }
+        board->cellCheckCount = 0;
+        for (size_t boardIndex = northWestestIndex; boardIndex < (board->width * board->height);
+             boardIndex += (board->width + 1)) {
+            board->cellCheckBuffer[bufferIndex] = board->cells[boardIndex];
+            bufferIndex++;
+            board->cellCheckCount++;
+            size_t nextIndex = boardIndex + (board->width + 1);
+            if (nextIndex >= (board->width * board->height) ||
+                nextIndex % board->width < boardIndex % board->width) {
+                break;
             }
-        }; break;
-        case C4_Board_RowAxis_NorthWestSouthEast: {
-            size_t northWestestIndex = 0;
-            for (size_t i = atIndex; i < (board->width * board->height); i -= (board->width + 1)) {
-                northWestestIndex = i;
-                size_t nextIndex = i - (board->width + 1);
-                // If this is true, the diagonal row has hit the left wall, meaning the loop should end.
-                if (
-                    nextIndex % board->width > i % board->width ||
-                    nextIndex >= (board->width * board->height)
-                ) {
-                    break;
-                }
-            }
-            board->cellCheckCount = 0;
-            for (size_t boardIndex = northWestestIndex; boardIndex < (board->width * board->height); boardIndex += (board->width + 1)) {
-                board->cellCheckBuffer[bufferIndex] = board->cells[boardIndex];
-                bufferIndex++;
-                board->cellCheckCount++;
-                size_t nextIndex = boardIndex + (board->width + 1);
-                if (
-                    nextIndex >= (board->width * board->height) || 
-                    nextIndex % board->width < boardIndex % board->width
-                ) {
-                    break;
-                }
-            }
-        }; break;
+        }
+    }; break;
     }
 }
 
@@ -329,7 +330,7 @@ bool C4_Board_IsEmpty(C4_Board* board) {
 
 bool C4_Board_IsFull(C4_Board* board) {
     assert(board);
-    
+
     for (size_t i = 0; i < (size_t)board->width * (size_t)board->height; i++) {
         if (board->cells[i] == C4_SlotState_Empty) {
             return false;

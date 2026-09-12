@@ -1,7 +1,8 @@
 #pragma once
-#include "Connect4/input/gamepad.h"
 #include "Connect4/assets/sounds.h"
+#include "Connect4/system/gamepad.h"
 #include "Connect4/ui/types.h"
+
 
 typedef struct C4_UI_Interaction_WhilePressedTiming {
     float delay;

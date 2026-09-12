@@ -1,9 +1,7 @@
 #pragma once
-#include "Connect4/input/interaction.h"
-#include "Connect4/ui/themes.h"
+#include "Connect4/system/interaction.h"
 #include "Connect4/ui/memoryArena.h"
-#include "SDL3/SDL.h"
-#include "SDL3_ttf/SDL_ttf.h"
+#include "Connect4/ui/themes.h"
 #include "Connect4/ui/types.h"
 
 typedef struct C4_UI_Node {
@@ -81,6 +79,8 @@ void C4_UI_Node_SetTextWrap(C4_UI_Node* node, int widthInPixels);
 
 void C4_UI_Node_AlignChildren(C4_UI_Node* node, C4_UI_Axis axis);
 void C4_UI_Node_ApplyChildSpacing(C4_UI_Node* parent);
-void C4_UI_Node_ClampToWindow(C4_UI_Node* node, unsigned int windowWidth, unsigned int windowHeight);
+void C4_UI_Node_ClampToWindow(
+    C4_UI_Node* node, unsigned int windowWidth, unsigned int windowHeight
+);
 void C4_UI_Node_AlignInParent(C4_UI_Node* node, SDL_FRect parentRect);
 void C4_UI_Node_RefreshLayout(C4_UI_Node* node, SDL_FRect parentRect);

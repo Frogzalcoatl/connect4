@@ -1,9 +1,9 @@
 #include "Connect4/ui/screens/game.h"
-#include "Connect4/constants.h"
-#include "Connect4/game/events.h"
-#include "Connect4/game/consoleOutput.h"
-#include "Connect4/ui/element/button.h"
 #include "Connect4/assets/fonts.h"
+#include "Connect4/game/events.h"
+#include "Connect4/system/consoleOutput.h"
+#include "Connect4/system/constants.h"
+#include "Connect4/ui/element/button.h"
 #include <assert.h>
 
 typedef struct {
@@ -17,22 +17,22 @@ static void C4_GameScreen_OnEnter(C4_UI_Screen* screen) {
 }
 
 void C4_GameScreen_HandleWindowResize(C4_UI_Screen* screen) {
-    assert (screen && screen->data);
+    assert(screen && screen->data);
 
     C4_GameScreenData* data = (C4_GameScreenData*)screen->data;
 
     C4_UI_Canvas_HandleWindowResize(&screen->canvas, data->game->window, data->game->uiScale);
 }
 
-//static void C4_GameScreen_ResetGame(C4_GameScreenData* gameData) {
-//    C4_Board_Reset(gameData->game->board);
-//}
+// static void C4_GameScreen_ResetGame(C4_GameScreenData* gameData) {
+//     C4_Board_Reset(gameData->game->board);
+// }
 
 static void C4_GameScreen_Init(C4_UI_Screen* screen, C4_Game* game);
 
 C4_UI_Screen* C4_GameScreen_Create(C4_Game* game) {
     assert(game);
-    
+
     C4_UI_Screen* screen = C4_Screen_Create(game->renderer, game->textEngine);
     if (!screen) {
         C4_FatalError(C4_ErrorCode_OutOfMemory, "Unable to allocate memory for game screen");
@@ -59,15 +59,16 @@ static void BackButton(void* context) {
 }
 
 void C4_GameScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
-    assert (screen && game && screen->data && game->renderer);
-    
-    //C4_UI_Canvas* canvas = &screen->canvas;
+    assert(screen && game && screen->data && game->renderer);
+
+    // C4_UI_Canvas* canvas = &screen->canvas;
     C4_GameScreenData* data = (C4_GameScreenData*)screen->data;
-    //SDL_Renderer* renderer = game->renderer;
+    // SDL_Renderer* renderer = game->renderer;
 
     data->game = game;
 
-    data->backButton = C4_UI_Button_Create(&screen->canvas.arena, 
+    data->backButton = C4_UI_Button_Create(
+        &screen->canvas.arena,
         &(C4_UI_Button_Config){
             .style = &C4_UI_THEME_DEFAULT.style,
             .rect = (SDL_FRect){0.f, 0.f, 400.f, 100.f},
@@ -81,7 +82,7 @@ void C4_GameScreen_Init(C4_UI_Screen* screen, C4_Game* game) {
     );
     data->backButton->input.OnPress = BackButton;
     data->backButton->selfAlign = C4_UI_Align_Bottom;
-    C4_UI_Canvas_AddNode(&screen->canvas ,data->backButton);
+    C4_UI_Canvas_AddNode(&screen->canvas, data->backButton);
 
     screen->HandleWindowResize(screen);
 }
