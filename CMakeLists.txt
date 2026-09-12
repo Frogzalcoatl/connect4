@@ -51,7 +51,16 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 project(Connect4 C CXX)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
+
+# Automatically copy compile_commands.json to the project root for clangd
+if(EXISTS "${CMAKE_BINARY_DIR}/compile_commands.json")
+    file(COPY_FILE
+        "${CMAKE_BINARY_DIR}/compile_commands.json"
+        "${CMAKE_SOURCE_DIR}/compile_commands.json"
+        ONLY_IF_DIFFERENT
+    )
+endif()
 
 # Compile definition cmake var initialization
 set(ASSETS_FOLDER_NAME "assets")
@@ -106,16 +115,49 @@ if(USE_DISCORD_RPC)
 endif()
 
 # Source C Files
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.c")
+set(SOURCES
+    src/android/quit.c
+    src/assets/fonts.c
+    src/assets/sounds.c
+    src/discord-rpc/index.c
+    src/game/board.c
+    src/game/connect4.c
+    src/game/consoleOutput.c
+    src/game/events.c
+    src/input/gamepad.c
+    src/input/interaction.c
+    src/instanceManager/index.c
+    src/instanceManager/posix.c
+    src/instanceManager/windows.c
+    src/physics/intersection.c
+    src/ui/draw/ellipse.c
+    src/ui/draw/rectangle.c
+    src/ui/draw/shapes.c
+    src/ui/draw/text.c
+    src/ui/draw/triangle.c
+    src/ui/draw/utils.c
+    src/ui/element/board.c
+    src/ui/element/button.c
+    src/ui/screens/game.c
+    src/ui/screens/menu.c
+    src/ui/screens/screen.c
+    src/ui/screens/settings.c
+    src/ui/canvas.c
+    src/ui/cursorStyle.c
+    src/ui/memoryArena.c
+    src/ui/node.c
+    src/ui/utils.c
+    src/ui/window.c
+    src/main.c
+)
 
 if (ANDROID)
-    list(APPEND SOURCES src/system/Android.cpp)
     add_library(${PROJECT_NAME} SHARED ${SOURCES})
 else()
     add_executable(${PROJECT_NAME} ${SOURCES})
 endif()
 
-target_include_directories(${PROJECT_NAME} PRIVATE src)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_subdirectory(libs/vfs)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

@@ -1,6 +1,3 @@
 {
-    "git.ignoredRepositories": [
-        "vcpkg"
-    ],
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "editor.formatOnSave": true,
 }

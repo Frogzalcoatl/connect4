@@ -1,44 +1,100 @@
 {
     "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "Android: Build APK (Debug)",
-            "type": "shell",
-            "command": "./gradlew assembleDebug",
-            "options": {
-                "cwd": "${workspaceFolder}/android"
-            },
-            "group": "build",
-            "windows": {
-                "command": ".\\gradlew.bat assembleDebug"
-            }
-        },
-        {
-            "label": "Android: Clean and Rebuild APK (Debug) (Extra Info)",
-            "type": "shell",
-            "command": "./gradlew clean assembleDebug",
-            "options": {
-                "cwd": "${workspaceFolder}/android"
-            },
-            "group": "build",
-            "windows": {
-                "command": ".\\gradlew.bat clean assembleDebug",
+    "windows": {
+        "options": {
+            "shell": {
+                "executable": "powershell.exe",
                 "args": [
-                    "--info"
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-Command",
+                    "$vswhere = Join-Path '${env:ProgramFiles(x86)}' 'Microsoft Visual Studio/Installer/vswhere.exe'; $vsPath = & $vswhere -latest -products * -property installationPath; & (Join-Path $vsPath 'Common7/Tools/Launch-VsDevShell.ps1') -Arch amd64 -SkipAutomaticLocation; "
                 ]
             }
+        }
+    },
+    "tasks": [
+        {
+            "label": " [Default] Configure",
+            "type": "shell",
+            "windows": {
+                "command": "cmake --preset windows"
+            },
+            "linux": {
+                "command": "cmake --preset linux"
+            },
+            "osx": {
+                "command": "cmake --preset macos"
+            },
+            "problemMatcher": []
         },
         {
-            "label": "Android: Clean and Rebuild APK (Debug)",
+            "label": " [Default] Build",
             "type": "shell",
-            "command": "./gradlew clean assembleDebug",
-            "options": {
-                "cwd": "${workspaceFolder}/android"
-            },
-            "group": "build",
             "windows": {
-                "command": ".\\gradlew.bat clean assembleDebug",
+                "command": "cmake --build build/windows --target run"
+            },
+            "linux": {
+                "command": "cmake --build build/linux --target run"
+            },
+            "osx": {
+                "command": "cmake --build build/macos --target run"
+            },
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "clear": true,
+                "reveal": "always",
+                "focus": false
             }
+        },
+        {
+            "label": "[Android ARM64] Configure",
+            "type": "shell",
+            "command": "cmake --preset android-arm64",
+            "problemMatcher": [],
+            "group": "none"
+        },
+        {
+            "label": "[Android ARM64] Build and Run",
+            "type": "shell",
+            "command": "cmake --build build/android-arm64 --target run",
+            "problemMatcher": [],
+            "group": "none",
+            "presentation": {
+                "clear": true,
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "[Android ARM64] Stream Logs",
+            "type": "shell",
+            "command": "adb logcat -c && adb logcat SDL/APP:V SDL:I *:S",
+            "windows": {
+                "command": "adb logcat -c; adb logcat SDL/APP:V SDL:I *:S"
+            },
+            "group": "none",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "focus": true
+            }
+        },
+        {
+            "label": "[Android ARM64] Build, Run, and Stream Logs",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "[Android ARM64] Build and Run",
+                "[Android ARM64] Stream Logs"
+            ],
+            "problemMatcher": [],
+            "group": "none"
         },
         {
             "label": "Build Windows Installer (Inno Setup)",
