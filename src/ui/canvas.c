@@ -64,9 +64,15 @@ void C4_UI_Canvas_Draw(C4_UI_Canvas* canvas, float uiScale) {
 static void C4_UI_Canvas_SetFocus(C4_UI_Canvas* canvas, C4_UI_Node* newNode) {
     assert(canvas && newNode);
 
+    if (canvas->focusedNode == newNode) {
+        return;
+    }
+
     if (canvas->focusedNode) {
         C4_UI_Interaction_Reset(&canvas->focusedNode->input);
     }
+
+    C4_Input_ResetVerbState(C4_INPUT_VERB_CONFIRM);
 
     if (!newNode || !newNode->input.isFocusable) {
         return;
