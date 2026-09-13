@@ -1,11 +1,26 @@
 CompileFlags:
-  Add:
-    # Compatibility with Windows SDK & MSVC Standard Library headers
-    - -fms-compatibility
-    - -fms-extensions
-    - -xc
-    - -std=c17
+  # Uncomment the one matching your active build preset:
+  CompilationDatabase: build/windows
+  # CompilationDatabase: build/windows-clang
+  # CompilationDatabase: build/linux
+  # CompilationDatabase: build/macos
+  # CompilationDatabase: build/android-arm64
+  # CompilationDatabase: build/android-x86_64
+  # CompilationDatabase: build
+  # CompilationDatabase: .
 
-    # Suppress warnings about compiler flags clangd doesn't need for code analysis
+  Add:
     - -Wno-unknown-warning-option
     - -Wno-unused-command-line-argument
+
+# Enable clangd's background index so project-wide renames (F2) work reliably
+Index:
+  Background: Build
+
+# Disables inline ghost parameter name badges
+InlayHints:
+  ParameterNames: false
+
+# Inserts parentheses () without filling in parameter names when autocompleting functions
+Completion:
+  ArgumentLists: Delimiters

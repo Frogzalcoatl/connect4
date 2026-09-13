@@ -12,7 +12,12 @@ When updating the app version, change both `vcpkg.json` and `android-project/app
 * **Arch / Manjaro:** `sudo pacman -S clang`
 * **openSUSE:** `sudo zypper install clang-tools`
 
-### 2. Build Tools
+### 2. Vcpkg
+Install Vcpkg if you have not already.
+Follow this [tutorial](https://learn.microsoft.com/en-us/vcpkg/get_started/get-started?pivots=shell-bash) until your environment variables have been set.
+Anything beyond that is unnecessary and has already been configured for this project.
+
+### 3. Build Tools
 **Windows:**
 
 1. Download [Build Tools for Visual Studio](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2026)
@@ -47,9 +52,6 @@ brew install cmake ninja
 **Linux:**
 
 * Install the SDL3 build dependencies [here](https://wiki.libsdl.org/SDL3/README-linux).
-
-### 3. Setup
-Run `setup.sh` (or `setup.bat` on windows) to create a compile_commands.json symlink for the clang language server, and clone Vcpkg locally if not installed globally.
 
 ## Building the Project
 See commands in `.vscode/tasks.json`. 
