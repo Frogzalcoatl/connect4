@@ -4,4 +4,5 @@
         ".clang-format": "yaml",
         ".clangd": "yaml"
     },
+    "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json"
 }

@@ -3,21 +3,12 @@
 When updating the app version, change both `vcpkg.json` and `android-project/app/build.gradle` (versionName).
 
 ## Prerequisites
-
-### 1. LLVM / Clang Tools (clangd & clang-format)
-* **Windows:** `winget install LLVM.LLVM`
-* **macOS:** `brew install llvm`
-* **Debian / Ubuntu:** `sudo apt install clangd clang-format`
-* **Fedora / RHEL:** `sudo dnf install clang-tools-extra`
-* **Arch / Manjaro:** `sudo pacman -S clang`
-* **openSUSE:** `sudo zypper install clang-tools`
-
-### 2. Vcpkg
+### 1. Vcpkg
 Install Vcpkg if you have not already.
 Follow this [tutorial](https://learn.microsoft.com/en-us/vcpkg/get_started/get-started?pivots=shell-bash) until your environment variables have been set.
 Anything beyond that is unnecessary and has already been configured for this project.
 
-### 3. Build Tools
+### 2. Build Tools
 **Windows:**
 
 1. Download [Build Tools for Visual Studio](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2026)
@@ -56,7 +47,6 @@ brew install cmake ninja
 ## Building the Project
 See commands in `.vscode/tasks.json`. 
 They use a preset listed in [CMakePresets.json](https://github.com/Frogzalcoatl/connect4/blob/main/CMakePresets.json).
-Uncomment the line in .clangd matching your selected preset for proper intellisense.
 ```
 cmake --preset windows
 cmake --build build/windows --target run
