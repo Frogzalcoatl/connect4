@@ -70,8 +70,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(vfs)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"
 )
 
 if (ANDROID)
