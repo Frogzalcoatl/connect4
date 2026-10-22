@@ -20,9 +20,6 @@ Anything beyond that is unnecessary and has already been configured for this pro
     * **C++ CMake tools for Windows**
     * **Windows 11 SDK** (Compatible with both Windows 10 and 11)
 
-Be sure to use the Developer Powershell for VS when building the project on windows.
-If you have a vscode based ide, this project's tasks.json automatically opens that terminal on windows.
-
 **MacOS:**
 
 1. Install Xcode Command Line Tools:
@@ -45,8 +42,9 @@ brew install cmake ninja
 * Install the SDL3 build dependencies [here](https://wiki.libsdl.org/SDL3/README-linux).
 
 ## Building the Project
-See commands in `.vscode/tasks.json`. 
+In VSCode, click the triangle button on the status bar to build and run this project. Otherwise, run the commands below. 
 They use a preset listed in [CMakePresets.json](https://github.com/Frogzalcoatl/connect4/blob/main/CMakePresets.json).
+If you're manually running build commands on windows instead of using the CMake extension, use the Developer Powershell for VS, which is included with the Visual Studio Build Tools.
 ```
 cmake --preset windows
 cmake --build build/windows --target run
